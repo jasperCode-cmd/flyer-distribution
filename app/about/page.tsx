@@ -78,7 +78,7 @@ export default function AboutPage() {
               },
               {
                 title: "Local Knowledge",
-                body: "We know Hampshire's streets, postcodes, and communities, and that local knowledge makes a real difference.",
+                body: "We know Hampshire's areas, postcodes, and communities, and that local knowledge makes a real difference.",
               },
               {
                 title: "Transparency",

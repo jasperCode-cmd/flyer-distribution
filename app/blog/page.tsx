@@ -23,12 +23,12 @@ const posts = [
     slug: "#",
   },
   {
-    title: "Individual vs Shared Distribution: Which Is Right for Your Campaign?",
+    title: "Leaflet Distribution or Vehicle Distribution: Which Is Right for Your Campaign?",
     excerpt:
-      "Both options have their place. We break down the pros, cons, and ideal use cases so you can make the right choice for your business.",
+      "Both approaches have their place. We break down the pros, cons, and ideal use cases so you can make the right choice for your business.",
     date: "28 October 2024",
     image: "https://picsum.photos/seed/blog2/600/400",
-    alt: "Comparison of a single flyer vs a bundle of leaflets",
+    alt: "Leaflets being placed on a parked car in a car park",
     slug: "#",
   },
   {
@@ -43,7 +43,7 @@ const posts = [
   {
     title: "Targeting the Right Postcodes: A Guide for Hampshire Businesses",
     excerpt:
-      "Not all postcodes are equal. Learn how to use demographic data to choose the streets most likely to respond to your campaign.",
+      "Not all postcode areas are equal. Learn how to use demographic data to choose the areas most likely to respond to your campaign.",
     date: "2 October 2024",
     image: "https://picsum.photos/seed/blog4/600/400",
     alt: "Map of Hampshire postcodes",

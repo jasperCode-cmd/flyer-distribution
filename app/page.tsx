@@ -137,13 +137,20 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-          <div className="mt-8">
+          <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
             <Link
               href="/services"
               className="text-blue-700 hover:text-blue-900 font-semibold text-sm underline underline-offset-2"
             >
               View all services →
             </Link>
+            <span className="hidden sm:block text-gray-300">|</span>
+            <p className="text-gray-500 text-sm">
+              Need printing too?{" "}
+              <Link href="/services" className="text-blue-600 hover:underline">
+                We offer A6, A5, and A4 print &amp; deliver.
+              </Link>
+            </p>
           </div>
         </div>
       </section>

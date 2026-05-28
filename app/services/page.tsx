@@ -74,6 +74,23 @@ export default function ServicesPage() {
               </div>
             ))}
           </div>
+
+          {/* Supporting service */}
+          <div className="mt-10 border-t border-gray-200 pt-10">
+            <p className="text-xs font-semibold uppercase tracking-widest text-blue-500 mb-4">
+              Also Available
+            </p>
+            <div className="bg-white rounded-lg border border-gray-200 p-6 md:max-w-xl hover:border-blue-300 transition-colors">
+              <h2 className="text-base font-semibold text-blue-900 mb-2">
+                Print &amp; Deliver
+              </h2>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Need your leaflets produced before distribution? We offer
+                printing in A6, A5, and A4. Just let us know when requesting
+                your quote and we can handle both print and delivery together.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
