@@ -28,10 +28,6 @@ const trustSignals = [
 
 const services = [
   {
-    title: "Individual Delivery",
-    desc: "Your flyer delivered on its own for maximum impact, with no competition from other leaflets in the letterbox.",
-  },
-  {
     title: "Shared Distribution",
     desc: "Cost-effective delivery bundled with complementary (non-competing) businesses to keep your price per door low.",
   },
