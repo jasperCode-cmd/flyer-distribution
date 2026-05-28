@@ -82,7 +82,7 @@ export default function AboutPage() {
               },
               {
                 title: "Transparency",
-                body: "Clear pricing, honest timelines, and straightforward communication throughout.",
+                body: "Clear quotes, honest timelines, and straightforward communication throughout.",
               },
             ].map((v) => (
               <div
