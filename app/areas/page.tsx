@@ -37,11 +37,6 @@ const featuredAreas = [
 
 const otherAreas = [
   "Eastleigh",
-  "Fareham",
-  "Gosport",
-  "Havant",
-  "Basingstoke",
-  "Andover",
   "New Forest",
   "Romsey",
   "Ringwood",
@@ -104,8 +99,7 @@ export default function AreasPage() {
             ))}
           </div>
           <p className="mt-6 text-gray-500 text-sm">
-            Don&apos;t see your area? Contact us, as we can often accommodate
-            additional postcodes on request.
+            Don&apos;t see your area listed? Get in touch and we can often accommodate additional postcodes on request.
           </p>
         </div>
       </section>
