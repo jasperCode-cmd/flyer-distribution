@@ -5,7 +5,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "About Us",
   description:
-    "Learn about Flyer Distribution Hampshire — a local team dedicated to reliable, targeted leaflet delivery across Hampshire and Dorset.",
+    "Learn about Flyer Distribution Hampshire, a local team dedicated to reliable, targeted leaflet delivery across Hampshire and Dorset.",
 };
 
 export default function AboutPage() {
@@ -78,7 +78,7 @@ export default function AboutPage() {
               },
               {
                 title: "Local Knowledge",
-                body: "We know Hampshire's streets, postcodes, and communities — that makes a real difference.",
+                body: "We know Hampshire's streets, postcodes, and communities, and that local knowledge makes a real difference.",
               },
               {
                 title: "Transparency",

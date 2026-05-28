@@ -39,8 +39,8 @@ export default function PooléPage() {
               BH13 through BH17 and surrounding postcodes.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              For businesses targeting higher-income demographics — luxury
-              services, premium restaurants, home improvement — Poole offers
+              For businesses targeting higher-income demographics such as luxury
+              services, premium restaurants, and home improvement, Poole offers
               an excellent return on flyer investment.
             </p>
             <p className="text-gray-600 leading-relaxed">

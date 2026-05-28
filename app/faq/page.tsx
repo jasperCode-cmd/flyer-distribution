@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "FAQ — Frequently Asked Questions",
+  title: "FAQ: Frequently Asked Questions",
   description:
     "Answers to common questions about flyer and leaflet distribution in Hampshire. Learn about pricing, quantities, timing and more.",
 };
@@ -14,7 +14,7 @@ const faqs = [
   },
   {
     q: "What is the minimum order quantity?",
-    a: "We generally work with campaigns from 500 flyers upwards. Smaller quantities are possible for targeted B2B campaigns — just ask.",
+    a: "We generally work with campaigns from 500 flyers upwards. Smaller quantities are possible for targeted B2B campaigns, so just ask.",
   },
   {
     q: "How long does distribution take?",
@@ -22,11 +22,11 @@ const faqs = [
   },
   {
     q: "Do I need to print my own flyers?",
-    a: "Yes — you supply the printed materials and we deliver them. We can recommend print suppliers if you need help with that step.",
+    a: "Yes. You supply the printed materials and we deliver them. We can recommend print suppliers if you need help with that step.",
   },
   {
     q: "What is solus distribution?",
-    a: "Solus means your flyer is delivered on its own — not bundled with any other leaflets. This gives it the best chance of being noticed and read. It costs more per door than shared distribution but is often worth it for high-impact campaigns.",
+    a: "Solus means your flyer is delivered on its own, not bundled with any other leaflets. This gives it the best chance of being noticed and read. It costs more per door than shared distribution but is often worth it for high-impact campaigns.",
   },
   {
     q: "What is shared distribution?",

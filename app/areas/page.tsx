@@ -104,7 +104,7 @@ export default function AreasPage() {
             ))}
           </div>
           <p className="mt-6 text-gray-500 text-sm">
-            Don&apos;t see your area? Contact us — we can often accommodate
+            Don&apos;t see your area? Contact us, as we can often accommodate
             additional postcodes on request.
           </p>
         </div>

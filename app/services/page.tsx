@@ -5,13 +5,13 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Flyer & Leaflet Distribution Services",
   description:
-    "Explore our flyer and leaflet distribution services in Hampshire — solus drops, shared distribution, B2B delivery and more.",
+    "Explore our flyer and leaflet distribution services in Hampshire, including solus drops, shared distribution, B2B delivery and more.",
 };
 
 const services = [
   {
     title: "Solus Distribution",
-    desc: "Your flyer delivered alone through each letterbox — no other leaflets competing for attention. The most impactful option for campaigns where quality matters.",
+    desc: "Your flyer delivered alone through each letterbox, with no other leaflets competing for attention. The most impactful option for campaigns where quality matters.",
     image: "https://picsum.photos/seed/solus/600/400",
     alt: "Single flyer being delivered through a letterbox",
   },

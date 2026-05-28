@@ -40,11 +40,11 @@ export default function PortsmouthPage() {
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
               The city&apos;s high-density housing makes it an excellent choice
-              for targeted campaigns — your investment goes further when more
+              for targeted campaigns, as your investment goes further when more
               homes are packed into a smaller geographic area.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              We deliver for businesses across sectors — from takeaways and
+              We deliver for businesses across sectors, from takeaways and
               tradespeople to fitness studios and estate agents.
             </p>
             <div className="mt-8">

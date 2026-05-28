@@ -21,7 +21,7 @@ export default function WinchesterPage() {
           </h1>
           <p className="text-blue-200 text-lg max-w-xl">
             Professional leaflet delivery across Winchester city and surrounding
-            Hampshire villages — reaching the affluent households of the county
+            Hampshire villages, reaching the affluent households of the county
             town.
           </p>
         </div>
@@ -45,8 +45,8 @@ export default function WinchesterPage() {
               the outlying villages such as Colden Common and Bishopstoke.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Winchester is particularly effective for premium services — home
-              improvements, fine dining, private schools, and professional
+              Winchester is particularly effective for premium services such as
+              home improvements, fine dining, private schools, and professional
               services.
             </p>
             <div className="mt-8">

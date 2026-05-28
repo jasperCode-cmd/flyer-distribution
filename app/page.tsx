@@ -12,7 +12,7 @@ const trustSignals = [
   {
     icon: "🏘️",
     title: "Local Team",
-    body: "We're based in Hampshire and know every postcode. No national middlemen — just local people who care about your campaign.",
+    body: "We're based in Hampshire and know every postcode. No national middlemen, just local people who care about your campaign.",
   },
   {
     icon: "🎯",
@@ -29,7 +29,7 @@ const trustSignals = [
 const services = [
   {
     title: "Solus Distribution",
-    desc: "Your flyer delivered on its own — maximum impact, no competition from other leaflets in the letterbox.",
+    desc: "Your flyer delivered on its own for maximum impact, with no competition from other leaflets in the letterbox.",
   },
   {
     title: "Shared Distribution",
@@ -76,7 +76,7 @@ export default function HomePage() {
             </h1>
             <p className="text-blue-100 text-lg sm:text-xl leading-relaxed mb-8">
               We deliver your leaflets and flyers directly through letterboxes
-              across Hampshire and Dorset — helping local businesses reach real
+              across Hampshire and Dorset, helping local businesses reach real
               customers in the right postcodes.
             </p>
             <Link
@@ -155,7 +155,7 @@ export default function HomePage() {
             Areas We Cover
           </h2>
           <p className="text-blue-200 mb-10 max-w-xl">
-            We cover the Hampshire and Dorset corridor — from Winchester in
+            We cover the Hampshire and Dorset corridor, from Winchester in
             the north to Poole in the west, including:
           </p>
           <div className="flex flex-wrap gap-3 mb-10">
@@ -186,7 +186,7 @@ export default function HomePage() {
           </h2>
           <p className="text-gray-600 max-w-lg mx-auto mb-8 leading-relaxed">
             Get in touch today for a free, no-obligation quote. Tell us your
-            target area and quantity — we'll do the rest.
+            target area and quantity, and we'll do the rest.
           </p>
           <Link
             href="/quote"

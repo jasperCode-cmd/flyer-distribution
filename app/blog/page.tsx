@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Blog — Leaflet Distribution Tips & News",
+  title: "Blog: Leaflet Distribution Tips & News",
   description:
     "Tips, guides, and news from the Flyer Distribution Hampshire team. Learn how to get the most from your leaflet campaigns.",
   robots: {
