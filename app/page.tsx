@@ -155,8 +155,8 @@ export default function HomePage() {
             Areas We Cover
           </h2>
           <p className="text-blue-200 mb-10 max-w-xl">
-            We distribute across all major towns and cities in Hampshire and
-            into Dorset, including:
+            We cover the Hampshire and Dorset corridor — from Winchester in
+            the north to Poole in the west, including:
           </p>
           <div className="flex flex-wrap gap-3 mb-10">
             {areas.map((area) => (
