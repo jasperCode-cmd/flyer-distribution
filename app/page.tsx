@@ -28,16 +28,20 @@ const trustSignals = [
 
 const services = [
   {
-    title: "Shared Distribution",
-    desc: "Cost-effective delivery bundled with complementary (non-competing) businesses to keep your price per door low.",
-  },
-  {
-    title: "Business-to-Business",
-    desc: "Targeted delivery to commercial premises, office parks, and retail areas across Hampshire.",
+    title: "Leaflet Distribution",
+    desc: "Door-to-door delivery to households across your chosen areas. Your printed materials posted directly through letterboxes across Hampshire and Dorset.",
   },
   {
     title: "Door-to-Door Leaflets",
-    desc: "Full residential coverage of selected postcodes, ideal for restaurants, tradespeople, and local services.",
+    desc: "Full residential coverage of selected postcodes and areas, ideal for restaurants, tradespeople, and local services.",
+  },
+  {
+    title: "Vehicle Leaflet Distribution",
+    desc: "Leaflets placed on parked cars in car parks, retail areas, and high-footfall locations across Hampshire and Dorset.",
+  },
+  {
+    title: "Campaign Planning",
+    desc: "We help you choose the right areas and quantities for your distribution campaign so every leaflet counts.",
   },
 ];
 
@@ -116,8 +120,8 @@ export default function HomePage() {
               Our Services
             </h2>
             <p className="text-gray-600 max-w-xl">
-              From individual drops to shared distribution, we have a delivery option
-              to suit every budget and campaign goal.
+              From door-to-door delivery to targeted postcode campaigns, we have a
+              service to suit every budget and campaign goal.
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">

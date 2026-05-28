@@ -5,45 +5,45 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Flyer & Leaflet Distribution Services",
   description:
-    "Explore our flyer and leaflet distribution services in Hampshire, including individual delivery, shared distribution, B2B delivery and more.",
+    "Explore our leaflet distribution services in Hampshire and Dorset, including door-to-door delivery, targeted postcode campaigns, vehicle distribution and more.",
 };
 
 const services = [
   {
-    title: "Individual Delivery",
-    desc: "Your flyer delivered alone through each letterbox, with no other leaflets competing for attention. The most impactful option for campaigns where quality matters.",
-    image: "https://picsum.photos/seed/individual/600/400",
-    alt: "Single flyer being delivered through a letterbox",
-  },
-  {
-    title: "Shared Distribution",
-    desc: "Share delivery costs with non-competing businesses. A cost-effective way to reach thousands of homes without breaking your marketing budget.",
-    image: "https://picsum.photos/seed/shared/600/400",
-    alt: "Bundle of leaflets ready for shared distribution",
-  },
-  {
-    title: "Business-to-Business (B2B)",
-    desc: "Target commercial premises, offices, and retail parks across Hampshire. Perfect for B2B services, suppliers, and trade businesses.",
-    image: "https://picsum.photos/seed/b2b/600/400",
-    alt: "Office park targeted for B2B leaflet delivery",
+    title: "Leaflet Distribution",
+    desc: "Standard door-to-door leaflet delivery to households across your chosen areas. We handle the rounds so your printed materials land directly through letterboxes across Hampshire and Dorset.",
+    image: "https://picsum.photos/seed/leafletdist/600/400",
+    alt: "Distributor posting leaflets through residential letterboxes",
   },
   {
     title: "Door-to-Door Residential",
-    desc: "Full coverage of chosen postcodes, street by street. Great for restaurants, tradespeople, estate agents, and any business that relies on local custom.",
-    image: "https://picsum.photos/seed/doortodoor/600/400",
-    alt: "Distributor walking down a residential street",
+    desc: "Full residential coverage of your chosen postcodes and areas. Great for restaurants, tradespeople, estate agents, and any business that relies on local custom.",
+    image: "https://picsum.photos/seed/residential/600/400",
+    alt: "Distributor walking through a residential area",
   },
   {
     title: "Targeted Postcode Campaigns",
-    desc: "Use our postcode-level targeting to focus your budget on the streets most likely to convert. We'll help you choose the right areas.",
+    desc: "Focus your budget on the postcode areas most likely to convert. We help you choose the right zones and quantities to get the best return from your campaign.",
     image: "https://picsum.photos/seed/postcode/600/400",
     alt: "Map highlighting targeted postcode areas",
   },
   {
     title: "Event & Venue Distribution",
     desc: "Distribute flyers at events, community centres, gyms, and high-footfall venues to reach your audience where they gather.",
-    image: "https://picsum.photos/seed/event/600/400",
+    image: "https://picsum.photos/seed/eventdist/600/400",
     alt: "Flyers being handed out at a local event",
+  },
+  {
+    title: "Vehicle Leaflet Distribution",
+    desc: "Place leaflets on parked cars in car parks, retail areas, and high-footfall locations across Hampshire and Dorset. An effective way to reach people already out and spending locally.",
+    image: "https://picsum.photos/seed/vehicle/600/400",
+    alt: "Leaflets placed on parked cars in a car park",
+  },
+  {
+    title: "Campaign Planning",
+    desc: "Not sure where to start? We help businesses choose the right areas, postcodes, and quantities for their distribution campaign to make every leaflet count.",
+    image: "https://picsum.photos/seed/planning/600/400",
+    alt: "Business owner planning a leaflet distribution campaign",
   },
 ];
 
