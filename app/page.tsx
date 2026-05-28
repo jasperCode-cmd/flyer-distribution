@@ -32,8 +32,8 @@ const services = [
     desc: "Door-to-door delivery to households across your chosen areas. Your printed materials posted directly through letterboxes across Hampshire and Dorset.",
   },
   {
-    title: "Door-to-Door Leaflets",
-    desc: "Full residential coverage of selected postcodes and areas, ideal for restaurants, tradespeople, and local services.",
+    title: "Targeted Postcode Campaigns",
+    desc: "Focus your campaign on the specific postcode areas most relevant to your business.",
   },
   {
     title: "Vehicle Leaflet Distribution",

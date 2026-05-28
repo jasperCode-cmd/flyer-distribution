@@ -11,27 +11,15 @@ export const metadata: Metadata = {
 const services = [
   {
     title: "Leaflet Distribution",
-    desc: "Standard door-to-door leaflet delivery to households across your chosen areas. We handle the rounds so your printed materials land directly through letterboxes across Hampshire and Dorset.",
+    desc: "Standard door-to-door leaflet delivery to households across your chosen areas in Hampshire and Dorset. We handle the rounds so your printed materials land directly through letterboxes.",
     image: "https://picsum.photos/seed/leafletdist/600/400",
     alt: "Distributor posting leaflets through residential letterboxes",
   },
   {
-    title: "Door-to-Door Residential",
-    desc: "Full residential coverage of your chosen postcodes and areas. Great for restaurants, tradespeople, estate agents, and any business that relies on local custom.",
-    image: "https://picsum.photos/seed/residential/600/400",
-    alt: "Distributor walking through a residential area",
-  },
-  {
     title: "Targeted Postcode Campaigns",
-    desc: "Focus your budget on the postcode areas most likely to convert. We help you choose the right zones and quantities to get the best return from your campaign.",
+    desc: "Focus your campaign on the specific postcode areas most relevant to your business. We help you choose the right zones and quantities to get the best return.",
     image: "https://picsum.photos/seed/postcode/600/400",
     alt: "Map highlighting targeted postcode areas",
-  },
-  {
-    title: "Event & Venue Distribution",
-    desc: "Distribute flyers at events, community centres, gyms, and high-footfall venues to reach your audience where they gather.",
-    image: "https://picsum.photos/seed/eventdist/600/400",
-    alt: "Flyers being handed out at a local event",
   },
   {
     title: "Vehicle Leaflet Distribution",
@@ -41,7 +29,7 @@ const services = [
   },
   {
     title: "Campaign Planning",
-    desc: "Not sure where to start? We help businesses choose the right areas, postcodes, and quantities for their distribution campaign to make every leaflet count.",
+    desc: "We help businesses choose the right areas, postcodes, and quantities for their distribution campaign to make every leaflet count.",
     image: "https://picsum.photos/seed/planning/600/400",
     alt: "Business owner planning a leaflet distribution campaign",
   },
@@ -64,7 +52,7 @@ export default function ServicesPage() {
       {/* Services grid */}
       <section className="bg-slate-50 py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {services.map((svc) => (
               <div
                 key={svc.title}
