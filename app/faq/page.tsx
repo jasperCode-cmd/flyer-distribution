@@ -4,49 +4,45 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "FAQ: Frequently Asked Questions",
   description:
-    "Answers to common questions about flyer and leaflet distribution in Hampshire. Learn about pricing, quantities, timing and more.",
+    "Answers to common questions about leaflet and flyer distribution in Hampshire and Dorset. Covering areas, quantities, campaign planning and more.",
 };
 
 const faqs = [
   {
-    q: "How much does leaflet distribution cost in Hampshire?",
-    a: "Pricing depends on the quantity, distribution type, and target area. Shared distribution starts from a lower cost per door, while individual delivery costs more but gives your flyer maximum impact. Contact us for a free quote tailored to your campaign.",
+    q: "What areas do you cover?",
+    a: "We cover the Hampshire and Dorset corridor, from Winchester in the north to Poole in the west. This includes Southampton, Portsmouth, Bournemouth, Poole, Winchester, Eastleigh, New Forest, Romsey, Ringwood, Christchurch, Hythe, Totton, Hedge End, and Chandler's Ford. If your target area is not listed, get in touch and we can often accommodate additional postcodes on request.",
   },
   {
-    q: "What is the minimum order quantity?",
-    a: "We generally work with campaigns from 500 flyers upwards. Smaller quantities are possible for targeted B2B campaigns, so just ask.",
+    q: "How does leaflet distribution work?",
+    a: "You supply the printed leaflets and we take care of the delivery. We post them directly through letterboxes in your chosen postcode areas across Hampshire and Dorset. Once your campaign is agreed and materials are received, our distribution teams carry out the rounds and confirm completion.",
   },
   {
-    q: "How long does distribution take?",
-    a: "Turnaround depends on quantity and area. Most residential campaigns are completed within 5–10 working days of us receiving your materials. We can often work faster for smaller campaigns.",
+    q: "Can I target specific postcode areas?",
+    a: "Yes. Postcode-level targeting is central to how we work. You choose the postcode areas you want to reach, and we focus the campaign there. Our Campaign Planning service can help if you are unsure which postcode areas are best suited to your business.",
   },
   {
-    q: "Do I need to print my own flyers?",
-    a: "Yes. You supply the printed materials and we deliver them. We can recommend print suppliers if you need help with that step.",
+    q: "Do I need to have my leaflets printed already?",
+    a: "Yes. You supply the printed materials and we handle the distribution. We do not offer printing services, so your leaflets should be ready before we begin.",
   },
   {
-    q: "What is individual delivery?",
-    a: "Individual delivery means your flyer is delivered on its own, not bundled with any other leaflets. This gives it the best chance of being noticed and read. It costs more per door than shared distribution but is often worth it for high-impact campaigns.",
+    q: "How do I get a quote?",
+    a: "Use the Get a Quote page and tell us your target postcode areas and approximate quantity. We will come back to you within 24 hours with a tailored price for your campaign.",
   },
   {
-    q: "What is shared distribution?",
-    a: "Shared distribution means your flyer is bundled with a small number of non-competing leaflets from other businesses. It's a cost-effective option that significantly reduces the price per door.",
+    q: "How many leaflets do I need?",
+    a: "That depends on the postcode areas you want to cover and how many households are within them. As a rough guide, a single postcode area typically contains between 1,500 and 3,000 households. We can advise on quantities as part of our Campaign Planning service.",
   },
   {
-    q: "How do I know my flyers have been delivered?",
-    a: "We complete all rounds as agreed and report back on completion. For larger campaigns we can discuss monitoring arrangements in advance.",
+    q: "What size leaflets do you deliver?",
+    a: "We deliver most standard leaflet sizes including A6, A5, A4, and DL. If you are unsure whether your format is suitable, just ask before you go to print.",
   },
   {
-    q: "Which areas do you cover?",
-    a: "We cover all major towns and postcodes across Hampshire and into Dorset, including Southampton, Portsmouth, Bournemouth, Poole, Winchester, Eastleigh, Fareham, and more. See our areas page for the full list.",
+    q: "What is vehicle leaflet distribution?",
+    a: "Vehicle leaflet distribution involves placing your leaflets on parked cars in car parks, retail areas, and high-footfall locations across Hampshire and Dorset. It is an effective way to reach people who are already out and spending locally, and works well alongside a door-to-door campaign.",
   },
   {
-    q: "Can I target specific postcodes or streets?",
-    a: "Absolutely. Targeted postcode and street-level distribution is one of our specialities. We'll work with you to define exactly which households you want to reach.",
-  },
-  {
-    q: "Do you offer B2B distribution?",
-    a: "Yes. We can target commercial premises, offices, retail parks, and business estates across Hampshire for business-to-business campaigns.",
+    q: "How long does a campaign take?",
+    a: "Most campaigns are completed within 5 to 10 working days of us receiving your materials. Smaller campaigns covering fewer postcode areas can often be turned around more quickly. We will agree a timeline with you before the campaign begins.",
   },
 ];
 
@@ -59,7 +55,8 @@ export default function FaqPage() {
             Frequently Asked Questions
           </h1>
           <p className="text-blue-200 text-lg max-w-xl">
-            Everything you need to know about flyer distribution in Hampshire.
+            Everything you need to know about leaflet distribution in Hampshire
+            and Dorset.
           </p>
         </div>
       </section>

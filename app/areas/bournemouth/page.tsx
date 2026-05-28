@@ -36,7 +36,7 @@ export default function BournemouthPage() {
               Bournemouth is one of Dorset&apos;s largest towns, known for its
               beaches, vibrant town centre, and large student population.
               We cover BH1 through BH12 and surrounding postcodes, reaching
-              residential streets across all neighbourhoods.
+              residential areas across all neighbourhoods.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
               Whether you need to reach the Westbourne boutique area,
@@ -44,8 +44,8 @@ export default function BournemouthPage() {
               distributors know these routes well.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Bournemouth&apos;s tourism economy also makes it ideal for
-              venue and event distribution to high-footfall locations.
+              Bournemouth&apos;s busy retail areas and car parks also make it
+              well suited to vehicle leaflet distribution campaigns.
             </p>
             <div className="mt-8">
               <Link
@@ -59,7 +59,7 @@ export default function BournemouthPage() {
           <div>
             <Image
               src="https://picsum.photos/seed/bournemouth/700/500"
-              alt="Bournemouth seafront and residential streets"
+              alt="Bournemouth seafront and residential area"
               width={700}
               height={500}
               className="rounded-lg w-full object-cover"

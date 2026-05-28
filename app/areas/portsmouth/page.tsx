@@ -59,7 +59,7 @@ export default function PortsmouthPage() {
           <div>
             <Image
               src="https://picsum.photos/seed/portsmouth/700/500"
-              alt="Portsmouth harbour and residential streets"
+              alt="Portsmouth harbour and residential area"
               width={700}
               height={500}
               className="rounded-lg w-full object-cover"

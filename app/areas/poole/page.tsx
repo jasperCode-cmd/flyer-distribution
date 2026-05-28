@@ -5,7 +5,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Flyer Distribution Poole",
   description:
-    "Professional leaflet and flyer distribution across Poole, Dorset. Targeted delivery to residential streets around Poole Harbour.",
+    "Professional leaflet and flyer distribution across Poole, Dorset. Targeted delivery to residential areas around Poole Harbour.",
 };
 
 export default function PooléPage() {

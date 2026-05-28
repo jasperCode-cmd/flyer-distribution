@@ -11,7 +11,7 @@ const featuredAreas = [
   {
     name: "Southampton",
     href: "/areas/southampton",
-    desc: "Hampshire's largest city. Full residential and commercial coverage.",
+    desc: "Hampshire's largest city. Residential coverage across all major postcode areas.",
   },
   {
     name: "Portsmouth",

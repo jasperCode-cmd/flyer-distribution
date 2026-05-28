@@ -60,7 +60,7 @@ export default function SouthamptonPage() {
           <div>
             <Image
               src="https://picsum.photos/seed/southampton/700/500"
-              alt="Aerial view of Southampton city streets"
+              alt="Aerial view of Southampton city centre"
               width={700}
               height={500}
               className="rounded-lg w-full object-cover"
