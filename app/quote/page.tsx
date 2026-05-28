@@ -147,8 +147,27 @@ export default function QuotePage() {
                   <option>Targeted Postcode Campaign</option>
                   <option>Vehicle Leaflet Distribution</option>
                   <option>Campaign Planning</option>
-                  <option>Print &amp; Deliver</option>
                 </select>
+              </div>
+
+              <div className="border border-gray-200 rounded-md px-4 py-3 bg-gray-50">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="include-printing"
+                    name="include-printing"
+                    value="yes"
+                    defaultChecked
+                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Include printing with my order
+                  </span>
+                </label>
+                <p className="mt-1.5 text-xs text-gray-500 pl-7">
+                  Uncheck if you already have your materials printed and just
+                  need distribution.
+                </p>
               </div>
 
               <div>
