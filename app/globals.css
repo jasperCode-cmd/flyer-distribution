@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+:root {
+  --font-inter: "Inter", sans-serif;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter);
+}
+
+body {
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
