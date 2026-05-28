@@ -17,7 +17,7 @@ const trustSignals = [
   {
     icon: "🎯",
     title: "Targeted Postcodes",
-    body: "Choose exactly which streets and postcodes you want to reach. Pay only for the households that matter to your business.",
+    body: "Choose exactly which areas and postcodes you want to reach. Pay only for the households that matter to your business.",
   },
   {
     icon: "✅",
