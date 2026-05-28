@@ -23,7 +23,7 @@ const posts = [
     slug: "#",
   },
   {
-    title: "Solus vs Shared Distribution: Which Is Right for Your Campaign?",
+    title: "Individual vs Shared Distribution: Which Is Right for Your Campaign?",
     excerpt:
       "Both options have their place. We break down the pros, cons, and ideal use cases so you can make the right choice for your business.",
     date: "28 October 2024",

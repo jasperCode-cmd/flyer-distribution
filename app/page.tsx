@@ -28,7 +28,7 @@ const trustSignals = [
 
 const services = [
   {
-    title: "Solus Distribution",
+    title: "Individual Delivery",
     desc: "Your flyer delivered on its own for maximum impact, with no competition from other leaflets in the letterbox.",
   },
   {
@@ -120,7 +120,7 @@ export default function HomePage() {
               Our Services
             </h2>
             <p className="text-gray-600 max-w-xl">
-              From solus drops to shared distribution, we have a delivery option
+              From individual drops to shared distribution, we have a delivery option
               to suit every budget and campaign goal.
             </p>
           </div>

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const faqs = [
   {
     q: "How much does leaflet distribution cost in Hampshire?",
-    a: "Pricing depends on the quantity, distribution type (solus or shared), and target area. Shared distribution starts from a lower cost per door, while solus delivery costs more but gives your flyer maximum impact. Contact us for a free quote tailored to your campaign.",
+    a: "Pricing depends on the quantity, distribution type, and target area. Shared distribution starts from a lower cost per door, while individual delivery costs more but gives your flyer maximum impact. Contact us for a free quote tailored to your campaign.",
   },
   {
     q: "What is the minimum order quantity?",
@@ -25,8 +25,8 @@ const faqs = [
     a: "Yes. You supply the printed materials and we deliver them. We can recommend print suppliers if you need help with that step.",
   },
   {
-    q: "What is solus distribution?",
-    a: "Solus means your flyer is delivered on its own, not bundled with any other leaflets. This gives it the best chance of being noticed and read. It costs more per door than shared distribution but is often worth it for high-impact campaigns.",
+    q: "What is individual delivery?",
+    a: "Individual delivery means your flyer is delivered on its own, not bundled with any other leaflets. This gives it the best chance of being noticed and read. It costs more per door than shared distribution but is often worth it for high-impact campaigns.",
   },
   {
     q: "What is shared distribution?",
