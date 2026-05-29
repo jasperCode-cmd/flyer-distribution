@@ -60,7 +60,7 @@ export default function WinchesterPage() {
           </div>
           <div>
             <Image
-              src="https://picsum.photos/seed/winchester/700/500"
+              src="https://images.unsplash.com/photo-1467803738586-46b7eb7b16a1?w=800&q=80"
               alt="Winchester cathedral and city centre"
               width={700}
               height={500}

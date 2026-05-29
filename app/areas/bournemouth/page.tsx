@@ -58,7 +58,7 @@ export default function BournemouthPage() {
           </div>
           <div>
             <Image
-              src="https://picsum.photos/seed/bournemouth/700/500"
+              src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80"
               alt="Bournemouth seafront and residential area"
               width={700}
               height={500}

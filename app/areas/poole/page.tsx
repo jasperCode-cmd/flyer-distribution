@@ -58,7 +58,7 @@ export default function PooléPage() {
           </div>
           <div>
             <Image
-              src="https://picsum.photos/seed/poole/700/500"
+              src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=80"
               alt="Poole harbour and waterfront residential area"
               width={700}
               height={500}
