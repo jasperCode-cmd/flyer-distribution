@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Areas We Cover in Hampshire & Dorset",
   description:
-    "Flyer and leaflet distribution across Hampshire and Dorset. View coverage areas including Southampton, Portsmouth, Bournemouth, Poole and Winchester.",
+    "Flyer and leaflet distribution across Hampshire and Dorset. View coverage areas including Southampton, Bournemouth, Poole and Winchester.",
 };
 
 const featuredAreas = [
@@ -12,11 +12,6 @@ const featuredAreas = [
     name: "Southampton",
     href: "/areas/southampton",
     desc: "Hampshire's largest city. Residential coverage across all major postcode areas.",
-  },
-  {
-    name: "Portsmouth",
-    href: "/areas/portsmouth",
-    desc: "Coastal city with dense residential districts across Portsea Island.",
   },
   {
     name: "Bournemouth",

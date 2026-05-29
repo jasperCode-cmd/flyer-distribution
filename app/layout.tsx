@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     template: "%s | Flyer Distribution Hampshire",
   },
   description:
-    "Professional flyer and leaflet distribution across Hampshire and Dorset. Covering Southampton, Portsmouth, Bournemouth, Poole and Winchester.",
+    "Professional flyer and leaflet distribution across Hampshire and Dorset. Covering Southampton, Bournemouth, Poole and Winchester.",
 };
 
 export default function RootLayout({

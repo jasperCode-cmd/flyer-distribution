@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const faqs = [
   {
     q: "What areas do you cover?",
-    a: "We cover the Hampshire and Dorset corridor, from Winchester in the north to Poole in the west. This includes Southampton, Portsmouth, Bournemouth, Poole, Winchester, Eastleigh, New Forest, Romsey, Ringwood, Christchurch, Hythe, Totton, Hedge End, and Chandler's Ford. If your target area is not listed, get in touch and we can often accommodate additional postcodes on request.",
+    a: "We cover the Hampshire and Dorset corridor, from Winchester in the north to Poole in the west. This includes Southampton, Bournemouth, Poole, Winchester, Eastleigh, New Forest, Romsey, Ringwood, Christchurch, Hythe, Totton, Hedge End, and Chandler's Ford. If your target area is not listed, get in touch and we can often accommodate additional postcodes on request.",
   },
   {
     q: "How does leaflet distribution work?",

@@ -8,7 +8,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/services",
     "/areas",
     "/areas/southampton",
-    "/areas/portsmouth",
     "/areas/bournemouth",
     "/areas/poole",
     "/areas/winchester",

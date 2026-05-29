@@ -5,7 +5,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Flyer Distribution Hampshire | Local Leaflet & Flyer Delivery",
   description:
-    "Reliable flyer and leaflet distribution across Hampshire and Dorset. Reach real households in Southampton, Portsmouth, Bournemouth, Poole and Winchester.",
+    "Reliable flyer and leaflet distribution across Hampshire and Dorset. Reach real households in Southampton, Bournemouth, Poole and Winchester.",
 };
 
 const trustSignals = [
@@ -47,7 +47,6 @@ const services = [
 
 const areas = [
   { name: "Southampton", href: "/areas/southampton" },
-  { name: "Portsmouth", href: "/areas/portsmouth" },
   { name: "Bournemouth", href: "/areas/bournemouth" },
   { name: "Poole", href: "/areas/poole" },
   { name: "Winchester", href: "/areas/winchester" },
