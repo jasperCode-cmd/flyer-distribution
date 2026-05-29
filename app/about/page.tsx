@@ -55,7 +55,7 @@ export default function AboutPage() {
           </div>
           <div>
             <Image
-              src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&q=80"
+              src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=800&q=80"
               alt="Flyer distribution team member on a Hampshire street"
               width={700}
               height={500}
