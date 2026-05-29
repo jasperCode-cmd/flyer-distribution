@@ -167,11 +167,38 @@ export default function QuoteForm() {
                 defaultValue="A5"
                 className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
-                <option value="A5">A5</option>
+                <option value="A5">A5 (most popular)</option>
                 <option value="A4">A4</option>
                 <option value="A6">A6</option>
                 <option value="DL">DL</option>
               </select>
+
+              <div className="mt-3">
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                  Print sides
+                </p>
+                <div className="flex gap-6">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="print-sides"
+                      value="Single sided"
+                      defaultChecked
+                      className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">Single sided</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="print-sides"
+                      value="Double sided"
+                      className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">Double sided</span>
+                  </label>
+                </div>
+              </div>
             </div>
           )}
         </div>
