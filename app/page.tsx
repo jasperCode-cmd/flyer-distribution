@@ -148,7 +148,7 @@ export default function HomePage() {
             <p className="text-gray-500 text-sm">
               Need printing too?{" "}
               <Link href="/services" className="text-blue-600 hover:underline">
-                We offer A6, A5, and A4 print &amp; deliver.
+                We offer A6, A5, A4, and DL print &amp; deliver.
               </Link>
             </p>
           </div>

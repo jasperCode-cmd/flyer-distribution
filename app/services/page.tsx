@@ -86,7 +86,7 @@ export default function ServicesPage() {
               </h2>
               <p className="text-gray-600 text-sm leading-relaxed">
                 Need your leaflets produced before distribution? We offer
-                printing in A6, A5, and A4. Just let us know when requesting
+                printing in A6, A5, A4, and DL. Just let us know when requesting
                 your quote and we can handle both print and delivery together.
               </p>
             </div>

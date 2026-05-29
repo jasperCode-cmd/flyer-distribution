@@ -22,7 +22,7 @@ const faqs = [
   },
   {
     q: "Do I need to have my leaflets printed already?",
-    a: "Not necessarily. You can supply your own printed leaflets, or we can handle printing for you. We print A6, A5, and A4. Just let us know when requesting your quote and we will include printing in the price.",
+    a: "Not necessarily. You can supply your own printed leaflets, or we can handle printing for you. We print A6, A5, A4, and DL. Just let us know when requesting your quote and we will include printing in the price.",
   },
   {
     q: "How do I get a quote?",
