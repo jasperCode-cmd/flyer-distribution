@@ -22,9 +22,9 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="shrink-0">
             <Image
-              src="/logo.svg"
-              width={180}
-              height={60}
+              src="/logo.png"
+              width={200}
+              height={70}
               alt="Flyer Distribution Hampshire"
               priority
             />
