@@ -12,7 +12,7 @@ const trustSignals = [
   {
     icon: "🏘️",
     title: "Local Team",
-    body: "We're based in Hampshire and know every postcode. No national middlemen, just local people who care about your campaign.",
+    body: "We're based in Hampshire and Dorset and know every postcode. No national middlemen, just local people who care about your campaign.",
   },
   {
     icon: "🎯",
