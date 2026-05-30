@@ -60,7 +60,7 @@ export default function HomePage() {
       {/* Hero */}
       <section className="relative bg-blue-900 text-white overflow-hidden">
         <Image
-          src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&q=80"
+          src="https://images.unsplash.com/photo-1592595896551-12b371d546d5?w=1920&q=80"
           alt="Flyer distributor walking through a Hampshire street"
           width={1600}
           height={700}
