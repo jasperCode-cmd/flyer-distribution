@@ -28,13 +28,21 @@ const featuredAreas = [
     href: "/areas/winchester",
     desc: "Historic cathedral city and prosperous Hampshire county town.",
   },
+  {
+    name: "New Forest",
+    href: "/areas/new-forest",
+    desc: "Towns and villages across one of Hampshire's most distinctive districts.",
+  },
+  {
+    name: "Ringwood",
+    href: "/areas/ringwood",
+    desc: "Market town on the New Forest edge, close to the Dorset border.",
+  },
 ];
 
 const otherAreas = [
   "Eastleigh",
-  "New Forest",
   "Romsey",
-  "Ringwood",
   "Christchurch",
   "Hythe",
   "Totton",

@@ -50,6 +50,8 @@ const areas = [
   { name: "Bournemouth", href: "/areas/bournemouth" },
   { name: "Poole", href: "/areas/poole" },
   { name: "Winchester", href: "/areas/winchester" },
+  { name: "New Forest", href: "/areas/new-forest" },
+  { name: "Ringwood", href: "/areas/ringwood" },
 ];
 
 export default function HomePage() {

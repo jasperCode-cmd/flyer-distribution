@@ -11,6 +11,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/areas/bournemouth",
     "/areas/poole",
     "/areas/winchester",
+    "/areas/new-forest",
+    "/areas/ringwood",
     "/quote",
     "/about",
     "/faq",
