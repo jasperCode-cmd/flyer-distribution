@@ -61,10 +61,10 @@ export default function Footer() {
                   Email
                 </span>
                 <a
-                  href="mailto:PLACEHOLDER_EMAIL"
+                  href="mailto:flyerdistributionhampshire@gmail.com"
                   className="hover:text-white transition-colors"
                 >
-                  PLACEHOLDER_EMAIL
+                  flyerdistributionhampshire@gmail.com
                 </a>
               </li>
               <li>
