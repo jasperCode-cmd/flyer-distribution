@@ -67,17 +67,7 @@ export default function Footer() {
                   flyerdistributionhampshire@gmail.com
                 </a>
               </li>
-              <li>
-                <span className="block text-blue-400 text-xs uppercase tracking-wide mb-0.5">
-                  Phone
-                </span>
-                <a
-                  href="tel:PLACEHOLDER_PHONE"
-                  className="hover:text-white transition-colors"
-                >
-                  PLACEHOLDER_PHONE
-                </a>
-              </li>
+
               <li>
                 <span className="block text-blue-400 text-xs uppercase tracking-wide mb-0.5">
                   Serving
