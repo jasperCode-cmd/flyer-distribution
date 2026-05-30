@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   },
   description:
     "Professional flyer and leaflet distribution across Hampshire and Dorset. Covering Southampton, Bournemouth, Poole and Winchester.",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
