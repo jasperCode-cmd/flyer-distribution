@@ -22,7 +22,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="shrink-0">
             <Image
-              src="/website_logo.png"
+              src="/website_logo_main.png"
               width={220}
               height={60}
               alt="Flyer Distribution Hampshire"
