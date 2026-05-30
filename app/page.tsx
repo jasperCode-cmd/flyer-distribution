@@ -60,11 +60,12 @@ export default function HomePage() {
       {/* Hero */}
       <section className="relative bg-blue-900 text-white overflow-hidden">
         <Image
-          src="https://images.unsplash.com/photo-1592595896551-12b371d546d5?w=1920&q=80"
+          src="https://images.unsplash.com/photo-1448630360428-65456885c650?w=1920&q=80"
           alt="Flyer distributor walking through a Hampshire street"
           width={1600}
           height={700}
           className="absolute inset-0 w-full h-full object-cover opacity-20"
+          style={{ objectPosition: 'center', transform: 'scale(1.2)' }}
           priority
         />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-28 lg:py-36">
