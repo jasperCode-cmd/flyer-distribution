@@ -26,7 +26,7 @@ const faqs = [
   },
   {
     q: "Do I need to have my leaflets printed already?",
-    a: "Not necessarily. You can supply your own printed leaflets, or we can handle printing for you. We print A6, A5, A4, and DL. Just let us know when requesting your quote and we will include printing in the price.",
+    a: "Not necessarily. You can supply your own printed materials, or we can handle printing for you. We have established relationships with print partners which means we can offer competitive pricing on A6, A5, A4 and DL formats. Just let us know when requesting your quote and we will include printing in your package.",
   },
   {
     q: "How do I get a quote?",
