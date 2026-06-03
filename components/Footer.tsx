@@ -21,9 +21,10 @@ export default function Footer() {
             <div className="mb-3 flex justify-center">
               <Image
                 src="/Flyer Distribution Logo White.png"
-                width={280}
-                height={90}
+                width={320}
+                height={80}
                 alt="Flyer Distribution Hampshire"
+                style={{ objectFit: 'cover', objectPosition: 'center' }}
               />
             </div>
             <p className="text-sm text-blue-300 leading-relaxed">
