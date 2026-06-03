@@ -19,15 +19,12 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div className="mb-3 flex justify-center">
-              <div style={{ overflow: 'hidden', height: '50px' }}>
-                <Image
-                  src="/Flyer Distribution Logo White.png"
-                  width={300}
-                  height={120}
-                  alt="Flyer Distribution Hampshire"
-                  style={{ marginTop: '-35px', objectFit: 'fill' }}
-                />
-              </div>
+              <Image
+                src="/Flyer Distribution Logo White.png"
+                width={250}
+                height={80}
+                alt="Flyer Distribution Hampshire"
+              />
             </div>
             <p className="text-sm text-blue-300 leading-relaxed">
               Professional flyer and leaflet distribution across Hampshire and
