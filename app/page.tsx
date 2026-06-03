@@ -28,12 +28,20 @@ const trustSignals = [
 
 const services = [
   {
+    title: "Design, Print and Deliver",
+    desc: "Our full end-to-end service. We handle everything from design and printing in A6, A5, A4 or DL through to full distribution across your chosen areas.",
+  },
+  {
+    title: "Print and Deliver",
+    desc: "Already have your design ready? We handle the printing in A6, A5, A4 or DL and deliver your leaflets directly through letterboxes across Hampshire and Dorset.",
+  },
+  {
     title: "Leaflet Distribution",
     desc: "Door-to-door delivery to households across your chosen areas. Your printed materials posted directly through letterboxes across Hampshire and Dorset.",
   },
   {
     title: "Targeted Postcode Campaigns",
-    desc: "Focus your campaign on the specific postcode areas most relevant to your business.",
+    desc: "Tell us your target areas and we will plan a campaign that puts your leaflets in front of the right people.",
   },
   {
     title: "Vehicle Leaflet Distribution",
@@ -139,20 +147,13 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-          <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="mt-8">
             <Link
               href="/services"
               className="text-blue-700 hover:text-blue-900 font-semibold text-sm underline underline-offset-2"
             >
               View all services →
             </Link>
-            <span className="hidden sm:block text-gray-300">|</span>
-            <p className="text-gray-500 text-sm">
-              Need printing too?{" "}
-              <Link href="/services" className="text-blue-600 hover:underline">
-                We offer A6, A5, A4, and DL print &amp; deliver.
-              </Link>
-            </p>
           </div>
         </div>
       </section>
