@@ -5,6 +5,7 @@ import Link from "next/link";
 
 export default function QuoteForm() {
   const [includePrinting, setIncludePrinting] = useState(true);
+  const [includeDesign, setIncludeDesign] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(false);
@@ -32,6 +33,7 @@ export default function QuoteForm() {
         setSubmitted(true);
         formRef.current?.reset();
         setIncludePrinting(true);
+        setIncludeDesign(false);
       } else {
         setError(true);
       }
@@ -334,6 +336,27 @@ export default function QuoteForm() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Design */}
+        <div className="border border-gray-200 rounded-md px-4 py-3 bg-gray-50">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              id="include-design"
+              name="include-design"
+              value="yes"
+              checked={includeDesign}
+              onChange={(e) => setIncludeDesign(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
+            />
+            <span className="text-sm font-medium text-gray-700">
+              Include design with my order
+            </span>
+          </label>
+          <p className="mt-1.5 text-xs text-gray-500 pl-7">
+            Uncheck if you already have your artwork ready.
+          </p>
         </div>
 
         {/* Message */}
