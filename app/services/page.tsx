@@ -17,7 +17,7 @@ const services = [
   },
   {
     title: "Targeted Postcode Campaigns",
-    desc: "Focus your campaign on the specific postcode areas most relevant to your business. We help you choose the right zones and quantities to get the best return.",
+    desc: "Tell us your target areas and we will plan a campaign that puts your leaflets in front of the right people. We work with you to focus your distribution where it counts.",
     image: "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80",
     alt: "Map highlighting targeted postcode areas",
   },

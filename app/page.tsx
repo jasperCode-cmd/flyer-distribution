@@ -17,7 +17,7 @@ const trustSignals = [
   {
     icon: "🎯",
     title: "Targeted Postcodes",
-    body: "Choose exactly which areas and postcodes you want to reach. Pay only for the households that matter to your business.",
+    body: "Tell us your target areas and we will plan a campaign that puts your leaflets in front of the right people. We work with you to focus your distribution where it counts.",
   },
   {
     icon: "✅",
