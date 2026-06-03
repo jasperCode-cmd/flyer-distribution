@@ -34,7 +34,7 @@ const faqs = [
   },
   {
     q: "How many leaflets do I need?",
-    a: "That depends on the postcode areas you want to cover and how many households are within them. As a rough guide, a single postcode area typically contains between 1,500 and 3,000 households. We can advise on quantities as part of our Campaign Planning service.",
+    a: "That depends on the postcode areas you want to cover and how many households are within them. We generally recommend starting with 5,000 or more, as this gives your campaign enough reach to generate a meaningful response. We offer discounted packages for larger quantities. We can advise on the right amount for your target areas as part of our Campaign Planning service.",
   },
   {
     q: "What size leaflets do you deliver?",
