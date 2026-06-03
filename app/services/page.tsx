@@ -29,18 +29,26 @@ const supportingServices = [
   {
     title: "Leaflet Distribution",
     desc: "Standard door-to-door leaflet delivery to households across your chosen areas in Hampshire and Dorset. We handle the rounds so your printed materials land directly through letterboxes.",
+    image: "https://images.unsplash.com/photo-1523995462485-3d171b5c8fa9?w=800&q=80",
+    alt: "Person posting leaflets through a residential letterbox",
   },
   {
     title: "Targeted Postcode Campaigns",
     desc: "Tell us your target areas and we will plan a campaign that puts your leaflets in front of the right people. We work with you to focus your distribution where it counts.",
+    image: "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80",
+    alt: "Map highlighting targeted postcode areas for a campaign",
   },
   {
     title: "Campaign Planning",
     desc: "We help businesses choose the right areas, postcodes, and quantities for their distribution campaign to make every leaflet count.",
+    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80",
+    alt: "Person reviewing campaign planning notes at a desk",
   },
   {
     title: "Vehicle Leaflet Distribution",
     desc: "Place leaflets on parked cars in car parks, retail areas, and high-footfall locations across Hampshire and Dorset. An effective way to reach people already out and spending locally.",
+    image: "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=800&q=80",
+    alt: "Parked cars in a car park where leaflets can be distributed",
   },
 ];
 
@@ -120,12 +128,21 @@ export default function ServicesPage() {
             {supportingServices.map((svc) => (
               <div
                 key={svc.title}
-                className="bg-white rounded-lg border border-gray-200 p-6 hover:border-blue-300 transition-colors"
+                className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-md transition-all"
               >
-                <h3 className="text-base font-semibold text-blue-900 mb-2">
-                  {svc.title}
-                </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{svc.desc}</p>
+                <Image
+                  src={svc.image}
+                  alt={svc.alt}
+                  width={600}
+                  height={300}
+                  className="w-full h-44 object-cover"
+                />
+                <div className="p-5">
+                  <h3 className="text-base font-semibold text-blue-900 mb-2">
+                    {svc.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">{svc.desc}</p>
+                </div>
               </div>
             ))}
           </div>
