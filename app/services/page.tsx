@@ -35,8 +35,8 @@ const supportingServices = [
   {
     title: "Targeted Postcode Campaigns",
     desc: "Tell us your target areas and we will plan a campaign that puts your leaflets in front of the right people. We work with you to focus your distribution where it counts.",
-    image: "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=80",
-    alt: "Map highlighting targeted postcode areas for a campaign",
+    image: "https://staticmap.openstreetmap.de/staticmap.php?center=50.9,-1.5&zoom=9&size=800x400&maptype=mapnik",
+    alt: "Hampshire and Dorset distribution area map",
   },
   {
     title: "Campaign Planning",
