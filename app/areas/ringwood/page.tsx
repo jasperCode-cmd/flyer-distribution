@@ -62,8 +62,8 @@ export default function RingwoodPage() {
           </div>
           <div>
             <Image
-              src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&q=80"
-              alt="Ringwood and surrounding Hampshire countryside"
+              src="https://images.pexels.com/photos/5784675/pexels-photo-5784675.jpeg?auto=compress&cs=tinysrgb&w=800"
+              alt="Green fields near Ringwood"
               width={700}
               height={500}
               className="rounded-lg w-full object-cover"
