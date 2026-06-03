@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const footerLinks = [
   { href: "/", label: "Home" },
@@ -17,13 +18,13 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
-                <span className="text-white text-xs font-bold">FD</span>
-              </div>
-              <span className="font-semibold text-white text-sm">
-                Flyer Distribution Hampshire
-              </span>
+            <div className="mb-3">
+              <Image
+                src="/website_logo_main.png"
+                width={200}
+                height={60}
+                alt="Flyer Distribution Hampshire"
+              />
             </div>
             <p className="text-sm text-blue-300 leading-relaxed">
               Professional flyer and leaflet distribution across Hampshire and
