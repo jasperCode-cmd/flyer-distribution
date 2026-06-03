@@ -58,8 +58,8 @@ export default function BournemouthPage() {
           </div>
           <div>
             <Image
-              src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80"
-              alt="Bournemouth seafront and residential area"
+              src="https://images.pexels.com/photos/29030837/pexels-photo-29030837.jpeg?auto=compress&cs=tinysrgb&w=800"
+              alt="Bournemouth pier and ferris wheel"
               width={700}
               height={500}
               className="rounded-lg w-full object-cover"
