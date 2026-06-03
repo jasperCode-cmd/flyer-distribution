@@ -58,8 +58,8 @@ export default function PooléPage() {
           </div>
           <div>
             <Image
-              src="https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=80"
-              alt="Poole harbour and waterfront residential area"
+              src="https://images.pexels.com/photos/32385939/pexels-photo-32385939.jpeg?auto=compress&cs=tinysrgb&w=800"
+              alt="Poole waterfront architecture"
               width={700}
               height={500}
               className="rounded-lg w-full object-cover"
