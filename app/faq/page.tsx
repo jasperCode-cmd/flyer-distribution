@@ -14,11 +14,11 @@ const faqs = [
   },
   {
     q: "How does leaflet distribution work?",
-    a: "You can supply your own printed leaflets and we take care of the delivery, or we can handle the whole process for you. We offer design, print and delivery as a complete package. For distribution only, we post your materials directly through letterboxes in your chosen postcode areas across Hampshire and Dorset. Once your campaign is agreed and materials are received, our distribution teams carry out the rounds and confirm completion.",
+    a: "You supply your printed leaflets and we take care of getting them delivered. We post them directly through letterboxes across your chosen postcode areas in Hampshire and Dorset. Once your materials are received, our team carries out the rounds and confirms completion.",
   },
   {
     q: "Do you offer a full design, print and delivery service?",
-    a: "Yes. If you need help from the very beginning, we offer a complete design, print and deliver package. We work with you on the artwork, handle the printing in A6, A5, A4 or DL, and carry out the full distribution. Just let us know when requesting your quote and we will take care of everything.",
+    a: "Yes. We offer a complete end-to-end service where we handle everything from initial artwork through to delivery. Just let us know when requesting your quote and we will talk you through the options.",
   },
   {
     q: "Can I target specific postcode areas?",
