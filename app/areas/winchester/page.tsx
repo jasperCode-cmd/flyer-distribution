@@ -60,8 +60,8 @@ export default function WinchesterPage() {
           </div>
           <div>
             <Image
-              src="https://images.unsplash.com/photo-1467803738586-46b7eb7b16a1?w=800&q=80"
-              alt="Winchester cathedral and city centre"
+              src="https://images.pexels.com/photos/11167778/pexels-photo-11167778.jpeg?auto=compress&cs=tinysrgb&w=800"
+              alt="Winchester Cathedral"
               width={700}
               height={500}
               className="rounded-lg w-full object-cover"
