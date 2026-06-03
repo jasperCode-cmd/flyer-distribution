@@ -20,7 +20,7 @@ const packages = [
     title: "Print and Deliver",
     badge: null,
     desc: "Already have your design ready? We handle the printing in A6, A5, A4 or DL and deliver your leaflets directly through letterboxes across Hampshire and Dorset.",
-    image: "https://images.unsplash.com/photo-1504270997636-07ddfbd48945?w=800&q=80",
+    image: "https://images.pexels.com/photos/19843566/pexels-photo-19843566.jpeg?auto=compress&cs=tinysrgb&w=800",
     alt: "Printed leaflets ready for delivery",
   },
 ];
@@ -29,13 +29,13 @@ const supportingServices = [
   {
     title: "Leaflet Distribution",
     desc: "Standard door-to-door leaflet delivery to households across your chosen areas in Hampshire and Dorset. We handle the rounds so your printed materials land directly through letterboxes.",
-    image: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=800&q=80",
+    image: "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=800",
     alt: "Leaflets being delivered through a letterbox",
   },
   {
     title: "Targeted Postcode Campaigns",
     desc: "We use postcode data to focus your distribution on the areas most likely to respond to your campaign. Rather than blanket coverage, we put your leaflets where your potential customers actually live.",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80",
+    image: "https://images.pexels.com/photos/17144737/pexels-photo-17144737.jpeg?auto=compress&cs=tinysrgb&w=800",
     alt: "Residential area targeted for leaflet distribution in Hampshire",
   },
   {
