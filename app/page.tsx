@@ -21,8 +21,8 @@ const trustSignals = [
   },
   {
     icon: "✅",
-    title: "Proven Reliability",
-    body: "Every round is completed by vetted, experienced distributors. Consistent delivery you can count on, campaign after campaign.",
+    title: "Tracked and Assured Delivery",
+    body: "Every round is completed by vetted, experienced distributors. We track every campaign and follow up to make sure your leaflets have been delivered so you can be confident your materials reached the right doors.",
   },
 ];
 
