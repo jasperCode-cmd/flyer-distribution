@@ -74,7 +74,7 @@ export default function AboutPage() {
             {[
               {
                 title: "Reliability",
-                body: "We do what we say we'll do. If we commit to a delivery round, it gets done.",
+                body: "We are a small team and our reputation depends on every round being completed. When we take on a campaign, it gets delivered.",
               },
               {
                 title: "Local Knowledge",
@@ -82,7 +82,7 @@ export default function AboutPage() {
               },
               {
                 title: "Transparency",
-                body: "Clear quotes, honest timelines, and straightforward communication throughout.",
+                body: "No hidden costs, no vague timelines. We give you a clear quote, keep you updated throughout and let you know when your campaign is complete. Simple, honest communication from start to finish.",
               },
             ].map((v) => (
               <div
