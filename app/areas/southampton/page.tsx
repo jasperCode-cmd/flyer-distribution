@@ -59,8 +59,8 @@ export default function SouthamptonPage() {
           </div>
           <div>
             <Image
-              src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&q=80"
-              alt="Aerial view of Southampton city centre"
+              src="https://images.pexels.com/photos/19916593/pexels-photo-19916593.jpeg?auto=compress&cs=tinysrgb&w=800"
+              alt="Southampton city centre shopping mall"
               width={700}
               height={500}
               className="rounded-lg w-full object-cover"
