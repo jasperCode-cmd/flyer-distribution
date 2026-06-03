@@ -20,7 +20,7 @@ export default function Footer() {
           <div>
             <div className="mb-3">
               <Image
-                src="/website_logo_main.png"
+                src="/Flyer Distribution Logo White.png"
                 width={200}
                 height={60}
                 alt="Flyer Distribution Hampshire"
