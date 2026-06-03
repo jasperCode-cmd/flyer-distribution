@@ -46,7 +46,7 @@ const faqs = [
   },
   {
     q: "How long does a campaign take?",
-    a: "Most campaigns are completed within 5 to 10 working days of us receiving your materials. Smaller campaigns covering fewer postcode areas can often be turned around more quickly. We will agree a timeline with you before the campaign begins.",
+    a: "Most campaigns are completed within two weeks of us receiving your materials, with smaller campaigns often turning around faster. We will agree a clear timeline with you before the campaign begins so you know exactly when to expect completion.",
   },
 ];
 
