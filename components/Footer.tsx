@@ -19,12 +19,15 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div className="mb-3 flex justify-center">
-              <Image
-                src="/Flyer Distribution Logo White.png"
-                width={250}
-                height={80}
-                alt="Flyer Distribution Hampshire"
-              />
+              <div style={{ height: '45px', overflow: 'hidden', position: 'relative', width: '260px' }}>
+                <Image
+                  src="/Flyer Distribution Logo White.png"
+                  width={260}
+                  height={130}
+                  alt="Flyer Distribution Hampshire"
+                  style={{ position: 'absolute', top: '-40px' }}
+                />
+              </div>
             </div>
             <p className="text-sm text-blue-300 leading-relaxed">
               Professional flyer and leaflet distribution across Hampshire and
