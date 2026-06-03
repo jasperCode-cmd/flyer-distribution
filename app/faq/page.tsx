@@ -14,7 +14,7 @@ const faqs = [
   },
   {
     q: "How does leaflet distribution work?",
-    a: "You supply your printed leaflets and we take care of getting them delivered. We post them directly through letterboxes across your chosen postcode areas in Hampshire and Dorset. Once your materials are received, our team carries out the rounds and confirms completion.",
+    a: "Once we have your printed leaflets, we take care of getting them delivered. We post them directly through letterboxes across your chosen postcode areas in Hampshire and Dorset. Once your materials are received, our team carries out the rounds and confirms completion.",
   },
   {
     q: "Do you offer a full design, print and delivery service?",
