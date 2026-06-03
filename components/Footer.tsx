@@ -18,11 +18,11 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div>
-            <div className="mb-3">
+            <div className="mb-3 flex justify-center">
               <Image
                 src="/Flyer Distribution Logo White.png"
-                width={200}
-                height={60}
+                width={280}
+                height={90}
                 alt="Flyer Distribution Hampshire"
               />
             </div>
