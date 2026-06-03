@@ -41,7 +41,7 @@ const services = [
   },
   {
     title: "Targeted Postcode Campaigns",
-    desc: "Tell us your target areas and we will plan a campaign that puts your leaflets in front of the right people.",
+    desc: "We use postcode data to focus your distribution on the areas most likely to respond to your campaign. Rather than blanket coverage, we put your leaflets where your potential customers actually live.",
   },
   {
     title: "Vehicle Leaflet Distribution",
@@ -49,7 +49,7 @@ const services = [
   },
   {
     title: "Campaign Planning",
-    desc: "We help you choose the right areas and quantities for your distribution campaign so every leaflet counts.",
+    desc: "Not sure where to start? We sit down with you to understand your business, your customers and your goals. Then we build a campaign plan around your budget and timeline.",
   },
 ];
 

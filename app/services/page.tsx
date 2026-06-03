@@ -34,13 +34,13 @@ const supportingServices = [
   },
   {
     title: "Targeted Postcode Campaigns",
-    desc: "Tell us your target areas and we will plan a campaign that puts your leaflets in front of the right people. We work with you to focus your distribution where it counts.",
+    desc: "We use postcode data to focus your distribution on the areas most likely to respond to your campaign. Rather than blanket coverage, we put your leaflets where your potential customers actually live.",
     image: "https://staticmap.openstreetmap.de/staticmap.php?center=50.9,-1.5&zoom=9&size=800x400&maptype=mapnik",
     alt: "Hampshire and Dorset distribution area map",
   },
   {
     title: "Campaign Planning",
-    desc: "We help businesses choose the right areas, postcodes, and quantities for their distribution campaign to make every leaflet count.",
+    desc: "Not sure where to start? We sit down with you to understand your business, your customers and your goals. Then we build a campaign plan around your budget and timeline.",
     image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80",
     alt: "Person reviewing campaign planning notes at a desk",
   },
