@@ -6,6 +6,32 @@ export const metadata: Metadata = {
   title: "About Us",
   description:
     "Learn about Flyer Distribution Hampshire, a local team dedicated to reliable, targeted leaflet delivery across Hampshire and Dorset.",
+  openGraph: {
+    title: "About Us",
+    description:
+      "Learn about Flyer Distribution Hampshire, a local team dedicated to reliable, targeted leaflet delivery across Hampshire and Dorset.",
+    url: "https://flyerdistributionhampshire.co.uk/about",
+    siteName: "Flyer Distribution Hampshire",
+    images: [
+      {
+        url: "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        width: 1200,
+        height: 630,
+        alt: "Flyer Distribution Hampshire",
+      },
+    ],
+    locale: "en_GB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About Us",
+    description:
+      "Learn about Flyer Distribution Hampshire, a local team dedicated to reliable, targeted leaflet delivery across Hampshire and Dorset.",
+    images: [
+      "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    ],
+  },
 };
 
 export default function AboutPage() {

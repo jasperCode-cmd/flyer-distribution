@@ -5,6 +5,32 @@ export const metadata: Metadata = {
   title: "FAQ: Frequently Asked Questions",
   description:
     "Answers to common questions about leaflet and flyer distribution in Hampshire and Dorset. Covering areas, quantities, campaign planning and more.",
+  openGraph: {
+    title: "FAQ: Frequently Asked Questions",
+    description:
+      "Answers to common questions about leaflet and flyer distribution in Hampshire and Dorset. Covering areas, quantities, campaign planning and more.",
+    url: "https://flyerdistributionhampshire.co.uk/faq",
+    siteName: "Flyer Distribution Hampshire",
+    images: [
+      {
+        url: "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        width: 1200,
+        height: 630,
+        alt: "Flyer Distribution Hampshire",
+      },
+    ],
+    locale: "en_GB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "FAQ: Frequently Asked Questions",
+    description:
+      "Answers to common questions about leaflet and flyer distribution in Hampshire and Dorset. Covering areas, quantities, campaign planning and more.",
+    images: [
+      "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    ],
+  },
 };
 
 const faqs = [

@@ -6,6 +6,32 @@ export const metadata: Metadata = {
   title: "Flyer & Leaflet Distribution Services",
   description:
     "Full design, print and leaflet distribution services across Hampshire and Dorset. Choose our end-to-end package or distribution-only service.",
+  openGraph: {
+    title: "Flyer & Leaflet Distribution Services",
+    description:
+      "Full design, print and leaflet distribution services across Hampshire and Dorset. Choose our end-to-end package or distribution-only service.",
+    url: "https://flyerdistributionhampshire.co.uk/services",
+    siteName: "Flyer Distribution Hampshire",
+    images: [
+      {
+        url: "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        width: 1200,
+        height: 630,
+        alt: "Flyer Distribution Hampshire",
+      },
+    ],
+    locale: "en_GB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Flyer & Leaflet Distribution Services",
+    description:
+      "Full design, print and leaflet distribution services across Hampshire and Dorset. Choose our end-to-end package or distribution-only service.",
+    images: [
+      "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    ],
+  },
 };
 
 const packages = [

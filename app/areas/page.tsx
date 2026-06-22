@@ -5,6 +5,32 @@ export const metadata: Metadata = {
   title: "Areas We Cover in Hampshire & Dorset",
   description:
     "Flyer and leaflet distribution across Hampshire and Dorset. View coverage areas including Southampton, Bournemouth, Poole and Winchester.",
+  openGraph: {
+    title: "Areas We Cover in Hampshire & Dorset",
+    description:
+      "Flyer and leaflet distribution across Hampshire and Dorset. View coverage areas including Southampton, Bournemouth, Poole and Winchester.",
+    url: "https://flyerdistributionhampshire.co.uk/areas",
+    siteName: "Flyer Distribution Hampshire",
+    images: [
+      {
+        url: "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
+        width: 1200,
+        height: 630,
+        alt: "Flyer Distribution Hampshire",
+      },
+    ],
+    locale: "en_GB",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Areas We Cover in Hampshire & Dorset",
+    description:
+      "Flyer and leaflet distribution across Hampshire and Dorset. View coverage areas including Southampton, Bournemouth, Poole and Winchester.",
+    images: [
+      "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
+    ],
+  },
 };
 
 const featuredAreas = [
