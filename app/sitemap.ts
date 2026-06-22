@@ -16,7 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/quote",
     "/about",
     "/faq",
-  ];
+  ]; // /blog excluded — noindex
 
   return routes.map((route) => ({
     url: `${BASE_URL}${route}`,
