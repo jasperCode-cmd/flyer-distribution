@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: "/admin/",
       },
     ],
-    sitemap: "https://PLACEHOLDER_DOMAIN/sitemap.xml",
+    sitemap: "https://flyerdistributionhampshire.co.uk/sitemap.xml",
   };
 }
