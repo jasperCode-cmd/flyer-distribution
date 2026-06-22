@@ -52,9 +52,91 @@ const supportingServices = [
   },
 ];
 
+const servicesSchema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Service",
+      "name": "Design, Print and Deliver",
+      "description":
+        "Our full end-to-end service. We work with you from the initial design right through to delivery. Bring us your idea and we handle everything including design, printing in A6, A5, A4 or DL, and full distribution across your chosen areas in Hampshire and Dorset.",
+      "provider": {
+        "@type": "LocalBusiness",
+        "name": "Flyer Distribution Hampshire",
+        "url": "https://flyerdistributionhampshire.co.uk",
+      },
+      "areaServed": "Hampshire and Dorset",
+    },
+    {
+      "@type": "Service",
+      "name": "Print and Deliver",
+      "description":
+        "Already have your design ready? We handle the printing in A6, A5, A4 or DL and deliver your leaflets directly through letterboxes across Hampshire and Dorset.",
+      "provider": {
+        "@type": "LocalBusiness",
+        "name": "Flyer Distribution Hampshire",
+        "url": "https://flyerdistributionhampshire.co.uk",
+      },
+      "areaServed": "Hampshire and Dorset",
+    },
+    {
+      "@type": "Service",
+      "name": "Leaflet Distribution",
+      "description":
+        "Standard door-to-door leaflet delivery to households across your chosen areas in Hampshire and Dorset. We handle the rounds so your printed materials land directly through letterboxes.",
+      "provider": {
+        "@type": "LocalBusiness",
+        "name": "Flyer Distribution Hampshire",
+        "url": "https://flyerdistributionhampshire.co.uk",
+      },
+      "areaServed": "Hampshire and Dorset",
+    },
+    {
+      "@type": "Service",
+      "name": "Targeted Postcode Campaigns",
+      "description":
+        "We use postcode data to focus your distribution on the areas most likely to respond to your campaign. Rather than blanket coverage, we put your leaflets where your potential customers actually live.",
+      "provider": {
+        "@type": "LocalBusiness",
+        "name": "Flyer Distribution Hampshire",
+        "url": "https://flyerdistributionhampshire.co.uk",
+      },
+      "areaServed": "Hampshire and Dorset",
+    },
+    {
+      "@type": "Service",
+      "name": "Vehicle Leaflet Distribution",
+      "description":
+        "Place leaflets on parked cars in car parks, retail areas, and high-footfall locations across Hampshire and Dorset. An effective way to reach people already out and spending locally.",
+      "provider": {
+        "@type": "LocalBusiness",
+        "name": "Flyer Distribution Hampshire",
+        "url": "https://flyerdistributionhampshire.co.uk",
+      },
+      "areaServed": "Hampshire and Dorset",
+    },
+    {
+      "@type": "Service",
+      "name": "Campaign Planning",
+      "description":
+        "Not sure where to start? We sit down with you to understand your business, your customers and your goals. Then we build a campaign plan around your budget and timeline.",
+      "provider": {
+        "@type": "LocalBusiness",
+        "name": "Flyer Distribution Hampshire",
+        "url": "https://flyerdistributionhampshire.co.uk",
+      },
+      "areaServed": "Hampshire and Dorset",
+    },
+  ],
+};
+
 export default function ServicesPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(servicesSchema) }}
+      />
       {/* Page header */}
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -62,9 +62,38 @@ const areas = [
   { name: "Ringwood", href: "/areas/ringwood" },
 ];
 
+const localBusinessSchema = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "Flyer Distribution Hampshire",
+  "description":
+    "Professional flyer and leaflet distribution across Hampshire and Dorset. Reach real households in Southampton, Bournemouth, Poole and Winchester.",
+  "url": "https://flyerdistributionhampshire.co.uk",
+  "email": "flyerdistributionhampshire@gmail.com",
+  "areaServed": [
+    "Southampton",
+    "Bournemouth",
+    "Poole",
+    "Winchester",
+    "Eastleigh",
+    "New Forest",
+    "Romsey",
+    "Ringwood",
+    "Christchurch",
+    "Hythe",
+    "Totton",
+    "Hedge End",
+    "Chandler's Ford",
+  ],
+};
+
 export default function HomePage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+      />
       {/* Hero */}
       <section className="relative bg-blue-900 text-white overflow-hidden">
         <Image

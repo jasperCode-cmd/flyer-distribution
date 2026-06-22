@@ -8,9 +8,38 @@ export const metadata: Metadata = {
     "Leaflet and flyer distribution across Southampton. Targeted postcode delivery for businesses reaching Hampshire's largest city.",
 };
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: "https://flyerdistributionhampshire.co.uk",
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Areas",
+      item: "https://flyerdistributionhampshire.co.uk/areas",
+    },
+    {
+      "@type": "ListItem",
+      position: 3,
+      name: "Southampton",
+      item: "https://flyerdistributionhampshire.co.uk/areas/southampton",
+    },
+  ],
+};
+
 export default function SouthamptonPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
