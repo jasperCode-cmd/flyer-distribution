@@ -12,6 +12,11 @@ const securityHeaders = [
     key: "Strict-Transport-Security",
     value: "max-age=63072000; includeSubDomains; preload",
   },
+  {
+    key: "Content-Security-Policy",
+    value:
+      "default-src 'self'; img-src 'self' images.unsplash.com images.pexels.com data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' fonts.gstatic.com; connect-src 'self' api.web3forms.com;",
+  },
 ];
 
 const nextConfig: NextConfig = {
