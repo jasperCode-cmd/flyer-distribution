@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Flyer Distribution New Forest",
   description:
     "Leaflet and flyer distribution across the New Forest, Hampshire. Door-to-door delivery to households in New Forest towns and villages.",
+  alternates: {
+    canonical: "https://flyerdistributionhampshire.co.uk/areas/new-forest",
+  },
   openGraph: {
     title: "Flyer Distribution New Forest",
     description:

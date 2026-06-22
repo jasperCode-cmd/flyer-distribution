@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Flyer Distribution Ringwood",
   description:
     "Leaflet and flyer distribution across Ringwood and surrounding areas in Hampshire. Targeted delivery to local households.",
+  alternates: {
+    canonical: "https://flyerdistributionhampshire.co.uk/areas/ringwood",
+  },
   openGraph: {
     title: "Flyer Distribution Ringwood",
     description:

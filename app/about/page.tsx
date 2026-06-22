@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "About Us",
   description:
     "Learn about Flyer Distribution Hampshire, a local team dedicated to reliable, targeted leaflet delivery across Hampshire and Dorset.",
+  alternates: {
+    canonical: "https://flyerdistributionhampshire.co.uk/about",
+  },
   openGraph: {
     title: "About Us",
     description:

@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Flyer Distribution Hampshire | Local Leaflet & Flyer Delivery",
   description:
     "Reliable flyer and leaflet distribution across Hampshire and Dorset. Reach real households in Southampton, Bournemouth, Poole and Winchester.",
+  alternates: {
+    canonical: "https://flyerdistributionhampshire.co.uk",
+  },
   openGraph: {
     title: "Flyer Distribution Hampshire | Local Leaflet & Flyer Delivery",
     description:

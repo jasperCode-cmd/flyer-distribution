@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Flyer Distribution Southampton",
   description:
     "Leaflet and flyer distribution across Southampton. Targeted postcode delivery for businesses reaching Hampshire's largest city.",
+  alternates: {
+    canonical: "https://flyerdistributionhampshire.co.uk/areas/southampton",
+  },
   openGraph: {
     title: "Flyer Distribution Southampton",
     description:

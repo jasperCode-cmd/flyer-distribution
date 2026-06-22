@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Flyer & Leaflet Distribution Services",
   description:
     "Full design, print and leaflet distribution services across Hampshire and Dorset. Choose our end-to-end package or distribution-only service.",
+  alternates: {
+    canonical: "https://flyerdistributionhampshire.co.uk/services",
+  },
   openGraph: {
     title: "Flyer & Leaflet Distribution Services",
     description:

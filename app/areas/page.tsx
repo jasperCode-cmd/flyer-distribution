@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: "Areas We Cover in Hampshire & Dorset",
   description:
     "Flyer and leaflet distribution across Hampshire and Dorset. View coverage areas including Southampton, Bournemouth, Poole and Winchester.",
+  alternates: {
+    canonical: "https://flyerdistributionhampshire.co.uk/areas",
+  },
   openGraph: {
     title: "Areas We Cover in Hampshire & Dorset",
     description:

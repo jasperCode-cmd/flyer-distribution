@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Flyer Distribution Poole",
   description:
     "Professional leaflet and flyer distribution across Poole, Dorset. Targeted delivery to residential areas around Poole Harbour.",
+  alternates: {
+    canonical: "https://flyerdistributionhampshire.co.uk/areas/poole",
+  },
   openGraph: {
     title: "Flyer Distribution Poole",
     description:

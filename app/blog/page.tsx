@@ -8,6 +8,9 @@ export const metadata: Metadata = {
     index: false,
     follow: true,
   },
+  alternates: {
+    canonical: "https://flyerdistributionhampshire.co.uk/blog",
+  },
   openGraph: {
     title: "Blog: Leaflet Distribution Tips & News",
     description:

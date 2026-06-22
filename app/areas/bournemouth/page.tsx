@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Flyer Distribution Bournemouth",
   description:
     "Leaflet and flyer distribution across Bournemouth. Targeted door-to-door delivery for local businesses in Dorset.",
+  alternates: {
+    canonical: "https://flyerdistributionhampshire.co.uk/areas/bournemouth",
+  },
   openGraph: {
     title: "Flyer Distribution Bournemouth",
     description:

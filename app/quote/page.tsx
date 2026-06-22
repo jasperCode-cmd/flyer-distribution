@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: "Get a Free Quote",
   description:
     "Request a free, no-obligation quote for flyer and leaflet distribution across Hampshire and Dorset.",
+  alternates: {
+    canonical: "https://flyerdistributionhampshire.co.uk/quote",
+  },
   openGraph: {
     title: "Get a Free Quote",
     description:

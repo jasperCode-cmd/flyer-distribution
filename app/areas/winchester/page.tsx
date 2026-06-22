@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   title: "Flyer Distribution Winchester",
   description:
     "Leaflet and flyer distribution across Winchester, Hampshire. Professional door-to-door delivery in the county town and surrounding villages.",
+  alternates: {
+    canonical: "https://flyerdistributionhampshire.co.uk/areas/winchester",
+  },
   openGraph: {
     title: "Flyer Distribution Winchester",
     description:
