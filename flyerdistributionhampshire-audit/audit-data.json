@@ -1,0 +1,461 @@
+{
+  "domain": "flyerdistributionhampshire.co.uk",
+  "audit_date": "2026-06-22",
+  "method": "source-code-analysis",
+  "next_js_version": "16.2.6",
+  "pages_audited": 13,
+  "pages_indexed": 12,
+  "summary": {
+    "health_score": 57,
+    "business_type": "Service Area Business — Leaflet & Flyer Distribution (Hampshire & Dorset, UK)",
+    "top_findings": [
+      "Canonical tags missing from rendered HTML on all 12 indexed pages (Next.js 16 renders them client-side only)",
+      "No Google Business Profile referenced or confirmed — essential for local pack ranking",
+      "No phone number anywhere on the site — critical trust and conversion gap",
+      "Favicon file 404: layout references /favicon.png but public/Favicon.png has capital F (case-sensitive on Linux)",
+      "LocalBusiness schema missing @id, telephone, serviceArea (GeoCircle), sameAs — severely limits entity disambiguation",
+      "Logo image URL in schema contains unencoded spaces — Google cannot fetch the image",
+      "Zero social proof: no testimonials, reviews, case studies, or named team members",
+      "All area pages thin (<300 words) and follow identical template — near-duplicate content risk",
+      "Blog exists but has zero content — footer links to an empty noindex page",
+      "No analytics installed (no GA4, GTM, Clarity, or any tracking)"
+    ],
+    "quick_wins": [
+      "Rename public/Favicon.png to public/favicon.png — 2 minutes, immediate brand fix",
+      "Rename logo files to remove spaces: flyer-distribution-logo-white-cropped.png — 10 minutes, fixes schema validation error",
+      "Create /public/llms.txt — 30 minutes, enables AI crawler entity understanding",
+      "Fix services page H2→H3 on package card titles — 15 minutes, fixes heading hierarchy",
+      "Add internal links from area pages to /services and related area pages — 2 hours, PageRank distribution"
+    ]
+  },
+  "categories": [
+    {
+      "name": "Technical SEO",
+      "score": 54,
+      "weight": 0.22,
+      "what_works": [
+        "robots.txt correctly configured: Allow /, Disallow /admin/, sitemap pointer correct",
+        "Sitemap has 12 correct URLs on right domain; blog correctly excluded",
+        "All 5 security headers present: X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, HSTS, CSP",
+        "viewport meta present on all pages",
+        "Inter font self-hosted via next/font with display:swap — prevents FOIT",
+        "Hero image uses priority prop — correct LCP optimization",
+        "All images have explicit width/height — prevents CLS",
+        "noindex correctly applied to /blog only",
+        "Clean URL structure: lowercase, hyphenated, descriptive slugs"
+      ],
+      "findings": [
+        {
+          "title": "Canonical tags missing from all 12 indexed pages",
+          "severity": "Critical",
+          "description": "alternates.canonical is defined in every page.tsx but Next.js 16 App Router renders it client-side via React metadata. The <link rel=\"canonical\"> tag is absent from the static HTML served to crawlers. Confirmed by inspecting index.html, about.html, areas/southampton.html, and all RSC payload files. None contain canonical.",
+          "recommendation": "Create a CanonicalTag server component that renders <link rel=\"canonical\" href={href} /> directly in the page JSX. Apply to all 12 indexed pages as a direct child element, bypassing the Next.js metadata pipeline."
+        },
+        {
+          "title": "Favicon 404 — case sensitivity bug",
+          "severity": "High",
+          "description": "layout.tsx references icon: \"/favicon.png\" but public/ contains Favicon.png (capital F). On Linux servers this returns a 404. Every page tab shows no icon.",
+          "recommendation": "mv /home/user/flyer-distribution/public/Favicon.png /home/user/flyer-distribution/public/favicon.png then rebuild."
+        },
+        {
+          "title": "No analytics installed",
+          "severity": "High",
+          "description": "No GA4, GTM, Microsoft Clarity, or any tracking code found in any source file. Quote form conversions cannot be measured. SEO impact of changes cannot be tracked.",
+          "recommendation": "Install GA4 via next/script in layout.tsx. Also update CSP in next.config.ts to add www.googletagmanager.com. Set up Search Console domain property. Add conversion event on Web3Forms success callback."
+        },
+        {
+          "title": "Logo filename has unencoded spaces in schema URL",
+          "severity": "High",
+          "description": "LocalBusiness schema image property references 'https://flyerdistributionhampshire.co.uk/Flyer Distribution Logo White Cropped.png'. Spaces in URLs are invalid per RFC 3986. Googlebot will fail to fetch this image for Knowledge Panel use.",
+          "recommendation": "Rename public/Flyer Distribution Logo White Cropped.png to public/flyer-distribution-logo-white-cropped.png. Update all references in app/page.tsx schema and components/Footer.tsx."
+        },
+        {
+          "title": "Blog linked in footer despite being noindex with no content",
+          "severity": "Low",
+          "description": "The /blog page is noindex (correct) but is linked from every page's footer. Human visitors clicking it see an empty 'coming soon' page which damages trust.",
+          "recommendation": "Remove the Blog link from components/Footer.tsx until content is published. Re-enable once at least 3 articles exist."
+        },
+        {
+          "title": "CSP img-src missing picsum.photos despite it being in next.config remotePatterns",
+          "severity": "Low",
+          "description": "next.config.ts remotePatterns includes picsum.photos but the CSP img-src does not. If any image from picsum is ever added, it will be blocked by CSP.",
+          "recommendation": "Either remove picsum.photos from remotePatterns or add it to the CSP img-src directive."
+        }
+      ]
+    },
+    {
+      "name": "Content Quality",
+      "score": 38,
+      "weight": 0.23,
+      "what_works": [
+        "FAQ page has 10 genuine, useful Q&As with specific factual detail",
+        "Area pages have correct H1s, unique meta titles, and unique (if brief) descriptions",
+        "All images have meaningful, descriptive alt text",
+        "Conversational, professional tone throughout",
+        "Some area pages mention specific neighbourhoods (e.g., Shirley, Portswood, Bitterne for Southampton)",
+        "Specific postcode lists give local specificity"
+      ],
+      "findings": [
+        {
+          "title": "Zero E-E-A-T authority signals",
+          "severity": "High",
+          "description": "The site has no named team members, no founding year, no campaigns completed count, no client names, no testimonials, no reviews, no industry affiliations. The About page makes claims ('vetted, trained distributors', 'reliable', 'experienced') with zero supporting evidence. Google quality raters would rate this as 'low' E-E-A-T.",
+          "recommendation": "Add: named business owner with brief bio on About page. Real photos of team. Number of campaigns delivered. Client testimonials (3 minimum on homepage, 1 per area page). AggregateRating schema once GBP reviews collected."
+        },
+        {
+          "title": "Services page heading hierarchy broken",
+          "severity": "Medium",
+          "description": "In app/services/page.tsx lines ~210, the two main package card titles ('Design, Print and Deliver' and 'Print and Deliver') use <h2> when they should use <h3>. The section container header is also <h2>, creating a flat hierarchy where Google cannot distinguish section headers from card titles.",
+          "recommendation": "Change the package card title tags from h2 to h3 in app/services/page.tsx."
+        },
+        {
+          "title": "All 6 area pages are thin templated content",
+          "severity": "High",
+          "description": "Area pages average 200-300 words, follow identical structure, and have minimal differentiation. Ringwood has only ~200 words. This meets the definition of thin location pages and risks being treated as near-duplicate content.",
+          "recommendation": "Expand each area page to 500+ words. Add: local business landscape context, demographic profile, a local testimonial, links to adjacent areas, area-specific FAQ, and more neighbourhood detail. Make each page genuinely distinct."
+        },
+        {
+          "title": "No pricing information anywhere on the site",
+          "severity": "High",
+          "description": "Zero pricing information exists. No starting prices, no volume tiers, no 'from' rates. This is a significant conversion barrier — comparison shoppers will leave to find a competitor who shows prices. SXO analysis found the SERP for 'leaflet distribution Hampshire' is populated with competitors showing pricing from ~£55 per 1,000.",
+          "recommendation": "Add 'from £XX per 1,000 leaflets' on services page and homepage. Consider a pricing table with volume tiers (1,000, 5,000, 10,000, 25,000+). Even 'prices on request from £X' reduces anxiety."
+        },
+        {
+          "title": "Blog has zero content",
+          "severity": "Medium",
+          "description": "The /blog page exists, is correctly set to noindex, but is linked from the footer. An active blog would be the highest-return content investment for long-tail traffic ('how many leaflets do I need', 'leaflet distribution vs social media', 'best postcode areas in Southampton for restaurants').",
+          "recommendation": "Publish 5+ articles targeting informational and comparison queries. Remove noindex from blog once content exists. Add blog as internal link destination from service and area pages."
+        },
+        {
+          "title": "FAQ answers too short for AI citation",
+          "severity": "Medium",
+          "description": "All 10 FAQ answers are 30-80 words. AI Overview eligibility and passage-level citation favours answers of 120-160 words with specific examples and evidence.",
+          "recommendation": "Expand each FAQ answer with specific details, examples, and process information. Add 3 missing FAQs: 'What does leaflet distribution cost?', 'How do I know my leaflets were actually delivered?', 'What is your minimum order?'"
+        }
+      ]
+    },
+    {
+      "name": "On-Page SEO",
+      "score": 65,
+      "weight": 0.20,
+      "what_works": [
+        "All 12 indexed pages have exactly one H1",
+        "H1 tags are keyword-rich (e.g., 'Flyer Distribution in Southampton', 'Professional Flyer Distribution in Hampshire and Dorset')",
+        "Title tags are well-structured with brand appended via template",
+        "Meta descriptions are specific, include location, and are within character limits",
+        "Open Graph and Twitter Card tags on all 13 pages",
+        "Responsive design with Tailwind breakpoints"
+      ],
+      "findings": [
+        {
+          "title": "Internal linking critically weak",
+          "severity": "High",
+          "description": "Almost every page links only to /quote. Area pages don't link to /services or to other area pages. Services page doesn't link to areas. About and FAQ pages only link to /quote. PageRank is channelled to a single conversion page while all service and area pages receive almost no internal link equity.",
+          "recommendation": "Add to each area page: link to /services ('View our distribution services'), links to 2-3 related area pages. Add to services page: link to /areas and specific area pages. Add contextual links in FAQ answers. Distribute link equity across the site."
+        },
+        {
+          "title": "Services page H2/H3 heading hierarchy error",
+          "severity": "Medium",
+          "description": "Package card titles ('Design, Print and Deliver', 'Print and Deliver') use h2 when they are sub-items of the h2 section header 'Full Print and Distribution Packages'. Creates ambiguous heading structure.",
+          "recommendation": "Change the two package card title elements from h2 to h3 in app/services/page.tsx."
+        },
+        {
+          "title": "OG image identical across all 13 pages",
+          "severity": "Low",
+          "description": "Every page (including all area sub-pages, blog, etc.) uses the same Pexels image for og:image. Page-specific OG images would improve social sharing CTR and brand perception.",
+          "recommendation": "Create page-specific OG images for at least: homepage, each area page, services page. Use Next.js OG image generation (next/og) or static images stored in /public/og/."
+        },
+        {
+          "title": "Quote page title could include location",
+          "severity": "Low",
+          "description": "'Get a Free Quote | Flyer Distribution Hampshire' is functional but 'Get a Free Quote for Leaflet Distribution in Hampshire' would target long-tail quote intent queries.",
+          "recommendation": "Update quote page title: 'Free Leaflet Distribution Quote | Hampshire & Dorset' (54 chars)"
+        }
+      ]
+    },
+    {
+      "name": "Schema / Structured Data",
+      "score": 31,
+      "weight": 0.10,
+      "what_works": [
+        "All schema uses JSON-LD format with https://schema.org context",
+        "LocalBusiness schema present on homepage",
+        "6 Service schemas in @graph on services page",
+        "FAQPage with 10 Q&As on FAQ page",
+        "BreadcrumbList (3-level) on all 6 area sub-pages",
+        "Schema is inline in server components (rendered in static HTML)"
+      ],
+      "findings": [
+        {
+          "title": "No @id on any schema entity",
+          "severity": "Critical",
+          "description": "No schema block on any page declares an @id URI. Without @id, Google cannot deduplicate the entity across pages or connect the LocalBusiness to the Service provider references. The 6 Service schemas reference the business via inline description, creating 6 disconnected entity definitions.",
+          "recommendation": "Add @id: 'https://flyerdistributionhampshire.co.uk/#business' to LocalBusiness. Reference this @id from all Service provider objects. Add @id to each Service: 'https://flyerdistributionhampshire.co.uk/services#leaflet-distribution' etc."
+        },
+        {
+          "title": "LocalBusiness missing critical SAB properties",
+          "severity": "High",
+          "description": "Missing: telephone, address (PostalAddress with at minimum addressRegion and addressCountry), serviceArea (GeoCircle with geoMidpoint and geoRadius), sameAs (GBP URL), logo (ImageObject), openingHours, priceRange. Current areaServed uses plain strings instead of typed City/AdministrativeArea objects.",
+          "recommendation": "Replace LocalBusiness schema with complete @graph including WebSite entity and all missing properties. See ACTION-PLAN.md H5 for full JSON-LD replacement."
+        },
+        {
+          "title": "Schema image URL has unencoded spaces",
+          "severity": "High",
+          "description": "LocalBusiness image: 'https://flyerdistributionhampshire.co.uk/Flyer Distribution Logo White Cropped.png' — spaces make this an invalid URL. Google will fail to fetch the image for Knowledge Panel.",
+          "recommendation": "Rename the file removing spaces, update the schema URL."
+        },
+        {
+          "title": "No WebSite schema with SearchAction",
+          "severity": "Medium",
+          "description": "No WebSite entity exists anywhere. A WebSite schema enables Sitelinks Searchbox in Google results. It also serves as a root entity hub that links to the LocalBusiness.",
+          "recommendation": "Add WebSite schema to homepage @graph: @type WebSite, @id with #website suffix, url, name, and publisher referencing LocalBusiness @id."
+        },
+        {
+          "title": "Service schemas missing @id, url, serviceType, offers",
+          "severity": "Medium",
+          "description": "All 6 Service nodes lack: @id (no stable URI), url (no link to page), serviceType (no machine-readable type), offers (no Offer block even without pricing).",
+          "recommendation": "Add @id, url, serviceType to each Service node. Add an Offer block with priceCurrency: 'GBP' and a description: 'Price on request'."
+        },
+        {
+          "title": "No schema on /about, /quote, or /areas index",
+          "severity": "Low",
+          "description": "/about, /quote, and /areas have no structured data at all.",
+          "recommendation": "Add ContactPage schema to /quote. Add WebPage schema to /about with a description and referencing the LocalBusiness @id."
+        }
+      ]
+    },
+    {
+      "name": "Performance (CWV)",
+      "score": 65,
+      "weight": 0.10,
+      "what_works": [
+        "Hero image uses priority prop (LCP optimization)",
+        "Inter font preloaded with display:swap",
+        "All Image components have explicit width/height (no CLS)",
+        "No third-party scripts or analytics (helps INP)",
+        "Sticky header does not cause layout reflow",
+        "JS loads async, non-blocking"
+      ],
+      "findings": [
+        {
+          "title": "Hero image served from third-party CDN (Unsplash)",
+          "severity": "Medium",
+          "description": "The hero image is hosted on images.unsplash.com. Despite being preloaded, the cross-origin connection adds DNS lookup + TCP handshake + TLS overhead to LCP. For LCP images, self-hosted is always faster.",
+          "recommendation": "Download the hero image, save to /public/images/hero.jpg, update the src in app/page.tsx. Update CSP img-src if removing Unsplash. Consider using WebP format for additional size savings."
+        },
+        {
+          "title": "No image format optimization for local images",
+          "severity": "Low",
+          "description": "The two local images (website_logo_main.png, Flyer Distribution Logo White Cropped.png) are PNG files. WebP or AVIF would be significantly smaller. Next.js Image component converts to WebP when serving, but only for dynamically resized images.",
+          "recommendation": "Next.js handles format optimization via /_next/image — this is largely handled. Ensure next.config.ts does not disable optimization."
+        }
+      ]
+    },
+    {
+      "name": "AI Search Readiness",
+      "score": 41,
+      "weight": 0.10,
+      "what_works": [
+        "FAQPage schema with 10 Q&As — strongest AI citation asset on the site",
+        "robots.txt does not block any AI crawlers (GPTBot, ClaudeBot, PerplexityBot all allowed)",
+        "Server-side rendered pages — AI crawlers receive complete HTML without JavaScript execution",
+        "Specific factual claims exist: 'within 24 hours', 'within two weeks', '5,000+ leaflets recommended'",
+        "Specific postcode lists and area coverage in area pages"
+      ],
+      "findings": [
+        {
+          "title": "No llms.txt file",
+          "severity": "High",
+          "description": "No /llms.txt exists. This emerging standard provides AI crawlers with a structured business summary without requiring full site crawl. Absence means ChatGPT, Perplexity, Claude, and other AI systems must parse the full site to understand the business.",
+          "recommendation": "Create /public/llms.txt with business summary, services list, coverage areas, contact info, and quote URL. See ACTION-PLAN.md H8 for full content template."
+        },
+        {
+          "title": "No external entity anchors (sameAs)",
+          "severity": "High",
+          "description": "No sameAs links to GBP, Facebook, Yell, or any external profile. AI systems (especially ChatGPT and Perplexity) cannot build entity confidence without external corroboration. The business exists only on this one domain with no external mentions.",
+          "recommendation": "Create GBP listing, social profiles. Add sameAs to LocalBusiness schema. Get mentioned in local directories (Yell, FreeIndex, Bark.com) to create external entity evidence."
+        },
+        {
+          "title": "FAQ answers too short for AI citation",
+          "severity": "Medium",
+          "description": "All 10 FAQ answers are 30-80 words. AI Overview candidate threshold is approximately 120-160 words per answer with specific evidence and examples.",
+          "recommendation": "Expand each FAQ answer with specific examples, numbers, and process detail. Add pricing FAQ once pricing is published."
+        },
+        {
+          "title": "No pricing data for AI comparison queries",
+          "severity": "Medium",
+          "description": "Queries like 'how much does leaflet distribution cost in Hampshire' are high-intent. The site cannot be cited for these queries because it contains no pricing information.",
+          "recommendation": "Publish starting-from pricing. Add pricing FAQ. Even a guide ('Typical 5,000-leaflet campaigns in Hampshire cost between £X and £Y depending on area density') would make the site citable."
+        }
+      ]
+    },
+    {
+      "name": "Local SEO",
+      "score": 34,
+      "weight_informal": "context only",
+      "what_works": [
+        "Consistent business name 'Flyer Distribution Hampshire' across all pages and schema",
+        "Email consistent: flyerdistributionhampshire@gmail.com in schema and footer",
+        "6 area sub-pages with unique content, correct H1s, BreadcrumbList schema",
+        "Area pages list specific postcodes (a local SEO signal)",
+        "Area pages mention specific neighbourhoods within each city",
+        "'Hampshire & Dorset' service area clearly stated sitewide"
+      ],
+      "findings": [
+        {
+          "title": "No Google Business Profile confirmed or referenced",
+          "severity": "Critical",
+          "description": "No GBP URL in sameAs, no Maps embed, no review widget, no GBP shortlink. GBP is the #1 ranking factor for local pack (map pack) results. Without it, the business cannot appear for 'near me' or local intent queries in the map section.",
+          "recommendation": "Create and verify GBP as SAB at business.google.com. Set service areas covering Hampshire and Dorset. Upload minimum 10 photos. Add all 6 services. Get phone verification. Once live, add GBP URL to schema sameAs."
+        },
+        {
+          "title": "No phone number",
+          "severity": "Critical",
+          "description": "No phone number anywhere on the site or in schema. This is required for GBP, local citations, and basic business trust. Many B2B clients (the target audience for this service) prefer to call before placing an order.",
+          "recommendation": "Set up a business phone number. Consider a virtual number (Google Voice, Vonage, or VOIP) to keep personal number private. Add to: footer, About page, schema telephone property, quote form header, GBP."
+        },
+        {
+          "title": "Gmail contact email reduces trust",
+          "severity": "Medium",
+          "description": "flyerdistributionhampshire@gmail.com is used as the sole contact. Gmail addresses signal an informal, possibly unestablished operation — particularly to business clients.",
+          "recommendation": "Set up hello@flyerdistributionhampshire.co.uk using Cloudflare Email Routing (free) or Google Workspace (£6/mo). Forward to existing Gmail inbox if preferred. Update schema email property and Footer.tsx."
+        },
+        {
+          "title": "Zero reviews and no review strategy",
+          "severity": "High",
+          "description": "No AggregateRating in schema. No testimonials on site. No review count anywhere. GBP review count is the #2 local pack ranking factor after GBP category.",
+          "recommendation": "After each campaign completion, email client with a GBP review shortlink. Target 5 reviews in first month, 20 within 6 months. Once 5+ collected, add AggregateRating to LocalBusiness schema."
+        },
+        {
+          "title": "7 areas listed as text tags with no dedicated pages",
+          "severity": "Low",
+          "description": "Eastleigh, Romsey, Christchurch, Hythe, Totton, Hedge End, and Chandler's Ford appear on the /areas page as non-linked text chips. These represent missed location page opportunities.",
+          "recommendation": "Add area pages for at least Eastleigh and Christchurch (highest search volume of the 7). Each would follow the existing area page template and contribute additional local landing pages."
+        }
+      ]
+    },
+    {
+      "name": "Images",
+      "score": 72,
+      "weight": 0.05,
+      "what_works": [
+        "All images have descriptive, non-empty alt text",
+        "Next.js Image component used throughout — automatic WebP format optimization",
+        "Explicit width/height on all images — prevents CLS",
+        "Priority prop on hero image — correct LCP treatment",
+        "Lazy loading on below-fold images"
+      ],
+      "findings": [
+        {
+          "title": "All photography is stock imagery",
+          "severity": "Medium",
+          "description": "Every image on the site is from Unsplash or Pexels (stock photos). The About page shows a generic postal worker image. No real photos of the business, team, or actual distribution work exist. Real photography is a strong E-E-A-T signal and trust builder.",
+          "recommendation": "Photograph real distribution rounds (with distributor permission). Add genuine team photo to About page. Add photos of printed leaflet samples to Services page. These should replace or supplement the stock imagery."
+        },
+        {
+          "title": "Single OG image used across all 13 pages",
+          "severity": "Low",
+          "description": "The same Pexels image (photo-35110918) is used as og:image on every page, including blog and all area pages. Page-specific social preview images improve click-through rates on social shares.",
+          "recommendation": "Create page-specific OG images for homepage, services, and each area page. Use next/og for dynamic generation or create static 1200x630 images stored in /public/og/"
+        },
+        {
+          "title": "Hero image hosted on third-party CDN",
+          "severity": "Low",
+          "description": "The hero image is an Unsplash URL. Hosting images on third-party CDNs adds cross-origin connection overhead to LCP.",
+          "recommendation": "Self-host the hero image in /public/images/ and update the src in app/page.tsx."
+        }
+      ]
+    }
+  ],
+  "action_plan": {
+    "phases": [
+      {
+        "name": "Phase 1: Critical Fixes",
+        "timeframe": "Day 1",
+        "items": [
+          "Rename public/Favicon.png to public/favicon.png",
+          "Fix canonical tag rendering: add explicit <link rel='canonical'> server component",
+          "Rename logo files to remove spaces from filenames",
+          "Update all references to renamed logo files in Footer.tsx and page.tsx schema"
+        ]
+      },
+      {
+        "name": "Phase 2: High-Impact Improvements",
+        "timeframe": "Week 1",
+        "items": [
+          "Create and verify Google Business Profile as Service Area Business",
+          "Add phone number to site, GBP, schema, and footer",
+          "Fix services page H2→H3 heading hierarchy",
+          "Add 3-5 client testimonials to homepage and area pages",
+          "Upgrade LocalBusiness schema with @id, serviceArea, sameAs, address, logo",
+          "Fix Service schema @id and provider @id cross-references",
+          "Install Google Analytics 4 and Google Search Console",
+          "Create /public/llms.txt",
+          "Add internal links from area pages to /services and related areas",
+          "Expand all 10 FAQ answers to 120+ words"
+        ]
+      },
+      {
+        "name": "Phase 3: Content & Authority",
+        "timeframe": "Month 2",
+        "items": [
+          "Expand homepage: add 'How it works' section, more social proof, stats",
+          "Add pricing information to services page (starting from prices)",
+          "Expand all 6 area pages to 500+ words each",
+          "Publish 5 blog articles and remove noindex from /blog",
+          "Add substantive content to About page: named person, real photo, history",
+          "Add ContactPage schema to /quote page",
+          "Set up professional email (hello@flyerdistributionhampshire.co.uk)",
+          "Build local citations on Yell, Bing Places, FreeIndex, Thomson Local"
+        ]
+      },
+      {
+        "name": "Phase 4: Monitoring & Iteration",
+        "timeframe": "Ongoing",
+        "items": [
+          "Monitor GSC for index coverage and canonical issues weekly",
+          "Track GBP Insights: impressions, calls, direction requests",
+          "Collect Google reviews — target 10 in first 3 months",
+          "Add AggregateRating schema once 5+ reviews collected",
+          "Monitor Core Web Vitals via PageSpeed Insights monthly",
+          "Expand area coverage pages: Eastleigh, Christchurch, Romsey",
+          "Expand blog to 10+ articles targeting long-tail queries"
+        ]
+      }
+    ]
+  },
+  "scores_by_specialist": {
+    "technical": 54,
+    "content": 38,
+    "schema": 31,
+    "local": 34,
+    "geo": 41,
+    "sxo": 44,
+    "images": 72,
+    "performance_estimated": 65,
+    "on_page": 65
+  },
+  "artifacts": {
+    "findings_dir": "findings/",
+    "full_report": "FULL-AUDIT-REPORT.md",
+    "action_plan": "ACTION-PLAN.md",
+    "screenshots_dir": "screenshots/"
+  },
+  "competitor_context": {
+    "note": "SXO specialist identified key competitors via SERP research",
+    "competitors": [
+      "Cheetah Distribution (16+ years, GPS-tracked delivery)",
+      "Shareplan Leaflet Distribution (since 2003, GPS tracking)",
+      "Dor-2-Dor (since 1987, 70+ offices nationally)",
+      "Blue Market Media",
+      "Tracker Leaflet Distribution"
+    ],
+    "competitive_gaps": [
+      "Competitors show per-1000 pricing; this site shows none",
+      "Competitors offer GPS tracked delivery proof; no mention here",
+      "Competitors list 10-20 years trading history; this site has none",
+      "Competitors have phone numbers prominently; this site has none",
+      "Competitors show review counts; this site has zero reviews"
+    ]
+  }
+}
