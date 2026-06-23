@@ -100,6 +100,9 @@ const localBusinessSchema = {
   "url": "https://flyerdistributionhampshire.co.uk",
   "email": "flyerdistributionhampshire@gmail.com",
   "image": "https://flyerdistributionhampshire.co.uk/Flyer%20Distribution%20Logo%20White%20Cropped.png",
+  "sameAs": [
+    "https://share.google/RVxyPi4TzXAzkt1Am",
+  ],
   "areaServed": [
     "Southampton",
     "Bournemouth",
