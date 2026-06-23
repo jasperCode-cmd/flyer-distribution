@@ -95,6 +95,7 @@ export default function FaqPage() {
 
   return (
     <>
+      <link rel="canonical" href="https://flyerdistributionhampshire.co.uk/faq" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}

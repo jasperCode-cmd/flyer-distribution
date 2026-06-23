@@ -65,6 +65,7 @@ const breadcrumbSchema = {
 export default function PooléPage() {
   return (
     <>
+      <link rel="canonical" href="https://flyerdistributionhampshire.co.uk/areas/poole" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}

@@ -65,6 +65,7 @@ const breadcrumbSchema = {
 export default function NewForestPage() {
   return (
     <>
+      <link rel="canonical" href="https://flyerdistributionhampshire.co.uk/areas/new-forest" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
