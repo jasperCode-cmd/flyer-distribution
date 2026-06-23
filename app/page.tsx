@@ -99,7 +99,7 @@ const localBusinessSchema = {
     "Professional flyer and leaflet distribution across Hampshire and Dorset. Reach real households in Southampton, Bournemouth, Poole and Winchester.",
   "url": "https://flyerdistributionhampshire.co.uk",
   "email": "flyerdistributionhampshire@gmail.com",
-  "image": "https://flyerdistributionhampshire.co.uk/Flyer Distribution Logo White Cropped.png",
+  "image": "https://flyerdistributionhampshire.co.uk/Flyer%20Distribution%20Logo%20White%20Cropped.png",
   "areaServed": [
     "Southampton",
     "Bournemouth",
