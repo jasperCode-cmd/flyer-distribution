@@ -75,6 +75,17 @@ export default function Footer() {
                 </span>
                 Hampshire &amp; Dorset
               </li>
+
+              <li>
+                <a
+                  href="https://share.google/RVxyPi4TzXAzkt1Am"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors"
+                >
+                  Find us on Google
+                </a>
+              </li>
             </ul>
           </div>
         </div>
