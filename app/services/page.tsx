@@ -3,14 +3,14 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Flyer & Leaflet Distribution Services",
+  title: "Leaflet Distribution Services",
   description:
     "Full design, print and leaflet distribution services across Hampshire and Dorset. Choose our end-to-end package or distribution-only service.",
   alternates: {
     canonical: "https://flyerdistributionhampshire.co.uk/services",
   },
   openGraph: {
-    title: "Flyer & Leaflet Distribution Services",
+    title: "Leaflet Distribution Services",
     description:
       "Full design, print and leaflet distribution services across Hampshire and Dorset. Choose our end-to-end package or distribution-only service.",
     url: "https://flyerdistributionhampshire.co.uk/services",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Flyer & Leaflet Distribution Services",
+    title: "Leaflet Distribution Services",
     description:
       "Full design, print and leaflet distribution services across Hampshire and Dorset. Choose our end-to-end package or distribution-only service.",
     images: [

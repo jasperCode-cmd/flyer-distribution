@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Blog: Leaflet Distribution Tips & News",
+  title: "Leaflet Distribution Blog",
   description:
     "Tips, guides, and news from the Flyer Distribution Hampshire team. Learn how to get the most from your leaflet campaigns.",
   robots: {
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     canonical: "https://flyerdistributionhampshire.co.uk/blog",
   },
   openGraph: {
-    title: "Blog: Leaflet Distribution Tips & News",
+    title: "Leaflet Distribution Blog",
     description:
       "Tips, guides, and news from the Flyer Distribution Hampshire team. Learn how to get the most from your leaflet campaigns.",
     url: "https://flyerdistributionhampshire.co.uk/blog",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Blog: Leaflet Distribution Tips & News",
+    title: "Leaflet Distribution Blog",
     description:
       "Tips, guides, and news from the Flyer Distribution Hampshire team. Learn how to get the most from your leaflet campaigns.",
     images: [

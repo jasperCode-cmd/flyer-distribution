@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Areas We Cover in Hampshire & Dorset",
+  title: "Hampshire & Dorset Coverage Areas",
   description:
     "Flyer and leaflet distribution across Hampshire and Dorset. View coverage areas including Southampton, Bournemouth, Poole and Winchester.",
   alternates: {
     canonical: "https://flyerdistributionhampshire.co.uk/areas",
   },
   openGraph: {
-    title: "Areas We Cover in Hampshire & Dorset",
+    title: "Hampshire & Dorset Coverage Areas",
     description:
       "Flyer and leaflet distribution across Hampshire and Dorset. View coverage areas including Southampton, Bournemouth, Poole and Winchester.",
     url: "https://flyerdistributionhampshire.co.uk/areas",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Areas We Cover in Hampshire & Dorset",
+    title: "Hampshire & Dorset Coverage Areas",
     description:
       "Flyer and leaflet distribution across Hampshire and Dorset. View coverage areas including Southampton, Bournemouth, Poole and Winchester.",
     images: [
