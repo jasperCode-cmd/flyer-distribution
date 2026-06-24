@@ -94,6 +94,7 @@ const areas = [
 const localBusinessSchema = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
+  "@id": "https://flyerdistributionhampshire.co.uk/#business",
   "name": "Flyer Distribution Hampshire",
   "description":
     "Professional flyer and leaflet distribution across Hampshire and Dorset. Reach real households in Southampton, Bournemouth, Poole and Winchester.",

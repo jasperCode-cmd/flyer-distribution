@@ -48,14 +48,30 @@ export const metadata: Metadata = {
   },
 };
 
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "https://flyerdistributionhampshire.co.uk/#website",
+  "name": "Flyer Distribution Hampshire",
+  "url": "https://flyerdistributionhampshire.co.uk",
+  "publisher": {
+    "@id": "https://flyerdistributionhampshire.co.uk/#business",
+  },
+  "inLanguage": "en-GB",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full`}>
+    <html lang="en-GB" className={`${inter.variable} h-full`}>
       <body className="min-h-full flex flex-col font-sans antialiased bg-slate-50 text-gray-800">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
