@@ -1,586 +1,204 @@
 # Full SEO Audit Report — flyerdistributionhampshire.co.uk
 
-**Audit date:** 2026-06-22  
-**Auditor:** SEO Audit System (source-code analysis)  
-**Method:** Source code + built HTML analysis (live domain unreachable per environment policy)  
-**Next.js version:** 16.2.6 (App Router, Turbopack build)  
-**Pages audited:** 13 (12 indexed + 1 noindex blog)
+**Audit date:** 2026-06-24
+**Method:** 9-agent parallel analysis — source code + built HTML (live domain unreachable from audit environment)
+**Business type detected:** Service Area Business (SAB) — Leaflet & Flyer Distribution, Hampshire & Dorset UK
+**Stack:** Next.js 16.2.6 / React 19 / App Router / Tailwind CSS v4
 
 ---
 
-## Overall SEO Health Score: 57 / 100
+## Overall SEO Health Score: 62 / 100
 
 | Category | Weight | Score | Weighted |
-|----------|--------|-------|---------|
-| Technical SEO | 22% | 58 | 12.8 |
-| Content Quality | 23% | 48 | 11.0 |
-| On-Page SEO | 20% | 65 | 13.0 |
-| Schema / Structured Data | 10% | 60 | 6.0 |
-| Performance (CWV) | 10% | 65 | 6.5 |
-| AI Search Readiness | 10% | 42 | 4.2 |
-| Images | 5% | 72 | 3.6 |
-| **TOTAL** | **100%** | | **57.1** |
+|---|---|---|---|
+| Technical SEO | 22% | 74 | 16.28 |
+| Content Quality | 23% | 61 | 14.03 |
+| On-Page SEO / SXO | 20% | 51 | 10.20 |
+| Schema / Structured Data | 10% | 54 | 5.40 |
+| Performance (CWV) | 10% | 72 | 7.20 |
+| AI Search Readiness | 10% | 54 | 5.40 |
+| Images | 5% | 70 | 3.50 |
+| **Overall** | **100%** | | **62 / 100** |
 
 ---
 
 ## Executive Summary
 
-Flyer Distribution Hampshire is a new local Service Area Business website built on Next.js 16. The technical foundations are solid — the site has good security headers, proper robots.txt, a correct sitemap, structured data on key pages, Open Graph/Twitter Card metadata, and clean URL structure. These were recently implemented and are working correctly.
+The site has a solid technical foundation: server-side rendered Next.js with all critical SEO content in the initial HTML payload, correct security headers, clean URL structure, and well-implemented breadcrumb and FAQ schema. These are genuine strengths that many local service competitors lack.
 
-However, the site has significant gaps in three areas that will materially limit its search performance:
+However, the site is currently non-competitive for its primary target queries because it is missing the entire trust and social proof layer that ranking pages in this vertical universally carry. Every competitor in the top 10 for "leaflet distribution Hampshire" has a visible phone number, customer testimonials, a delivery proof mechanism, and pricing signals. This site has none of these. No amount of technical optimisation closes that gap.
 
-**1. Critical technical issue:** Canonical tags, while defined in source code via Next.js `alternates.canonical`, are NOT appearing in the static HTML output served to crawlers. This is a confirmed build artifact. Google may still read them via JavaScript execution, but it creates unnecessary crawl ambiguity and is a high-priority fix.
+The five highest-impact improvements — in order of expected ranking impact — are:
 
-**2. Content depth and E-E-A-T:** Almost all pages are thin. The homepage, about page, and area pages lack social proof (zero reviews/testimonials), pricing information, named team members, case studies, or years of experience. The blog is entirely empty. These gaps severely limit trust signals and reduce the probability of ranking for competitive local queries.
+1. **Add a phone number** to header, footer, About, and Quote pages
+2. **Collect and publish customer testimonials** (3–5 on homepage and About page)
+3. **Build GBP reviews** — post-campaign email asking for a Google review
+4. **Expand area pages** from 200 words to 600+ with local context, process narrative, and inline FAQs
+5. **Add indicative pricing** — even a "from £X per 1,000" signal removes the largest conversion barrier
 
-**3. Missing local SEO fundamentals:** No Google Business Profile presence referenced anywhere. No phone number. No physical address. Gmail contact email. The LocalBusiness schema is missing critical properties (telephone, address, @id). For a local SAB competing on "leaflet distribution Southampton"-type queries, GBP is essential and currently absent.
-
-### Top 5 Critical Issues
-1. **Canonical tags missing from rendered HTML** — all 12 indexed pages
-2. **No Google Business Profile** — essential for local pack ranking
-3. **No phone number** — major trust and conversion gap
-4. **Favicon file not found** (`/favicon.png` referenced but `public/favicon.png` doesn't exist — only `Favicon.png` with capital F)
-5. **Zero content on blog** — missed opportunity; blog is linked in footer and indexed (should be noindex or populated)
-
-### Top 5 Quick Wins
-1. Rename `public/Favicon.png` → `public/favicon.png` (case fix, 2 minutes)
-2. Add phone number to footer, schema, and quote form header
-3. Add 3–5 client testimonials to homepage and area pages
-4. Fix canonical rendering: add explicit `<link rel="canonical">` via a layout component
-5. Add `WebSite` schema with `SearchAction` to layout
+Items 1–3 are off-site/operational, not code changes. Items 4–5 are content work. The schema and technical fixes listed below are meaningful but secondary to these foundational trust signals.
 
 ---
 
-## 1. Technical SEO
+## Score by Specialist Agent
 
-### 1.1 Crawlability
-
-**robots.txt** (PASS)
-```
-User-Agent: *
-Allow: /
-Disallow: /admin/
-Sitemap: https://flyerdistributionhampshire.co.uk/sitemap.xml
-```
-Correct. `/admin/` blocked. Sitemap properly declared.
-
-**Sitemap** (PASS — minor issues)
-- 12 URLs present, all on correct domain
-- `/blog` correctly excluded (noindex page)
-- All 6 area sub-pages included
-- Issue: All pages have identical `lastModified` timestamp (build time). Static `lastmod` would be more accurate.
-- Issue: All non-homepage pages have `priority: 0.8` — no differentiation between service pages and area pages.
-
-**URL Structure** (PASS)
-- Clean, descriptive slugs: `/areas/southampton`, `/areas/new-forest`, `/services`, `/faq`
-- No trailing slash inconsistencies visible in source
-- No query parameters on key pages
-- `/areas/new-forest` correctly uses hyphen (not `/new_forest`)
-
-### 1.2 Indexability
-
-**Canonical Tags** (CRITICAL FAIL)
-
-All 12 indexed pages define `alternates.canonical` in their Next.js metadata export. However, zero canonical `<link>` tags appear in the static HTML served by the build. Verification: manually inspected `index.html`, `about.html`, `areas/southampton.html` — none contain `<link rel="canonical">`. RSC payload segments also contain no canonical data.
-
-In Next.js 15+, `alternates.canonical` is rendered via React's metadata API which injects tags client-side. Google claims to execute JavaScript but relies on canonical being in the initial HTML for certainty. Other crawlers (Bing, AI bots) may miss it entirely.
-
-**Current canonical source code (page.tsx):**
-```typescript
-alternates: {
-  canonical: "https://flyerdistributionhampshire.co.uk/about",
-},
-```
-**What appears in rendered HTML:** Nothing.
-
-**Fix:** Add explicit `<link rel="canonical" href={canonicalUrl}>` in the page `<head>` using a layout-level component or Next.js `generateMetadata` with direct `<link>` tag.
-
-**noindex** (PASS)
-- Blog page correctly sets `robots: { index: false, follow: true }`
-- All other pages do not set noindex
-
-**Meta robots** (PASS)
-- No `X-Robots-Tag` conflicts detected
-- No accidental noindex on indexed pages
-
-### 1.3 Security Headers
-
-All 5 expected security headers are present in `next.config.ts` and applied to all routes via `/(.*)`  pattern:
-
-| Header | Value | Status |
-|--------|-------|--------|
-| X-Frame-Options | DENY | PASS |
-| X-Content-Type-Options | nosniff | PASS |
-| Referrer-Policy | strict-origin-when-cross-origin | PASS |
-| Permissions-Policy | camera=(), microphone=(), geolocation=() | PASS |
-| Strict-Transport-Security | max-age=63072000; includeSubDomains; preload | PASS |
-| Content-Security-Policy | Present | PASS (see notes) |
-
-**CSP Notes:**
-- `img-src` covers `images.unsplash.com` and `images.pexels.com` ✓
-- `connect-src` covers `api.web3forms.com` for quote form ✓
-- `script-src 'unsafe-inline'` is present — reduces CSP security value but required for Next.js
-- `font-src fonts.gstatic.com` — Inter is self-hosted via `next/font`, this may be unused
-- Missing: `https://www.googletagmanager.com` (if analytics added later, CSP will block it)
-
-### 1.4 Performance Signals (from HTML analysis)
-
-**Preloads detected in homepage HTML:**
-- Font: `83afe278b6a6bb3c-s.p.0q-301v4kxxnr.woff2` (Inter self-hosted — good)
-- Hero image: Unsplash photo (1920px) — preloaded ✓
-- Logo: `website_logo_main.png` — preloaded ✓
-
-**LCP candidate:** Hero section background image from Unsplash (1920×700). It's loaded via Next.js `<Image>` with `priority` prop — this is correct and should optimize LCP. However, the image is hosted on Unsplash CDN (third-party), adding DNS lookup latency.
-
-**JavaScript:** Multiple async script chunks loaded. No render-blocking scripts detected in `<head>`. Next.js App Router properly defers non-critical JS.
-
-**Images:** All images use Next.js `<Image>` component with explicit `width` and `height`. This prevents CLS (layout shift). No images with missing dimensions detected.
-
-**Fonts:** Inter loaded via `next/font/google` with `display: 'swap'` — correct, prevents FOIT.
-
-### 1.5 Missing Critical File
-
-**Favicon** (HIGH)
-
-Layout.tsx references: `icon: "/favicon.png"`
-
-`/home/user/flyer-distribution/public/` contains: `Favicon.png` (capital F), NOT `favicon.png`
-
-On Linux servers (case-sensitive filesystem), `/favicon.png` will 404. The browser tab will show no favicon. This is a trust/brand signal issue.
-
-**Fix:** `mv /home/user/flyer-distribution/public/Favicon.png /home/user/flyer-distribution/public/favicon.png`
-
-### 1.6 Analytics
-
-**No analytics installed.** No Google Analytics 4, Google Tag Manager, Microsoft Clarity, Hotjar, or any tracking code found in any source file. This means:
-- No organic traffic data
-- No conversion tracking (quote form submissions)
-- No GSC data will be available
-- Cannot measure SEO impact of changes
-
-**Fix:** Install GA4 + Google Search Console as immediate priority. Web3Forms (the quote form submission handler) does capture leads, but there's no website-side tracking.
-
-### 1.7 Mobile
-
-- `<meta name="viewport" content="width=device-width, initial-scale=1">` present ✓
-- Tailwind responsive classes used throughout (sm:, md:, lg: breakpoints) ✓
-- Mobile hamburger menu implemented in Header component ✓
-- No explicit AMP pages (not needed for this site type)
+| Specialist | Score | Key Gap |
+|---|---|---|
+| Technical SEO | 74/100 | No AI crawler management, no IndexNow, duplicate canonicals |
+| Content Quality | 61/100 | E-E-A-T crisis — anonymous, no reviews, 9/12 pages thin |
+| On-Page SEO (SXO) | 51/100 | Zero competitive trust elements present vs. 10/10 competitors |
+| Schema | 54/100 | No entity graph — missing @id, WebSite, area-page Service nodes |
+| Sitemap/Architecture | 71/100 | lastModified = build date, deprecated priority/changeFreq |
+| Performance | 72/100 | Hero cross-origin LCP risk, services-page CLS |
+| AI Search Readiness | 54/100 | No pricing, FAQ answers too short, weak brand mentions |
+| Local SEO | 57/100 | No reviews, no phone, no citation directory presence |
+| Backlinks | N/A | New domain, clean slate, foundational citations not yet built |
 
 ---
 
-## 2. Content Quality
+## What Was Fixed During This Audit
 
-### 2.1 Page-by-Page Assessment
-
-**Homepage (/)** — Score: 6/10
-- H1: "Professional Flyer Distribution in Hampshire and Dorset" ✓ (keyword-rich)
-- Content: Hero, 3 trust signals, 6 service cards, area links, CTA
-- Weakness: Trust signals are generic claims ("Reliability", "Targeted Postcodes", "Tracked Delivery") with no evidence. No customer names, no statistics, no testimonials.
-- Missing: How long in business, number of campaigns delivered, number of households reached
-- Word count: ~400 words visible to users (thin for a competitive local service homepage)
-
-**Services (/services)** — Score: 6/10
-- H1: "Our Services" (weak — generic)
-- Heading hierarchy issue: Package card titles use `<h2>` instead of `<h3>`, creating a broken hierarchy where the section title ("Full Print and Distribution Packages") is also `<h2>`. Google may deweight both.
-- Content describes 6 services adequately but very briefly
-- No pricing — this is a significant conversion barrier. Competitors likely show starting prices.
-- Word count: ~500 words (adequate for a services page if pricing/social proof added)
-
-**About (/about)** — Score: 4/10
-- H1: "About Us"
-- Tells the reader they're "local", "independent", "small enough to care" — all generic claims
-- No named team members, no photos of actual staff (uses generic Unsplash photo)
-- No founding year, no years of experience, no number of campaigns completed
-- No company registration number or VAT number
-- Three "values" cards (Reliability, Local Knowledge, Transparency) — all claims, no evidence
-- This page scores extremely low on E-E-A-T
-
-**FAQ (/faq)** — Score: 7/10
-- H1: "Frequently Asked Questions" 
-- 10 questions covering: coverage areas, process, design/print options, postcode targeting, quote process, quantities, formats, vehicle distribution, campaign timescales
-- Good conversational tone
-- FAQPage schema implemented
-- Weakness: H2 tags used for each FAQ question (should be fine for FAQ format)
-- Missing: Pricing FAQs ("How much does leaflet distribution cost?"), "How do I know my leaflets were delivered?", "What is your minimum order?"
-- All answers are honest about "get in touch" — no concrete info provided
-
-**Area Pages (6 pages)** — Score: 5/10
-- H1: "Flyer Distribution in [City]" ✓ (keyword-rich)
-- Each page has ~200–300 words of body content
-- Pages follow identical template: intro, about coverage, postcodes we cover
-- Differentiation is minimal — mostly different postcodes and one image
-- Southampton: mentions specific neighborhoods (Shirley, Portswood, Bitterne) — good
-- Winchester: mentions "affluent households", "county town" — adds value
-- Ringwood: only 3 postcodes listed (BH24, BH21, BH31) — very limited
-- Missing on all area pages: links to related areas, links to services page, local stats (households, population), case study or testimonial from that area
-
-**Quote (/quote)** — Score: 7/10
-- H1: "Get a Free Quote"
-- Form is comprehensive and well-designed
-- Uses Web3Forms for submission (no server-side code needed)
-- Weakness: No trust signals near the form ("We respond within 24 hours" is in the sub-header but no social proof)
-- Missing: Phone number as alternative contact
-- Quote form has 12+ fields — may cause form abandonment. Consider a 2-step form.
-
-**Blog (/blog)** — Score: 1/10
-- H1: "Blog"
-- Zero content — only text: "We are working on guides and tips for local businesses running leaflet campaigns. Check back soon."
-- Page is noindex (correct given no content) but is linked from the footer
-- Blog is a major missed opportunity for long-tail content ("how many leaflets do I need?", "best leaflet sizes for restaurants")
-
-### 2.2 E-E-A-T Assessment
-
-| Signal | Present | Notes |
-|--------|---------|-------|
-| Experience (real campaigns described) | No | No case studies or examples |
-| Expertise (technical knowledge shown) | Partial | FAQ shows process knowledge |
-| Authoritativeness (named authors, awards) | No | No named staff, no industry affiliations |
-| Trustworthiness (reviews, contact info) | Low | Email only, no reviews, Gmail address |
-| Physical address | No | SAB doesn't need to display, but adds trust |
-| Phone number | No | Major gap |
-| Company registration | No | Adds legitimacy |
-| Review count | 0 | No reviews anywhere |
-| Social media links | 0 | No social profiles linked |
-| Named team members | 0 | Generic "we" throughout |
-
-**E-E-A-T verdict:** Very low. The site reads like a professional template but lacks any real evidence of an established business. Google's quality raters would likely score this low on E-E-A-T for a YMYL-adjacent service (spending money on marketing).
-
-### 2.3 Thin Content
-
-Pages with insufficient content depth (under 300 substantive words):
-- `/about` (~300 words, but all claims — no evidence)
-- `/areas/ringwood` (~200 words)
-- `/areas/new-forest` (~250 words)
-- All other area pages: 250–350 words
-
-### 2.4 Duplicate Content
-
-The 6 area pages share near-identical structure and similar phrasing. While each has some unique content (specific postcodes, local landmarks), the template is very similar. Google may treat these as near-duplicate thin pages.
-
-Risk: **Medium** — distinct enough not to trigger penalties but insufficient to rank strongly for competitive area-specific queries.
+**`/public/llms.txt` created and deployed** by the GEO agent during this audit. The file is now served at `https://flyerdistributionhampshire.co.uk/llms.txt` and contains: business description, all six services with format specifications, geographic coverage with postcodes, key operational facts (minimum quantity: 5,000 leaflets; quote turnaround: 24 hours; campaign completion: 2 weeks), all 10 FAQ answers verbatim, and a full page index. This improves AI search citability across Perplexity, Bing Copilot, and any crawler that respects the llms.txt convention.
 
 ---
 
-## 3. On-Page SEO
+## Critical Issues (Fix Immediately)
 
-### 3.1 Title Tags
+### CRIT-1: No phone number anywhere on the site
+Present across 0/13 pages. Click-to-call is the primary mobile conversion mechanism for local services. 10/10 ranking competitors have a visible phone number. Also required in LocalBusiness schema `telephone` field.
 
-| Page | Title | Length | Issues |
-|------|-------|--------|--------|
-| / | Flyer Distribution Hampshire \| Local Leaflet & Flyer Delivery | 62 chars | Good |
-| /services | Flyer & Leaflet Distribution Services \| Flyer Distribution Hampshire | 68 chars | Good |
-| /about | About Us \| Flyer Distribution Hampshire | 40 chars | Generic H1, could be stronger |
-| /faq | FAQ: Frequently Asked Questions \| Flyer Distribution Hampshire | 61 chars | Good |
-| /areas | Areas We Cover in Hampshire & Dorset \| Flyer Distribution Hampshire | 67 chars | Good |
-| /areas/southampton | Flyer Distribution Southampton \| Flyer Distribution Hampshire | 61 chars | Missing "Hampshire" after Southampton |
-| /areas/bournemouth | Flyer Distribution Bournemouth \| Flyer Distribution Hampshire | 61 chars | Good |
-| /areas/poole | Flyer Distribution Poole \| Flyer Distribution Hampshire | 56 chars | Good |
-| /areas/winchester | Flyer Distribution Winchester \| Flyer Distribution Hampshire | 61 chars | Good |
-| /areas/new-forest | Flyer Distribution New Forest \| Flyer Distribution Hampshire | 61 chars | Good |
-| /areas/ringwood | Flyer Distribution Ringwood \| Flyer Distribution Hampshire | 59 chars | Good |
-| /quote | Get a Free Quote \| Flyer Distribution Hampshire | 48 chars | Could include location |
+**Business requirement:** Obtain a phone number (even a free Google Voice / local VoIP number) and add it to the site header, footer, About page, Quote page, and LocalBusiness JSON-LD.
 
-### 3.2 Meta Descriptions
+### CRIT-2: Zero customer testimonials or social proof
+No testimonials, no reviews, no star rating, no case studies anywhere on the site. Whitespark 2026 identifies review velocity as a top-3 local pack factor. Every ranking competitor surfaces 4+ star ratings and client quotes above the fold.
 
-| Page | Description | Length | Issues |
-|------|-------------|--------|--------|
-| / | "Reliable flyer and leaflet distribution across Hampshire and Dorset. Reach real households in Southampton, Bournemouth, Poole and Winchester." | 142 chars | Good, location-specific |
-| /services | "Full design, print and leaflet distribution services across Hampshire and Dorset. Choose our end-to-end package or distribution-only service." | 141 chars | Good |
-| /about | "Learn about Flyer Distribution Hampshire, a local team dedicated to reliable, targeted leaflet delivery across Hampshire and Dorset." | 132 chars | Weak — no USP |
-| /faq | "Answers to common questions about leaflet and flyer distribution in Hampshire and Dorset. Covering areas, quantities, campaign planning and more." | 145 chars | Good |
-| /areas/southampton | "Leaflet and flyer distribution across Southampton. Targeted postcode delivery for businesses reaching Hampshire's largest city." | 126 chars | Good |
-| /areas/bournemouth | "Leaflet and flyer distribution across Bournemouth. Targeted door-to-door delivery for local businesses in Dorset." | 114 chars | Good |
-| /quote | "Request a free, no-obligation quote for flyer and leaflet distribution across Hampshire and Dorset." | 100 chars | Short, could include 24hr response |
+**Immediate action:** Contact recent customers directly and ask for written testimonials (for the website) + Google Business Profile reviews. Three genuine testimonials with first name and business type transform the trust profile.
 
-### 3.3 H1 Tags
+### CRIT-3: No AI crawler management in robots.txt
+All AI training crawlers freely ingesting via wildcard rule. Add named rules for at minimum: GPTBot (OpenAI training), CCBot (bulk scraper), Bytespider (ByteDance training), Google-Extended (Gemini training). Allow PerplexityBot and ChatGPT-User (these drive referral traffic, not training).
 
-All 12 indexed pages have exactly one H1. No missing or duplicate H1s.
+### CRIT-4: E-E-A-T crisis — anonymous business
+No named founder, director, or team member anywhere. Under September 2025 QRG, anonymous local service businesses score poorly on Trustworthiness. The About page has three values cards with no individual behind them.
 
-### 3.4 Heading Hierarchy Issues
-
-**Services page** — MEDIUM issue:
-```
-H1: Our Services
-  H2: Full Print and Distribution Packages  (section header)
-    H2: Design, Print and Deliver  ← WRONG: should be H3 (package card)
-    H2: Print and Deliver          ← WRONG: should be H3 (package card)
-  H2: Distribution Services  (section header)
-    H3: Leaflet Distribution  ← Correct H3 here
-    H3: Targeted Postcode Campaigns
-    ...
-  H2: Not Sure Which Service Is Right for You?
-```
-The two package titles are H2 when they should be H3, creating an ambiguous hierarchy where Google must decide which H2s are section headers vs content.
-
-**FAQ page** — MEDIUM issue:
-All 10 FAQ questions use H2, then the "Still have questions?" CTA also uses H2. This is acceptable in FAQ format but the CTA H2 at the end creates noise in heading structure.
-
-### 3.5 Internal Linking
-
-This is one of the most significant on-page weaknesses:
-
-| Page | Internal links to other pages |
-|------|-------------------------------|
-| / | /quote, /services, /areas, /areas/* (6 area buttons) |
-| /services | /quote only |
-| /about | /quote only |
-| /faq | /quote only |
-| /areas | /quote, /areas/* (6 area cards) |
-| /areas/southampton | /quote only |
-| /areas/bournemouth | /quote only |
-| /areas/poole | /quote only |
-| /areas/winchester | /quote only |
-| /areas/new-forest | /quote only |
-| /areas/ringwood | /quote only |
-| /quote | (no internal links in body) |
-
-**Problems:**
-- Area pages don't link to the main /services page
-- Area pages don't link to other area pages (no related area discovery)
-- Services page doesn't link to any area pages
-- About page doesn't link to services or areas
-- FAQ page answers mention postcode targeting but don't link to /areas
-- No page links to /about or /faq (except header nav)
-
-PageRank is funnelled entirely to /quote, starving other pages of link equity.
+**Action:** Name the business owner on the About page with a 2–3 sentence bio. This is the single highest-ROI content change available.
 
 ---
 
-## 4. Schema / Structured Data
+## High Priority (Fix Within 1 Week)
 
-### 4.1 Implemented Schemas
+### HIGH-1: Duplicate canonical tags — remove JSX `<link rel="canonical">` from all pages
+Confirmed in built HTML: both `metadata.alternates.canonical` AND the JSX `<link>` are rendering, producing two identical canonical tags per page. Since Next.js 16.2.6 correctly renders `alternates.canonical`, the JSX link elements in each page component return value should be removed. Affects 13 page files.
 
-| Page | Schema Type | Present |
-|------|------------|---------|
-| / | LocalBusiness | Yes |
-| /services | Service × 6 (in @graph) | Yes |
-| /faq | FAQPage | Yes |
-| /areas/southampton | BreadcrumbList | Yes |
-| /areas/bournemouth | BreadcrumbList | Yes |
-| /areas/poole | BreadcrumbList | Yes |
-| /areas/winchester | BreadcrumbList | Yes |
-| /areas/new-forest | BreadcrumbList | Yes |
-| /areas/ringwood | BreadcrumbList | Yes |
-| /about | None | Missing |
-| /quote | None | Missing |
-| /areas | None | Missing |
+### HIGH-2: Add indicative pricing to homepage and services page
+"How much does leaflet distribution cost in Hampshire?" is the highest-volume PAA query for this vertical. No pricing signal exists anywhere — not even a "from £X" indication. This is the most common reason a budget-researching SME bounces to a competitor.
 
-### 4.2 LocalBusiness Schema Analysis
+### HIGH-3: Add "How It Works" process section (homepage and services page)
+Present on 8/10 ranking competitor pages. A 3–4 step process block (enquiry → proof review → distribution → confirmation) addresses informational intent and increases conversion confidence. Also improves AI citation readiness.
 
-Current implementation:
+### HIGH-4: Expand /services page from 410 to 800+ words
+The most under-resourced high-intent page. Add: per-service "who it suits" copy, turnaround expectations, minimum quantities, and a How It Works section. Service descriptions currently duplicate the homepage cards word-for-word.
+
+### HIGH-5: Expand About page — add founding date, name, and town
+270 words with no identifying information. Add: founder/owner name and short bio, founding year, town-level location ("based in [town], Hampshire"), and 2–3 client testimonials.
+
+### HIGH-6: Schema entity graph — add `@id` to LocalBusiness and propagate
+Without `"@id": "https://flyerdistributionhampshire.co.uk/#business"`, Google cannot reliably associate citations, Service nodes, or GBP signals with this entity. 20-minute fix with compounding impact across all schema improvements.
+
+### HIGH-7: Add WebSite schema to layout.tsx
+Global entity declaration linking the publisher to the WebSite. Enables sitelinks search box eligibility.
+
+### HIGH-8: `lastModified: new Date()` in sitemap.ts
+Generates an identical build timestamp for all 12 URLs. Replace with static per-route ISO date strings.
+
+---
+
+## Medium Priority (Fix Within 1 Month)
+
+### MED-1: Expand all 6 area pages to 400–600 words
+9/12 pages fall below their word count minimums. Each area page needs one genuinely unique content element: a demographic statistic, local landmark reference, business-use case, or geographic detail not replicated elsewhere. New Forest and Southampton are the strongest models.
+
+### MED-2: Add Service schema to each area page scoped to that city
+Currently area pages carry only BreadcrumbList schema. Add a `Service` node with `areaServed: {"@type": "City", "name": "[City]"}` and `provider: {"@id": ".../#business"}` to each.
+
+### MED-3: Add BreadcrumbList to /services, /faq, /about, /quote
+Already implemented on /areas and all 6 area pages. Add two-item (Home → Page) lists to the four remaining content pages.
+
+### MED-4: Add 3 FAQ questions — pricing, tracking, exclusivity
+"How much does leaflet distribution cost in Hampshire?", "How do I know my leaflets were delivered?", "Are my leaflets delivered alone or with other businesses?" — the top PAA queries for this vertical, all absent from the current FAQ.
+
+### MED-5: Upgrade `areaServed` to typed Place objects
+Replace plain string array in LocalBusiness schema with:
 ```json
-{
-  "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  "name": "Flyer Distribution Hampshire",
-  "description": "...",
-  "url": "https://flyerdistributionhampshire.co.uk",
-  "email": "flyerdistributionhampshire@gmail.com",
-  "image": "https://flyerdistributionhampshire.co.uk/Flyer Distribution Logo White Cropped.png",
-  "areaServed": ["Southampton", "Bournemouth", "Poole", ...]
-}
+{"@type": "City", "name": "Southampton", "addressRegion": "Hampshire", "addressCountry": "GB"}
 ```
 
-**Missing required/recommended properties:**
-- `@id` — should be `"https://flyerdistributionhampshire.co.uk/#organization"`
-- `telephone` — not available yet (add when phone number obtained)
-- `address` — PostalAddress (SABs can hide from GBP but schema should have serviceArea instead)
-- `openingHoursSpecification` — hours not defined
-- `priceRange` — "££" estimate
-- `sameAs` — array of GBP URL, Facebook, Twitter etc.
-- `logo` — separate logo property vs image
-- `serviceArea` — should use GeoCircle or GeoShape for SAB
-- `knowsAbout` — ["Leaflet Distribution", "Flyer Delivery", ...]
+### MED-6: Change `lang="en"` to `lang="en-GB"` in layout.tsx
+Small but correct for a UK-specific business.
 
-**Image URL issue:** The logo URL contains a space: `"Flyer Distribution Logo White Cropped.png"` — this will fail HTTP validation. Should be URL-encoded or the filename should use hyphens.
+### MED-7: Fix CSP — remove `fonts.gstatic.com`, add `picsum.photos` note
+`fonts.gstatic.com` in `font-src` is unused (next/font self-hosts). Remove. Also remove `picsum.photos` from `next.config.ts` remotePatterns (unused).
 
-### 4.3 Service Schema Analysis
+### MED-8: Fix services-page image CLS risk (fill prop)
+Replace `width`/`height` + CSS height override with `fill` + fixed-height wrapper on all package and supporting-service card images.
 
-6 Service schemas implemented. Each has: @type, name, description, provider (LocalBusiness reference), areaServed.
+### MED-9: Start citation building
+Submit to Yell.com, Yelp UK, FreeIndex, Thomson Local, Scoot, and Bark.com with consistent NAP. ~2.5 hours total, maximum local SEO impact for a new domain.
 
-**Missing from Service schemas:**
-- `@id` for each service
-- `url` — should point to `/services#service-name`
-- `serviceType` — more specific categorization
-- `offers` — Offer schema (even without price, can indicate "contact for pricing")
-
-### 4.4 Missing Schemas
-
-- `WebSite` with `SearchAction` (enables sitelinks search box)
-- `Organization` (separate from LocalBusiness)
-- `WebPage` for key pages
-- `ContactPage` for /quote
-- `AggregateRating` (once reviews collected)
-- `Review` entries
+### MED-10: Meta titles — add geo context to inner pages
+- /services: "Leaflet Distribution Services | Hampshire & Dorset"
+- /about: "About Flyer Distribution Hampshire"
+- /quote: "Get a Free Leaflet Distribution Quote | Hampshire & Dorset"
+- /faq: "Leaflet Distribution FAQ | Flyer Distribution Hampshire"
 
 ---
 
-## 5. Images
+## Low Priority (Backlog)
 
-### 5.1 Alt Text
+### LOW-1: IndexNow protocol
+Generate a hex key, place at `/public/<key>.txt`, and POST changed URLs on deploy. Near-instant indexing for Bing and Yandex.
 
-All images have descriptive alt text. No empty `alt=""` attributes found. Quality assessment:
+### LOW-2: Hero image self-hosting
+Replace Unsplash URL with a self-hosted or CDN-served image to eliminate cross-origin cold-fetch LCP risk.
 
-| Image | Alt Text | Quality |
-|-------|----------|---------|
-| Hero (homepage) | "Flyer distributor walking through a Hampshire street" | Excellent — local, descriptive |
-| About page | "Flyer distribution team member on a Hampshire street" | Good |
-| Southampton | "Southampton city centre shopping mall" | Generic — could mention brand |
-| Bournemouth | "Bournemouth pier and ferris wheel" | Generic landmark |
-| Winchester | "Winchester Cathedral" | Too generic, missing service context |
-| Ringwood | "Green fields near Ringwood" | Very generic |
-| Design service | "Designer working on creative artwork at a desk" | Generic stock photo description |
-| Print service | "Printed leaflets ready for delivery" | Good, service-relevant |
+### LOW-3: Add favicon.ico fallback
+Place a .ico file in /public/ for older clients and feed readers.
 
-### 5.2 Image Optimization
+### LOW-4: Nonce-based CSP
+Replace `script-src 'unsafe-inline'` with a nonce via Next.js middleware. 3–4 hour implementation, security hardening.
 
-- All images use Next.js `<Image>` component ✓
-- Width/height explicitly set on all images ✓ (prevents CLS)
-- Priority prop on hero image ✓
-- Lazy loading on below-fold images ✓
-- Images served from Unsplash/Pexels CDNs (third-party latency)
-- No local hero images — all stock photography
-- No WebP explicitly forced (Next.js handles format optimization)
+### LOW-5: Verify GBP share link stability
+Replace `https://share.google/RVxyPi4TzXAzkt1Am` with a stable Google Maps Place URL from the GBP dashboard.
 
-### 5.3 OG Image
+### LOW-6: Remove deprecated sitemap fields
+Drop `changeFrequency` and `priority` from sitemap.ts — Google ignores both.
 
-All 13 pages (including blog) use the SAME OG image: `https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200`
+### LOW-7: Dedicate pages for Eastleigh and Christchurch
+When ready to expand content, these two towns have the highest search volume among the "Also Covering" list. Follow the existing area page template with genuine unique content.
 
-This is a generic image of leaflets being delivered (appropriate for the business). However, page-specific OG images would improve social sharing CTR.
+### LOW-8: Remove `priority` from Header logo
+Both the hero image and logo have `priority` — competing preload links. Remove priority from the logo; it's tiny and fast without it.
+
+### LOW-9: Publish blog content
+When the blog launches, priority topics: "How many leaflets do I need for a Southampton campaign?", "What does leaflet distribution cost in Hampshire?", "GPS tracked vs untracked delivery — what's the difference?"
 
 ---
 
-## 6. Performance (Core Web Vitals Estimates)
+## Technical Implementation Notes
 
-*Note: No live CrUX data available. Estimates based on source code analysis.*
+**Canonical tags:** The JSX `<link rel="canonical">` elements added in the previous session were necessary when `metadata.alternates.canonical` wasn't rendering. The current build confirms both are now rendering. Removing the JSX links (HIGH-1) is now safe and recommended.
 
-### 6.1 LCP (Largest Contentful Paint) — Estimated: Good
+**JSON-LD placement:** `<script>` tags are NOT hoisted by React 19 — JSON-LD appears in BODY, not HEAD. This is fine — Google reads structured data from anywhere in the document.
 
-- Hero image has `priority` prop (Next.js generates `fetchpriority="high"`) ✓
-- Font preloaded via `<link rel="preload">` ✓
-- Hero image preloaded ✓
-- Concern: Hero image is from Unsplash CDN (third-party) — adds DNS lookup + connection time
-
-### 6.2 CLS (Cumulative Layout Shift) — Estimated: Good
-
-- All `<Image>` components have explicit `width` and `height` ✓
-- `display: 'swap'` on Inter font ✓
-- Header is sticky (no reflow) ✓
-
-### 6.3 INP (Interaction to Next Paint) — Estimated: Unknown
-
-- Header component is a client component (`"use client"`) due to mobile menu toggle
-- QuoteForm is a client component with form state
-- No heavy client-side JS detected beyond Next.js runtime
-- No third-party scripts (no analytics, no chat widgets, no ad scripts) — this actually helps INP
-
-### 6.4 Performance Concerns
-
-- 6 scripts loaded async in `<head>` — all async, non-blocking
-- Turbopack build chunks may be less optimized than webpack for production
-- No image optimization for local/hosted images (only CDN images)
-- No critical CSS inlining (relies on CSS chunk)
+**Next.js image optimization:** Active (no `output: "export"` and no `unoptimized: true`). AVIF/WebP served automatically via `/_next/image`.
 
 ---
 
-## 7. AI Search Readiness (GEO)
+## Scoring Improvement Roadmap
 
-### 7.1 llms.txt
-
-No `llms.txt` file exists. This is an emerging standard that helps AI crawlers understand site structure and permissions. Absence is not penalizing currently but is a missed optimization opportunity.
-
-### 7.2 AI Crawler Access
-
-- `robots.txt` has `Allow: /` with no specific AI crawler blocks ✓
-- No `GPTBot`, `ClaudeBot`, `PerplexityBot` disallow rules ✓
-- AI crawlers can access all pages
-
-### 7.3 Passage-Level Citability
-
-**FAQPage schema:** 10 Q&A pairs with structured JSON-LD — excellent for AI citation of specific facts about the service. Example citable passages:
-- "We cover Southampton, Bournemouth, Poole, Winchester, Eastleigh, New Forest, Romsey, Ringwood, Christchurch, Hythe, Totton, Hedge End, and Chandler's Ford"
-- "Most campaigns are completed within two weeks of us receiving your materials"
-- "We generally recommend 5,000 or more [leaflets]"
-
-**Missing citable facts:**
-- No pricing data anywhere (major gap for AI comparison queries)
-- No "about the team" with names/credentials
-- No founding year or business history
-- No statistics ("X campaigns delivered", "Y households reached")
-
-### 7.4 Content Structure for AI
-
-The site's content is structured but very lean. Clear statements exist but are sparse. For AI engines to cite this business confidently, they need more distinctive factual content.
-
----
-
-## 8. Local SEO
-
-### 8.1 NAP Consistency
-
-| Element | Status |
-|---------|--------|
-| Name | Consistent ("Flyer Distribution Hampshire") across all pages ✓ |
-| Address | MISSING — no address on site |
-| Phone | MISSING — no phone number anywhere |
-| Email | Present (Gmail) — consistent ✓ |
-
-For a Service Area Business, hiding a physical address is acceptable (and common). However, having NO contact information other than an email — and a Gmail address at that — significantly damages trust signals.
-
-### 8.2 Google Business Profile
-
-No GBP URL is referenced anywhere on the site. It's unknown if a GBP listing exists. For local pack ranking ("leaflet distribution Southampton"), GBP is the #1 ranking factor and its absence (or non-optimized state) explains most of the potential ranking gap.
-
-### 8.3 LocalBusiness Schema for SAB
-
-The current LocalBusiness schema uses `areaServed: ["Southampton", "Bournemouth", ...]` (array of strings). For a SAB, Google recommends using `serviceArea` with `GeoCircle` or `GeoShape` rather than just string names. The current approach is acceptable but less specific than ideal.
-
-### 8.4 Area Page Quality
-
-6 area sub-pages exist. Quality assessment:
-- All have unique H1, meta title, meta description ✓
-- All have BreadcrumbList schema ✓
-- All list specific postcodes ✓
-- None have LocalBusiness or Service schema ✓ (could be added)
-- All mention specific neighborhoods/areas within each location ✓
-- None have testimonials from clients in that area
-- None cross-link to related area pages
-- Very short content (~200–300 words each)
-
----
-
-## 9. Conclusions
-
-The site has a strong technical foundation for a brand-new business: security, sitemap, robots, OG tags, schema, canonicals (in source) — these are all in place. The critical gap is content depth and local business signals.
-
-To rank competitively for "leaflet distribution Hampshire" and area-specific variants, the site needs:
-1. A working Google Business Profile with reviews
-2. A phone number
-3. Social proof (testimonials, case studies, review count)
-4. Significantly deeper content on the homepage and area pages
-5. An active blog with locally-relevant content
-6. The canonical tag rendering fix (technical)
-7. Pricing information (or at minimum a starting-from price)
-
----
-
-## Appendix: Pages Audited
-
-| Page | URL | Indexed | Schema | Word Count |
-|------|-----|---------|--------|------------|
-| Homepage | / | Yes | LocalBusiness | ~400 |
-| Services | /services | Yes | 6× Service | ~500 |
-| Areas | /areas | Yes | None | ~200 |
-| Southampton | /areas/southampton | Yes | BreadcrumbList | ~300 |
-| Bournemouth | /areas/bournemouth | Yes | BreadcrumbList | ~250 |
-| Poole | /areas/poole | Yes | BreadcrumbList | ~250 |
-| Winchester | /areas/winchester | Yes | BreadcrumbList | ~300 |
-| New Forest | /areas/new-forest | Yes | BreadcrumbList | ~280 |
-| Ringwood | /areas/ringwood | Yes | BreadcrumbList | ~230 |
-| Quote | /quote | Yes | None | ~50 + form |
-| About | /about | Yes | None | ~300 |
-| FAQ | /faq | Yes | FAQPage | ~800 |
-| Blog | /blog | **No** | None | ~30 |
-
-*Specialist subagent findings are in: `findings/technical.md`, `findings/content.md`, `findings/schema.md`, `findings/local.md`, `findings/geo.md`, `findings/sxo.md`*
+| Milestone | Actions | Expected Score |
+|---|---|---|
+| Current | — | 62/100 |
+| After Phase 1 (critical trust) | Phone + testimonials + named founder + GBP reviews | ~70/100 |
+| After Phase 2 (content expansion) | Area pages expanded, services page expanded, pricing added | ~76/100 |
+| After Phase 3 (schema + technical) | Entity graph fixed, BreadcrumbList everywhere, canonical cleanup | ~81/100 |
+| After Phase 4 (citations + links) | Tier 1 directories, chamber listings, blog launched | ~86/100 |
