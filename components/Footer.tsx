@@ -39,13 +39,18 @@ export default function Footer() {
             </h3>
             <ul className="space-y-2">
               {footerLinks.map((link) => (
-                <li key={link.href}>
+                <li key={link.href} className="flex items-center gap-2">
                   <Link
                     href={link.href}
                     className="text-sm text-blue-300 hover:text-white transition-colors"
                   >
                     {link.label}
                   </Link>
+                  {link.href === "/blog" && (
+                    <span className="text-xs text-blue-500 border border-blue-700 rounded px-1.5 py-0.5 leading-none">
+                      Coming soon
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
