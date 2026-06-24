@@ -101,7 +101,6 @@ const breadcrumbSchema = {
 export default function AreasPage() {
   return (
     <>
-      <link rel="canonical" href="https://flyerdistributionhampshire.co.uk/areas" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}

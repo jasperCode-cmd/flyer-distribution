@@ -40,7 +40,6 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <>
-      <link rel="canonical" href="https://flyerdistributionhampshire.co.uk/about" />
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">About Us</h1>

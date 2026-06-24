@@ -123,7 +123,6 @@ const localBusinessSchema = {
 export default function HomePage() {
   return (
     <>
-      <link rel="canonical" href="https://flyerdistributionhampshire.co.uk" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}

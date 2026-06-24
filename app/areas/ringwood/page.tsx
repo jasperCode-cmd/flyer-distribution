@@ -65,7 +65,6 @@ const breadcrumbSchema = {
 export default function RingwoodPage() {
   return (
     <>
-      <link rel="canonical" href="https://flyerdistributionhampshire.co.uk/areas/ringwood" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}

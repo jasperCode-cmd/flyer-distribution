@@ -65,7 +65,6 @@ const breadcrumbSchema = {
 export default function BournemouthPage() {
   return (
     <>
-      <link rel="canonical" href="https://flyerdistributionhampshire.co.uk/areas/bournemouth" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
