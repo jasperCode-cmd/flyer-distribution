@@ -79,10 +79,33 @@ const otherAreas = [
   "Chandler's Ford",
 ];
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: "https://flyerdistributionhampshire.co.uk",
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Areas",
+      item: "https://flyerdistributionhampshire.co.uk/areas",
+    },
+  ],
+};
+
 export default function AreasPage() {
   return (
     <>
       <link rel="canonical" href="https://flyerdistributionhampshire.co.uk/areas" />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
