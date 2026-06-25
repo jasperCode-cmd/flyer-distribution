@@ -166,16 +166,28 @@ export default function HomePage() {
                 Get a Free Quote
               </Link>
             </div>
-            {/* Leaflet image — 40% of row width at desktop (~410px) */}
+            {/* Image column — square on mobile, cropped portrait on desktop */}
             <div className="flex justify-center lg:justify-end">
+              {/* Mobile: square 1054×1054, hidden at lg+ */}
               <Image
                 src="/Leaflet going through door with our branding.png"
                 alt="Branded leaflet being delivered through a letterbox"
                 width={1054}
                 height={1054}
                 quality={90}
-                sizes="(max-width: 1023px) min(100vw, 384px), 410px"
-                className="w-full max-w-xs sm:max-w-sm lg:max-w-full rounded-xl shadow-2xl"
+                sizes="min(100vw, 384px)"
+                className="w-full max-w-xs sm:max-w-sm rounded-xl shadow-2xl block lg:hidden"
+                priority
+              />
+              {/* Desktop: cropped portrait 700×1054, shown at lg+ */}
+              <Image
+                src="/Leaflet going through door with our branding cropped.png"
+                alt="Branded leaflet being delivered through a letterbox"
+                width={700}
+                height={1054}
+                quality={90}
+                sizes="410px"
+                className="w-full rounded-xl shadow-2xl hidden lg:block"
                 priority
               />
             </div>
