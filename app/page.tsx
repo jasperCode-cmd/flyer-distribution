@@ -129,8 +129,22 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
       />
       {/* Hero */}
-      <section className="bg-blue-900 text-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+      <section className="relative bg-blue-900 text-white overflow-hidden">
+        {/* Background photo — darkened to stay behind content */}
+        <Image
+          src="https://images.unsplash.com/photo-1464082354059-27db6ce50048?w=1920&q=80"
+          alt=""
+          aria-hidden="true"
+          width={1920}
+          height={800}
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ objectPosition: "center" }}
+          priority
+        />
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-blue-950/80" />
+        {/* Content */}
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
             {/* Text */}
             <div>
@@ -159,6 +173,8 @@ export default function HomePage() {
                 alt="Branded leaflet being delivered through a letterbox"
                 width={1054}
                 height={1054}
+                quality={90}
+                sizes="(max-width: 1023px) min(100vw, 384px), 544px"
                 className="w-full max-w-sm lg:max-w-full rounded-xl shadow-2xl"
                 priority
               />
