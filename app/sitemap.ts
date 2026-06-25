@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const BASE_URL = "https://flyerdistributionhampshire.co.uk";
+const BASE_URL = "https://www.flyerdistributionhampshire.co.uk";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const routes = [

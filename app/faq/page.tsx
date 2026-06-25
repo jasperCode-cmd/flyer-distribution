@@ -6,13 +6,13 @@ export const metadata: Metadata = {
   description:
     "Answers to common questions about leaflet and flyer distribution in Hampshire and Dorset. Covering areas, quantities, campaign planning and more.",
   alternates: {
-    canonical: "https://flyerdistributionhampshire.co.uk/faq",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/faq",
   },
   openGraph: {
     title: "FAQ: Frequently Asked Questions",
     description:
       "Answers to common questions about leaflet and flyer distribution in Hampshire and Dorset. Covering areas, quantities, campaign planning and more.",
-    url: "https://flyerdistributionhampshire.co.uk/faq",
+    url: "https://www.flyerdistributionhampshire.co.uk/faq",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {

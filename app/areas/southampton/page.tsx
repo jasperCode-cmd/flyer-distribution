@@ -7,13 +7,13 @@ export const metadata: Metadata = {
   description:
     "Leaflet and flyer distribution across Southampton. Targeted postcode delivery for businesses reaching Hampshire's largest city.",
   alternates: {
-    canonical: "https://flyerdistributionhampshire.co.uk/areas/southampton",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/southampton",
   },
   openGraph: {
     title: "Flyer Distribution Southampton",
     description:
       "Leaflet and flyer distribution across Southampton. Targeted postcode delivery for businesses reaching Hampshire's largest city.",
-    url: "https://flyerdistributionhampshire.co.uk/areas/southampton",
+    url: "https://www.flyerdistributionhampshire.co.uk/areas/southampton",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -45,19 +45,19 @@ const breadcrumbSchema = {
       "@type": "ListItem",
       position: 1,
       name: "Home",
-      item: "https://flyerdistributionhampshire.co.uk",
+      item: "https://www.flyerdistributionhampshire.co.uk",
     },
     {
       "@type": "ListItem",
       position: 2,
       name: "Areas",
-      item: "https://flyerdistributionhampshire.co.uk/areas",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas",
     },
     {
       "@type": "ListItem",
       position: 3,
       name: "Southampton",
-      item: "https://flyerdistributionhampshire.co.uk/areas/southampton",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas/southampton",
     },
   ],
 };

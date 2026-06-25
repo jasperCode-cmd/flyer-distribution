@@ -7,13 +7,13 @@ export const metadata: Metadata = {
   description:
     "Leaflet and flyer distribution across the New Forest, Hampshire. Door-to-door delivery to households in New Forest towns and villages.",
   alternates: {
-    canonical: "https://flyerdistributionhampshire.co.uk/areas/new-forest",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/new-forest",
   },
   openGraph: {
     title: "Flyer Distribution New Forest",
     description:
       "Leaflet and flyer distribution across the New Forest, Hampshire. Door-to-door delivery to households in New Forest towns and villages.",
-    url: "https://flyerdistributionhampshire.co.uk/areas/new-forest",
+    url: "https://www.flyerdistributionhampshire.co.uk/areas/new-forest",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -45,19 +45,19 @@ const breadcrumbSchema = {
       "@type": "ListItem",
       position: 1,
       name: "Home",
-      item: "https://flyerdistributionhampshire.co.uk",
+      item: "https://www.flyerdistributionhampshire.co.uk",
     },
     {
       "@type": "ListItem",
       position: 2,
       name: "Areas",
-      item: "https://flyerdistributionhampshire.co.uk/areas",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas",
     },
     {
       "@type": "ListItem",
       position: 3,
       name: "New Forest",
-      item: "https://flyerdistributionhampshire.co.uk/areas/new-forest",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas/new-forest",
     },
   ],
 };

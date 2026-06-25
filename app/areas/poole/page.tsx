@@ -7,13 +7,13 @@ export const metadata: Metadata = {
   description:
     "Professional leaflet and flyer distribution across Poole, Dorset. Targeted delivery to residential areas around Poole Harbour.",
   alternates: {
-    canonical: "https://flyerdistributionhampshire.co.uk/areas/poole",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/poole",
   },
   openGraph: {
     title: "Flyer Distribution Poole",
     description:
       "Professional leaflet and flyer distribution across Poole, Dorset. Targeted delivery to residential areas around Poole Harbour.",
-    url: "https://flyerdistributionhampshire.co.uk/areas/poole",
+    url: "https://www.flyerdistributionhampshire.co.uk/areas/poole",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -45,19 +45,19 @@ const breadcrumbSchema = {
       "@type": "ListItem",
       position: 1,
       name: "Home",
-      item: "https://flyerdistributionhampshire.co.uk",
+      item: "https://www.flyerdistributionhampshire.co.uk",
     },
     {
       "@type": "ListItem",
       position: 2,
       name: "Areas",
-      item: "https://flyerdistributionhampshire.co.uk/areas",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas",
     },
     {
       "@type": "ListItem",
       position: 3,
       name: "Poole",
-      item: "https://flyerdistributionhampshire.co.uk/areas/poole",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas/poole",
     },
   ],
 };

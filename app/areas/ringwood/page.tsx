@@ -7,13 +7,13 @@ export const metadata: Metadata = {
   description:
     "Leaflet and flyer distribution across Ringwood and surrounding areas in Hampshire. Targeted delivery to local households.",
   alternates: {
-    canonical: "https://flyerdistributionhampshire.co.uk/areas/ringwood",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/ringwood",
   },
   openGraph: {
     title: "Flyer Distribution Ringwood",
     description:
       "Leaflet and flyer distribution across Ringwood and surrounding areas in Hampshire. Targeted delivery to local households.",
-    url: "https://flyerdistributionhampshire.co.uk/areas/ringwood",
+    url: "https://www.flyerdistributionhampshire.co.uk/areas/ringwood",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -45,19 +45,19 @@ const breadcrumbSchema = {
       "@type": "ListItem",
       position: 1,
       name: "Home",
-      item: "https://flyerdistributionhampshire.co.uk",
+      item: "https://www.flyerdistributionhampshire.co.uk",
     },
     {
       "@type": "ListItem",
       position: 2,
       name: "Areas",
-      item: "https://flyerdistributionhampshire.co.uk/areas",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas",
     },
     {
       "@type": "ListItem",
       position: 3,
       name: "Ringwood",
-      item: "https://flyerdistributionhampshire.co.uk/areas/ringwood",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas/ringwood",
     },
   ],
 };

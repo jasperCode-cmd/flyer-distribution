@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     title: "Flyer Distribution Hampshire",
     description:
       "Professional flyer and leaflet distribution across Hampshire and Dorset.",
-    url: "https://flyerdistributionhampshire.co.uk",
+    url: "https://www.flyerdistributionhampshire.co.uk",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -51,11 +51,11 @@ export const metadata: Metadata = {
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "@id": "https://flyerdistributionhampshire.co.uk/#website",
+  "@id": "https://www.flyerdistributionhampshire.co.uk/#website",
   "name": "Flyer Distribution Hampshire",
-  "url": "https://flyerdistributionhampshire.co.uk",
+  "url": "https://www.flyerdistributionhampshire.co.uk",
   "publisher": {
-    "@id": "https://flyerdistributionhampshire.co.uk/#business",
+    "@id": "https://www.flyerdistributionhampshire.co.uk/#business",
   },
   "inLanguage": "en-GB",
 };

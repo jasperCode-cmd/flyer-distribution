@@ -9,13 +9,13 @@ export const metadata: Metadata = {
     follow: true,
   },
   alternates: {
-    canonical: "https://flyerdistributionhampshire.co.uk/blog",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/blog",
   },
   openGraph: {
     title: "Leaflet Distribution Blog",
     description:
       "Tips, guides, and news from the Flyer Distribution Hampshire team. Learn how to get the most from your leaflet campaigns.",
-    url: "https://flyerdistributionhampshire.co.uk/blog",
+    url: "https://www.flyerdistributionhampshire.co.uk/blog",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {

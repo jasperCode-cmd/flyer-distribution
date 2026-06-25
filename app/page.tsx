@@ -7,13 +7,13 @@ export const metadata: Metadata = {
   description:
     "Reliable flyer and leaflet distribution across Hampshire and Dorset. Reach real households in Southampton, Bournemouth, Poole and Winchester.",
   alternates: {
-    canonical: "https://flyerdistributionhampshire.co.uk",
+    canonical: "https://www.flyerdistributionhampshire.co.uk",
   },
   openGraph: {
     title: "Flyer Distribution Hampshire | Local Leaflet & Flyer Delivery",
     description:
       "Reliable flyer and leaflet distribution across Hampshire and Dorset. Reach real households in Southampton, Bournemouth, Poole and Winchester.",
-    url: "https://flyerdistributionhampshire.co.uk",
+    url: "https://www.flyerdistributionhampshire.co.uk",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -94,13 +94,13 @@ const areas = [
 const localBusinessSchema = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
-  "@id": "https://flyerdistributionhampshire.co.uk/#business",
+  "@id": "https://www.flyerdistributionhampshire.co.uk/#business",
   "name": "Flyer Distribution Hampshire",
   "description":
     "Professional flyer and leaflet distribution across Hampshire and Dorset. Reach real households in Southampton, Bournemouth, Poole and Winchester.",
-  "url": "https://flyerdistributionhampshire.co.uk",
+  "url": "https://www.flyerdistributionhampshire.co.uk",
   "email": "flyerdistributionhampshire@gmail.com",
-  "image": "https://flyerdistributionhampshire.co.uk/Flyer%20Distribution%20Logo%20White%20Cropped.png",
+  "image": "https://www.flyerdistributionhampshire.co.uk/Flyer%20Distribution%20Logo%20White%20Cropped.png",
   "sameAs": [
     "https://share.google/RVxyPi4TzXAzkt1Am",
   ],

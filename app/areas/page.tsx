@@ -6,13 +6,13 @@ export const metadata: Metadata = {
   description:
     "Flyer and leaflet distribution across Hampshire and Dorset. View coverage areas including Southampton, Bournemouth, Poole and Winchester.",
   alternates: {
-    canonical: "https://flyerdistributionhampshire.co.uk/areas",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/areas",
   },
   openGraph: {
     title: "Hampshire & Dorset Coverage Areas",
     description:
       "Flyer and leaflet distribution across Hampshire and Dorset. View coverage areas including Southampton, Bournemouth, Poole and Winchester.",
-    url: "https://flyerdistributionhampshire.co.uk/areas",
+    url: "https://www.flyerdistributionhampshire.co.uk/areas",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -87,13 +87,13 @@ const breadcrumbSchema = {
       "@type": "ListItem",
       position: 1,
       name: "Home",
-      item: "https://flyerdistributionhampshire.co.uk",
+      item: "https://www.flyerdistributionhampshire.co.uk",
     },
     {
       "@type": "ListItem",
       position: 2,
       name: "Areas",
-      item: "https://flyerdistributionhampshire.co.uk/areas",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas",
     },
   ],
 };

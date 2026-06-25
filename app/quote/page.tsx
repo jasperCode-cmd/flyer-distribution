@@ -6,13 +6,13 @@ export const metadata: Metadata = {
   description:
     "Request a free, no-obligation quote for flyer and leaflet distribution across Hampshire and Dorset.",
   alternates: {
-    canonical: "https://flyerdistributionhampshire.co.uk/quote",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/quote",
   },
   openGraph: {
     title: "Get a Free Quote",
     description:
       "Request a free, no-obligation quote for flyer and leaflet distribution across Hampshire and Dorset.",
-    url: "https://flyerdistributionhampshire.co.uk/quote",
+    url: "https://www.flyerdistributionhampshire.co.uk/quote",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {

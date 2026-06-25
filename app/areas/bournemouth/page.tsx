@@ -7,13 +7,13 @@ export const metadata: Metadata = {
   description:
     "Leaflet and flyer distribution across Bournemouth. Targeted door-to-door delivery for local businesses in Dorset.",
   alternates: {
-    canonical: "https://flyerdistributionhampshire.co.uk/areas/bournemouth",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/bournemouth",
   },
   openGraph: {
     title: "Flyer Distribution Bournemouth",
     description:
       "Leaflet and flyer distribution across Bournemouth. Targeted door-to-door delivery for local businesses in Dorset.",
-    url: "https://flyerdistributionhampshire.co.uk/areas/bournemouth",
+    url: "https://www.flyerdistributionhampshire.co.uk/areas/bournemouth",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -45,19 +45,19 @@ const breadcrumbSchema = {
       "@type": "ListItem",
       position: 1,
       name: "Home",
-      item: "https://flyerdistributionhampshire.co.uk",
+      item: "https://www.flyerdistributionhampshire.co.uk",
     },
     {
       "@type": "ListItem",
       position: 2,
       name: "Areas",
-      item: "https://flyerdistributionhampshire.co.uk/areas",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas",
     },
     {
       "@type": "ListItem",
       position: 3,
       name: "Bournemouth",
-      item: "https://flyerdistributionhampshire.co.uk/areas/bournemouth",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas/bournemouth",
     },
   ],
 };

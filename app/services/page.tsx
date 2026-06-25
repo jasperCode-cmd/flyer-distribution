@@ -7,13 +7,13 @@ export const metadata: Metadata = {
   description:
     "Full design, print and leaflet distribution services across Hampshire and Dorset. Choose our end-to-end package or distribution-only service.",
   alternates: {
-    canonical: "https://flyerdistributionhampshire.co.uk/services",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/services",
   },
   openGraph: {
     title: "Leaflet Distribution Services",
     description:
       "Full design, print and leaflet distribution services across Hampshire and Dorset. Choose our end-to-end package or distribution-only service.",
-    url: "https://flyerdistributionhampshire.co.uk/services",
+    url: "https://www.flyerdistributionhampshire.co.uk/services",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -92,7 +92,7 @@ const servicesSchema = {
       "provider": {
         "@type": "LocalBusiness",
         "name": "Flyer Distribution Hampshire",
-        "url": "https://flyerdistributionhampshire.co.uk",
+        "url": "https://www.flyerdistributionhampshire.co.uk",
       },
       "areaServed": "Hampshire and Dorset",
     },
@@ -104,7 +104,7 @@ const servicesSchema = {
       "provider": {
         "@type": "LocalBusiness",
         "name": "Flyer Distribution Hampshire",
-        "url": "https://flyerdistributionhampshire.co.uk",
+        "url": "https://www.flyerdistributionhampshire.co.uk",
       },
       "areaServed": "Hampshire and Dorset",
     },
@@ -116,7 +116,7 @@ const servicesSchema = {
       "provider": {
         "@type": "LocalBusiness",
         "name": "Flyer Distribution Hampshire",
-        "url": "https://flyerdistributionhampshire.co.uk",
+        "url": "https://www.flyerdistributionhampshire.co.uk",
       },
       "areaServed": "Hampshire and Dorset",
     },
@@ -128,7 +128,7 @@ const servicesSchema = {
       "provider": {
         "@type": "LocalBusiness",
         "name": "Flyer Distribution Hampshire",
-        "url": "https://flyerdistributionhampshire.co.uk",
+        "url": "https://www.flyerdistributionhampshire.co.uk",
       },
       "areaServed": "Hampshire and Dorset",
     },
@@ -140,7 +140,7 @@ const servicesSchema = {
       "provider": {
         "@type": "LocalBusiness",
         "name": "Flyer Distribution Hampshire",
-        "url": "https://flyerdistributionhampshire.co.uk",
+        "url": "https://www.flyerdistributionhampshire.co.uk",
       },
       "areaServed": "Hampshire and Dorset",
     },
@@ -152,7 +152,7 @@ const servicesSchema = {
       "provider": {
         "@type": "LocalBusiness",
         "name": "Flyer Distribution Hampshire",
-        "url": "https://flyerdistributionhampshire.co.uk",
+        "url": "https://www.flyerdistributionhampshire.co.uk",
       },
       "areaServed": "Hampshire and Dorset",
     },
