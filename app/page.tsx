@@ -145,16 +145,16 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-blue-950/80" />
         {/* Content */}
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-          <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr] gap-10 lg:gap-12 items-center">
-            {/* Text */}
+          <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-10 lg:gap-16 items-center">
+            {/* Text — 60% of row width at desktop */}
             <div>
               <p className="text-blue-300 text-sm font-semibold uppercase tracking-widest mb-4">
                 Hampshire &amp; Dorset
               </p>
-              <h1 className="text-4xl sm:text-5xl lg:text-5xl font-bold leading-tight mb-6">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
                 Professional Flyer Distribution in Hampshire and Dorset
               </h1>
-              <p className="text-blue-100 text-lg leading-relaxed mb-8">
+              <p className="text-blue-100 text-lg sm:text-xl leading-relaxed mb-8">
                 We deliver your leaflets and flyers directly through letterboxes
                 across Hampshire and Dorset, helping local businesses reach real
                 customers in the right postcodes.
@@ -166,7 +166,7 @@ export default function HomePage() {
                 Get a Free Quote
               </Link>
             </div>
-            {/* Leaflet image — 3/5 of the grid width (~60%) */}
+            {/* Leaflet image — 40% of row width at desktop (~410px) */}
             <div className="flex justify-center lg:justify-end">
               <Image
                 src="/Leaflet going through door with our branding.png"
@@ -174,7 +174,7 @@ export default function HomePage() {
                 width={1054}
                 height={1054}
                 quality={90}
-                sizes="(max-width: 1023px) min(100vw, 384px), 650px"
+                sizes="(max-width: 1023px) min(100vw, 384px), 410px"
                 className="w-full max-w-xs sm:max-w-sm lg:max-w-full rounded-xl shadow-2xl"
                 priority
               />
