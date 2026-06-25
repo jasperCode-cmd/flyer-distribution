@@ -129,35 +129,40 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
       />
       {/* Hero */}
-      <section className="relative bg-blue-900 text-white overflow-hidden">
-        <Image
-          src="https://images.unsplash.com/photo-1464082354059-27db6ce50048?w=1920&q=80"
-          alt="Flyer distributor walking through a Hampshire street"
-          width={1600}
-          height={700}
-          className="absolute inset-0 w-full h-full object-cover opacity-20"
-          style={{ objectPosition: 'center', transform: 'scale(1.2)' }}
-          priority
-        />
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-28 lg:py-36">
-          <div className="max-w-2xl">
-            <p className="text-blue-300 text-sm font-semibold uppercase tracking-widest mb-4">
-              Hampshire &amp; Dorset
-            </p>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-              Professional Flyer Distribution in Hampshire and Dorset
-            </h1>
-            <p className="text-blue-100 text-lg sm:text-xl leading-relaxed mb-8">
-              We deliver your leaflets and flyers directly through letterboxes
-              across Hampshire and Dorset, helping local businesses reach real
-              customers in the right postcodes.
-            </p>
-            <Link
-              href="/quote"
-              className="inline-block bg-white text-blue-900 hover:bg-blue-50 font-bold px-8 py-4 rounded-md text-base transition-colors shadow-lg"
-            >
-              Get a Free Quote
-            </Link>
+      <section className="bg-blue-900 text-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+            {/* Text */}
+            <div>
+              <p className="text-blue-300 text-sm font-semibold uppercase tracking-widest mb-4">
+                Hampshire &amp; Dorset
+              </p>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+                Professional Flyer Distribution in Hampshire and Dorset
+              </h1>
+              <p className="text-blue-100 text-lg sm:text-xl leading-relaxed mb-8">
+                We deliver your leaflets and flyers directly through letterboxes
+                across Hampshire and Dorset, helping local businesses reach real
+                customers in the right postcodes.
+              </p>
+              <Link
+                href="/quote"
+                className="inline-block bg-white text-blue-900 hover:bg-blue-50 font-bold px-8 py-4 rounded-md text-base transition-colors shadow-lg"
+              >
+                Get a Free Quote
+              </Link>
+            </div>
+            {/* Leaflet image */}
+            <div className="flex justify-center lg:justify-end">
+              <Image
+                src="/Leaflet going through door with our branding.png"
+                alt="Branded leaflet being delivered through a letterbox"
+                width={1054}
+                height={1054}
+                className="w-full max-w-sm lg:max-w-full rounded-xl shadow-2xl"
+                priority
+              />
+            </div>
           </div>
         </div>
       </section>
