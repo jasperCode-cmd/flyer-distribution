@@ -200,7 +200,7 @@ export default function HomePage() {
 
       {/* Stats bar */}
       <section className="bg-blue-900 text-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-6">
 
             {/* 92% — filled/duotone eye */}
@@ -236,15 +236,15 @@ export default function HomePage() {
             </div>
 
             {/* 4/5 — 4 filled + 1 outline person */}
-            <div className="text-center">
-              <div className="flex justify-center items-center gap-1 mb-5" aria-hidden="true">
+            <div className="text-center flex flex-col items-center">
+              <div className="flex items-center justify-center gap-1 mb-5" aria-hidden="true">
                 {[0, 1, 2, 3, 4].map((i) =>
                   i < 4 ? (
-                    <svg key={i} className="w-9 h-9 text-white" viewBox="0 0 24 24" fill="currentColor">
+                    <svg key={i} className="w-9 h-9 text-white block" viewBox="0 0 24 24" fill="currentColor">
                       <path d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" />
                     </svg>
                   ) : (
-                    <svg key={i} className="w-9 h-9 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                    <svg key={i} className="w-9 h-9 text-blue-400 block" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                     </svg>
                   )
@@ -257,7 +257,7 @@ export default function HomePage() {
             </div>
 
           </div>
-          <p className="text-center text-blue-300 text-xs mt-12">
+          <p className="text-center text-blue-300 text-xs mt-6">
             Source: Royal Mail
           </p>
         </div>
