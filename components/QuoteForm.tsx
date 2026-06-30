@@ -376,6 +376,28 @@ export default function QuoteForm() {
           </p>
         </div>
 
+        {/* Budget */}
+        <div>
+          <label
+            htmlFor="budget"
+            className="block text-sm font-medium text-gray-700 mb-1"
+          >
+            Approximate campaign budget
+          </label>
+          <select
+            id="budget"
+            name="budget"
+            className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+          >
+            <option value="">Select a range...</option>
+            <option>£150 - £300</option>
+            <option>£300 - £500</option>
+            <option>£500 - £1,000</option>
+            <option>£1,000 - £2,000</option>
+            <option>£2,000+</option>
+          </select>
+        </div>
+
         {/* Message */}
         <div>
           <label
