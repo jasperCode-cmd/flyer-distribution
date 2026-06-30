@@ -52,7 +52,7 @@ const trustSignals = [
   {
     icon: "✅",
     title: "Tracked and Assured Delivery",
-    body: "Every round is completed by vetted, experienced distributors. We track every campaign and follow up to make sure your leaflets have been delivered so you can be confident your materials reached the right doors.",
+    body: "Every round is completed by vetted, experienced distributors who confirm completion, so you can be confident your materials reached the right doors.",
   },
 ];
 
@@ -197,6 +197,41 @@ export default function HomePage() {
       </section>
 
       <Testimonials />
+
+      {/* Stats bar */}
+      <section className="bg-blue-900 text-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4">
+            <div className="text-center">
+              <div className="text-4xl mb-3" aria-hidden="true">
+                <svg className="w-10 h-10 mx-auto text-blue-300" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.77 9.77 0 01-4-.84L3 20l1.09-3.27A7.96 7.96 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </div>
+              <p className="text-4xl sm:text-5xl font-bold mb-2">89%</p>
+              <p className="text-blue-200 text-sm leading-relaxed max-w-xs mx-auto">of customers remember door-drop mail more than other forms of advertising</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl mb-3" aria-hidden="true">
+                <svg className="w-10 h-10 mx-auto text-blue-300" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 2C8.686 2 6 4.686 6 8c0 5.25 6 13 6 13s6-7.75 6-13c0-3.314-2.686-6-6-6zm0 8a2 2 0 110-4 2 2 0 010 4z" />
+                </svg>
+              </div>
+              <p className="text-4xl sm:text-5xl font-bold mb-2">45%</p>
+              <p className="text-blue-200 text-sm leading-relaxed max-w-xs mx-auto">keep leaflets for later use on a pinboard, kitchen side, or in a drawer</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl mb-3" aria-hidden="true">
+                <svg className="w-10 h-10 mx-auto text-blue-300" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-1a4 4 0 00-4-4h-1M9 20H4v-1a4 4 0 014-4h1m4 5v-1a4 4 0 00-3-3.87M15 7a4 4 0 11-8 0 4 4 0 018 0zm6 3a3 3 0 11-6 0 3 3 0 016 0zM3 10a3 3 0 116 0 3 3 0 01-6 0z" />
+                </svg>
+              </div>
+              <p className="text-4xl sm:text-5xl font-bold mb-2">4/5</p>
+              <p className="text-blue-200 text-sm leading-relaxed max-w-xs mx-auto">people will take a look at a leaflet when it lands on their doorstep</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Trust signals */}
       <section className="bg-white border-b border-gray-100">
