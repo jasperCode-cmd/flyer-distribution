@@ -49,17 +49,15 @@ export default function Testimonials() {
 
           {/* Card 2 — Kola Construction */}
           <div className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col">
-            {/* Badges flank the logo, bottom-aligned so they overlap its lower portion */}
-            <div className="flex items-end justify-center mb-4">
-              <div className="relative z-10 -mr-2 shrink-0">
-                <Image
-                  src="/grand designs live.webp"
-                  alt="Grand Designs Live exhibitor badge"
-                  width={200}
-                  height={100}
-                  className="h-14 w-auto object-contain"
-                />
-              </div>
+            {/* Badges flanking the logo with clear separation, bottom-aligned */}
+            <div className="flex items-end justify-between mb-4">
+              <Image
+                src="/grand designs live.webp"
+                alt="Grand Designs Live exhibitor badge"
+                width={200}
+                height={100}
+                className="h-14 w-auto object-contain shrink-0"
+              />
               <Image
                 src="/KOLA-CONSTRUCTION-LOGO.webp"
                 alt="Kola Construction logo"
@@ -67,15 +65,13 @@ export default function Testimonials() {
                 height={80}
                 className="h-16 w-auto object-contain shrink-0"
               />
-              <div className="relative z-10 -ml-2 shrink-0">
-                <Image
-                  src="/logo_exhibitor_default.webp"
-                  alt="Ideal Home Show exhibitor badge"
-                  width={200}
-                  height={100}
-                  className="h-10 w-auto object-contain"
-                />
-              </div>
+              <Image
+                src="/logo_exhibitor_default.webp"
+                alt="Ideal Home Show exhibitor badge"
+                width={200}
+                height={100}
+                className="h-8 w-auto object-contain shrink-0"
+              />
             </div>
             <Stars />
             <blockquote className="text-gray-600 text-sm leading-relaxed mb-3">
