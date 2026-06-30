@@ -200,35 +200,56 @@ export default function HomePage() {
 
       {/* Stats bar */}
       <section className="bg-blue-900 text-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-6">
+
+            {/* 89% — filled speech/thought bubble */}
             <div className="text-center">
-              <div className="text-4xl mb-3" aria-hidden="true">
-                <svg className="w-10 h-10 mx-auto text-blue-300" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.77 9.77 0 01-4-.84L3 20l1.09-3.27A7.96 7.96 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              <div className="flex justify-center mb-5" aria-hidden="true">
+                <svg className="w-14 h-14 text-blue-300" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
                 </svg>
               </div>
-              <p className="text-4xl sm:text-5xl font-bold mb-2">89%</p>
-              <p className="text-blue-200 text-sm leading-relaxed max-w-xs mx-auto">of customers remember door-drop mail more than other forms of advertising</p>
+              <p className="text-5xl sm:text-6xl font-bold mb-3">89%</p>
+              <p className="text-blue-200 text-sm leading-relaxed max-w-[13rem] mx-auto">
+                of customers remember door-drop mail more than other forms of advertising
+              </p>
             </div>
+
+            {/* 45% — filled location pin */}
             <div className="text-center">
-              <div className="text-4xl mb-3" aria-hidden="true">
-                <svg className="w-10 h-10 mx-auto text-blue-300" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 2C8.686 2 6 4.686 6 8c0 5.25 6 13 6 13s6-7.75 6-13c0-3.314-2.686-6-6-6zm0 8a2 2 0 110-4 2 2 0 010 4z" />
+              <div className="flex justify-center mb-5" aria-hidden="true">
+                <svg className="w-14 h-14 text-blue-300" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z" />
                 </svg>
               </div>
-              <p className="text-4xl sm:text-5xl font-bold mb-2">45%</p>
-              <p className="text-blue-200 text-sm leading-relaxed max-w-xs mx-auto">keep leaflets for later use on a pinboard, kitchen side, or in a drawer</p>
+              <p className="text-5xl sm:text-6xl font-bold mb-3">45%</p>
+              <p className="text-blue-200 text-sm leading-relaxed max-w-[13rem] mx-auto">
+                keep leaflets for later use on a pinboard, kitchen side, or in a drawer
+              </p>
             </div>
+
+            {/* 4/5 — 4 filled + 1 outline person */}
             <div className="text-center">
-              <div className="text-4xl mb-3" aria-hidden="true">
-                <svg className="w-10 h-10 mx-auto text-blue-300" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-1a4 4 0 00-4-4h-1M9 20H4v-1a4 4 0 014-4h1m4 5v-1a4 4 0 00-3-3.87M15 7a4 4 0 11-8 0 4 4 0 018 0zm6 3a3 3 0 11-6 0 3 3 0 016 0zM3 10a3 3 0 116 0 3 3 0 01-6 0z" />
-                </svg>
+              <div className="flex justify-center items-end gap-1 mb-5" aria-hidden="true">
+                {[0, 1, 2, 3, 4].map((i) =>
+                  i < 4 ? (
+                    <svg key={i} className="w-9 h-9 text-white" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" />
+                    </svg>
+                  ) : (
+                    <svg key={i} className="w-9 h-9 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
+                  )
+                )}
               </div>
-              <p className="text-4xl sm:text-5xl font-bold mb-2">4/5</p>
-              <p className="text-blue-200 text-sm leading-relaxed max-w-xs mx-auto">people will take a look at a leaflet when it lands on their doorstep</p>
+              <p className="text-5xl sm:text-6xl font-bold mb-3">4/5</p>
+              <p className="text-blue-200 text-sm leading-relaxed max-w-[13rem] mx-auto">
+                people will take a look at a leaflet when it lands on their doorstep
+              </p>
             </div>
+
           </div>
         </div>
       </section>
