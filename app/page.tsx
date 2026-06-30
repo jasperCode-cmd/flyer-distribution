@@ -156,9 +156,9 @@ export default function HomePage() {
                 Professional Flyer Distribution in Hampshire and Dorset
               </h1>
               <p className="text-blue-100 text-lg sm:text-xl leading-relaxed mb-8">
-                We deliver your leaflets and flyers directly through letterboxes
-                across Hampshire and Dorset, helping local businesses reach real
-                customers in the right postcodes.
+                We deliver and track your leaflets and flyers directly through
+                letterboxes across Hampshire and Dorset, helping local businesses
+                reach real customers in the right postcodes.
               </p>
               <Link
                 href="/quote"
