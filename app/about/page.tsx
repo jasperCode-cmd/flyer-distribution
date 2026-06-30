@@ -51,7 +51,8 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="bg-slate-50 py-16">
+      {/* Intro — two-column with image */}
+      <section className="bg-slate-50 pt-16 pb-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div>
             <p className="text-gray-600 mb-4 leading-relaxed">
@@ -68,58 +69,12 @@ export default function AboutPage() {
               design and SEO, helping businesses build a stronger presence both
               online and offline.
             </p>
-            <p className="text-gray-600 mb-8 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed">
               We&apos;re small enough to offer a genuinely personal service, with
               distributors who are fully vetted, trained, and know their routes
               inside out. We cover all major towns and cities across Hampshire and
               into Dorset, including Bournemouth and Poole.
             </p>
-
-            <h2 className="text-2xl font-bold text-blue-900 mb-4">
-              Who We Are
-            </h2>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              Flyer Distribution Hampshire was co-founded by Jasper and Daniel,
-              who both graduated in 2025, Jasper from the University of
-              Southampton and Daniel from Bournemouth University. Together they
-              combine modern digital marketing expertise with proven offline
-              advertising methods to give businesses a complete marketing solution.
-            </p>
-
-            <h3 className="text-lg font-semibold text-blue-900 mb-2">
-              Jasper, Co-Founder &amp; Operations Director
-            </h3>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              Jasper brings extensive expertise in website design and development,
-              search engine optimisation (SEO), organic digital marketing, and
-              social media growth. His passion for helping businesses improve their
-              online visibility ensures clients benefit from marketing strategies
-              that continue delivering results long after a campaign has finished.
-            </p>
-
-            <h3 className="text-lg font-semibold text-blue-900 mb-2">
-              Daniel, Co-Founder &amp; Sales Director
-            </h3>
-            <p className="text-gray-600 mb-8 leading-relaxed">
-              Daniel has a strong background in sales, media, marketing, and
-              business development. His experience in building client
-              relationships, developing advertising strategies, and growing brands
-              through social media enables him to create marketing campaigns that
-              are both effective and commercially focused.
-            </p>
-
-            <p className="text-gray-600 mb-8 leading-relaxed">
-              If you have a campaign in mind, we&apos;d be delighted to discuss
-              how Flyer Distribution Hampshire can help your business reach more
-              customers and achieve measurable growth.
-            </p>
-
-            <Link
-              href="/quote"
-              className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition-colors"
-            >
-              Get a Free Quote
-            </Link>
           </div>
           <div>
             <Image
@@ -130,6 +85,57 @@ export default function AboutPage() {
               className="rounded-lg w-full object-cover"
             />
           </div>
+        </div>
+      </section>
+
+      {/* Who We Are — full width */}
+      <section className="bg-slate-50 pb-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-bold text-blue-900 mb-4">
+            Who We Are
+          </h2>
+          <p className="text-gray-600 mb-6 leading-relaxed">
+            Flyer Distribution Hampshire was co-founded by Jasper and Daniel,
+            who both graduated in 2025, Jasper from the University of
+            Southampton and Daniel from Bournemouth University. Together they
+            combine modern digital marketing expertise with proven offline
+            advertising methods to give businesses a complete marketing solution.
+          </p>
+
+          <h3 className="text-lg font-semibold text-blue-900 mb-2">
+            Jasper, Co-Founder &amp; Operations Director
+          </h3>
+          <p className="text-gray-600 mb-6 leading-relaxed">
+            Jasper brings extensive expertise in website design and development,
+            search engine optimisation (SEO), organic digital marketing, and
+            social media growth. His passion for helping businesses improve their
+            online visibility ensures clients benefit from marketing strategies
+            that continue delivering results long after a campaign has finished.
+          </p>
+
+          <h3 className="text-lg font-semibold text-blue-900 mb-2">
+            Daniel, Co-Founder &amp; Sales Director
+          </h3>
+          <p className="text-gray-600 mb-8 leading-relaxed">
+            Daniel has a strong background in sales, media, marketing, and
+            business development. His experience in building client
+            relationships, developing advertising strategies, and growing brands
+            through social media enables him to create marketing campaigns that
+            are both effective and commercially focused.
+          </p>
+
+          <p className="text-gray-600 mb-8 leading-relaxed">
+            If you have a campaign in mind, we&apos;d be delighted to discuss
+            how Flyer Distribution Hampshire can help your business reach more
+            customers and achieve measurable growth.
+          </p>
+
+          <Link
+            href="/quote"
+            className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition-colors"
+          >
+            Get a Free Quote
+          </Link>
         </div>
       </section>
 
