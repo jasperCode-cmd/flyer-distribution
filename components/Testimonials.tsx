@@ -49,32 +49,33 @@ export default function Testimonials() {
 
           {/* Card 2 — Kola Construction */}
           <div className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col">
-            {/* Exhibitor badges above logo, flanking left and right */}
-            <div className="flex justify-between items-center mb-2">
-              <Image
-                src="/grand designs live.webp"
-                alt="Grand Designs Live exhibitor badge"
-                width={200}
-                height={100}
-                className="h-9 w-auto object-contain"
-              />
-              <Image
-                src="/logo_exhibitor_default.webp"
-                alt="Ideal Home Show exhibitor badge"
-                width={200}
-                height={100}
-                className="h-9 w-auto object-contain"
-              />
-            </div>
-            {/* Kola logo, larger */}
-            <div className="flex items-center justify-center mb-4">
+            {/* Badges flank the logo, bottom-aligned so they overlap its lower portion */}
+            <div className="flex items-end justify-center mb-4">
+              <div className="relative z-10 -mr-2 shrink-0">
+                <Image
+                  src="/grand designs live.webp"
+                  alt="Grand Designs Live exhibitor badge"
+                  width={200}
+                  height={100}
+                  className="h-14 w-auto object-contain"
+                />
+              </div>
               <Image
                 src="/KOLA-CONSTRUCTION-LOGO.webp"
                 alt="Kola Construction logo"
                 width={200}
                 height={80}
-                className="h-16 w-auto object-contain"
+                className="h-16 w-auto object-contain shrink-0"
               />
+              <div className="relative z-10 -ml-2 shrink-0">
+                <Image
+                  src="/logo_exhibitor_default.webp"
+                  alt="Ideal Home Show exhibitor badge"
+                  width={200}
+                  height={100}
+                  className="h-10 w-auto object-contain"
+                />
+              </div>
             </div>
             <Stars />
             <blockquote className="text-gray-600 text-sm leading-relaxed mb-3">
