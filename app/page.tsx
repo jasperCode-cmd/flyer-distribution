@@ -201,12 +201,12 @@ export default function HomePage() {
       {/* Stats bar */}
       <section className="bg-blue-900 text-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-6 items-start">
 
             {/* 92% — filled/duotone eye */}
-            <div className="text-center">
-              <div className="flex justify-center mb-5" aria-hidden="true">
-                <svg className="w-14 h-14 text-blue-300" viewBox="0 0 24 24" fill="currentColor">
+            <div className="flex flex-col items-center text-center">
+              <div className="h-14 flex items-end justify-center mb-5" aria-hidden="true">
+                <svg className="w-14 h-14 text-blue-300 block" viewBox="0 0 24 24" fill="currentColor">
                   <path
                     fillRule="evenodd"
                     clipRule="evenodd"
@@ -216,28 +216,28 @@ export default function HomePage() {
                   <circle cx="12" cy="12" r="3" />
                 </svg>
               </div>
-              <p className="text-5xl sm:text-6xl font-bold mb-3">92%</p>
-              <p className="text-blue-200 text-sm leading-relaxed max-w-[13rem] mx-auto">
+              <p className="text-5xl sm:text-6xl font-bold mb-3 leading-none">92%</p>
+              <p className="text-blue-200 text-sm leading-relaxed max-w-[13rem]">
                 of people who receive a door drop read it
               </p>
             </div>
 
             {/* 74% — filled location pin */}
-            <div className="text-center">
-              <div className="flex justify-center mb-5" aria-hidden="true">
-                <svg className="w-14 h-14 text-blue-300" viewBox="0 0 24 24" fill="currentColor">
+            <div className="flex flex-col items-center text-center">
+              <div className="h-14 flex items-end justify-center mb-5" aria-hidden="true">
+                <svg className="w-14 h-14 text-blue-300 block" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z" />
                 </svg>
               </div>
-              <p className="text-5xl sm:text-6xl font-bold mb-3">74%</p>
-              <p className="text-blue-200 text-sm leading-relaxed max-w-[13rem] mx-auto">
+              <p className="text-5xl sm:text-6xl font-bold mb-3 leading-none">74%</p>
+              <p className="text-blue-200 text-sm leading-relaxed max-w-[13rem]">
                 of door drops are opened, read, filed or set aside for later
               </p>
             </div>
 
             {/* 4/5 — 4 filled + 1 outline person */}
-            <div className="text-center flex flex-col items-center">
-              <div className="flex items-center justify-center gap-1 mb-5" aria-hidden="true">
+            <div className="flex flex-col items-center text-center">
+              <div className="h-14 flex items-end justify-center gap-1 mb-5" aria-hidden="true">
                 {[0, 1, 2, 3, 4].map((i) =>
                   i < 4 ? (
                     <svg key={i} className="w-9 h-9 text-white block" viewBox="0 0 24 24" fill="currentColor">
@@ -250,8 +250,8 @@ export default function HomePage() {
                   )
                 )}
               </div>
-              <p className="text-5xl sm:text-6xl font-bold mb-3">4/5</p>
-              <p className="text-blue-200 text-sm leading-relaxed max-w-[13rem] mx-auto">
+              <p className="text-5xl sm:text-6xl font-bold mb-3 leading-none">4/5</p>
+              <p className="text-blue-200 text-sm leading-relaxed max-w-[13rem]">
                 of door drop items are engaged with
               </p>
             </div>
