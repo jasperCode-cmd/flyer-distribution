@@ -24,11 +24,11 @@ export default function Testimonials() {
           What People Say About Us
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start pt-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
 
           {/* Card 1 — Body by Victoria */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6 flex flex-col h-full">
-            <div className="flex items-center justify-center h-16 mb-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col">
+            <div className="flex items-center justify-center mb-4">
               <Image
                 src="/Body by Victoria.png"
                 alt="Body by Victoria logo"
@@ -38,7 +38,7 @@ export default function Testimonials() {
               />
             </div>
             <Stars />
-            <blockquote className="text-gray-600 text-sm leading-relaxed flex-1 mb-4">
+            <blockquote className="text-gray-600 text-sm leading-relaxed mb-3">
               &ldquo;Great communication from the start. Very polite competitive prices will definitely be using again. Thank you&rdquo;
             </blockquote>
             <div>
@@ -47,43 +47,37 @@ export default function Testimonials() {
             </div>
           </div>
 
-          {/* Card 2 — Kola Construction (with exhibitor badges) */}
-          <div className="relative bg-white rounded-lg border border-gray-200 p-6 pt-8 flex flex-col h-full">
-            {/* Exhibitor badge — Grand Designs Live (top-left) */}
-            <div className="absolute -top-5 left-3">
+          {/* Card 2 — Kola Construction */}
+          <div className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col">
+            {/* Exhibitor badges above logo, flanking left and right */}
+            <div className="flex justify-between items-center mb-2">
               <Image
                 src="/grand designs live.webp"
                 alt="Grand Designs Live exhibitor badge"
                 width={200}
                 height={100}
-                className="h-10 w-auto object-contain"
+                className="h-9 w-auto object-contain"
               />
-            </div>
-            {/* Exhibitor badge — Ideal Home Show (top-right) */}
-            <div className="absolute -top-5 right-3">
               <Image
                 src="/logo_exhibitor_default.webp"
                 alt="Ideal Home Show exhibitor badge"
                 width={200}
                 height={100}
-                className="h-10 w-auto object-contain"
+                className="h-9 w-auto object-contain"
               />
             </div>
-
-            <div className="flex items-center justify-center h-16 mb-1">
+            {/* Kola logo, larger */}
+            <div className="flex items-center justify-center mb-4">
               <Image
                 src="/KOLA-CONSTRUCTION-LOGO.webp"
                 alt="Kola Construction logo"
                 width={200}
                 height={80}
-                className="h-12 w-auto object-contain"
+                className="h-16 w-auto object-contain"
               />
             </div>
-            <p className="text-center text-xs text-gray-400 mb-3 leading-tight">
-              Kola Construction: Grand Designs Live &amp; Ideal Home Show exhibitor
-            </p>
             <Stars />
-            <blockquote className="text-gray-600 text-sm leading-relaxed flex-1 mb-4">
+            <blockquote className="text-gray-600 text-sm leading-relaxed mb-3">
               &ldquo;Excellent flyer distribution service from start to finish. The team was professional, reliable, and kept us updated throughout the campaign.&rdquo;
             </blockquote>
             <div>
@@ -93,18 +87,18 @@ export default function Testimonials() {
           </div>
 
           {/* Card 3 — Cozy Stoves */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6 flex flex-col h-full">
-            <div className="flex items-center justify-center h-16 mb-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col">
+            <div className="flex items-center justify-center mb-4">
               <Image
                 src="/Cozy-Stoves-logo.png"
                 alt="Cozy Stoves logo"
                 width={305}
                 height={100}
-                className="h-10 w-auto object-contain"
+                className="h-14 w-auto object-contain"
               />
             </div>
             <Stars />
-            <blockquote className="text-gray-600 text-sm leading-relaxed flex-1 mb-4">
+            <blockquote className="text-gray-600 text-sm leading-relaxed mb-3">
               &ldquo;Fast and reliable team service all around&rdquo;
             </blockquote>
             <div>
