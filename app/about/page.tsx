@@ -5,14 +5,14 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "About Us",
   description:
-    "Learn about Flyer Distribution Hampshire, a local team dedicated to reliable, targeted leaflet delivery across Hampshire and Dorset.",
+    "Flyer Distribution Hampshire is an independent marketing and leaflet distribution company based in Hampshire, co-founded by Jasper Adams and Daniel Whitby.",
   alternates: {
     canonical: "https://www.flyerdistributionhampshire.co.uk/about",
   },
   openGraph: {
     title: "About Us",
     description:
-      "Learn about Flyer Distribution Hampshire, a local team dedicated to reliable, targeted leaflet delivery across Hampshire and Dorset.",
+      "Flyer Distribution Hampshire is an independent marketing and leaflet distribution company based in Hampshire, co-founded by Jasper Adams and Daniel Whitby.",
     url: "https://www.flyerdistributionhampshire.co.uk/about",
     siteName: "Flyer Distribution Hampshire",
     images: [
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "About Us",
     description:
-      "Learn about Flyer Distribution Hampshire, a local team dedicated to reliable, targeted leaflet delivery across Hampshire and Dorset.",
+      "Flyer Distribution Hampshire is an independent marketing and leaflet distribution company based in Hampshire, co-founded by Jasper Adams and Daniel Whitby.",
     images: [
       "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
     ],
@@ -44,8 +44,9 @@ export default function AboutPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">About Us</h1>
           <p className="text-blue-200 text-lg max-w-xl">
-            We&apos;re a local Hampshire business built on reliability, local
-            knowledge, and a genuine commitment to helping businesses grow.
+            An independent marketing and leaflet distribution company based in
+            Hampshire, helping businesses connect with their ideal customers
+            through both traditional and digital marketing.
           </p>
         </div>
       </section>
@@ -53,34 +54,73 @@ export default function AboutPage() {
       <section className="bg-slate-50 py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div>
+            <p className="text-gray-600 mb-4 leading-relaxed">
+              Flyer Distribution Hampshire is an independent marketing and leaflet
+              distribution company based in Hampshire, helping businesses connect
+              with their ideal customers through both traditional and digital
+              marketing. We work with local businesses, national brands running
+              regional campaigns, charities, and community organisations to deliver
+              advertising that gets real results.
+            </p>
+            <p className="text-gray-600 mb-4 leading-relaxed">
+              Leaflet distribution remains at the heart of what we do, but our
+              services extend beyond door-to-door delivery to include website
+              design and SEO, helping businesses build a stronger presence both
+              online and offline.
+            </p>
+            <p className="text-gray-600 mb-8 leading-relaxed">
+              We&apos;re small enough to offer a genuinely personal service, with
+              distributors who are fully vetted, trained, and know their routes
+              inside out. We cover all major towns and cities across Hampshire and
+              into Dorset, including Bournemouth and Poole.
+            </p>
+
             <h2 className="text-2xl font-bold text-blue-900 mb-4">
               Who We Are
             </h2>
-            <p className="text-gray-600 mb-4 leading-relaxed">
-              Flyer Distribution Hampshire is an independent leaflet delivery
-              business based in Hampshire, UK. We work with local businesses,
-              national brands with local campaigns, charities, and community
-              organisations to get printed materials into the right letterboxes.
+            <p className="text-gray-600 mb-6 leading-relaxed">
+              Flyer Distribution Hampshire was co-founded by Jasper Adams and
+              Daniel Whitby, who both graduated in 2025, Jasper from the
+              University of Southampton and Daniel from Bournemouth University.
+              Together they combine modern digital marketing expertise with proven
+              offline advertising methods to give businesses a complete marketing
+              solution.
             </p>
-            <p className="text-gray-600 mb-4 leading-relaxed">
-              Unlike large national operators, we&apos;re small enough to care
-              about every campaign and experienced enough to deliver it properly.
-              Our distributors are vetted, trained, and know their routes inside
-              out.
+
+            <h3 className="text-lg font-semibold text-blue-900 mb-2">
+              Jasper Adams &mdash; Co-Founder &amp; Operations Director
+            </h3>
+            <p className="text-gray-600 mb-6 leading-relaxed">
+              Jasper brings extensive expertise in website design and development,
+              search engine optimisation (SEO), organic digital marketing, and
+              social media growth. His passion for helping businesses improve their
+              online visibility ensures clients benefit from marketing strategies
+              that continue delivering results long after a campaign has finished.
             </p>
-            <p className="text-gray-600 leading-relaxed">
-              We cover all major towns across Hampshire and extend into Dorset,
-              including Bournemouth and Poole. If you have a campaign in mind,
-              we&apos;d love to hear from you.
+
+            <h3 className="text-lg font-semibold text-blue-900 mb-2">
+              Daniel Whitby &mdash; Co-Founder &amp; Sales Director
+            </h3>
+            <p className="text-gray-600 mb-8 leading-relaxed">
+              Daniel has a strong background in sales, media, marketing, and
+              business development. His experience in building client
+              relationships, developing advertising strategies, and growing brands
+              through social media enables him to create marketing campaigns that
+              are both effective and commercially focused.
             </p>
-            <div className="mt-8">
-              <Link
-                href="/quote"
-                className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition-colors"
-              >
-                Get a Free Quote
-              </Link>
-            </div>
+
+            <p className="text-gray-600 mb-8 leading-relaxed">
+              If you have a campaign in mind, we&apos;d be delighted to discuss
+              how Flyer Distribution Hampshire can help your business reach more
+              customers and achieve measurable growth.
+            </p>
+
+            <Link
+              href="/quote"
+              className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition-colors"
+            >
+              Get a Free Quote
+            </Link>
           </div>
           <div>
             <Image
