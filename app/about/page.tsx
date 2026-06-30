@@ -5,14 +5,14 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "About Us",
   description:
-    "Flyer Distribution Hampshire is an independent marketing and leaflet distribution company based in Hampshire, co-founded by Jasper Adams and Daniel Whitby.",
+    "Flyer Distribution Hampshire is an independent marketing and leaflet distribution company based in Hampshire, co-founded by Jasper and Daniel.",
   alternates: {
     canonical: "https://www.flyerdistributionhampshire.co.uk/about",
   },
   openGraph: {
     title: "About Us",
     description:
-      "Flyer Distribution Hampshire is an independent marketing and leaflet distribution company based in Hampshire, co-founded by Jasper Adams and Daniel Whitby.",
+      "Flyer Distribution Hampshire is an independent marketing and leaflet distribution company based in Hampshire, co-founded by Jasper and Daniel.",
     url: "https://www.flyerdistributionhampshire.co.uk/about",
     siteName: "Flyer Distribution Hampshire",
     images: [
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "About Us",
     description:
-      "Flyer Distribution Hampshire is an independent marketing and leaflet distribution company based in Hampshire, co-founded by Jasper Adams and Daniel Whitby.",
+      "Flyer Distribution Hampshire is an independent marketing and leaflet distribution company based in Hampshire, co-founded by Jasper and Daniel.",
     images: [
       "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
     ],
@@ -79,16 +79,15 @@ export default function AboutPage() {
               Who We Are
             </h2>
             <p className="text-gray-600 mb-6 leading-relaxed">
-              Flyer Distribution Hampshire was co-founded by Jasper Adams and
-              Daniel Whitby, who both graduated in 2025, Jasper from the
-              University of Southampton and Daniel from Bournemouth University.
-              Together they combine modern digital marketing expertise with proven
-              offline advertising methods to give businesses a complete marketing
-              solution.
+              Flyer Distribution Hampshire was co-founded by Jasper and Daniel,
+              who both graduated in 2025, Jasper from the University of
+              Southampton and Daniel from Bournemouth University. Together they
+              combine modern digital marketing expertise with proven offline
+              advertising methods to give businesses a complete marketing solution.
             </p>
 
             <h3 className="text-lg font-semibold text-blue-900 mb-2">
-              Jasper Adams &mdash; Co-Founder &amp; Operations Director
+              Jasper, Co-Founder &amp; Operations Director
             </h3>
             <p className="text-gray-600 mb-6 leading-relaxed">
               Jasper brings extensive expertise in website design and development,
@@ -99,7 +98,7 @@ export default function AboutPage() {
             </p>
 
             <h3 className="text-lg font-semibold text-blue-900 mb-2">
-              Daniel Whitby &mdash; Co-Founder &amp; Sales Director
+              Daniel, Co-Founder &amp; Sales Director
             </h3>
             <p className="text-gray-600 mb-8 leading-relaxed">
               Daniel has a strong background in sales, media, marketing, and
