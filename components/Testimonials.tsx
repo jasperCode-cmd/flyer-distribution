@@ -50,7 +50,7 @@ export default function Testimonials() {
           {/* Card 2 — Kola Construction */}
           <div className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col">
             {/* Badges flanking the logo with clear separation, bottom-aligned */}
-            <div className="flex items-end justify-between mb-4">
+            <div className="flex items-center justify-between mb-4">
               <Image
                 src="/grand designs live.webp"
                 alt="Grand Designs Live exhibitor badge"
