@@ -62,8 +62,8 @@ export default function WebDesignSeoPage() {
           </div>
           <div>
             <Image
-              src="https://images.pexels.com/photos/7055/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=800"
-              alt="Clean iMac workspace representing professional web design"
+              src="https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=800"
+              alt="Clean desk with laptop and design work representing professional web design"
               width={800}
               height={534}
               className="rounded-lg w-full object-cover"
