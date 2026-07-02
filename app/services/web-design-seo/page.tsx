@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -41,14 +42,74 @@ export default function WebDesignSeoPage() {
         </div>
       </section>
 
-      {/* Body */}
+      {/* Intro: two-column with image */}
+      <section className="bg-white py-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+          <div>
+            <p className="text-gray-600 leading-relaxed mb-4">
+              We design and build bespoke websites for local businesses across
+              Hampshire and Dorset, and beyond. Whether you&apos;re a trades
+              business, a service company, a restaurant, or a charity, we build
+              websites that look professional, load fast, and are built to
+              convert visitors into enquiries.
+            </p>
+            <p className="text-gray-600 leading-relaxed">
+              Every website we build is custom, designed around your business
+              and your goals, not adapted from a generic template. We work with
+              you from initial brief through to launch, keeping the process
+              straightforward and jargon-free.
+            </p>
+          </div>
+          <div>
+            <Image
+              src="https://images.pexels.com/photos/7055/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=800"
+              alt="Clean iMac workspace representing professional web design"
+              width={800}
+              height={534}
+              className="rounded-lg w-full object-cover"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Service detail cards */}
       <section className="bg-slate-50 py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 max-w-2xl">
-          <p className="text-gray-600 leading-relaxed text-base">
-            We&apos;re expanding our services to include website design,
-            development, and SEO. Get in touch to discuss your project and
-            we&apos;ll put together a proposal.
-          </p>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h2 className="text-base font-semibold text-blue-900 mb-2">
+                Web Design
+              </h2>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                We build fast, clean websites tailored to your business. Every
+                site is mobile-friendly, easy to navigate, and designed to make
+                a strong first impression with potential customers.
+              </p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h2 className="text-base font-semibold text-blue-900 mb-2">
+                Search Engine Optimisation
+              </h2>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                A great website is only valuable if people can find it. We build
+                every site with SEO in mind from the ground up, covering
+                technical setup, on-page optimisation, and local search
+                visibility. We also offer ongoing SEO support and retainers for
+                businesses looking to grow their search presence over time.
+              </p>
+            </div>
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h2 className="text-base font-semibold text-blue-900 mb-2">
+                Who We Work With
+              </h2>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                We work with service businesses, tradespeople, restaurants,
+                retailers, charities, and local organisations. If you need a
+                website or want to improve your search rankings, we&apos;d love
+                to hear about your project.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
