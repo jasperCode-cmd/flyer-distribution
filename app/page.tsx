@@ -291,7 +291,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="mb-10">
             <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-3">
-              Our Services
+              Leaflet Services
             </h2>
             <p className="text-gray-600 max-w-xl">
               From door-to-door delivery to targeted postcode campaigns, we have a
