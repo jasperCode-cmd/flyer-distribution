@@ -371,7 +371,7 @@ export default function HomePage() {
             >
               <div className="relative h-48 w-full">
                 <Image
-                  src="https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=800"
+                  src="https://images.pexels.com/photos/1779487/pexels-photo-1779487.jpeg?auto=compress&cs=tinysrgb&w=800"
                   alt="Laptop on a desk representing web design and SEO work"
                   fill
                   sizes="(max-width: 640px) 100vw, 50vw"
@@ -399,7 +399,7 @@ export default function HomePage() {
                   alt="Mobile LED screen trailer"
                   fill
                   sizes="(max-width: 640px) 100vw, 50vw"
-                  className="object-cover object-bottom"
+                  className="object-cover object-top"
                 />
               </div>
               <div className="p-6">
