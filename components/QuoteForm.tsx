@@ -4,12 +4,17 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 
 export default function QuoteForm() {
+  const [serviceType, setServiceType] = useState("");
   const [includePrinting, setIncludePrinting] = useState(true);
   const [includeDesign, setIncludeDesign] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+
+  const isLeaflet = serviceType === "" || serviceType === "Leaflet Distribution";
+  const isWebDesign = serviceType === "Web Design & SEO";
+  const isScreenHire = serviceType === "Screen Hire";
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -32,6 +37,7 @@ export default function QuoteForm() {
       if (json.success) {
         setSubmitted(true);
         formRef.current?.reset();
+        setServiceType("");
         setIncludePrinting(true);
         setIncludeDesign(false);
       } else {
@@ -158,109 +164,6 @@ export default function QuoteForm() {
           />
         </div>
 
-        {/* Address */}
-        <div>
-          <label
-            htmlFor="address"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Address
-          </label>
-          <input
-            type="text"
-            id="address"
-            name="address"
-            className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-
-        {/* Town + Postcode */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div>
-            <label
-              htmlFor="town"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Town
-            </label>
-            <input
-              type="text"
-              id="town"
-              name="town"
-              className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="postcode"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Postcode
-            </label>
-            <input
-              type="text"
-              id="postcode"
-              name="postcode"
-              className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-        </div>
-
-        {/* Areas required */}
-        <div>
-          <label
-            htmlFor="areas-required"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Areas required / target postcodes
-          </label>
-          <input
-            type="text"
-            id="areas-required"
-            name="areas-required"
-            placeholder="e.g. Southampton SO15, SO16"
-            className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
-
-        {/* Quantity + Campaign start date */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div>
-            <label
-              htmlFor="quantity"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Approximate quantity (flyers)
-            </label>
-            <select
-              id="quantity"
-              name="quantity"
-              className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-            >
-              <option value="">Select a range…</option>
-              <option>Under 1,000</option>
-              <option>1,000 – 5,000</option>
-              <option>5,000 – 10,000</option>
-              <option>10,000 – 25,000</option>
-              <option>25,000+</option>
-            </select>
-          </div>
-          <div>
-            <label
-              htmlFor="campaign-start-date"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Campaign start date
-            </label>
-            <input
-              type="date"
-              id="campaign-start-date"
-              name="campaign-start-date"
-              className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-        </div>
-
         {/* Service type */}
         <div>
           <label
@@ -272,148 +175,386 @@ export default function QuoteForm() {
           <select
             id="service"
             name="service"
+            value={serviceType}
+            onChange={(e) => setServiceType(e.target.value)}
             className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
           >
             <option value="">Not sure yet</option>
             <option>Leaflet Distribution</option>
-            <option>Targeted Postcode Campaign</option>
-            <option>Vehicle Leaflet Distribution</option>
-            <option>Campaign Planning</option>
+            <option>Web Design &amp; SEO</option>
+            <option>Screen Hire</option>
           </select>
         </div>
 
-        {/* Printing */}
-        <div className="border border-gray-200 rounded-md px-4 py-3 bg-gray-50">
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              id="printing-included"
-              name="printing-included"
-              value="yes"
-              checked={includePrinting}
-              onChange={(e) => setIncludePrinting(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
-            />
-            <span className="text-sm font-medium text-gray-700">
-              Include printing with my order
-            </span>
-          </label>
-          <p className="mt-1.5 text-xs text-gray-500 pl-7">
-            Uncheck if you already have your materials printed and just need
-            distribution.
-          </p>
+        {/* ── Leaflet Distribution fields ── */}
+        {isLeaflet && (
+          <>
+            {/* Address */}
+            <div>
+              <label
+                htmlFor="address"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Address
+              </label>
+              <input
+                type="text"
+                id="address"
+                name="address"
+                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
 
-          {includePrinting && (
-            <div className="mt-3 pl-7 space-y-3">
+            {/* Town + Postcode */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div>
                 <label
-                  htmlFor="item-size"
+                  htmlFor="town"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Item size
+                  Town
                 </label>
-                <select
-                  id="item-size"
-                  name="item-size"
-                  defaultValue="A5"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                >
-                  <option value="A5">A5 (most popular)</option>
-                  <option value="A4">A4</option>
-                  <option value="A6">A6</option>
-                  <option value="DL">DL</option>
-                </select>
+                <input
+                  type="text"
+                  id="town"
+                  name="town"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
-
               <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">
-                  Print sides
-                </p>
-                <div className="flex gap-6">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="print-sides"
-                      value="Single sided"
-                      defaultChecked
-                      className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Single sided</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="print-sides"
-                      value="Double sided"
-                      className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">Double sided</span>
-                  </label>
-                </div>
+                <label
+                  htmlFor="postcode"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Postcode
+                </label>
+                <input
+                  type="text"
+                  id="postcode"
+                  name="postcode"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
             </div>
-          )}
-        </div>
 
-        {/* Design */}
-        <div className="border border-gray-200 rounded-md px-4 py-3 bg-gray-50">
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              id="include-design"
-              name="include-design"
-              value="yes"
-              checked={includeDesign}
-              onChange={(e) => setIncludeDesign(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
-            />
-            <span className="text-sm font-medium text-gray-700">
-              Include design with my order
-            </span>
-          </label>
-          <p className="mt-1.5 text-xs text-gray-500 pl-7">
-            Uncheck if you already have your artwork ready.
-          </p>
-        </div>
+            {/* Areas required */}
+            <div>
+              <label
+                htmlFor="areas-required"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Areas required / target postcodes
+              </label>
+              <input
+                type="text"
+                id="areas-required"
+                name="areas-required"
+                placeholder="e.g. Southampton SO15, SO16"
+                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
 
-        {/* Budget */}
-        <div>
-          <label
-            htmlFor="budget"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Approximate campaign budget
-          </label>
-          <select
-            id="budget"
-            name="budget"
-            className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-          >
-            <option value="">Select a range...</option>
-            <option>£150 - £300</option>
-            <option>£300 - £500</option>
-            <option>£500 - £1,000</option>
-            <option>£1,000 - £2,000</option>
-            <option>£2,000+</option>
-          </select>
-        </div>
+            {/* Quantity + Campaign start date */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label
+                  htmlFor="quantity"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Approximate quantity (flyers)
+                </label>
+                <select
+                  id="quantity"
+                  name="quantity"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                >
+                  <option value="">Select a range...</option>
+                  <option>Under 1,000</option>
+                  <option>1,000 - 5,000</option>
+                  <option>5,000 - 10,000</option>
+                  <option>10,000 - 25,000</option>
+                  <option>25,000+</option>
+                </select>
+              </div>
+              <div>
+                <label
+                  htmlFor="campaign-start-date"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Campaign start date
+                </label>
+                <input
+                  type="date"
+                  id="campaign-start-date"
+                  name="campaign-start-date"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
 
-        {/* Message */}
-        <div>
-          <label
-            htmlFor="message"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Additional details
-          </label>
-          <textarea
-            id="message"
-            name="message"
-            rows={4}
-            placeholder="Tell us about your campaign, timing, or any special requirements…"
-            className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-          />
-        </div>
+            {/* Printing */}
+            <div className="border border-gray-200 rounded-md px-4 py-3 bg-gray-50">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  id="printing-included"
+                  name="printing-included"
+                  value="yes"
+                  checked={includePrinting}
+                  onChange={(e) => setIncludePrinting(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
+                />
+                <span className="text-sm font-medium text-gray-700">
+                  Include printing with my order
+                </span>
+              </label>
+              <p className="mt-1.5 text-xs text-gray-500 pl-7">
+                Uncheck if you already have your materials printed and just need
+                distribution.
+              </p>
+
+              {includePrinting && (
+                <div className="mt-3 pl-7 space-y-3">
+                  <div>
+                    <label
+                      htmlFor="item-size"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Item size
+                    </label>
+                    <select
+                      id="item-size"
+                      name="item-size"
+                      defaultValue="A5"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                    >
+                      <option value="A5">A5 (most popular)</option>
+                      <option value="A4">A4</option>
+                      <option value="A6">A6</option>
+                      <option value="DL">DL</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-medium text-gray-700 mb-2">
+                      Print sides
+                    </p>
+                    <div className="flex gap-6">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="print-sides"
+                          value="Single sided"
+                          defaultChecked
+                          className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-700">Single sided</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="print-sides"
+                          value="Double sided"
+                          className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <span className="text-sm text-gray-700">Double sided</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Design */}
+            <div className="border border-gray-200 rounded-md px-4 py-3 bg-gray-50">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  id="include-design"
+                  name="include-design"
+                  value="yes"
+                  checked={includeDesign}
+                  onChange={(e) => setIncludeDesign(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
+                />
+                <span className="text-sm font-medium text-gray-700">
+                  Include design with my order
+                </span>
+              </label>
+              <p className="mt-1.5 text-xs text-gray-500 pl-7">
+                Uncheck if you already have your artwork ready.
+              </p>
+            </div>
+
+            {/* Budget (leaflet) */}
+            <div>
+              <label
+                htmlFor="budget"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Approximate campaign budget
+              </label>
+              <select
+                id="budget"
+                name="budget"
+                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              >
+                <option value="">Select a range...</option>
+                <option>£150 - £300</option>
+                <option>£300 - £500</option>
+                <option>£500 - £1,000</option>
+                <option>£1,000 - £2,000</option>
+                <option>£2,000+</option>
+              </select>
+            </div>
+
+            {/* Additional details (leaflet) */}
+            <div>
+              <label
+                htmlFor="message"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Additional details
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                rows={4}
+                placeholder="Tell us about your campaign, timing, or any special requirements..."
+                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              />
+            </div>
+          </>
+        )}
+
+        {/* ── Web Design & SEO fields ── */}
+        {isWebDesign && (
+          <>
+            <div>
+              <label
+                htmlFor="business-type"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Business type
+              </label>
+              <input
+                type="text"
+                id="business-type"
+                name="business-type"
+                placeholder="e.g. Restaurant, Trades, Charity"
+                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="web-budget"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Approximate budget
+              </label>
+              <select
+                id="web-budget"
+                name="budget"
+                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              >
+                <option value="">Select a range...</option>
+                <option>Under £500</option>
+                <option>£500 - £1,000</option>
+                <option>£1,000 - £2,500</option>
+                <option>£2,500+</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="web-message"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Additional details
+              </label>
+              <textarea
+                id="web-message"
+                name="message"
+                rows={4}
+                placeholder="Tell us about your project, what you need, or any questions you have..."
+                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              />
+            </div>
+          </>
+        )}
+
+        {/* ── Screen Hire fields ── */}
+        {isScreenHire && (
+          <>
+            <div>
+              <label
+                htmlFor="event-date"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Event date
+              </label>
+              <input
+                type="date"
+                id="event-date"
+                name="event-date"
+                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="event-location"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Event location
+              </label>
+              <input
+                type="text"
+                id="event-location"
+                name="event-location"
+                placeholder="e.g. Southampton City Centre"
+                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="event-duration"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Approximate duration
+              </label>
+              <select
+                id="event-duration"
+                name="event-duration"
+                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              >
+                <option value="">Select a duration...</option>
+                <option>Half day</option>
+                <option>Full day</option>
+                <option>2-3 days</option>
+                <option>Longer</option>
+              </select>
+            </div>
+
+            <div>
+              <label
+                htmlFor="screen-message"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Additional details
+              </label>
+              <textarea
+                id="screen-message"
+                name="message"
+                rows={4}
+                placeholder="Tell us about your event, what you need the screen for, or any questions..."
+                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              />
+            </div>
+          </>
+        )}
 
         {/* Newsletter opt-in */}
         <div>
@@ -450,7 +591,7 @@ export default function QuoteForm() {
           disabled={isSubmitting}
           className="w-full bg-blue-700 hover:bg-blue-800 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-md transition-colors text-sm"
         >
-          {isSubmitting ? "Sending…" : "Send Quote Request"}
+          {isSubmitting ? "Sending..." : "Send Quote Request"}
         </button>
       </form>
 
