@@ -367,20 +367,25 @@ export default function HomePage() {
             {/* Web Design & SEO */}
             <Link
               href="/services/web-design-seo"
-              className="bg-white rounded-lg border border-gray-200 p-6 hover:border-blue-300 transition-colors group"
+              className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 transition-colors group"
             >
-              <div className="mb-4">
-                <svg className="w-8 h-8 text-blue-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <rect x="2" y="3" width="20" height="14" rx="2" />
-                  <path d="M8 21h8M12 17v4" />
-                </svg>
+              <div className="relative h-48 w-full">
+                <Image
+                  src="https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=800"
+                  alt="Laptop on a desk representing web design and SEO work"
+                  fill
+                  sizes="(max-width: 640px) 100vw, 50vw"
+                  className="object-cover"
+                />
               </div>
-              <h3 className="text-base font-semibold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors">
-                Web Design &amp; SEO
-              </h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                We build fast, professional websites and handle search engine optimisation to help your business get found online. From design through to delivery, we manage the process end to end.
-              </p>
+              <div className="p-6">
+                <h3 className="text-base font-semibold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors">
+                  Web Design &amp; SEO
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  We build fast, professional websites and handle search engine optimisation to help your business get found online. From design through to delivery, we manage the process end to end.
+                </p>
+              </div>
             </Link>
 
             {/* Mobile Screen Trailer Hire */}
@@ -394,7 +399,7 @@ export default function HomePage() {
                   alt="Mobile LED screen trailer"
                   fill
                   sizes="(max-width: 640px) 100vw, 50vw"
-                  className="object-cover"
+                  className="object-cover object-bottom"
                 />
               </div>
               <div className="p-6">
