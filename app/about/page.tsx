@@ -76,10 +76,10 @@ export default function AboutPage() {
           </div>
           <div>
             <Image
-              src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800&q=80"
-              alt="Flyer distribution team member on a Hampshire street"
-              width={700}
-              height={500}
+              src="/Flyer%20Distribution%20Hampshire.jpg"
+              alt="Flyer Distribution Hampshire team"
+              width={1200}
+              height={1600}
               className="rounded-lg w-full object-cover"
             />
           </div>
