@@ -57,23 +57,21 @@ export default function AboutPage() {
           <div>
             <p className="text-gray-600 mb-4 leading-relaxed">
               Flyer Distribution Hampshire is an independent marketing and leaflet
-              distribution company based in Hampshire, helping businesses connect
-              with their ideal customers through both traditional and digital
-              marketing. We work with local businesses, national brands running
-              regional campaigns, charities, and community organisations to deliver
-              advertising that gets real results.
+              distribution company based in Hampshire. We help local businesses,
+              national brands, charities, and community organisations connect with
+              their ideal customers through targeted advertising that gets real
+              results.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              Leaflet distribution remains at the heart of what we do, but our
-              services extend beyond door-to-door delivery to include website
-              design and SEO, helping businesses build a stronger presence both
-              online and offline.
+              Leaflet distribution is at the heart of what we do, with services
+              extending to website design and SEO for businesses looking to grow
+              their presence online as well as offline.
             </p>
             <p className="text-gray-600 leading-relaxed">
               We&apos;re small enough to offer a genuinely personal service, with
               distributors who are fully vetted, trained, and know their routes
-              inside out. We cover all major towns and cities across Hampshire and
-              into Dorset, including Bournemouth and Poole.
+              inside out, covering Hampshire and into Dorset including Bournemouth
+              and Poole.
             </p>
           </div>
           <div>
