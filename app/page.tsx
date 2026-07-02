@@ -369,7 +369,7 @@ export default function HomePage() {
               href="/services/web-design-seo"
               className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 transition-colors group"
             >
-              <div className="relative h-48 w-full">
+              <div className="relative h-64 w-full">
                 <Image
                   src="https://images.pexels.com/photos/3913016/pexels-photo-3913016.jpeg?auto=compress&cs=tinysrgb&w=800"
                   alt="Laptop on a desk representing web design and SEO work"
@@ -393,7 +393,7 @@ export default function HomePage() {
               href="/services/screen-hire"
               className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 transition-colors group"
             >
-              <div className="relative h-48 w-full">
+              <div className="relative h-64 w-full">
                 <Image
                   src="/Mobile%20Screen%20Trailer%20Hire.jpg"
                   alt="Mobile LED screen trailer"
