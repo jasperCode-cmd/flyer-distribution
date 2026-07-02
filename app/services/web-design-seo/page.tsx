@@ -113,6 +113,25 @@ export default function WebDesignSeoPage() {
         </div>
       </section>
 
+      {/* CTA */}
+      <section className="bg-white py-20">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-4">
+            Ready to Grow Online?
+          </h2>
+          <p className="text-gray-600 max-w-lg mx-auto mb-8 leading-relaxed">
+            Tell us about your business and what you&apos;re looking to achieve.
+            We&apos;ll come back to you with a clear proposal and no obligation.
+          </p>
+          <Link
+            href="/quote"
+            className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-10 py-4 rounded-md text-base transition-colors shadow"
+          >
+            Get in Touch
+          </Link>
+        </div>
+      </section>
+
       {/* Leaflet services */}
       <section className="bg-white py-16 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -181,25 +200,6 @@ export default function WebDesignSeoPage() {
               </div>
             </Link>
           </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="bg-white py-20">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-4">
-            Ready to Grow Online?
-          </h2>
-          <p className="text-gray-600 max-w-lg mx-auto mb-8 leading-relaxed">
-            Tell us about your business and what you&apos;re looking to achieve.
-            We&apos;ll come back to you with a clear proposal and no obligation.
-          </p>
-          <Link
-            href="/quote"
-            className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-10 py-4 rounded-md text-base transition-colors shadow"
-          >
-            Get in Touch
-          </Link>
         </div>
       </section>
     </>
