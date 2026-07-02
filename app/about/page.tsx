@@ -102,7 +102,7 @@ export default function AboutPage() {
 
           <h3 className="mb-2">
             <span className="block text-2xl font-bold text-gray-900">Jasper</span>
-            <span className="block text-sm font-medium text-blue-700 mt-0.5">Co-Founder &amp; Operations Director</span>
+            <span className="block text-sm font-medium text-blue-700 font-semibold mt-0.5">Co-Founder &amp; Operations Director</span>
           </h3>
           <p className="text-gray-600 mb-6 leading-relaxed">
             Jasper brings extensive expertise in website design and development,
@@ -114,7 +114,7 @@ export default function AboutPage() {
 
           <h3 className="mb-2">
             <span className="block text-2xl font-bold text-gray-900">Daniel</span>
-            <span className="block text-sm font-medium text-blue-700 mt-0.5">Co-Founder &amp; Sales Director</span>
+            <span className="block text-sm font-medium text-blue-700 font-semibold mt-0.5">Co-Founder &amp; Sales Director</span>
           </h3>
           <p className="text-gray-600 mb-8 leading-relaxed">
             Daniel has a strong background in sales, media, marketing, and
