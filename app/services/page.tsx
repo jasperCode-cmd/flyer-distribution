@@ -3,14 +3,14 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Leaflet Distribution Services",
+  title: "Leaflet Services | Flyer Distribution Hampshire",
   description:
     "Full design, print and leaflet distribution services across Hampshire and Dorset. Choose our end-to-end package or distribution-only service.",
   alternates: {
     canonical: "https://www.flyerdistributionhampshire.co.uk/services",
   },
   openGraph: {
-    title: "Leaflet Distribution Services",
+    title: "Leaflet Services | Flyer Distribution Hampshire",
     description:
       "Full design, print and leaflet distribution services across Hampshire and Dorset. Choose our end-to-end package or distribution-only service.",
     url: "https://www.flyerdistributionhampshire.co.uk/services",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Leaflet Distribution Services",
+    title: "Leaflet Services | Flyer Distribution Hampshire",
     description:
       "Full design, print and leaflet distribution services across Hampshire and Dorset. Choose our end-to-end package or distribution-only service.",
     images: [
@@ -169,7 +169,7 @@ export default function ServicesPage() {
       {/* Page header */}
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3">Our Services</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-3">Leaflet Services</h1>
           <p className="text-blue-200 max-w-xl text-lg">
             Flexible flyer and leaflet distribution solutions for businesses of
             all sizes across Hampshire and Dorset.
@@ -276,6 +276,65 @@ export default function ServicesPage() {
           >
             Get a Free Quote
           </Link>
+        </div>
+      </section>
+
+      {/* Additional Services */}
+      <section className="bg-slate-50 py-16 border-t border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-10">
+            Additional Services
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Web Design & SEO */}
+            <Link
+              href="/services/web-design-seo"
+              className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-md transition-all group"
+            >
+              <div className="relative h-44 w-full">
+                <Image
+                  src="https://images.pexels.com/photos/3913016/pexels-photo-3913016.jpeg?auto=compress&cs=tinysrgb&w=800"
+                  alt="Laptop showing design software in a professional workspace"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover"
+                />
+              </div>
+              <div className="p-5">
+                <h3 className="text-base font-semibold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors">
+                  Web Design &amp; SEO
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  We build fast, professional websites and handle search engine optimisation to help your business get found online. From design through to delivery, we manage the process end to end.
+                </p>
+              </div>
+            </Link>
+
+            {/* Mobile Screen Trailer Hire */}
+            <Link
+              href="/services/screen-hire"
+              className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-md transition-all group"
+            >
+              <div className="relative h-44 w-full">
+                <Image
+                  src="/Mobile%20Screen%20Trailer%20Hire.jpg"
+                  alt="Mobile LED screen trailer"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="object-cover"
+                  style={{ objectPosition: "center 30%" }}
+                />
+              </div>
+              <div className="p-5">
+                <h3 className="text-base font-semibold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors">
+                  Mobile Screen Trailer Hire
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Hire our mobile LED screen trailer for events, advertising, movies, or gaming. Mounted on a trailer with a 7m&sup2; screen, it&apos;s easy to set up and guaranteed to get you noticed.
+                </p>
+              </div>
+            </Link>
+          </div>
         </div>
       </section>
     </>
