@@ -371,7 +371,7 @@ export default function HomePage() {
             >
               <div className="relative h-48 w-full">
                 <Image
-                  src="https://images.pexels.com/photos/1181671/pexels-photo-1181671.jpeg?auto=compress&cs=tinysrgb&w=800"
+                  src="https://images.pexels.com/photos/3913016/pexels-photo-3913016.jpeg?auto=compress&cs=tinysrgb&w=800"
                   alt="Laptop on a desk representing web design and SEO work"
                   fill
                   sizes="(max-width: 640px) 100vw, 50vw"
@@ -400,7 +400,7 @@ export default function HomePage() {
                   fill
                   sizes="(max-width: 640px) 100vw, 50vw"
                   className="object-cover"
-                  style={{ objectPosition: "center bottom" }}
+                  style={{ objectPosition: "center 30%" }}
                 />
               </div>
               <div className="p-6">
