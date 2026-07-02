@@ -153,7 +153,7 @@ export default function HomePage() {
                 Hampshire &amp; Dorset
               </p>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
-                No.1 Tracked Flyer Distribution in Hampshire and Dorset
+                #1 Tracked Flyer Distribution in Hampshire and Dorset
               </h1>
               <p className="text-blue-100 text-lg sm:text-xl leading-relaxed mb-8">
                 We deliver and track your leaflets and flyers directly through
