@@ -111,6 +111,25 @@ export default function ScreenHirePage() {
           </Link>
         </div>
       </section>
+
+      {/* Web Design cross-link */}
+      <section className="bg-slate-50 py-12 border-t border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-xl font-bold text-blue-900 mb-2">
+            Looking to Grow Online Too?
+          </h2>
+          <p className="text-gray-600 mb-6 max-w-md mx-auto text-sm leading-relaxed">
+            We also offer bespoke web design and SEO for local businesses across
+            Hampshire and Dorset.
+          </p>
+          <Link
+            href="/services/web-design-seo"
+            className="inline-block bg-white border border-blue-700 text-blue-700 hover:bg-blue-700 hover:text-white font-semibold px-7 py-3 rounded-md text-sm transition-colors"
+          >
+            Web Design &amp; SEO
+          </Link>
+        </div>
+      </section>
     </>
   );
 }
