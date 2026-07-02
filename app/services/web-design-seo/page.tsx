@@ -62,8 +62,8 @@ export default function WebDesignSeoPage() {
           </div>
           <div>
             <Image
-              src="https://images.pexels.com/photos/196644/pexels-photo-196644.jpeg?auto=compress&cs=tinysrgb&w=800"
-              alt="Clean desk with laptop and design work representing professional web design"
+              src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&q=80"
+              alt="MacBook Pro with code on screen representing professional web design"
               width={800}
               height={534}
               className="rounded-lg w-full object-cover"
@@ -109,6 +109,77 @@ export default function WebDesignSeoPage() {
                 to hear about your project.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Leaflet services */}
+      <section className="bg-white py-16 border-t border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-bold text-blue-900 mb-8">
+            Leaflet Services
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Link
+              href="/services"
+              className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-md transition-all group"
+            >
+              <Image
+                src="https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80"
+                alt="Designer working on creative artwork at a desk"
+                width={600}
+                height={300}
+                className="w-full h-44 object-cover"
+              />
+              <div className="p-5">
+                <h3 className="text-base font-semibold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors">
+                  Design, Print and Deliver
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Our full end-to-end service. We handle design, printing in A6, A5, A4 or DL, and full distribution across your chosen areas.
+                </p>
+              </div>
+            </Link>
+            <Link
+              href="/services"
+              className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-md transition-all group"
+            >
+              <Image
+                src="https://images.pexels.com/photos/19843566/pexels-photo-19843566.jpeg?auto=compress&cs=tinysrgb&w=800"
+                alt="Printed leaflets ready for delivery"
+                width={600}
+                height={300}
+                className="w-full h-44 object-cover"
+              />
+              <div className="p-5">
+                <h3 className="text-base font-semibold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors">
+                  Print and Deliver
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Already have your design ready? We handle printing in A6, A5, A4 or DL and deliver your leaflets directly through letterboxes.
+                </p>
+              </div>
+            </Link>
+            <Link
+              href="/services"
+              className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-md transition-all group"
+            >
+              <Image
+                src="https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=800"
+                alt="Leaflets being delivered through a letterbox"
+                width={600}
+                height={300}
+                className="w-full h-44 object-cover"
+              />
+              <div className="p-5">
+                <h3 className="text-base font-semibold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors">
+                  Leaflet Distribution
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Door-to-door delivery to households across your chosen areas in Hampshire and Dorset. Your materials posted directly through letterboxes.
+                </p>
+              </div>
+            </Link>
           </div>
         </div>
       </section>
