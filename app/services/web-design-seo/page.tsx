@@ -46,19 +46,26 @@ export default function WebDesignSeoPage() {
       <section className="bg-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div>
-            <p className="text-gray-600 leading-relaxed mb-4">
+            <p className="text-gray-600 leading-relaxed mb-6">
               We design and build bespoke websites for local businesses across
-              Hampshire and Dorset, and beyond. Whether you&apos;re a trades
-              business, a service company, a restaurant, or a charity, we build
-              websites that look professional, load fast, and are built to
-              convert visitors into enquiries.
+              Hampshire and Dorset, and beyond.
             </p>
-            <p className="text-gray-600 leading-relaxed">
-              Every website we build is custom, designed around your business
-              and your goals, not adapted from a generic template. We work with
-              you from initial brief through to launch, keeping the process
-              straightforward and jargon-free.
-            </p>
+            <ul className="space-y-3">
+              {[
+                "Bespoke websites built around your business",
+                "Fast, mobile-friendly, and easy to navigate",
+                "Built to convert visitors into enquiries",
+                "From initial brief through to launch, jargon-free",
+                "SEO built in from the ground up",
+              ].map((point) => (
+                <li key={point} className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-blue-700 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                  <span className="text-gray-600 text-sm leading-relaxed">{point}</span>
+                </li>
+              ))}
+            </ul>
           </div>
           <div>
             <Image
@@ -77,6 +84,10 @@ export default function WebDesignSeoPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <svg className="w-8 h-8 text-blue-700 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="2" y="3" width="20" height="14" rx="2" />
+                <path d="M8 21h8M12 17v4" />
+              </svg>
               <h2 className="text-base font-semibold text-blue-900 mb-2">
                 Web Design
               </h2>
@@ -87,6 +98,10 @@ export default function WebDesignSeoPage() {
               </p>
             </div>
             <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <svg className="w-8 h-8 text-blue-700 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
+              </svg>
               <h2 className="text-base font-semibold text-blue-900 mb-2">
                 Search Engine Optimisation
               </h2>
@@ -99,6 +114,11 @@ export default function WebDesignSeoPage() {
               </p>
             </div>
             <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <svg className="w-8 h-8 text-blue-700 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+              </svg>
               <h2 className="text-base font-semibold text-blue-900 mb-2">
                 Who We Work With
               </h2>
