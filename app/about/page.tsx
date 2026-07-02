@@ -102,8 +102,9 @@ export default function AboutPage() {
             advertising methods to give businesses a complete marketing solution.
           </p>
 
-          <h3 className="text-lg font-semibold text-blue-900 mb-2">
-            Jasper, Co-Founder &amp; Operations Director
+          <h3 className="mb-2">
+            <span className="block text-2xl font-bold text-gray-900">Jasper</span>
+            <span className="block text-sm font-medium text-gray-500 mt-0.5">Co-Founder &amp; Operations Director</span>
           </h3>
           <p className="text-gray-600 mb-6 leading-relaxed">
             Jasper brings extensive expertise in website design and development,
@@ -113,8 +114,9 @@ export default function AboutPage() {
             that continue delivering results long after a campaign has finished.
           </p>
 
-          <h3 className="text-lg font-semibold text-blue-900 mb-2">
-            Daniel, Co-Founder &amp; Sales Director
+          <h3 className="mb-2">
+            <span className="block text-2xl font-bold text-gray-900">Daniel</span>
+            <span className="block text-sm font-medium text-gray-500 mt-0.5">Co-Founder &amp; Sales Director</span>
           </h3>
           <p className="text-gray-600 mb-8 leading-relaxed">
             Daniel has a strong background in sales, media, marketing, and
