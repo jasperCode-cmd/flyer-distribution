@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -53,6 +54,22 @@ export default function ScreenHirePage() {
             A powerful, portable LED screen for events, advertising, and
             entertainment across Hampshire and Dorset.
           </p>
+        </div>
+      </section>
+
+      {/* Trailer image */}
+      <section className="bg-slate-50 pt-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="relative h-96 w-full overflow-hidden rounded-lg">
+            <Image
+              src="/Mobile%20Screen%20Trailer%20Hire.jpg"
+              alt="Mobile LED screen trailer ready for hire"
+              width={1244}
+              height={1600}
+              className="object-cover w-full h-full"
+              style={{ objectPosition: "center 30%" }}
+            />
+          </div>
         </div>
       </section>
 
