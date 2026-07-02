@@ -16,6 +16,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/quote",
     "/about",
     "/faq",
+    "/services/screen-hire",
+    "/services/web-design-seo",
   ]; // /blog excluded — noindex
 
   return routes.map((route) => ({

@@ -352,6 +352,60 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Additional Services */}
+      <section className="bg-slate-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-3">
+              Additional Services
+            </h2>
+            <p className="text-gray-600 max-w-xl">
+              Beyond leaflet distribution, we offer web design and SEO, and mobile screen trailer hire across Hampshire and Dorset.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Web Design & SEO */}
+            <Link
+              href="/services/web-design-seo"
+              className="bg-white rounded-lg border border-gray-200 p-6 hover:border-blue-300 transition-colors group"
+            >
+              <div className="mb-4">
+                <svg className="w-8 h-8 text-blue-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="2" y="3" width="20" height="14" rx="2" />
+                  <path d="M8 21h8M12 17v4" />
+                </svg>
+              </div>
+              <h3 className="text-base font-semibold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors">
+                Web Design &amp; SEO
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                We build fast, professional websites and handle search engine optimisation to help your business get found online. From design through to delivery, we manage the process end to end.
+              </p>
+            </Link>
+
+            {/* Mobile Screen Trailer Hire */}
+            <Link
+              href="/services/screen-hire"
+              className="bg-white rounded-lg border border-gray-200 p-6 hover:border-blue-300 transition-colors group"
+            >
+              <div className="mb-4">
+                <svg className="w-8 h-8 text-blue-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="2" y="3" width="20" height="13" rx="2" />
+                  <path d="M2 13h20" />
+                  <path d="M6 17l1.5 4M18 17l-1.5 4M8 21h8" />
+                </svg>
+              </div>
+              <h3 className="text-base font-semibold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors">
+                Mobile Screen Trailer Hire
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Hire our mobile LED screen trailer for events, advertising, movies, or gaming. Mounted on a trailer with a 7m&sup2; screen, it&apos;s easy to set up and guaranteed to get you noticed.
+              </p>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA */}
       <section className="bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
