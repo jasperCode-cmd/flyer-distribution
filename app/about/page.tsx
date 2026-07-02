@@ -74,13 +74,13 @@ export default function AboutPage() {
               and Poole.
             </p>
           </div>
-          <div className="aspect-square overflow-hidden rounded-lg">
+          <div className="max-w-sm mx-auto lg:mx-0">
             <Image
               src="/Flyer%20Distribution%20Hampshire.jpg"
               alt="Flyer Distribution Hampshire team"
               width={1200}
               height={1600}
-              className="w-full h-full object-cover"
+              className="w-full h-auto rounded-lg object-contain"
             />
           </div>
         </div>
