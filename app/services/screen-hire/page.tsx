@@ -62,7 +62,7 @@ export default function ScreenHirePage() {
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative h-96 w-full overflow-hidden rounded-lg">
             <Image
-              src="/Mobile%20Screen%20Trailer%20Hire.jpg"
+              src="/Mobile%20Screen%20Trailer%20Hire%20Enquire.jpg"
               alt="Mobile LED screen trailer ready for hire"
               width={1244}
               height={1600}
