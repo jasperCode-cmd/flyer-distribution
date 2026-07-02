@@ -12,7 +12,7 @@ export default function QuoteForm() {
   const [error, setError] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
-  const isLeaflet = serviceType === "" || serviceType === "Leaflet Distribution";
+  const isLeaflet = serviceType === "Leaflet Distribution";
   const isWebDesign = serviceType === "Web Design & SEO";
   const isScreenHire = serviceType === "Screen Hire";
 
@@ -179,7 +179,7 @@ export default function QuoteForm() {
             onChange={(e) => setServiceType(e.target.value)}
             className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
           >
-            <option value="">Not sure yet</option>
+            <option value="">Select a service...</option>
             <option>Leaflet Distribution</option>
             <option>Web Design &amp; SEO</option>
             <option>Screen Hire</option>
