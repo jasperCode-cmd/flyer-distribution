@@ -386,21 +386,25 @@ export default function HomePage() {
             {/* Mobile Screen Trailer Hire */}
             <Link
               href="/services/screen-hire"
-              className="bg-white rounded-lg border border-gray-200 p-6 hover:border-blue-300 transition-colors group"
+              className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 transition-colors group"
             >
-              <div className="mb-4">
-                <svg className="w-8 h-8 text-blue-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <rect x="2" y="3" width="20" height="13" rx="2" />
-                  <path d="M2 13h20" />
-                  <path d="M6 17l1.5 4M18 17l-1.5 4M8 21h8" />
-                </svg>
+              <div className="relative h-48 w-full">
+                <Image
+                  src="/Mobile%20Screen%20Trailer%20Hire.jpg"
+                  alt="Mobile LED screen trailer"
+                  fill
+                  sizes="(max-width: 640px) 100vw, 50vw"
+                  className="object-cover"
+                />
               </div>
-              <h3 className="text-base font-semibold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors">
-                Mobile Screen Trailer Hire
-              </h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                Hire our mobile LED screen trailer for events, advertising, movies, or gaming. Mounted on a trailer with a 7m&sup2; screen, it&apos;s easy to set up and guaranteed to get you noticed.
-              </p>
+              <div className="p-6">
+                <h3 className="text-base font-semibold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors">
+                  Mobile Screen Trailer Hire
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Hire our mobile LED screen trailer for events, advertising, movies, or gaming. Mounted on a trailer with a 7m&sup2; screen, it&apos;s easy to set up and guaranteed to get you noticed.
+                </p>
+              </div>
             </Link>
           </div>
         </div>
