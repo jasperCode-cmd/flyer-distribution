@@ -60,14 +60,14 @@ export default function ScreenHirePage() {
       {/* Trailer image */}
       <section className="bg-slate-50 pt-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative h-96 w-full overflow-hidden rounded-lg">
+          <div className="relative h-64 w-full overflow-hidden rounded-lg">
             <Image
               src="/Mobile%20Screen%20Trailer%20Hire.jpg"
               alt="Mobile LED screen trailer ready for hire"
               width={1244}
               height={1600}
               className="object-cover w-full h-full"
-              style={{ objectPosition: "center 30%" }}
+              style={{ objectPosition: "center center" }}
             />
           </div>
         </div>
