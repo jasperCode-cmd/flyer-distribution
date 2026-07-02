@@ -114,13 +114,14 @@ export default function BournemouthPage() {
               </Link>
             </div>
           </div>
-          <div className="relative h-64 w-full overflow-hidden rounded-lg">
+          <div className="relative h-80 w-full overflow-hidden rounded-lg">
             <Image
               src="https://images.pexels.com/photos/29030837/pexels-photo-29030837.jpeg?auto=compress&cs=tinysrgb&w=800"
               alt="Bournemouth pier and ferris wheel"
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover"
+              style={{ objectPosition: "center" }}
             />
           </div>
         </div>
