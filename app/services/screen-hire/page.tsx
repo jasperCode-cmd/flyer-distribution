@@ -29,15 +29,15 @@ export const metadata: Metadata = {
 const features = [
   {
     title: "Be Seen With a Screen",
-    body: "Our mobile screen trailers are customised for different events and proven to get attention. Whether you need outdoor advertising, live event display, or something that simply stops people in their tracks, a mobile screen delivers impact that static advertising cannot match.",
+    body: "Our mobile LED screen trailers are fully customisable for your event or campaign. Whether you need outdoor advertising, a live event display, a movie screening, or a gaming setup, the screen can be configured to suit. The 7m² display is bright enough for daylight viewing and delivers impact that static advertising cannot match.",
   },
   {
     title: "On the Move",
-    body: "The screen arrives mounted on a trailer and can be raised for maximum viewing. Featuring a 7m² screen, it is straightforward to position and operate, making it suitable for a wide range of locations and occasions across Hampshire and Dorset.",
+    body: "The screen arrives pre-mounted on a road-legal trailer and can be raised to maximum viewing height on arrival. Setup is straightforward and can typically be completed within an hour. The trailer is stable on most surfaces and suitable for car parks, fields, event sites, and public spaces across Hampshire and Dorset.",
   },
   {
     title: "Fully Qualified Engineers",
-    body: "All screen designs and installations are overseen by fully qualified engineers using the latest components. You can hire with confidence knowing the setup is safe, professional, and built to perform.",
+    body: "All screen installations are designed and overseen by fully qualified engineers using industry-leading components. We handle the full setup and takedown so you don't have to. You hire with confidence knowing the equipment is safe, professionally installed, and built to perform for the duration of your event.",
   },
 ];
 
