@@ -90,6 +90,9 @@ const areas = [
   { name: "Winchester", href: "/areas/winchester" },
   { name: "New Forest", href: "/areas/new-forest" },
   { name: "Ringwood", href: "/areas/ringwood" },
+  { name: "Christchurch", href: "/areas/christchurch" },
+  { name: "Dorset", href: "/areas/dorset" },
+  { name: "Eastleigh", href: "/areas/eastleigh" },
 ];
 
 const localBusinessSchema = {
@@ -349,7 +352,7 @@ export default function HomePage() {
             Also covering
           </p>
           <div className="flex flex-wrap gap-2 mb-8">
-            {["Brockenhurst", "Romsey", "Christchurch", "Hythe", "Totton"].map((a) => (
+            {["Brockenhurst", "Romsey", "Hythe", "Totton", "Hedge End", "Chandler's Ford"].map((a) => (
               <span
                 key={a}
                 className="bg-blue-800 border border-blue-700 text-blue-200 text-sm px-4 py-1.5 rounded-full"
