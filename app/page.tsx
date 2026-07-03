@@ -349,7 +349,7 @@ export default function HomePage() {
             Also covering
           </p>
           <div className="flex flex-wrap gap-2 mb-8">
-            {["Brockenhurst", "Eastleigh", "Romsey", "Christchurch", "Hythe", "Totton"].map((a) => (
+            {["Brockenhurst", "Romsey", "Christchurch", "Hythe", "Totton"].map((a) => (
               <span
                 key={a}
                 className="bg-blue-800 border border-blue-700 text-blue-200 text-sm px-4 py-1.5 rounded-full"

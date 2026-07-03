@@ -20,6 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/services/web-design-seo",
     "/areas/christchurch",
     "/areas/dorset",
+    "/areas/eastleigh",
   ]; // /blog excluded — noindex
 
   return routes.map((route) => ({

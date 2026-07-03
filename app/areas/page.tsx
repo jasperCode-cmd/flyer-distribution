@@ -73,6 +73,11 @@ const featuredAreas = [
     desc: "Coastal market town on the Dorset border, with strong residential coverage across BH23 postcodes.",
   },
   {
+    name: "Eastleigh",
+    href: "/areas/eastleigh",
+    desc: "One of Hampshire's largest towns with strong residential coverage across SO50 postcodes.",
+  },
+  {
     name: "Dorset",
     href: "/areas/dorset",
     desc: "County-wide coverage across Dorset including Bournemouth, Poole, Christchurch, Weymouth and surrounding towns.",
@@ -80,7 +85,6 @@ const featuredAreas = [
 ];
 
 const otherAreas = [
-  "Eastleigh",
   "Romsey",
   "Hythe",
   "Totton",

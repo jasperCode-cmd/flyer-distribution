@@ -3,17 +3,17 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Flyer Distribution New Forest",
+  title: "Leaflet Distribution Eastleigh",
   description:
-    "Leaflet and flyer distribution across the New Forest, Hampshire. Door-to-door delivery to households in New Forest towns and villages.",
+    "Targeted leaflet and flyer distribution across Eastleigh and SO50 postcodes. Door-to-door delivery for local businesses in one of Hampshire's largest towns.",
   alternates: {
-    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/new-forest",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/eastleigh",
   },
   openGraph: {
-    title: "Flyer Distribution New Forest",
+    title: "Leaflet Distribution Eastleigh",
     description:
-      "Leaflet and flyer distribution across the New Forest, Hampshire. Door-to-door delivery to households in New Forest towns and villages.",
-    url: "https://www.flyerdistributionhampshire.co.uk/areas/new-forest",
+      "Targeted leaflet and flyer distribution across Eastleigh and SO50 postcodes. Door-to-door delivery for local businesses in one of Hampshire's largest towns.",
+    url: "https://www.flyerdistributionhampshire.co.uk/areas/eastleigh",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -28,9 +28,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Flyer Distribution New Forest",
+    title: "Leaflet Distribution Eastleigh",
     description:
-      "Leaflet and flyer distribution across the New Forest, Hampshire. Door-to-door delivery to households in New Forest towns and villages.",
+      "Targeted leaflet and flyer distribution across Eastleigh and SO50 postcodes. Door-to-door delivery for local businesses in one of Hampshire's largest towns.",
     images: [
       "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
     ],
@@ -56,13 +56,13 @@ const breadcrumbSchema = {
     {
       "@type": "ListItem",
       position: 3,
-      name: "New Forest",
-      item: "https://www.flyerdistributionhampshire.co.uk/areas/new-forest",
+      name: "Eastleigh",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas/eastleigh",
     },
   ],
 };
 
-export default function NewForestPage() {
+export default function EastleighPage() {
   return (
     <>
       <script
@@ -75,12 +75,11 @@ export default function NewForestPage() {
             Coverage Area
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            Leaflet Distribution New Forest
+            Leaflet Distribution Eastleigh
           </h1>
           <p className="text-blue-200 text-lg max-w-xl">
-            Professional leaflet delivery across New Forest towns and villages,
-            reaching households throughout one of Hampshire&apos;s most
-            distinctive areas.
+            Targeted door-to-door leaflet delivery across Eastleigh and
+            surrounding SO50 postcodes.
           </p>
         </div>
       </section>
@@ -89,43 +88,40 @@ export default function NewForestPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div>
             <h2 className="text-2xl font-bold text-blue-900 mb-4">
-              About Our New Forest Coverage
+              About Our Eastleigh Coverage
             </h2>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              The New Forest is a unique area covering a wide spread of market
-              towns, villages, and residential communities across southern
-              Hampshire. Key towns include Lyndhurst, Brockenhurst, Fordingbridge,
-              and Hythe, alongside a network of smaller villages with loyal,
-              locally-minded residents.
+              Eastleigh is one of Hampshire&apos;s largest towns, home to around
+              50,000 residents across a mix of residential neighbourhoods and
+              commercial areas. We cover SO50 and surrounding postcodes,
+              delivering directly through letterboxes across the town.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              We cover SO40, SO41, SO42, SO43, and surrounding postcode areas,
-              delivering to households across the district. The New Forest
-              demographic tends to be established and community-focused, making it
-              well suited to local services, home improvement businesses, and
-              independent retailers.
+              Whether you&apos;re targeting the town centre, Chandler&apos;s
+              Ford, Hedge End, or surrounding villages, our experienced
+              distributors know these routes well.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Vehicle leaflet distribution is also available in car parks and
-              high-footfall locations across New Forest towns for businesses
-              looking to reach visitors and day-trippers as well as residents.
+              Eastleigh&apos;s proximity to Southampton Airport and strong
+              commuter population also makes it well suited to targeted postcode
+              campaigns for local service businesses.
             </p>
             <div className="mt-8">
               <Link
                 href="/quote"
                 className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition-colors"
               >
-                Get a New Forest Quote
+                Get an Eastleigh Quote
               </Link>
             </div>
           </div>
-          <div>
+          <div className="relative h-80 w-full overflow-hidden rounded-lg">
             <Image
-              src="https://images.pexels.com/photos/33881640/pexels-photo-33881640.jpeg?auto=compress&cs=tinysrgb&w=800"
-              alt="New Forest village street in summer"
-              width={700}
-              height={500}
-              className="rounded-lg w-full object-cover"
+              src="https://images.pexels.com/photos/2467285/pexels-photo-2467285.jpeg?auto=compress&cs=tinysrgb&w=800"
+              alt="Hampshire town residential street"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
             />
           </div>
         </div>
@@ -134,10 +130,10 @@ export default function NewForestPage() {
       <section className="bg-white py-12 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-xl font-bold text-blue-900 mb-4">
-            New Forest Postcodes We Cover
+            Eastleigh Postcodes We Cover
           </h2>
           <div className="flex flex-wrap gap-2">
-            {["SO40", "SO41", "SO42", "SO43", "SO45", "BH24", "BH25"].map((pc) => (
+            {["SO50", "SO53"].map((pc) => (
               <span
                 key={pc}
                 className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full font-medium"
@@ -156,14 +152,6 @@ export default function NewForestPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Link
-              href="/areas/ringwood"
-              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
-            >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Ringwood</h3>
-              <p className="text-gray-600 text-xs mb-3">Market town on the New Forest edge, close to the Dorset border.</p>
-              <span className="text-blue-600 text-xs font-semibold">View area →</span>
-            </Link>
-            <Link
               href="/areas/southampton"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
@@ -172,11 +160,19 @@ export default function NewForestPage() {
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
-              href="/areas/bournemouth"
+              href="/areas/winchester"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Bournemouth</h3>
-              <p className="text-gray-600 text-xs mb-3">Major Dorset resort town with strong consumer footfall.</p>
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Winchester</h3>
+              <p className="text-gray-600 text-xs mb-3">Historic cathedral city and prosperous Hampshire county town.</p>
+              <span className="text-blue-600 text-xs font-semibold">View area →</span>
+            </Link>
+            <Link
+              href="/areas/new-forest"
+              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
+            >
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">New Forest</h3>
+              <p className="text-gray-600 text-xs mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

@@ -143,6 +143,40 @@ export default function PooléPage() {
           </div>
         </div>
       </section>
+
+      <section className="bg-slate-50 py-12 border-t border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-xl font-bold text-blue-900 mb-6">
+            Other Areas Nearby
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Link
+              href="/areas/bournemouth"
+              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
+            >
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Bournemouth</h3>
+              <p className="text-gray-600 text-xs mb-3">Major Dorset resort town with strong consumer footfall.</p>
+              <span className="text-blue-600 text-xs font-semibold">View area →</span>
+            </Link>
+            <Link
+              href="/areas/dorset"
+              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
+            >
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Dorset</h3>
+              <p className="text-gray-600 text-xs mb-3">County-wide coverage across Bournemouth, Poole and surrounding towns.</p>
+              <span className="text-blue-600 text-xs font-semibold">View area →</span>
+            </Link>
+            <Link
+              href="/areas/ringwood"
+              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
+            >
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Ringwood</h3>
+              <p className="text-gray-600 text-xs mb-3">Market town on the New Forest edge, close to the Dorset border.</p>
+              <span className="text-blue-600 text-xs font-semibold">View area →</span>
+            </Link>
+          </div>
+        </div>
+      </section>
     </>
   );
 }
