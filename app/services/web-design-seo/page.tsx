@@ -123,10 +123,14 @@ export default function WebDesignSeoPage() {
                 Who We Work With
               </h2>
               <p className="text-gray-600 text-sm leading-relaxed">
-                We work with service businesses, tradespeople, restaurants,
-                retailers, charities, and local organisations. If you need a
-                website or want to improve your search rankings, we&apos;d love
-                to hear about your project.
+                Most of our web design clients are service businesses that rely
+                on local customers finding them online: trades, home
+                improvement, health and wellness, food and drink, professional
+                services, and community organisations. If your business depends
+                on people in your area being able to find you and trust what
+                they see, we can help. We&apos;re happy to work with any
+                business, and we don&apos;t need a brief to give you a quote.
+                Just tell us what you&apos;re trying to achieve.
               </p>
             </div>
           </div>
