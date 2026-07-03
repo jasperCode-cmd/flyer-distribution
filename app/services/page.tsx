@@ -260,6 +260,46 @@ export default function ServicesPage() {
         </div>
       </section>
 
+      {/* Areas We Cover */}
+      <section className="bg-blue-900 text-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-3">
+            Areas We Cover
+          </h2>
+          <p className="text-blue-200 mb-10 max-w-xl">
+            We cover the Hampshire and Dorset corridor, from Winchester in
+            the north to Poole in the west, including:
+          </p>
+          <div className="flex flex-wrap gap-3 mb-8">
+            {[
+              { name: "Southampton", href: "/areas/southampton" },
+              { name: "Bournemouth", href: "/areas/bournemouth" },
+              { name: "Poole", href: "/areas/poole" },
+              { name: "Winchester", href: "/areas/winchester" },
+              { name: "New Forest", href: "/areas/new-forest" },
+              { name: "Ringwood", href: "/areas/ringwood" },
+              { name: "Christchurch", href: "/areas/christchurch" },
+              { name: "Dorset", href: "/areas/dorset" },
+              { name: "Eastleigh", href: "/areas/eastleigh" },
+            ].map((area) => (
+              <Link
+                key={area.name}
+                href={area.href}
+                className="bg-blue-800 hover:bg-blue-700 border border-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-md transition-colors"
+              >
+                {area.name}
+              </Link>
+            ))}
+          </div>
+          <Link
+            href="/areas"
+            className="text-blue-300 hover:text-white font-semibold text-sm underline underline-offset-2"
+          >
+            See all coverage areas →
+          </Link>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="bg-white py-16 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
