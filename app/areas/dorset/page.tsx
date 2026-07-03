@@ -91,23 +91,28 @@ export default function DorsetPage() {
               About Our Dorset Coverage
             </h2>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              Dorset is one of the most diverse counties on the south coast, with
-              major urban centres in Bournemouth and Poole, busy coastal towns
-              like Christchurch and Weymouth, and a wealth of market towns and
-              villages inland. Our distribution teams cover all key areas across
-              the county.
+              Dorset is one of the most varied counties for leaflet distribution,
+              covering everything from the busy urban centres of Bournemouth and
+              Poole through to the quieter market towns and coastal villages
+              further west. If you are running a campaign that needs to reach
+              audiences across the county rather than a single town, a
+              Dorset-wide campaign is the most effective way to do it.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              We cover BH postcode areas across the east of the county, including
-              Bournemouth, Poole, Christchurch, Wimborne, Ferndown, and
-              Verwood, as well as the DT postcodes serving Dorchester,
-              Weymouth, Bridport, and Sherborne.
+              We cover all major Dorset postcode areas including BH1 through
+              BH25, DT1 and surrounding Dorchester postcodes, and the coastal
+              and rural areas in between. This makes us the right partner for
+              businesses with a broad Dorset audience, including regional service
+              providers, national brands running local activations, charities
+              covering the county, and event promoters reaching across multiple
+              towns at once.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Whether you need to reach urban households, coastal communities, or
-              the county&apos;s rural residents, we can build a Dorset-wide
-              campaign or focus on specific towns and postcodes that match your
-              customer profile.
+              Where you need coverage in specific towns such as Bournemouth,
+              Poole, or Christchurch, we also offer targeted campaigns for each
+              of those areas individually. County-wide and multi-town campaigns
+              are priced and planned as a single campaign, so you get one point
+              of contact and one coordinated delivery.
             </p>
             <div className="mt-8">
               <Link

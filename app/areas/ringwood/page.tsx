@@ -91,23 +91,25 @@ export default function RingwoodPage() {
               About Our Ringwood Coverage
             </h2>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              Ringwood is a thriving market town on the edge of the New Forest,
-              with a strong community feel and a mix of residential areas and
-              rural properties. Its position close to the Dorset border makes it
-              a natural hub for reaching households across the western edge of
-              Hampshire.
+              Ringwood is a busy market town on the edge of the New Forest, well
+              positioned between Bournemouth and Salisbury and serving a broad
+              mix of residential streets, rural properties, and a strong local
+              high street. We cover BH24 and surrounding postcodes, delivering
+              directly through letterboxes across the town and into the
+              surrounding villages.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              We cover BH24 and surrounding postcode areas, delivering to
-              households across Ringwood town as well as nearby villages including
-              St Leonards, Ashley Heath, and Verwood. The area attracts a
-              stable, established resident base that responds well to local
-              marketing.
+              The town has a loyal local customer base and strong footfall from
+              visitors passing through to the New Forest and the coast, making it
+              particularly effective for food and drink businesses, home services,
+              tradespeople, and event promotion. Its rural-residential mix also
+              means a single campaign can reach both village households and town
+              centre addresses in one round.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Ringwood works particularly well for home services, tradespeople,
-              and businesses looking to build a local presence across the
-              Hampshire and Dorset border area.
+              Vehicle leaflet distribution is also available across Ringwood&apos;s
+              car parks and retail areas for businesses looking to reach people
+              already out and spending locally.
             </p>
             <div className="mt-8">
               <Link

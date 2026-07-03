@@ -91,22 +91,24 @@ export default function ChristchurchPage() {
               About Our Christchurch Coverage
             </h2>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              Christchurch is a historic market town on the Dorset coast, sitting
-              at the mouth of the rivers Avon and Stour. Known for its priory,
-              harbour, and the beaches at Mudeford, it has a settled residential
-              community and a loyal local audience that responds well to targeted
-              print marketing.
+              Christchurch sits on the Dorset coast between Bournemouth and the
+              New Forest, with a settled residential population and a strong
+              seasonal visitor trade. We cover BH23 and surrounding postcodes,
+              delivering to households across the town and into nearby villages
+              including Burton, Walkford, and Highcliffe.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              We cover BH23 and surrounding postcode areas, delivering to
-              households across Christchurch town centre, Highcliffe, Burton, and
-              the surrounding villages. The area is particularly well suited to
-              local services, home improvements, and hospitality businesses.
+              The town&apos;s established residential character makes it well
+              suited to campaigns targeting homeowners, particularly for home
+              improvement, professional services, and local tradespeople. Its
+              position between Bournemouth and the New Forest also makes it a
+              natural add-on for businesses running wider coastal or county
+              campaigns.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Christchurch sits between Bournemouth and the New Forest, making it
-              an effective addition to wider Dorset or Hampshire campaigns for
-              businesses seeking broad coastal coverage.
+              Christchurch&apos;s harbourside and town centre retail areas are
+              also available for vehicle leaflet distribution, reaching visitors
+              and day-trippers alongside the resident population.
             </p>
             <div className="mt-8">
               <Link
