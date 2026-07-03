@@ -38,42 +38,42 @@ export const metadata: Metadata = {
 
 const featuredAreas = [
   {
-    name: "Leaflet Distribution Southampton",
+    name: "Southampton",
     href: "/areas/southampton",
     desc: "Hampshire's largest city. Residential coverage across all major postcode areas.",
   },
   {
-    name: "Leaflet Distribution Bournemouth",
+    name: "Bournemouth",
     href: "/areas/bournemouth",
     desc: "Major Dorset resort town with strong consumer footfall.",
   },
   {
-    name: "Leaflet Distribution Poole",
+    name: "Poole",
     href: "/areas/poole",
     desc: "Affluent harbour town with excellent residential distribution routes.",
   },
   {
-    name: "Leaflet Distribution Winchester",
+    name: "Winchester",
     href: "/areas/winchester",
     desc: "Historic cathedral city and prosperous Hampshire county town.",
   },
   {
-    name: "Leaflet Distribution New Forest",
+    name: "New Forest",
     href: "/areas/new-forest",
     desc: "Towns and villages across one of Hampshire's most distinctive districts.",
   },
   {
-    name: "Leaflet Distribution Ringwood",
+    name: "Ringwood",
     href: "/areas/ringwood",
     desc: "Market town on the New Forest edge, close to the Dorset border.",
   },
   {
-    name: "Leaflet Distribution Christchurch",
+    name: "Christchurch",
     href: "/areas/christchurch",
     desc: "Coastal market town on the Dorset border, with strong residential coverage across BH23 postcodes.",
   },
   {
-    name: "Leaflet Distribution Dorset",
+    name: "Dorset",
     href: "/areas/dorset",
     desc: "County-wide coverage across Dorset including Bournemouth, Poole, Christchurch, Weymouth and surrounding towns.",
   },
