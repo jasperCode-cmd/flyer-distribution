@@ -173,6 +173,39 @@ export default function AreasPage() {
         </div>
       </section>
 
+      <section className="bg-slate-50 py-14 border-t border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-bold text-blue-900 mb-3">
+            Our Leaflet Distribution Services
+          </h2>
+          <p className="text-gray-600 mb-8">
+            From design and print through to targeted postcode campaigns, we have a service to suit every budget.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            {[
+              { title: "Design, Print and Deliver", href: "/services" },
+              { title: "Print and Deliver", href: "/services" },
+              { title: "Leaflet Distribution", href: "/services" },
+            ].map((svc) => (
+              <Link
+                key={svc.title}
+                href={svc.href}
+                className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
+              >
+                <h3 className="text-sm font-semibold text-blue-900 mb-3">{svc.title}</h3>
+                <span className="text-blue-600 text-xs font-semibold">View service →</span>
+              </Link>
+            ))}
+          </div>
+          <Link
+            href="/services"
+            className="text-blue-600 hover:text-blue-800 font-semibold text-sm underline underline-offset-2"
+          >
+            See all services →
+          </Link>
+        </div>
+      </section>
+
       <section className="bg-white py-14 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-2xl font-bold text-blue-900 mb-4">
