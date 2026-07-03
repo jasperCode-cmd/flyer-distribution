@@ -123,13 +123,13 @@ export default function DorsetPage() {
               </Link>
             </div>
           </div>
-          <div className="relative h-80 w-full overflow-hidden rounded-lg">
+          <div className="aspect-square overflow-hidden rounded-lg">
             <Image
-              src="https://images.pexels.com/photos/1591339/pexels-photo-1591339.jpeg?auto=compress&cs=tinysrgb&w=800"
-              alt="Dorset countryside rolling hills"
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
+              src="https://images.pexels.com/photos/20814980/pexels-photo-20814980.jpeg?auto=compress&cs=tinysrgb&w=800"
+              alt="Dorset coastal town"
+              width={700}
+              height={700}
+              className="w-full h-full object-cover object-center"
             />
           </div>
         </div>

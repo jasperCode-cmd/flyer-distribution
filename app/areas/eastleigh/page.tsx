@@ -115,13 +115,13 @@ export default function EastleighPage() {
               </Link>
             </div>
           </div>
-          <div className="relative h-80 w-full overflow-hidden rounded-lg">
+          <div className="aspect-square overflow-hidden rounded-lg">
             <Image
-              src="https://images.pexels.com/photos/2467285/pexels-photo-2467285.jpeg?auto=compress&cs=tinysrgb&w=800"
-              alt="Hampshire town residential street"
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
+              src="/Street_Image_when_distributing_flyers.jpg"
+              alt="Street scene during leaflet distribution in Eastleigh"
+              width={700}
+              height={700}
+              className="w-full h-full object-cover object-center"
             />
           </div>
         </div>
