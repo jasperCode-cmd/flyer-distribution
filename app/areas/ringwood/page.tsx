@@ -99,12 +99,11 @@ export default function RingwoodPage() {
               surrounding villages.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              The town has a loyal local customer base and strong footfall from
-              visitors passing through to the New Forest and the coast, making it
-              particularly effective for food and drink businesses, home services,
-              tradespeople, and event promotion. Its rural-residential mix also
-              means a single campaign can reach both village households and town
-              centre addresses in one round.
+              The town has a loyal local customer base that engages well with
+              print marketing, particularly for home services, food and drink,
+              and community events. Its rural-residential mix also means a
+              single campaign can reach both village households and town centre
+              addresses in one round.
             </p>
             <p className="text-gray-600 leading-relaxed">
               Vehicle leaflet distribution is also available across Ringwood&apos;s

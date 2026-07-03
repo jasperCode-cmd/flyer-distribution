@@ -103,9 +103,10 @@ export default function WinchesterPage() {
               the outlying villages such as Colden Common and Bishopstoke.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Winchester is particularly effective for premium services such as
-              home improvements, fine dining, private schools, and professional
-              services.
+              Winchester&apos;s county town professional base makes it
+              particularly effective for premium services such as home
+              improvements, fine dining, private schools, and specialist
+              professional services.
             </p>
             <div className="mt-8">
               <Link

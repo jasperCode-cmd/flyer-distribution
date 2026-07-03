@@ -97,9 +97,10 @@ export default function PooléPage() {
               BH13 through BH17 and surrounding postcodes.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              For businesses targeting higher-income demographics such as luxury
-              services, premium restaurants, and home improvement, Poole offers
-              an excellent return on flyer investment.
+              For businesses targeting higher-income demographics, Poole&apos;s
+              waterfront and marina postcodes offer some of the highest-value
+              residential distribution in Dorset, particularly for luxury
+              services, premium restaurants, and home improvement.
             </p>
             <p className="text-gray-600 leading-relaxed">
               We also cover Parkstone, Upton, Hamworthy, and the wider

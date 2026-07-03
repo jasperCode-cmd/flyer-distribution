@@ -102,8 +102,10 @@ export default function BournemouthPage() {
               distributors know these routes well.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Bournemouth&apos;s busy retail areas and car parks also make it
-              well suited to vehicle leaflet distribution campaigns.
+              Bournemouth&apos;s large student population and year-round tourism
+              also make it one of the most responsive areas for campaign
+              testing: high footfall, high density, and a wide mix of
+              demographics within a compact postcode range.
             </p>
             <div className="mt-8">
               <Link

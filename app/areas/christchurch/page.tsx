@@ -98,12 +98,11 @@ export default function ChristchurchPage() {
               including Burton, Walkford, and Highcliffe.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              The town&apos;s established residential character makes it well
-              suited to campaigns targeting homeowners, particularly for home
-              improvement, professional services, and local tradespeople. Its
-              position between Bournemouth and the New Forest also makes it a
-              natural add-on for businesses running wider coastal or county
-              campaigns.
+              The town&apos;s homeowner-heavy demographic makes it particularly
+              effective for home improvement, trades, and professional services
+              campaigns. Its position between Bournemouth and the New Forest
+              also makes it a natural add-on for businesses running wider
+              coastal or county campaigns.
             </p>
             <p className="text-gray-600 leading-relaxed">
               Christchurch&apos;s harbourside and town centre retail areas are
