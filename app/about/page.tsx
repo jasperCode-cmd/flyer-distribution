@@ -174,6 +174,49 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+      <section className="bg-slate-50 py-16 border-t border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl font-bold text-blue-900 mb-3">
+            Our Services
+          </h2>
+          <p className="text-gray-600 mb-8">
+            From leaflet distribution to web design and mobile screen hire, we offer a range of marketing solutions for local businesses.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                title: "Leaflet Services",
+                desc: "Door-to-door distribution, targeted postcode campaigns, design and print.",
+                href: "/services",
+              },
+              {
+                title: "Web Design & SEO",
+                desc: "Bespoke websites and search engine optimisation for local businesses.",
+                href: "/services/web-design-seo",
+              },
+              {
+                title: "Screen Hire",
+                desc: "Mobile LED screen trailer hire for events and advertising across Hampshire and Dorset.",
+                href: "/services/screen-hire",
+              },
+            ].map((svc) => (
+              <Link
+                key={svc.title}
+                href={svc.href}
+                className="border border-gray-200 rounded-lg p-6 bg-white hover:border-blue-400 hover:shadow-md transition-all block"
+              >
+                <h3 className="text-base font-semibold text-blue-900 mb-2">
+                  {svc.title}
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">{svc.desc}</p>
+                <span className="mt-3 inline-block text-blue-600 text-xs font-semibold">
+                  View service →
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
     </>
   );
 }
