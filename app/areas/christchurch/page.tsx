@@ -3,17 +3,17 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Flyer Distribution Bournemouth",
+  title: "Leaflet Distribution Christchurch",
   description:
-    "Leaflet and flyer distribution across Bournemouth. Targeted door-to-door delivery for local businesses in Dorset.",
+    "Leaflet and flyer distribution across Christchurch and BH23 postcodes. Targeted door-to-door delivery in this coastal Dorset market town.",
   alternates: {
-    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/bournemouth",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/christchurch",
   },
   openGraph: {
-    title: "Flyer Distribution Bournemouth",
+    title: "Leaflet Distribution Christchurch",
     description:
-      "Leaflet and flyer distribution across Bournemouth. Targeted door-to-door delivery for local businesses in Dorset.",
-    url: "https://www.flyerdistributionhampshire.co.uk/areas/bournemouth",
+      "Leaflet and flyer distribution across Christchurch and BH23 postcodes. Targeted door-to-door delivery in this coastal Dorset market town.",
+    url: "https://www.flyerdistributionhampshire.co.uk/areas/christchurch",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -28,9 +28,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Flyer Distribution Bournemouth",
+    title: "Leaflet Distribution Christchurch",
     description:
-      "Leaflet and flyer distribution across Bournemouth. Targeted door-to-door delivery for local businesses in Dorset.",
+      "Leaflet and flyer distribution across Christchurch and BH23 postcodes. Targeted door-to-door delivery in this coastal Dorset market town.",
     images: [
       "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
     ],
@@ -56,13 +56,13 @@ const breadcrumbSchema = {
     {
       "@type": "ListItem",
       position: 3,
-      name: "Bournemouth",
-      item: "https://www.flyerdistributionhampshire.co.uk/areas/bournemouth",
+      name: "Christchurch",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas/christchurch",
     },
   ],
 };
 
-export default function BournemouthPage() {
+export default function ChristchurchPage() {
   return (
     <>
       <script
@@ -75,11 +75,11 @@ export default function BournemouthPage() {
             Coverage Area
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            Leaflet Distribution Bournemouth
+            Leaflet Distribution Christchurch
           </h1>
           <p className="text-blue-200 text-lg max-w-xl">
-            Reach residents and visitors across Bournemouth with professional
-            door-to-door leaflet distribution.
+            Door-to-door leaflet delivery across Christchurch and BH23
+            postcodes, reaching households in this coastal Dorset market town.
           </p>
         </div>
       </section>
@@ -88,40 +88,42 @@ export default function BournemouthPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div>
             <h2 className="text-2xl font-bold text-blue-900 mb-4">
-              About Our Bournemouth Coverage
+              About Our Christchurch Coverage
             </h2>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              Bournemouth is one of Dorset&apos;s largest towns, known for its
-              beaches, vibrant town centre, and large student population.
-              We cover BH1 through BH12 and surrounding postcodes, reaching
-              residential areas across all neighbourhoods.
+              Christchurch is a historic market town on the Dorset coast, sitting
+              at the mouth of the rivers Avon and Stour. Known for its priory,
+              harbour, and the beaches at Mudeford, it has a settled residential
+              community and a loyal local audience that responds well to targeted
+              print marketing.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              Whether you need to reach the Westbourne boutique area,
-              Boscombe, Winton, or the leafy suburbs, our experienced
-              distributors know these routes well.
+              We cover BH23 and surrounding postcode areas, delivering to
+              households across Christchurch town centre, Highcliffe, Burton, and
+              the surrounding villages. The area is particularly well suited to
+              local services, home improvements, and hospitality businesses.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Bournemouth&apos;s busy retail areas and car parks also make it
-              well suited to vehicle leaflet distribution campaigns.
+              Christchurch sits between Bournemouth and the New Forest, making it
+              an effective addition to wider Dorset or Hampshire campaigns for
+              businesses seeking broad coastal coverage.
             </p>
             <div className="mt-8">
               <Link
                 href="/quote"
                 className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition-colors"
               >
-                Get a Bournemouth Quote
+                Get a Christchurch Quote
               </Link>
             </div>
           </div>
           <div className="relative h-80 w-full overflow-hidden rounded-lg">
             <Image
-              src="https://images.pexels.com/photos/29030837/pexels-photo-29030837.jpeg?auto=compress&cs=tinysrgb&w=800"
-              alt="Bournemouth pier and ferris wheel"
+              src="https://images.pexels.com/photos/1796730/pexels-photo-1796730.jpeg?auto=compress&cs=tinysrgb&w=800"
+              alt="Christchurch harbour and waterfront"
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover"
-              style={{ objectPosition: "center" }}
             />
           </div>
         </div>
@@ -130,19 +132,17 @@ export default function BournemouthPage() {
       <section className="bg-white py-12 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-xl font-bold text-blue-900 mb-4">
-            Bournemouth Postcodes We Cover
+            Christchurch Postcodes We Cover
           </h2>
           <div className="flex flex-wrap gap-2">
-            {["BH1", "BH2", "BH3", "BH4", "BH5", "BH6", "BH7", "BH8", "BH9", "BH10", "BH11", "BH12"].map(
-              (pc) => (
-                <span
-                  key={pc}
-                  className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full font-medium"
-                >
-                  {pc}
-                </span>
-              )
-            )}
+            {["BH23"].map((pc) => (
+              <span
+                key={pc}
+                className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full font-medium"
+              >
+                {pc}
+              </span>
+            ))}
           </div>
         </div>
       </section>

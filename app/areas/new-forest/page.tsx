@@ -75,7 +75,7 @@ export default function NewForestPage() {
             Coverage Area
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            Flyer Distribution in the New Forest
+            Leaflet Distribution New Forest
           </h1>
           <p className="text-blue-200 text-lg max-w-xl">
             Professional leaflet delivery across New Forest towns and villages,

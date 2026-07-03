@@ -38,45 +38,55 @@ export const metadata: Metadata = {
 
 const featuredAreas = [
   {
-    name: "Southampton",
+    name: "Leaflet Distribution Southampton",
     href: "/areas/southampton",
     desc: "Hampshire's largest city. Residential coverage across all major postcode areas.",
   },
   {
-    name: "Bournemouth",
+    name: "Leaflet Distribution Bournemouth",
     href: "/areas/bournemouth",
     desc: "Major Dorset resort town with strong consumer footfall.",
   },
   {
-    name: "Poole",
+    name: "Leaflet Distribution Poole",
     href: "/areas/poole",
     desc: "Affluent harbour town with excellent residential distribution routes.",
   },
   {
-    name: "Winchester",
+    name: "Leaflet Distribution Winchester",
     href: "/areas/winchester",
     desc: "Historic cathedral city and prosperous Hampshire county town.",
   },
   {
-    name: "New Forest",
+    name: "Leaflet Distribution New Forest",
     href: "/areas/new-forest",
     desc: "Towns and villages across one of Hampshire's most distinctive districts.",
   },
   {
-    name: "Ringwood",
+    name: "Leaflet Distribution Ringwood",
     href: "/areas/ringwood",
     desc: "Market town on the New Forest edge, close to the Dorset border.",
+  },
+  {
+    name: "Leaflet Distribution Christchurch",
+    href: "/areas/christchurch",
+    desc: "Coastal market town on the Dorset border, with strong residential coverage across BH23 postcodes.",
+  },
+  {
+    name: "Leaflet Distribution Dorset",
+    href: "/areas/dorset",
+    desc: "County-wide coverage across Dorset including Bournemouth, Poole, Christchurch, Weymouth and surrounding towns.",
   },
 ];
 
 const otherAreas = [
   "Eastleigh",
   "Romsey",
-  "Christchurch",
   "Hythe",
   "Totton",
   "Hedge End",
   "Chandler's Ford",
+  "Brockenhurst",
 ];
 
 const breadcrumbSchema = {

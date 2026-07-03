@@ -3,17 +3,17 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Flyer Distribution Bournemouth",
+  title: "Leaflet Distribution Dorset",
   description:
-    "Leaflet and flyer distribution across Bournemouth. Targeted door-to-door delivery for local businesses in Dorset.",
+    "County-wide leaflet and flyer distribution across Dorset. Covering Bournemouth, Poole, Christchurch, Weymouth and surrounding towns.",
   alternates: {
-    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/bournemouth",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/dorset",
   },
   openGraph: {
-    title: "Flyer Distribution Bournemouth",
+    title: "Leaflet Distribution Dorset",
     description:
-      "Leaflet and flyer distribution across Bournemouth. Targeted door-to-door delivery for local businesses in Dorset.",
-    url: "https://www.flyerdistributionhampshire.co.uk/areas/bournemouth",
+      "County-wide leaflet and flyer distribution across Dorset. Covering Bournemouth, Poole, Christchurch, Weymouth and surrounding towns.",
+    url: "https://www.flyerdistributionhampshire.co.uk/areas/dorset",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -28,9 +28,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Flyer Distribution Bournemouth",
+    title: "Leaflet Distribution Dorset",
     description:
-      "Leaflet and flyer distribution across Bournemouth. Targeted door-to-door delivery for local businesses in Dorset.",
+      "County-wide leaflet and flyer distribution across Dorset. Covering Bournemouth, Poole, Christchurch, Weymouth and surrounding towns.",
     images: [
       "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
     ],
@@ -56,13 +56,13 @@ const breadcrumbSchema = {
     {
       "@type": "ListItem",
       position: 3,
-      name: "Bournemouth",
-      item: "https://www.flyerdistributionhampshire.co.uk/areas/bournemouth",
+      name: "Dorset",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas/dorset",
     },
   ],
 };
 
-export default function BournemouthPage() {
+export default function DorsetPage() {
   return (
     <>
       <script
@@ -75,11 +75,11 @@ export default function BournemouthPage() {
             Coverage Area
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            Leaflet Distribution Bournemouth
+            Leaflet Distribution Dorset
           </h1>
           <p className="text-blue-200 text-lg max-w-xl">
-            Reach residents and visitors across Bournemouth with professional
-            door-to-door leaflet distribution.
+            County-wide leaflet delivery across Dorset, from Bournemouth and
+            Poole in the east to Weymouth and beyond.
           </p>
         </div>
       </section>
@@ -88,40 +88,43 @@ export default function BournemouthPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div>
             <h2 className="text-2xl font-bold text-blue-900 mb-4">
-              About Our Bournemouth Coverage
+              About Our Dorset Coverage
             </h2>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              Bournemouth is one of Dorset&apos;s largest towns, known for its
-              beaches, vibrant town centre, and large student population.
-              We cover BH1 through BH12 and surrounding postcodes, reaching
-              residential areas across all neighbourhoods.
+              Dorset is one of the most diverse counties on the south coast, with
+              major urban centres in Bournemouth and Poole, busy coastal towns
+              like Christchurch and Weymouth, and a wealth of market towns and
+              villages inland. Our distribution teams cover all key areas across
+              the county.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              Whether you need to reach the Westbourne boutique area,
-              Boscombe, Winton, or the leafy suburbs, our experienced
-              distributors know these routes well.
+              We cover BH postcode areas across the east of the county, including
+              Bournemouth, Poole, Christchurch, Wimborne, Ferndown, and
+              Verwood, as well as the DT postcodes serving Dorchester,
+              Weymouth, Bridport, and Sherborne.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Bournemouth&apos;s busy retail areas and car parks also make it
-              well suited to vehicle leaflet distribution campaigns.
+              Whether you need to reach urban households, coastal communities, or
+              the county&apos;s rural residents, we can build a Dorset-wide
+              campaign or focus on specific towns and postcodes that match your
+              customer profile.
             </p>
             <div className="mt-8">
               <Link
                 href="/quote"
                 className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition-colors"
               >
-                Get a Bournemouth Quote
+                Get a Dorset Quote
               </Link>
             </div>
           </div>
           <div className="relative h-80 w-full overflow-hidden rounded-lg">
             <Image
-              src="https://images.pexels.com/photos/29030837/pexels-photo-29030837.jpeg?auto=compress&cs=tinysrgb&w=800"
-              alt="Bournemouth pier and ferris wheel"
+              src="https://images.pexels.com/photos/1591339/pexels-photo-1591339.jpeg?auto=compress&cs=tinysrgb&w=800"
+              alt="Dorset countryside rolling hills"
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover"
-              style={{ objectPosition: "center" }}
             />
           </div>
         </div>
@@ -130,19 +133,22 @@ export default function BournemouthPage() {
       <section className="bg-white py-12 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-xl font-bold text-blue-900 mb-4">
-            Bournemouth Postcodes We Cover
+            Dorset Postcodes We Cover
           </h2>
           <div className="flex flex-wrap gap-2">
-            {["BH1", "BH2", "BH3", "BH4", "BH5", "BH6", "BH7", "BH8", "BH9", "BH10", "BH11", "BH12"].map(
-              (pc) => (
-                <span
-                  key={pc}
-                  className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full font-medium"
-                >
-                  {pc}
-                </span>
-              )
-            )}
+            {[
+              "BH1", "BH2", "BH3", "BH4", "BH5", "BH6", "BH7", "BH8",
+              "BH9", "BH10", "BH11", "BH12", "BH13", "BH14", "BH15",
+              "BH16", "BH17", "BH18", "BH21", "BH22", "BH23", "BH24",
+              "DT1", "DT2", "DT3", "DT4", "DT9", "DT11",
+            ].map((pc) => (
+              <span
+                key={pc}
+                className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full font-medium"
+              >
+                {pc}
+              </span>
+            ))}
           </div>
         </div>
       </section>

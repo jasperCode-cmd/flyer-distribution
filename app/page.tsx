@@ -115,10 +115,12 @@ const localBusinessSchema = {
     "Romsey",
     "Ringwood",
     "Christchurch",
+    "Dorset",
     "Hythe",
     "Totton",
     "Hedge End",
     "Chandler's Ford",
+    "Brockenhurst",
   ],
 };
 
@@ -332,7 +334,7 @@ export default function HomePage() {
             We cover the Hampshire and Dorset corridor, from Winchester in
             the north to Poole in the west, including:
           </p>
-          <div className="flex flex-wrap gap-3 mb-10">
+          <div className="flex flex-wrap gap-3 mb-8">
             {areas.map((area) => (
               <Link
                 key={area.name}
@@ -341,6 +343,19 @@ export default function HomePage() {
               >
                 {area.name}
               </Link>
+            ))}
+          </div>
+          <p className="text-blue-400 text-xs font-semibold uppercase tracking-wide mb-3">
+            Also covering
+          </p>
+          <div className="flex flex-wrap gap-2 mb-8">
+            {["Brockenhurst", "Eastleigh", "Romsey", "Christchurch", "Hythe", "Totton"].map((a) => (
+              <span
+                key={a}
+                className="bg-blue-800 border border-blue-700 text-blue-200 text-sm px-4 py-1.5 rounded-full"
+              >
+                {a}
+              </span>
             ))}
           </div>
           <Link

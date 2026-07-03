@@ -75,7 +75,7 @@ export default function SouthamptonPage() {
             Coverage Area
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            Flyer Distribution in Southampton
+            Leaflet Distribution Southampton
           </h1>
           <p className="text-blue-200 text-lg max-w-xl">
             Reach households and businesses across Hampshire&apos;s largest city

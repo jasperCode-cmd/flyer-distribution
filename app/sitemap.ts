@@ -18,6 +18,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/faq",
     "/services/screen-hire",
     "/services/web-design-seo",
+    "/areas/christchurch",
+    "/areas/dorset",
   ]; // /blog excluded — noindex
 
   return routes.map((route) => ({

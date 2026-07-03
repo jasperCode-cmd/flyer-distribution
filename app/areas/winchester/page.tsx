@@ -75,7 +75,7 @@ export default function WinchesterPage() {
             Coverage Area
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            Flyer Distribution in Winchester
+            Leaflet Distribution Winchester
           </h1>
           <p className="text-blue-200 text-lg max-w-xl">
             Professional leaflet delivery across Winchester city and surrounding

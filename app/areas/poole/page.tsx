@@ -75,7 +75,7 @@ export default function PooléPage() {
             Coverage Area
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            Flyer Distribution in Poole
+            Leaflet Distribution Poole
           </h1>
           <p className="text-blue-200 text-lg max-w-xl">
             Door-to-door leaflet delivery across Poole, covering affluent
