@@ -19,7 +19,7 @@ body {
 }
 
 .marquee-track {
-  animation: marquee 38s linear infinite;
+  animation: marquee 80s linear infinite;
 }
 
 /* Pause on hover or keyboard focus anywhere inside the carousel */
