@@ -67,6 +67,20 @@ export default function WebDesignSeoPage() {
                 </li>
               ))}
             </ul>
+            <div className="mt-8 border border-blue-200 bg-blue-50 rounded-lg p-6">
+              <h2 className="text-lg font-bold text-blue-900 mb-2">
+                Get Online for Less
+              </h2>
+              <p className="text-gray-600 text-sm leading-relaxed mb-4">
+                Professional websites from £60 a month, no big upfront cost.
+              </p>
+              <Link
+                href="/quote"
+                className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-6 py-3 rounded-md transition-colors text-sm"
+              >
+                Book a Free Call
+              </Link>
+            </div>
           </div>
           <div>
             <Image
