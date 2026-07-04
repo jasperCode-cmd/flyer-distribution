@@ -215,7 +215,7 @@ export default function ServicesPage() {
                   </p>
                   <Link
                     href="/quote"
-                    className="inline-block bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-5 py-2.5 rounded-md transition-colors"
+                    className="inline-block bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-5 py-2.5 rounded-md transition duration-200 ease-out hover:scale-105"
                   >
                     Get a Quote
                   </Link>
@@ -285,7 +285,7 @@ export default function ServicesPage() {
               <Link
                 key={area.name}
                 href={area.href}
-                className="bg-blue-800 hover:bg-blue-700 border border-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-md transition-colors"
+                className="bg-blue-800 hover:bg-blue-700 border border-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-md transition duration-200 ease-out hover:scale-105"
               >
                 {area.name}
               </Link>
@@ -312,7 +312,7 @@ export default function ServicesPage() {
           </p>
           <Link
             href="/quote"
-            className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-8 py-4 rounded-md transition-colors"
+            className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-8 py-4 rounded-md transition duration-200 ease-out hover:scale-105"
           >
             Get a Free Quote
           </Link>

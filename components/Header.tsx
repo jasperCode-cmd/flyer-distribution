@@ -115,7 +115,7 @@ export default function Header() {
           <div className="hidden md:block">
             <Link
               href="/quote"
-              className="bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-5 py-2.5 rounded-md transition-colors"
+              className="bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-5 py-2.5 rounded-md transition duration-200 ease-out hover:scale-105"
             >
               Get a Quote
             </Link>
@@ -196,7 +196,7 @@ export default function Header() {
 
               <Link
                 href="/quote"
-                className="mt-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-4 py-2.5 rounded-md text-center transition-colors"
+                className="mt-2 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-4 py-2.5 rounded-md text-center transition duration-200 ease-out hover:scale-105"
                 onClick={() => setMenuOpen(false)}
               >
                 Get a Quote

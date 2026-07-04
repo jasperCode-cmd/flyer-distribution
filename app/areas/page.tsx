@@ -217,7 +217,7 @@ export default function AreasPage() {
           </p>
           <Link
             href="/quote"
-            className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-8 py-4 rounded-md transition-colors"
+            className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-8 py-4 rounded-md transition duration-200 ease-out hover:scale-105"
           >
             Get a Free Quote
           </Link>

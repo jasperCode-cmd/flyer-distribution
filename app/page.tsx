@@ -167,7 +167,7 @@ export default function HomePage() {
               </p>
               <Link
                 href="/quote"
-                className="inline-block bg-white text-blue-900 hover:bg-blue-50 font-bold px-8 py-4 rounded-md text-base transition-colors shadow-lg"
+                className="inline-block bg-white text-blue-900 hover:bg-blue-50 font-bold px-8 py-4 rounded-md text-base transition duration-200 ease-out hover:scale-105 shadow-lg"
               >
                 Get a Free Quote
               </Link>
@@ -446,7 +446,7 @@ export default function HomePage() {
           </p>
           <Link
             href="/quote"
-            className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-10 py-4 rounded-md text-base transition-colors shadow"
+            className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-10 py-4 rounded-md text-base transition duration-200 ease-out hover:scale-105 shadow"
           >
             Get a Free Quote
           </Link>

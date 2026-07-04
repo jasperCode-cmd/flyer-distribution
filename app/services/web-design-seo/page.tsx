@@ -95,7 +95,7 @@ export default function WebDesignSeoPage() {
             </p>
             <Link
               href="/quote"
-              className="inline-block bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold px-8 py-4 rounded-md transition-colors text-base"
+              className="inline-block bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold px-8 py-4 rounded-md transition duration-200 ease-out hover:scale-105 text-base"
             >
               Book a Free Call
             </Link>
@@ -122,7 +122,7 @@ export default function WebDesignSeoPage() {
           </p>
           <Link
             href="/quote"
-            className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-10 py-4 rounded-md text-base transition-colors shadow"
+            className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-10 py-4 rounded-md text-base transition duration-200 ease-out hover:scale-105 shadow"
           >
             Get in Touch
           </Link>

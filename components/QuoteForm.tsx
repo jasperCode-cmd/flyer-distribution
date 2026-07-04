@@ -540,7 +540,7 @@ export default function QuoteForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-blue-700 hover:bg-blue-800 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-md transition-colors text-sm"
+          className="w-full bg-blue-700 hover:bg-blue-800 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-md transition duration-200 ease-out hover:scale-105 text-sm"
         >
           {isSubmitting ? "Sending..." : "Send Quote Request"}
         </button>

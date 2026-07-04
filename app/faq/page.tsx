@@ -136,7 +136,7 @@ export default function FaqPage() {
             </p>
             <Link
               href="/quote"
-              className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3 rounded-md transition-colors text-sm"
+              className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3 rounded-md transition duration-200 ease-out hover:scale-105 text-sm"
             >
               Get a Free Quote
             </Link>

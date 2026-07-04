@@ -117,7 +117,7 @@ export default function DorsetPage() {
             <div className="mt-8">
               <Link
                 href="/quote"
-                className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition-colors"
+                className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition duration-200 ease-out hover:scale-105"
               >
                 Get a Dorset Quote
               </Link>
