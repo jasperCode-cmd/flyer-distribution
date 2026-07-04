@@ -11,3 +11,40 @@
 body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
+
+/* ── Area carousel marquee ── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.marquee-track {
+  animation: marquee 38s linear infinite;
+}
+
+/* Pause on hover or keyboard focus anywhere inside the carousel */
+.marquee-container:hover  .marquee-track,
+.marquee-container:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Fade left/right edges via mask */
+.marquee-outer {
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%);
+  mask-image:         linear-gradient(to right, transparent 0%, black 7%, black 93%, transparent 100%);
+}
+
+/* Reduced-motion: disable animation, hide dupe set, allow horizontal scroll */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+  .marquee-copy-dupe {
+    display: none;
+  }
+  .marquee-outer {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}

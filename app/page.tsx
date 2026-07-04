@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Testimonials from "@/components/Testimonials";
 import StatsBar from "@/components/StatsBar";
+import AreaCarousel from "@/components/AreaCarousel";
 
 export const metadata: Metadata = {
   title: "Flyer Distribution Hampshire | Local Leaflet & Flyer Delivery",
@@ -201,6 +202,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <AreaCarousel />
 
       <Testimonials />
 
