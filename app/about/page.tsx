@@ -94,7 +94,9 @@ export default function AboutPage() {
           <h2 className="text-2xl font-bold text-blue-900 mb-4">
             Who We Are
           </h2>
-          <p className="text-gray-600 mb-6 leading-relaxed">
+
+          {/* Intro — standalone above the founder cards */}
+          <p className="text-gray-600 mb-10 leading-relaxed">
             Flyer Distribution Hampshire was co-founded by Jasper and Daniel,
             who both graduated in 2025, Jasper from the University of
             Southampton and Daniel from Bournemouth University. Together they
@@ -102,42 +104,67 @@ export default function AboutPage() {
             advertising methods to give businesses a complete marketing solution.
           </p>
 
-          <h3 className="mb-2">
-            <span className="block text-2xl font-bold text-gray-900">Jasper</span>
-            <span className="block text-sm font-medium text-blue-700 font-semibold mt-0.5">Co-Founder &amp; Operations Director</span>
-          </h3>
-          <p className="text-gray-600 mb-6 leading-relaxed">
-            Jasper brings extensive expertise in website design and development,
-            search engine optimisation (SEO), organic digital marketing, and
-            social media growth. His passion for helping businesses improve their
-            online visibility ensures clients benefit from marketing strategies
-            that continue delivering results long after a campaign has finished.
-          </p>
+          {/* Founder cards — side by side on desktop */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
 
-          <h3 className="mb-2">
-            <span className="block text-2xl font-bold text-gray-900">Daniel</span>
-            <span className="block text-sm font-medium text-blue-700 font-semibold mt-0.5">Co-Founder &amp; Sales Director</span>
-          </h3>
-          <p className="text-gray-600 mb-8 leading-relaxed">
-            Daniel has a strong background in sales, media, marketing, and
-            business development. His experience in building client
-            relationships, developing advertising strategies, and growing brands
-            through social media enables him to create marketing campaigns that
-            are both effective and commercially focused.
-          </p>
+            {/* Jasper */}
+            <div className="group relative bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-out">
+              <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-lg bg-blue-200 group-hover:bg-blue-500 transition-colors duration-300" aria-hidden="true" />
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xl font-bold flex-shrink-0">
+                  J
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">Jasper</p>
+                  <p className="text-sm font-semibold text-blue-700 mt-0.5">Co-Founder &amp; Operations Director</p>
+                </div>
+              </div>
+              <p className="text-gray-600 text-sm leading-[1.8]">
+                Jasper brings extensive expertise in website design and development,
+                search engine optimisation (SEO), organic digital marketing, and
+                social media growth. His passion for helping businesses improve their
+                online visibility ensures clients benefit from marketing strategies
+                that continue delivering results long after a campaign has finished.
+              </p>
+            </div>
 
-          <p className="text-gray-600 mb-8 leading-relaxed">
-            If you have a campaign in mind, we&apos;d be delighted to discuss
-            how Flyer Distribution Hampshire can help your business reach more
-            customers and achieve measurable growth.
-          </p>
+            {/* Daniel */}
+            <div className="group relative bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-out">
+              <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-lg bg-blue-200 group-hover:bg-blue-500 transition-colors duration-300" aria-hidden="true" />
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xl font-bold flex-shrink-0">
+                  D
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">Daniel</p>
+                  <p className="text-sm font-semibold text-blue-700 mt-0.5">Co-Founder &amp; Sales Director</p>
+                </div>
+              </div>
+              <p className="text-gray-600 text-sm leading-[1.8]">
+                Daniel has a strong background in sales, media, marketing, and
+                business development. His experience in building client
+                relationships, developing advertising strategies, and growing brands
+                through social media enables him to create marketing campaigns that
+                are both effective and commercially focused.
+              </p>
+            </div>
 
-          <Link
-            href="/quote"
-            className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition duration-200 ease-out hover:scale-105"
-          >
-            Get a Free Quote
-          </Link>
+          </div>
+
+          {/* Closing — centered below both cards */}
+          <div className="text-center">
+            <p className="text-gray-600 mb-8 leading-relaxed max-w-lg mx-auto">
+              If you have a campaign in mind, we&apos;d be delighted to discuss
+              how Flyer Distribution Hampshire can help your business reach more
+              customers and achieve measurable growth.
+            </p>
+            <Link
+              href="/quote"
+              className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition duration-200 ease-out hover:scale-105"
+            >
+              Get a Free Quote
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -163,8 +190,9 @@ export default function AboutPage() {
             ].map((v) => (
               <div
                 key={v.title}
-                className="border border-gray-200 rounded-lg p-6 text-center"
+                className="group relative border border-gray-200 rounded-lg p-6 text-center shadow-sm hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-out"
               >
+                <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-lg bg-blue-200 group-hover:bg-blue-500 transition-colors duration-300" aria-hidden="true" />
                 <h3 className="text-base font-semibold text-blue-900 mb-2">
                   {v.title}
                 </h3>
