@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import ScrollReveal from "@/components/ScrollReveal";
 
 export const metadata: Metadata = {
   title: "About Us",
@@ -55,35 +56,47 @@ export default function AboutPage() {
       <section className="bg-slate-50 pt-16 pb-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div>
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 text-lg mb-7 leading-relaxed">
               Flyer Distribution Hampshire is an independent marketing and leaflet
               distribution company based in Hampshire. We help local businesses,
               national brands, charities, and community organisations connect with
-              their ideal customers through targeted advertising that gets real
-              results.
+              their ideal customers through{" "}
+              <strong className="font-semibold text-gray-800">
+                targeted advertising that gets real results
+              </strong>
+              .
             </p>
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 text-lg mb-7 leading-relaxed">
               Leaflet distribution is at the heart of what we do, with services
-              extending to website design and SEO for businesses looking to grow
-              their presence online as well as offline.
+              extending to{" "}
+              <strong className="font-semibold text-gray-800">
+                website design and SEO
+              </strong>{" "}
+              for businesses looking to grow their presence online as well as
+              offline.
             </p>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600 text-lg leading-relaxed">
               We&apos;re small enough to offer a genuinely personal service, with
-              distributors who are fully vetted, trained, and know their routes
-              inside out, covering Hampshire and into Dorset including Bournemouth
-              and Poole.
+              distributors who are{" "}
+              <strong className="font-semibold text-gray-800">
+                fully vetted, trained
+              </strong>
+              , and know their routes inside out, covering Hampshire and into
+              Dorset including Bournemouth and Poole.
             </p>
           </div>
           <div className="max-w-sm mx-auto lg:mx-0">
-            <div className="aspect-square overflow-hidden rounded-lg">
-              <Image
-                src="/Flyer%20Distribution%20Hampshire.jpg"
-                alt="Flyer Distribution Hampshire team"
-                width={1200}
-                height={1600}
-                className="w-full h-full object-cover"
-              />
-            </div>
+            <ScrollReveal>
+              <div className="aspect-square overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
+                <Image
+                  src="/Flyer%20Distribution%20Hampshire.jpg"
+                  alt="Flyer Distribution Hampshire team"
+                  width={1200}
+                  height={1600}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
