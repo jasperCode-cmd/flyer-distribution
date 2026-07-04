@@ -4,6 +4,7 @@ import Link from "next/link";
 import Testimonials from "@/components/Testimonials";
 import StatsBar from "@/components/StatsBar";
 import AreaCarousel from "@/components/AreaCarousel";
+import TrustCards from "@/components/TrustCards";
 
 export const metadata: Metadata = {
   title: "Flyer Distribution Hampshire | Local Leaflet & Flyer Delivery",
@@ -40,23 +41,6 @@ export const metadata: Metadata = {
   },
 };
 
-const trustSignals = [
-  {
-    icon: "🏘️",
-    title: "Local Team",
-    body: "We're based in Hampshire and Dorset and know every postcode. No national middlemen, just local people who care about your campaign.",
-  },
-  {
-    icon: "🎯",
-    title: "Targeted Postcodes",
-    body: "Tell us your target areas and we will plan a campaign that puts your leaflets in front of the right people. We work with you to focus your distribution where it counts.",
-  },
-  {
-    icon: "✅",
-    title: "Tracked and Assured Delivery",
-    body: "Every round is completed by vetted, experienced distributors who confirm completion, so you can be confident your materials reached the right doors.",
-  },
-];
 
 const services = [
   {
@@ -215,20 +199,7 @@ export default function HomePage() {
           <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 text-center mb-12">
             Why Choose Us?
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {trustSignals.map((item) => (
-              <div
-                key={item.title}
-                className="text-center p-6 rounded-lg bg-blue-50 border border-blue-100"
-              >
-                <div className="text-4xl mb-4">{item.icon}</div>
-                <h3 className="text-lg font-semibold text-blue-900 mb-2">
-                  {item.title}
-                </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{item.body}</p>
-              </div>
-            ))}
-          </div>
+          <TrustCards />
         </div>
       </section>
 
