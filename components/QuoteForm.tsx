@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import Link from "next/link";
 
 export default function QuoteForm() {
   const [serviceType, setServiceType] = useState("");
@@ -547,13 +546,6 @@ export default function QuoteForm() {
         </button>
       </form>
 
-      <p className="text-center text-gray-500 text-sm mt-6">
-        Prefer to talk?{" "}
-        <Link href="/about" className="text-blue-700 hover:underline">
-          Contact us directly
-        </Link>{" "}
-        and we&apos;ll call you back.
-      </p>
     </div>
   );
 }
