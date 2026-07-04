@@ -102,31 +102,37 @@ export default function WebDesignCards() {
   const [expanded, setExpanded] = useState<number | null>(null);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {cards.map((card, i) => {
         const isOpen = expanded === i;
         return (
+          /* Fixed-height wrapper on desktop: card stays vertically centered,
+             so it expands symmetrically (top edge up, bottom edge down) on hover */
           <div
             key={card.title}
-            className="bg-white rounded-xl md:cursor-pointer"
-            onMouseEnter={() => setExpanded(i)}
-            onMouseLeave={() => setExpanded(null)}
-            onClick={() => setExpanded(isOpen ? null : i)}
+            className="md:h-[440px] md:flex md:items-center md:justify-center"
           >
-            {/* Icon + title: always visible, centered in collapsed state */}
-            <div className="flex flex-col items-center justify-center text-center px-6 pt-8 pb-4 min-h-[148px]">
-              {card.icon}
-              <h2 className="text-base font-semibold text-blue-900">
-                {card.title}
-              </h2>
-            </div>
-            {/* Description: always visible on mobile, expands on hover/click on desktop */}
             <div
-              className={`overflow-hidden transition-all duration-300 ease-out md:max-h-0 ${isOpen ? "md:max-h-[500px]" : ""}`}
+              className="w-full bg-white rounded-xl md:cursor-pointer"
+              onMouseEnter={() => setExpanded(i)}
+              onMouseLeave={() => setExpanded(null)}
+              onClick={() => setExpanded(isOpen ? null : i)}
             >
-              <p className="text-gray-600 text-sm leading-relaxed px-6 pb-8 text-center">
-                {card.description}
-              </p>
+              {/* Icon + title: always visible, centered in collapsed state */}
+              <div className="flex flex-col items-center justify-center text-center px-6 pt-8 pb-4 min-h-[148px]">
+                {card.icon}
+                <h2 className="text-base font-semibold text-blue-900">
+                  {card.title}
+                </h2>
+              </div>
+              {/* Description: always visible on mobile, expands on hover/click on desktop */}
+              <div
+                className={`overflow-hidden transition-all duration-500 ease-out md:max-h-0 ${isOpen ? "md:max-h-[300px]" : ""}`}
+              >
+                <p className="text-gray-600 text-sm leading-relaxed px-6 pb-8 text-center">
+                  {card.description}
+                </p>
+              </div>
             </div>
           </div>
         );
