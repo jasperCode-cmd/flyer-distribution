@@ -20,10 +20,9 @@ function Cards({ tabIndex }: { tabIndex?: number }) {
           key={a.slug}
           href={`/areas/${a.slug}`}
           tabIndex={tabIndex}
-          className="flex-shrink-0 w-44 bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm hover:border-blue-300 hover:shadow-md transition-all duration-200"
+          className="flex-shrink-0 bg-white border border-gray-200 rounded-full px-5 py-2 shadow-sm hover:border-blue-300 hover:shadow-md transition-all duration-200 flex items-center"
         >
-          <p className="text-blue-900 font-semibold text-sm">{a.name}</p>
-          <p className="text-gray-500 text-xs mt-0.5 leading-snug">{a.desc}</p>
+          <span className="text-blue-900 font-semibold text-sm whitespace-nowrap">{a.name}</span>
         </Link>
       ))}
     </>
