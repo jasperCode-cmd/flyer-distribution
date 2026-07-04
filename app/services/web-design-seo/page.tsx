@@ -46,11 +46,11 @@ export default function WebDesignSeoPage() {
       <section className="bg-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div>
-            <p className="text-gray-600 leading-relaxed mb-6">
+            <p className="text-gray-600 text-xl leading-relaxed mb-6">
               We design and build bespoke websites for local businesses across
               Hampshire and Dorset, and beyond.
             </p>
-            <ul className="space-y-3">
+            <ul className="space-y-4">
               {[
                 "Bespoke websites built around your business",
                 "Fast and easy to navigate for your customers",
@@ -60,27 +60,13 @@ export default function WebDesignSeoPage() {
                 "A professional online presence customers can trust",
               ].map((point) => (
                 <li key={point} className="flex items-start gap-3">
-                  <svg className="w-5 h-5 text-blue-700 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <svg className="w-6 h-6 text-blue-700 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M20 6L9 17l-5-5" />
                   </svg>
-                  <span className="text-gray-600 text-sm leading-relaxed">{point}</span>
+                  <span className="text-gray-600 text-lg leading-relaxed">{point}</span>
                 </li>
               ))}
             </ul>
-            <div className="mt-8 border border-blue-200 bg-blue-50 rounded-lg p-6">
-              <h2 className="text-lg font-bold text-blue-900 mb-2">
-                Get Online for Less
-              </h2>
-              <p className="text-gray-600 text-sm leading-relaxed mb-4">
-                Professional websites from £60 a month, no big upfront cost.
-              </p>
-              <Link
-                href="/quote"
-                className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-6 py-3 rounded-md transition-colors text-sm"
-              >
-                Book a Free Call
-              </Link>
-            </div>
           </div>
           <div>
             <Image
@@ -91,6 +77,26 @@ export default function WebDesignSeoPage() {
               className="rounded-lg w-full object-cover"
             />
           </div>
+        </div>
+      </section>
+
+      {/* Get Online for Less — full-width offer band */}
+      <section className="bg-blue-50 border-t border-blue-200 py-14">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-blue-900 mb-3">
+            Get Online for Less
+          </h2>
+          <p className="text-xl text-gray-700 leading-relaxed mb-6">
+            Professional websites from{" "}
+            <span className="text-yellow-400 font-bold">£60 a month</span>
+            , no big upfront cost.
+          </p>
+          <Link
+            href="/quote"
+            className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-8 py-4 rounded-md transition-colors text-base"
+          >
+            Book a Free Call
+          </Link>
         </div>
       </section>
 
