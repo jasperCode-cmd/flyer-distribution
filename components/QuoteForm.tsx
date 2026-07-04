@@ -189,54 +189,6 @@ export default function QuoteForm() {
         {/* ── Leaflet Distribution fields ── */}
         {isLeaflet && (
           <>
-            {/* Address */}
-            <div>
-              <label
-                htmlFor="address"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Address
-              </label>
-              <input
-                type="text"
-                id="address"
-                name="address"
-                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            {/* Town + Postcode */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div>
-                <label
-                  htmlFor="town"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Town
-                </label>
-                <input
-                  type="text"
-                  id="town"
-                  name="town"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="postcode"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Postcode
-                </label>
-                <input
-                  type="text"
-                  id="postcode"
-                  name="postcode"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-
             {/* Areas required */}
             <div>
               <label
