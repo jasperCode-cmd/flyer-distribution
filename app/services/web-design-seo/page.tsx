@@ -84,18 +84,20 @@ export default function WebDesignSeoPage() {
       {/* Get Online for Less — contained offer box */}
       <section className="bg-white py-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-blue-900 rounded-xl px-8 py-10 sm:px-12 sm:py-12">
-            <h2 className="text-3xl font-bold text-white mb-3">
-              Get Online for Less
-            </h2>
-            <p className="text-xl text-blue-100 leading-relaxed mb-6">
-              Professional websites from{" "}
-              <span className="text-yellow-400 font-bold">£60 a month</span>
-              , no big upfront cost.
-            </p>
+          <div className="bg-blue-900 rounded-xl px-8 py-10 sm:px-12 md:py-8 shadow-[0_0_30px_rgba(250,204,21,0.2)] md:flex md:items-center md:justify-between md:gap-10">
+            <div>
+              <h2 className="text-3xl font-bold text-white mb-3">
+                Get Online for Less
+              </h2>
+              <p className="text-xl text-blue-100 leading-relaxed md:mb-0 mb-6">
+                Professional websites from{" "}
+                <span className="text-yellow-400 font-bold">£60 a month</span>
+                , no big upfront cost.
+              </p>
+            </div>
             <Link
               href="/quote"
-              className="inline-block bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold px-8 py-4 rounded-md transition duration-200 ease-out hover:scale-105 text-base"
+              className="inline-block shrink-0 bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold px-10 py-5 rounded-md transition duration-200 ease-out hover:scale-105 text-lg"
             >
               Book a Free Call
             </Link>
