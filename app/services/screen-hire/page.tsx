@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import ScreenHireCards from "@/components/ScreenHireCards";
+import ScrollReveal from "@/components/ScrollReveal";
 
 export const metadata: Metadata = {
   title: "Mobile Screen Trailer Hire | Flyer Distribution Hampshire",
@@ -26,21 +28,6 @@ export const metadata: Metadata = {
   },
 };
 
-const features = [
-  {
-    title: "Be Seen With a Screen",
-    body: "Our mobile LED screen trailers are fully customisable for your event or campaign. Whether you need outdoor advertising, a live event display, a movie screening, or a gaming setup, the screen can be configured to suit. The 7m² display is bright enough for daylight viewing and delivers impact that static advertising cannot match.",
-  },
-  {
-    title: "On the Move",
-    body: "The screen arrives pre-mounted on a road-legal trailer and can be raised to maximum viewing height on arrival. Setup is straightforward and can typically be completed within an hour. The trailer is stable on most surfaces and suitable for car parks, fields, event sites, and public spaces across Hampshire and Dorset.",
-  },
-  {
-    title: "Fully Qualified Engineers",
-    body: "All screen installations are designed and overseen by fully qualified engineers using industry-leading components. We handle the full setup and takedown so you don't have to. You hire with confidence knowing the equipment is safe, professionally installed, and built to perform for the duration of your event.",
-  },
-];
-
 export default function ScreenHirePage() {
   return (
     <>
@@ -60,35 +47,25 @@ export default function ScreenHirePage() {
       {/* Trailer image */}
       <section className="bg-slate-50 pt-16">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative h-96 w-full overflow-hidden rounded-lg">
-            <Image
-              src="/Mobile%20Screen%20Trailer%20Hire%20Enquire.jpg"
-              alt="Mobile LED screen trailer ready for hire"
-              width={1244}
-              height={1600}
-              className="object-cover w-full h-full"
-              style={{ objectPosition: "center center" }}
-            />
-          </div>
+          <ScrollReveal>
+            <div className="relative h-96 w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-black/5">
+              <Image
+                src="/Mobile%20Screen%20Trailer%20Hire%20Enquire.jpg"
+                alt="Mobile LED screen trailer ready for hire"
+                width={1244}
+                height={1600}
+                className="object-cover w-full h-full"
+                style={{ objectPosition: "center center" }}
+              />
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
       {/* Feature cards */}
       <section className="bg-slate-50 py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {features.map((f) => (
-              <div
-                key={f.title}
-                className="bg-white rounded-lg border border-gray-200 p-6"
-              >
-                <h2 className="text-base font-semibold text-blue-900 mb-2">
-                  {f.title}
-                </h2>
-                <p className="text-gray-600 text-sm leading-relaxed">{f.body}</p>
-              </div>
-            ))}
-          </div>
+          <ScreenHireCards />
         </div>
       </section>
 
@@ -124,7 +101,7 @@ export default function ScreenHirePage() {
           </p>
           <Link
             href="/services/web-design-seo"
-            className="inline-block bg-white border border-blue-700 text-blue-700 hover:bg-blue-700 hover:text-white font-semibold px-7 py-3 rounded-md text-sm transition-colors"
+            className="inline-block bg-white border border-blue-700 text-blue-700 hover:bg-blue-700 hover:text-white font-semibold px-7 py-3 rounded-md text-sm transition duration-200 ease-out hover:scale-105"
           >
             Web Design &amp; SEO
           </Link>
