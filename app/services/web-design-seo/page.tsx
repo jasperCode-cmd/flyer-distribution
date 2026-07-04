@@ -53,10 +53,11 @@ export default function WebDesignSeoPage() {
             <ul className="space-y-3">
               {[
                 "Bespoke websites built around your business",
-                "Fast, mobile-friendly, and easy to navigate",
+                "Fast and easy to navigate for your customers",
                 "Built to convert visitors into enquiries",
-                "From initial brief through to launch, jargon-free",
-                "SEO built in from the ground up",
+                "Clean and mobile-friendly from the beginning",
+                "SEO built in from the ground up so you get work organically",
+                "A professional online presence customers can trust",
               ].map((point) => (
                 <li key={point} className="flex items-start gap-3">
                   <svg className="w-5 h-5 text-blue-700 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
