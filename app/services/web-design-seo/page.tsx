@@ -106,7 +106,7 @@ export default function WebDesignSeoPage() {
       </section>
 
       {/* Service detail cards */}
-      <section className="bg-blue-900 py-16">
+      <section className="bg-blue-900 py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <WebDesignCards />
         </div>

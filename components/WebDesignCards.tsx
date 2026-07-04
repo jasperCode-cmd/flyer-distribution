@@ -128,11 +128,7 @@ export default function WebDesignCards() {
             >
               {/* Icon + title */}
               <div
-                className={`flex flex-col items-center justify-center text-center px-6 ${
-                  isWho
-                    ? "pt-6 pb-3 min-h-[120px]"
-                    : "pt-8 pb-4 min-h-[148px]"
-                }`}
+                className="flex flex-col items-center justify-center text-center px-6 pt-8 pb-4 min-h-[148px]"
               >
                 {card.icon}
                 <h2 className="text-base font-semibold text-blue-900">
@@ -146,9 +142,7 @@ export default function WebDesignCards() {
                 }`}
               >
                 <p
-                  className={`text-gray-600 text-sm leading-relaxed px-6 text-center ${
-                    isWho ? "pb-6" : "pb-8"
-                  }`}
+                  className="text-gray-600 text-sm leading-relaxed px-6 text-center pb-8"
                 >
                   {card.description}
                 </p>
