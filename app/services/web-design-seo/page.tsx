@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import WebDesignCards from "@/components/WebDesignCards";
 
 export const metadata: Metadata = {
   title: "Web Design & SEO | Flyer Distribution Hampshire",
@@ -101,60 +102,9 @@ export default function WebDesignSeoPage() {
       </section>
 
       {/* Service detail cards */}
-      <section className="bg-slate-50 py-16">
+      <section className="bg-blue-900 py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <svg className="w-8 h-8 text-blue-700 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <rect x="2" y="3" width="20" height="14" rx="2" />
-                <path d="M8 21h8M12 17v4" />
-              </svg>
-              <h2 className="text-base font-semibold text-blue-900 mb-2">
-                Web Design
-              </h2>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                We build fast, clean websites tailored to your business. Every
-                site is mobile-friendly, easy to navigate, and designed to make
-                a strong first impression with potential customers.
-              </p>
-            </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <svg className="w-8 h-8 text-blue-700 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="8" />
-                <path d="M21 21l-4.35-4.35" />
-              </svg>
-              <h2 className="text-base font-semibold text-blue-900 mb-2">
-                Search Engine Optimisation
-              </h2>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                A great website is only valuable if people can find it. We build
-                every site with SEO in mind from the ground up, covering
-                technical setup, on-page optimisation, and local search
-                visibility. We also offer ongoing SEO support and retainers for
-                businesses looking to grow their search presence over time.
-              </p>
-            </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <svg className="w-8 h-8 text-blue-700 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
-              </svg>
-              <h2 className="text-base font-semibold text-blue-900 mb-2">
-                Who We Work With
-              </h2>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                Most of our web design clients are service businesses that rely
-                on local customers finding them online: trades, home
-                improvement, health and wellness, food and drink, professional
-                services, and community organisations. If your business depends
-                on people in your area being able to find you and trust what
-                they see, we can help. We&apos;re happy to work with any
-                business, and we don&apos;t need a brief to give you a quote.
-                Just tell us what you&apos;re trying to achieve.
-              </p>
-            </div>
-          </div>
+          <WebDesignCards />
         </div>
       </section>
 
