@@ -83,16 +83,15 @@ const cards = [
     ),
     description: (
       <>
-        Most of our web design clients are service businesses that rely on local
-        customers finding them online: trades, home improvement, health and
-        wellness, food and drink, professional services, and community
-        organisations. If your business depends on people in your area being
-        able to find you and trust what they see, we can help. We&apos;re happy
-        to work with any business, and we{" "}
+        Most of our web design clients are local service businesses, from trades
+        and home improvement to health and wellness, food and drink, and
+        professional services. If your business relies on people in your area
+        finding you online and trusting what they see, we can help. We&apos;re
+        happy to work with any business and{" "}
         <strong className="font-semibold text-gray-800">
           don&apos;t need a brief to give you a quote
         </strong>
-        . Just tell us what you&apos;re trying to achieve.
+        , just tell us what you&apos;re trying to achieve.
       </>
     ),
   },
@@ -105,12 +104,21 @@ export default function WebDesignCards() {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {cards.map((card, i) => {
         const isOpen = expanded === i;
+        const isWho = i === 2;
+
         return (
-          /* Fixed-height wrapper on desktop: card stays vertically centered,
-             so it expands symmetrically (top edge up, bottom edge down) on hover */
           <div
             key={card.title}
-            className="md:h-[440px] md:flex md:items-center md:justify-center"
+            className={
+              isWho
+                ? // "Who We Work With": transitions height slowly so the blue section
+                  // background grows to accommodate if content exceeds base height
+                  `md:flex md:items-center md:justify-center transition-[height] ease-out duration-700 ${
+                    isOpen ? "md:h-[420px]" : "md:h-[360px]"
+                  }`
+                : // Web Design + SEO: fixed at SEO-card expanded height, no growth
+                  "md:h-[360px] md:flex md:items-center md:justify-center"
+            }
           >
             <div
               className="w-full bg-white rounded-xl md:cursor-pointer"
@@ -118,8 +126,14 @@ export default function WebDesignCards() {
               onMouseLeave={() => setExpanded(null)}
               onClick={() => setExpanded(isOpen ? null : i)}
             >
-              {/* Icon + title: always visible, centered in collapsed state */}
-              <div className="flex flex-col items-center justify-center text-center px-6 pt-8 pb-4 min-h-[148px]">
+              {/* Icon + title */}
+              <div
+                className={`flex flex-col items-center justify-center text-center px-6 ${
+                  isWho
+                    ? "pt-6 pb-3 min-h-[120px]"
+                    : "pt-8 pb-4 min-h-[148px]"
+                }`}
+              >
                 {card.icon}
                 <h2 className="text-base font-semibold text-blue-900">
                   {card.title}
@@ -127,9 +141,15 @@ export default function WebDesignCards() {
               </div>
               {/* Description: always visible on mobile, expands on hover/click on desktop */}
               <div
-                className={`overflow-hidden transition-all duration-500 ease-out md:max-h-0 ${isOpen ? "md:max-h-[300px]" : ""}`}
+                className={`overflow-hidden transition-all duration-500 ease-out md:max-h-0 ${
+                  isOpen ? "md:max-h-[300px]" : ""
+                }`}
               >
-                <p className="text-gray-600 text-sm leading-relaxed px-6 pb-8 text-center">
+                <p
+                  className={`text-gray-600 text-sm leading-relaxed px-6 text-center ${
+                    isWho ? "pb-6" : "pb-8"
+                  }`}
+                >
                   {card.description}
                 </p>
               </div>
