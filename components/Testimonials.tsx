@@ -27,7 +27,7 @@ export default function Testimonials() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
 
           {/* Card 1 — Body by Victoria */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col">
+          <div className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col shadow transition duration-300 ease-out hover:shadow-lg hover:scale-[1.02]">
             <div className="flex items-center justify-center mb-4">
               <Image
                 src="/Body by Victoria.png"
@@ -48,7 +48,7 @@ export default function Testimonials() {
           </div>
 
           {/* Card 2 — Kola Construction */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col">
+          <div className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col shadow transition duration-300 ease-out hover:shadow-lg hover:scale-[1.02]">
             {/* Badges flanking the logo with clear separation, bottom-aligned */}
             <div className="flex items-center justify-between mb-4">
               <Image
@@ -84,7 +84,7 @@ export default function Testimonials() {
           </div>
 
           {/* Card 3 — Cozy Stoves */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col">
+          <div className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col shadow transition duration-300 ease-out hover:shadow-lg hover:scale-[1.02]">
             <div className="flex items-center justify-center mb-4">
               <Image
                 src="/Cozy-Stoves-logo.png"
