@@ -217,15 +217,17 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {services.map((svc) => (
-              <div
+              <Link
                 key={svc.title}
-                className="bg-white rounded-lg border border-gray-200 p-6 hover:border-blue-300 transition-colors"
+                href="/services"
+                className="group relative bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:border-blue-300 hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-out block"
               >
+                <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-lg bg-blue-200 group-hover:bg-blue-500 transition-colors duration-300" aria-hidden="true" />
                 <h3 className="text-base font-semibold text-blue-900 mb-2">
                   {svc.title}
                 </h3>
                 <p className="text-gray-600 text-sm leading-relaxed">{svc.desc}</p>
-              </div>
+              </Link>
             ))}
           </div>
           <div className="mt-8">
