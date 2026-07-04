@@ -81,23 +81,25 @@ export default function WebDesignSeoPage() {
         </div>
       </section>
 
-      {/* Get Online for Less — full-width offer band */}
-      <section className="bg-blue-50 border-t border-blue-200 py-14">
+      {/* Get Online for Less — contained offer box */}
+      <section className="bg-white py-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-blue-900 mb-3">
-            Get Online for Less
-          </h2>
-          <p className="text-xl text-gray-700 leading-relaxed mb-6">
-            Professional websites from{" "}
-            <span className="text-yellow-400 font-bold">£60 a month</span>
-            , no big upfront cost.
-          </p>
-          <Link
-            href="/quote"
-            className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-8 py-4 rounded-md transition-colors text-base"
-          >
-            Book a Free Call
-          </Link>
+          <div className="bg-blue-900 rounded-xl px-8 py-10 sm:px-12 sm:py-12">
+            <h2 className="text-3xl font-bold text-white mb-3">
+              Get Online for Less
+            </h2>
+            <p className="text-xl text-blue-100 leading-relaxed mb-6">
+              Professional websites from{" "}
+              <span className="text-yellow-400 font-bold">£60 a month</span>
+              , no big upfront cost.
+            </p>
+            <Link
+              href="/quote"
+              className="inline-block bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold px-8 py-4 rounded-md transition-colors text-base"
+            >
+              Book a Free Call
+            </Link>
+          </div>
         </div>
       </section>
 
