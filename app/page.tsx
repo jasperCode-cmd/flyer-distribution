@@ -114,6 +114,28 @@ const localBusinessSchema = {
     "Chandler's Ford",
     "Brockenhurst",
   ],
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "5.0",
+    "reviewCount": "2",
+    "bestRating": "5",
+  },
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ],
+      "opens": "09:00",
+      "closes": "18:00",
+    },
+  ],
 };
 
 export default function HomePage() {
