@@ -4,7 +4,7 @@ import Link from "next/link";
 import WebDesignCards from "@/components/WebDesignCards";
 
 export const metadata: Metadata = {
-  title: "Web Design & SEO | Flyer Distribution Hampshire",
+  title: "Web Design & SEO",
   description:
     "Fast, professional websites and search engine optimisation for businesses across Hampshire and Dorset. We handle design, development, and SEO end to end.",
   alternates: {

@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Leaflet Services | Flyer Distribution Hampshire",
+  title: "Leaflet Services",
   description:
     "Full design, print and leaflet distribution services across Hampshire and Dorset. Choose our end-to-end package or distribution-only service.",
   alternates: {

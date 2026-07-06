@@ -5,7 +5,7 @@ import ScreenHireCards from "@/components/ScreenHireCards";
 import ScrollReveal from "@/components/ScrollReveal";
 
 export const metadata: Metadata = {
-  title: "Mobile Screen Trailer Hire | Flyer Distribution Hampshire",
+  title: "Mobile Screen Trailer Hire",
   description:
     "Hire our mobile LED screen trailer for events, advertising, movies, or gaming across Hampshire and Dorset. A 7m² screen mounted on a trailer, easy to set up and guaranteed to get you noticed.",
   alternates: {
