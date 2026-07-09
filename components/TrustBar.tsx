@@ -103,21 +103,21 @@ const items = [
 
 export default function TrustBar() {
   return (
-    <section className="bg-blue-950 py-10 sm:py-12">
+    <section className="bg-white py-10 sm:py-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-y-8 gap-x-6 lg:gap-x-4 lg:divide-x lg:divide-white/10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-y-8 gap-x-6 lg:gap-x-4 lg:divide-x lg:divide-gray-200">
           {items.map((item) => (
             <div
               key={item.title}
               className="group flex flex-col items-center text-center px-2"
             >
-              <div className="text-white/90 group-hover:text-yellow-400 group-hover:scale-110 transition-all duration-300 ease-out mb-3">
+              <div className="text-blue-600 group-hover:text-yellow-400 group-hover:scale-110 transition-all duration-300 ease-out mb-3">
                 {item.icon}
               </div>
-              <h3 className="text-base sm:text-lg font-bold text-white/90 group-hover:text-white transition-all duration-300 ease-out mb-1">
+              <h3 className="text-base sm:text-lg font-bold text-blue-950 group-hover:text-black transition-all duration-300 ease-out mb-1">
                 {item.title}
               </h3>
-              <p className="text-sm text-blue-300/80">{item.subtitle}</p>
+              <p className="text-sm text-gray-500">{item.subtitle}</p>
             </div>
           ))}
         </div>
