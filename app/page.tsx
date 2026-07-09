@@ -4,6 +4,7 @@ import Link from "next/link";
 import Testimonials from "@/components/Testimonials";
 import StatsBar from "@/components/StatsBar";
 import AreaCarousel from "@/components/AreaCarousel";
+import TrustBar from "@/components/TrustBar";
 import TrustCards from "@/components/TrustCards";
 
 export const metadata: Metadata = {
@@ -211,6 +212,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <TrustBar />
 
       <AreaCarousel />
 
