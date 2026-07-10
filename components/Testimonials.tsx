@@ -1,11 +1,14 @@
 import Image from "next/image";
 
-const Stars = () => (
-  <div className="flex gap-0.5 mb-3" aria-label="5 out of 5 stars">
+const Stars = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => (
+  <div
+    className={`flex gap-0.5 mb-3 ${size === "sm" ? "scale-90 origin-left" : ""}`}
+    aria-label="5 out of 5 stars"
+  >
     {[...Array(5)].map((_, i) => (
       <svg
         key={i}
-        className="w-4 h-4 text-amber-400"
+        className={`${size === "lg" ? "w-5 h-5" : "w-4 h-4"} text-amber-400`}
         fill="currentColor"
         viewBox="0 0 20 20"
         aria-hidden="true"
@@ -24,9 +27,23 @@ export default function Testimonials() {
           What People Say About Us
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[0.8fr_1fr_1.25fr_1fr_0.8fr] gap-6 items-start">
 
-          {/* Card 1 — Body by Victoria */}
+          {/* Card 1 — Coastline Print (smallest, no written review) */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4 flex flex-col shadow transition duration-300 ease-out hover:shadow-lg hover:scale-[1.02]">
+            <div className="flex items-center justify-center mb-3">
+              <div className="w-11 h-11 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-base font-bold flex-shrink-0">
+                C
+              </div>
+            </div>
+            <Stars size="sm" />
+            <div>
+              <p className="text-blue-900 font-semibold text-sm">Coastline Print</p>
+              <p className="text-gray-400 text-xs mt-0.5">Google Review</p>
+            </div>
+          </div>
+
+          {/* Card 2 — Body by Victoria (medium) */}
           <div className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col shadow transition duration-300 ease-out hover:shadow-lg hover:scale-[1.02]">
             <div className="flex items-center justify-center mb-4">
               <Image
@@ -47,8 +64,8 @@ export default function Testimonials() {
             </div>
           </div>
 
-          {/* Card 2 — Kola Construction */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col shadow transition duration-300 ease-out hover:shadow-lg hover:scale-[1.02]">
+          {/* Card 3 — Kola Construction (largest, center) */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6 flex flex-col shadow transition duration-300 ease-out hover:shadow-lg hover:scale-[1.02]">
             {/* Badges flanking the logo with clear separation, bottom-aligned */}
             <div className="flex items-center justify-between mb-4">
               <Image
@@ -73,29 +90,46 @@ export default function Testimonials() {
                 className="h-8 w-auto object-contain shrink-0"
               />
             </div>
-            <Stars />
-            <blockquote className="text-gray-600 text-sm leading-relaxed mb-3">
+            <Stars size="lg" />
+            <blockquote className="text-gray-600 text-[15px] leading-relaxed mb-3">
               &ldquo;Excellent flyer distribution service from start to finish. The team was professional, reliable, and kept us updated throughout the campaign.&rdquo;
             </blockquote>
             <div>
-              <p className="text-blue-900 font-semibold text-sm">Kola Construction</p>
+              <p className="text-blue-900 font-semibold text-base">Kola Construction</p>
+              <p className="text-gray-400 text-sm mt-0.5">Google Review</p>
+            </div>
+          </div>
+
+          {/* Card 4 — Hendoni's Salon (medium) */}
+          <div className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col shadow transition duration-300 ease-out hover:shadow-lg hover:scale-[1.02]">
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xl font-bold flex-shrink-0">
+                H
+              </div>
+            </div>
+            <Stars />
+            <blockquote className="text-gray-600 text-sm leading-relaxed mb-3">
+              &ldquo;Incredible service from start to finish, these guys deal with you in a really professional way and get the job done fast. Would really recommend 🙌&rdquo;
+            </blockquote>
+            <div>
+              <p className="text-blue-900 font-semibold text-sm">Hendoni&apos;s Salon</p>
               <p className="text-gray-400 text-xs mt-0.5">Google Review</p>
             </div>
           </div>
 
-          {/* Card 3 — Cozy Stoves */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col shadow transition duration-300 ease-out hover:shadow-lg hover:scale-[1.02]">
-            <div className="flex items-center justify-center mb-4">
+          {/* Card 5 — Cozy Stoves (smallest) */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4 flex flex-col shadow transition duration-300 ease-out hover:shadow-lg hover:scale-[1.02]">
+            <div className="flex items-center justify-center mb-3">
               <Image
                 src="/Cozy-Stoves-logo.png"
                 alt="Cozy Stoves logo"
                 width={305}
                 height={100}
-                className="h-14 w-auto object-contain"
+                className="h-11 w-auto object-contain"
               />
             </div>
-            <Stars />
-            <blockquote className="text-gray-600 text-sm leading-relaxed mb-3">
+            <Stars size="sm" />
+            <blockquote className="text-gray-600 text-xs leading-relaxed mb-3">
               &ldquo;Fast and reliable team service all around&rdquo;
             </blockquote>
             <div>
