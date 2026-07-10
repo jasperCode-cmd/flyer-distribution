@@ -1,14 +1,22 @@
-import Image from "next/image";
+"use client";
 
-const Stars = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => (
-  <div
-    className={`flex gap-0.5 mb-3 ${size === "sm" ? "scale-90 origin-left" : ""}`}
-    aria-label="5 out of 5 stars"
-  >
+import Image from "next/image";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+type Testimonial = {
+  id: string;
+  name: string;
+  label: string;
+  quote: string | null;
+  header: React.ReactNode;
+};
+
+const Stars = () => (
+  <div className="flex gap-0.5 mb-3" aria-label="5 out of 5 stars">
     {[...Array(5)].map((_, i) => (
       <svg
         key={i}
-        className={`${size === "lg" ? "w-5 h-5" : "w-4 h-4"} text-amber-400`}
+        className="w-4 h-4 text-amber-400"
         fill="currentColor"
         viewBox="0 0 20 20"
         aria-hidden="true"
@@ -19,7 +27,163 @@ const Stars = ({ size = "md" }: { size?: "sm" | "md" | "lg" }) => (
   </div>
 );
 
+const ChevronIcon = ({ flipped = false }: { flipped?: boolean }) => (
+  <svg
+    className={`w-5 h-5 ${flipped ? "rotate-180" : ""}`}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M15 18l-6-6 6-6" />
+  </svg>
+);
+
+const testimonials: Testimonial[] = [
+  {
+    id: "coastline-print",
+    name: "Coastline Print",
+    label: "Google Review",
+    quote: null,
+    header: (
+      <Image
+        src="/Coastline Print Logo.jpg"
+        alt="Coastline Print logo"
+        width={150}
+        height={150}
+        className="h-14 w-14 object-contain rounded-full"
+      />
+    ),
+  },
+  {
+    id: "body-by-victoria",
+    name: "Body by Victoria",
+    label: "Google Review",
+    quote:
+      "Great communication from the start. Very polite competitive prices will definitely be using again. Thank you",
+    header: (
+      <Image
+        src="/Body by Victoria.png"
+        alt="Body by Victoria logo"
+        width={913}
+        height={534}
+        className="h-14 w-auto object-contain"
+      />
+    ),
+  },
+  {
+    id: "kola-construction",
+    name: "Kola Construction",
+    label: "Google Review",
+    quote:
+      "Excellent flyer distribution service from start to finish. The team was professional, reliable, and kept us updated throughout the campaign.",
+    header: (
+      <div className="flex items-center justify-center gap-2">
+        <Image
+          src="/grand designs live.webp"
+          alt="Grand Designs Live exhibitor badge"
+          width={200}
+          height={100}
+          className="h-10 w-auto object-contain shrink-0"
+        />
+        <Image
+          src="/KOLA-CONSTRUCTION-LOGO.webp"
+          alt="Kola Construction logo"
+          width={200}
+          height={80}
+          className="h-12 w-auto object-contain shrink-0"
+        />
+        <Image
+          src="/logo_exhibitor_default.webp"
+          alt="Ideal Home Show exhibitor badge"
+          width={200}
+          height={100}
+          className="h-7 w-auto object-contain shrink-0"
+        />
+      </div>
+    ),
+  },
+  {
+    id: "hendonis-salon",
+    name: "Hendonis Salon",
+    label: "Google Review",
+    quote:
+      "Incredible service from start to finish, these guys deal with you in a really professional way and get the job done fast. Would really recommend 🙌",
+    header: (
+      <Image
+        src="/Hendonis Salon.jpg"
+        alt="Hendonis Salon logo"
+        width={150}
+        height={150}
+        className="h-14 w-14 object-contain rounded-full"
+      />
+    ),
+  },
+  {
+    id: "cozy-stoves",
+    name: "Cozy Stoves",
+    label: "Client review",
+    quote: "Fast and reliable team service all around",
+    header: (
+      <Image
+        src="/Cozy-Stoves-logo.png"
+        alt="Cozy Stoves logo"
+        width={305}
+        height={100}
+        className="h-14 w-auto object-contain"
+      />
+    ),
+  },
+];
+
+const COUNT = testimonials.length;
+const AUTOPLAY_MS = 4500;
+const SWIPE_THRESHOLD = 40;
+
+/** Shortest signed circular distance from `index` to `i`, e.g. for 5 items: -2..2 */
+function circularDiff(i: number, index: number) {
+  const n = COUNT;
+  let d = ((i - index) % n + n) % n;
+  if (d > n / 2) d -= n;
+  return d;
+}
+
 export default function Testimonials() {
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+
+  const goTo = useCallback((i: number) => {
+    setIndex(((i % COUNT) + COUNT) % COUNT);
+  }, []);
+
+  const next = useCallback(() => goTo(index + 1), [index, goTo]);
+  const prev = useCallback(() => goTo(index - 1), [index, goTo]);
+
+  useEffect(() => {
+    if (paused) return;
+    const t = setTimeout(() => {
+      setIndex((i) => (i + 1) % COUNT);
+    }, AUTOPLAY_MS);
+    return () => clearTimeout(t);
+  }, [index, paused]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(delta) > SWIPE_THRESHOLD) {
+      if (delta < 0) next();
+      else prev();
+    }
+    touchStartX.current = null;
+  };
+
   return (
     <section className="bg-white border-b border-gray-100">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -27,117 +191,90 @@ export default function Testimonials() {
           What People Say About Us
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[0.8fr_1fr_1.25fr_1fr_0.8fr] gap-6 items-start">
+        <div
+          className="relative"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+        >
+          <div
+            className="relative mx-auto max-w-2xl h-[300px] sm:h-[340px] overflow-hidden"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            {testimonials.map((t, i) => {
+              const diff = circularDiff(i, index);
+              const abs = Math.abs(diff);
+              const isCenter = diff === 0;
+              const scale = isCenter ? 1 : abs === 1 ? 0.86 : 0.72;
+              const opacity = isCenter ? 1 : abs === 1 ? 0.68 : 0;
 
-          {/* Card 1 — Coastline Print (smallest, no written review) */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4 flex flex-col shadow transition duration-300 ease-out hover:shadow-lg hover:scale-[1.02]">
-            <div className="flex items-center justify-center mb-3">
-              <div className="w-11 h-11 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-base font-bold flex-shrink-0">
-                C
-              </div>
-            </div>
-            <Stars size="sm" />
-            <div>
-              <p className="text-blue-900 font-semibold text-sm">Coastline Print</p>
-              <p className="text-gray-400 text-xs mt-0.5">Google Review</p>
-            </div>
+              return (
+                <div
+                  key={t.id}
+                  aria-hidden={!isCenter}
+                  className="absolute top-1/2 left-1/2 transition-all duration-700 ease-out"
+                  style={{
+                    transform: `translate(-50%, -50%) translateX(${diff * 76}%) scale(${scale})`,
+                    opacity,
+                    zIndex: isCenter ? 20 : abs === 1 ? 10 : 0,
+                    pointerEvents: isCenter ? "auto" : "none",
+                  }}
+                >
+                  <div className="w-64 h-72 sm:w-80 sm:h-[310px] bg-white rounded-lg border border-gray-200 shadow-lg p-5 sm:p-6 flex flex-col">
+                    <div className="h-14 flex items-center justify-center mb-4 shrink-0">
+                      {t.header}
+                    </div>
+                    <div className="flex-1 flex flex-col justify-center min-h-0">
+                      <Stars />
+                      {t.quote && (
+                        <blockquote className="text-gray-600 text-sm leading-relaxed line-clamp-5">
+                          &ldquo;{t.quote}&rdquo;
+                        </blockquote>
+                      )}
+                    </div>
+                    <div className="mt-3 shrink-0">
+                      <p className="text-blue-900 font-semibold text-sm">{t.name}</p>
+                      <p className="text-gray-400 text-xs mt-0.5">{t.label}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
-          {/* Card 2 — Body by Victoria (medium) */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col shadow transition duration-300 ease-out hover:shadow-lg hover:scale-[1.02]">
-            <div className="flex items-center justify-center mb-4">
-              <Image
-                src="/Body by Victoria.png"
-                alt="Body by Victoria logo"
-                width={913}
-                height={534}
-                className="h-14 w-auto object-contain"
-              />
-            </div>
-            <Stars />
-            <blockquote className="text-gray-600 text-sm leading-relaxed mb-3">
-              &ldquo;Great communication from the start. Very polite competitive prices will definitely be using again. Thank you&rdquo;
-            </blockquote>
-            <div>
-              <p className="text-blue-900 font-semibold text-sm">Body by Victoria</p>
-              <p className="text-gray-400 text-xs mt-0.5">Google Review</p>
-            </div>
-          </div>
+          {/* Arrows */}
+          <button
+            type="button"
+            onClick={prev}
+            aria-label="Previous testimonial"
+            className="absolute left-0 sm:-left-2 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-white border border-gray-200 shadow text-blue-700 flex items-center justify-center hover:bg-blue-50 transition-colors duration-200"
+          >
+            <ChevronIcon />
+          </button>
+          <button
+            type="button"
+            onClick={next}
+            aria-label="Next testimonial"
+            className="absolute right-0 sm:-right-2 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-white border border-gray-200 shadow text-blue-700 flex items-center justify-center hover:bg-blue-50 transition-colors duration-200"
+          >
+            <ChevronIcon flipped />
+          </button>
+        </div>
 
-          {/* Card 3 — Kola Construction (largest, center) */}
-          <div className="bg-white rounded-lg border border-gray-200 p-6 flex flex-col shadow transition duration-300 ease-out hover:shadow-lg hover:scale-[1.02]">
-            {/* Badges flanking the logo with clear separation, bottom-aligned */}
-            <div className="flex items-center justify-between mb-4">
-              <Image
-                src="/grand designs live.webp"
-                alt="Grand Designs Live exhibitor badge"
-                width={200}
-                height={100}
-                className="h-14 w-auto object-contain shrink-0"
-              />
-              <Image
-                src="/KOLA-CONSTRUCTION-LOGO.webp"
-                alt="Kola Construction logo"
-                width={200}
-                height={80}
-                className="h-16 w-auto object-contain shrink-0"
-              />
-              <Image
-                src="/logo_exhibitor_default.webp"
-                alt="Ideal Home Show exhibitor badge"
-                width={200}
-                height={100}
-                className="h-8 w-auto object-contain shrink-0"
-              />
-            </div>
-            <Stars size="lg" />
-            <blockquote className="text-gray-600 text-[15px] leading-relaxed mb-3">
-              &ldquo;Excellent flyer distribution service from start to finish. The team was professional, reliable, and kept us updated throughout the campaign.&rdquo;
-            </blockquote>
-            <div>
-              <p className="text-blue-900 font-semibold text-base">Kola Construction</p>
-              <p className="text-gray-400 text-sm mt-0.5">Google Review</p>
-            </div>
-          </div>
-
-          {/* Card 4 — Hendoni's Salon (medium) */}
-          <div className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col shadow transition duration-300 ease-out hover:shadow-lg hover:scale-[1.02]">
-            <div className="flex items-center justify-center mb-4">
-              <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 text-xl font-bold flex-shrink-0">
-                H
-              </div>
-            </div>
-            <Stars />
-            <blockquote className="text-gray-600 text-sm leading-relaxed mb-3">
-              &ldquo;Incredible service from start to finish, these guys deal with you in a really professional way and get the job done fast. Would really recommend 🙌&rdquo;
-            </blockquote>
-            <div>
-              <p className="text-blue-900 font-semibold text-sm">Hendoni&apos;s Salon</p>
-              <p className="text-gray-400 text-xs mt-0.5">Google Review</p>
-            </div>
-          </div>
-
-          {/* Card 5 — Cozy Stoves (smallest) */}
-          <div className="bg-white rounded-lg border border-gray-200 p-4 flex flex-col shadow transition duration-300 ease-out hover:shadow-lg hover:scale-[1.02]">
-            <div className="flex items-center justify-center mb-3">
-              <Image
-                src="/Cozy-Stoves-logo.png"
-                alt="Cozy Stoves logo"
-                width={305}
-                height={100}
-                className="h-11 w-auto object-contain"
-              />
-            </div>
-            <Stars size="sm" />
-            <blockquote className="text-gray-600 text-xs leading-relaxed mb-3">
-              &ldquo;Fast and reliable team service all around&rdquo;
-            </blockquote>
-            <div>
-              <p className="text-blue-900 font-semibold text-sm">Cozy Stoves</p>
-              <p className="text-gray-400 text-xs mt-0.5">Client review</p>
-            </div>
-          </div>
-
+        {/* Dots */}
+        <div className="flex justify-center gap-2 mt-8">
+          {testimonials.map((t, i) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => goTo(i)}
+              aria-label={`Go to ${t.name} testimonial`}
+              aria-current={i === index}
+              className={`w-2.5 h-2.5 rounded-full transition-colors duration-200 ${
+                i === index ? "bg-blue-700" : "bg-gray-300 hover:bg-gray-400"
+              }`}
+            />
+          ))}
         </div>
       </div>
     </section>
