@@ -44,37 +44,6 @@ const ChevronIcon = ({ flipped = false }: { flipped?: boolean }) => (
 
 const testimonials: Testimonial[] = [
   {
-    id: "coastline-print",
-    name: "Coastline Print",
-    label: "Google Review",
-    quote: null,
-    header: (
-      <Image
-        src="/Coastline Print Logo.jpg"
-        alt="Coastline Print logo"
-        width={150}
-        height={150}
-        className="h-14 w-14 object-contain rounded-full"
-      />
-    ),
-  },
-  {
-    id: "body-by-victoria",
-    name: "Body by Victoria",
-    label: "Google Review",
-    quote:
-      "Great communication from the start. Very polite competitive prices will definitely be using again. Thank you",
-    header: (
-      <Image
-        src="/Body by Victoria.png"
-        alt="Body by Victoria logo"
-        width={913}
-        height={534}
-        className="h-14 w-auto object-contain"
-      />
-    ),
-  },
-  {
     id: "kola-construction",
     name: "Kola Construction",
     label: "Google Review",
@@ -104,6 +73,37 @@ const testimonials: Testimonial[] = [
           className="h-7 w-auto object-contain shrink-0"
         />
       </div>
+    ),
+  },
+  {
+    id: "body-by-victoria",
+    name: "Body by Victoria",
+    label: "Google Review",
+    quote:
+      "Great communication from the start. Very polite competitive prices will definitely be using again. Thank you",
+    header: (
+      <Image
+        src="/Body by Victoria.png"
+        alt="Body by Victoria logo"
+        width={913}
+        height={534}
+        className="h-14 w-auto object-contain"
+      />
+    ),
+  },
+  {
+    id: "coastline-print",
+    name: "Coastline Print",
+    label: "Google Review",
+    quote: null,
+    header: (
+      <Image
+        src="/Coastline Print Logo.jpg"
+        alt="Coastline Print logo"
+        width={150}
+        height={150}
+        className="h-14 w-14 object-contain rounded-full"
+      />
     ),
   },
   {
@@ -185,7 +185,7 @@ export default function Testimonials() {
   };
 
   return (
-    <section className="bg-white border-b border-gray-100">
+    <section className="bg-white border-b border-gray-100 overflow-hidden">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 text-center mb-12">
           What People Say About Us
@@ -197,7 +197,7 @@ export default function Testimonials() {
           onMouseLeave={() => setPaused(false)}
         >
           <div
-            className="relative mx-auto max-w-2xl h-[300px] sm:h-[340px] overflow-hidden"
+            className="relative mx-auto max-w-2xl h-[300px] sm:h-[340px]"
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
