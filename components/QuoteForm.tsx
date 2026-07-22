@@ -86,7 +86,7 @@ export default function QuoteForm() {
               htmlFor="first-name"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              First name
+              First name <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -119,7 +119,7 @@ export default function QuoteForm() {
             htmlFor="email"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Email address
+            Email address <span className="text-red-500">*</span>
           </label>
           <input
             type="email"
@@ -136,7 +136,7 @@ export default function QuoteForm() {
             htmlFor="phone"
             className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Contact number
+            Contact number <span className="text-red-500">*</span>
           </label>
           <input
             type="tel"
