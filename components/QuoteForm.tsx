@@ -343,11 +343,12 @@ export default function QuoteForm() {
                 htmlFor="budget"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Approximate campaign budget
+                Approximate campaign budget <span className="text-red-500">*</span>
               </label>
               <select
                 id="budget"
                 name="budget"
+                required
                 className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
                 <option value="">Select a range...</option>
@@ -402,11 +403,12 @@ export default function QuoteForm() {
                 htmlFor="web-budget"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Approximate budget
+                Approximate budget <span className="text-red-500">*</span>
               </label>
               <select
                 id="web-budget"
                 name="budget"
+                required
                 className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
                 <option value="">Select a range...</option>
