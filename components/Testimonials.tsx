@@ -137,6 +137,22 @@ const testimonials: Testimonial[] = [
       />
     ),
   },
+  {
+    id: "homebites-bakery",
+    name: "Homebites Bakery",
+    label: "Google Review",
+    quote:
+      "10/10 service for my cake business! Very professional, would definitely recommend.",
+    header: (
+      <Image
+        src="/Home bites bakery.png"
+        alt="Homebites Bakery logo"
+        width={72}
+        height={72}
+        className="h-14 w-14 object-contain rounded-full"
+      />
+    ),
+  },
 ];
 
 const COUNT = testimonials.length;
