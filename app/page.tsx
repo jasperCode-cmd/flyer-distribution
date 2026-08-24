@@ -168,7 +168,7 @@ export default function HomePage() {
             <div>
               <Link
                 href="/quote"
-                className="inline-block bg-yellow-400 hover:bg-yellow-300 hover:shadow-[0_0_20px_rgba(250,204,21,0.5)] text-blue-900 text-xs sm:text-sm font-semibold px-4 py-1.5 rounded-full mb-4 transition duration-200 ease-out hover:scale-105"
+                className="inline-block bg-yellow-400 hover:bg-yellow-300 hover:shadow-[0_0_20px_rgba(250,204,21,0.5)] text-blue-900 text-[11px] leading-tight sm:text-sm font-semibold px-3 py-1 sm:px-4 sm:py-1.5 rounded-full mb-4 transition duration-200 ease-out hover:scale-105"
               >
                 <span className="font-bold">End of Summer Deal:</span> New
                 customers get 10% off their first campaign
