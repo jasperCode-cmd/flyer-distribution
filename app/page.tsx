@@ -166,6 +166,13 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-10 lg:gap-16 items-center">
             {/* Text — 60% of row width at desktop */}
             <div>
+              <Link
+                href="/quote"
+                className="inline-block bg-yellow-400 hover:bg-yellow-300 hover:shadow-[0_0_20px_rgba(250,204,21,0.5)] text-blue-900 text-xs sm:text-sm font-semibold px-4 py-1.5 rounded-full mb-4 transition duration-200 ease-out hover:scale-105"
+              >
+                <span className="font-bold">End of Summer Deal:</span> New
+                customers get 10% off their first campaign
+              </Link>
               <p className="text-blue-300 text-sm font-semibold uppercase tracking-widest mb-4">
                 Hampshire &amp; Dorset
               </p>
