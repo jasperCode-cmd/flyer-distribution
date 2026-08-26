@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 const footerLinks = [
   { href: "/", label: "Home" },
@@ -12,6 +15,9 @@ const footerLinks = [
 ];
 
 export default function Footer() {
+  const pathname = usePathname();
+  if (pathname.startsWith("/admin/crm")) return null;
+
   return (
     <footer className="bg-blue-950 text-blue-200 mt-auto">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

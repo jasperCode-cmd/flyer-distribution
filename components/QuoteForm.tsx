@@ -39,6 +39,14 @@ export default function QuoteForm() {
         setServiceType("");
         setIncludePrinting(true);
         setIncludeDesign(false);
+
+        // Best-effort CRM lead capture, alongside the Web3Forms email
+        // above. Never allowed to affect the user-facing success state.
+        fetch("/api/quote-lead", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }).catch(() => {});
       } else {
         setError(true);
       }

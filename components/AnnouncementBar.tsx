@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 export default function AnnouncementBar() {
   const pathname = usePathname();
-  if (pathname === "/quote") return null;
+  if (pathname === "/quote" || pathname.startsWith("/admin/crm")) return null;
 
   return (
     <Link

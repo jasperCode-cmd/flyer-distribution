@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 
 const servicesDropdown = [
@@ -32,6 +33,9 @@ export default function Header() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const pathname = usePathname();
+  if (pathname.startsWith("/admin/crm")) return null;
 
   return (
     <header className="bg-white border-b border-blue-100 sticky top-0 z-50 shadow-sm">
