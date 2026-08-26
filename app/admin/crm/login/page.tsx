@@ -39,13 +39,13 @@ export default function CrmLoginPage() {
   return (
     <div className="min-h-screen bg-blue-950 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-8">
           <Image
             src="/Flyer Distribution Logo White Cropped.png"
-            width={192}
-            height={71}
+            width={384}
+            height={142}
             alt="Flyer Distribution Hampshire"
-            className="h-10 w-auto"
+            className="h-20 w-auto"
           />
         </div>
         <div className="bg-white rounded-lg p-8 shadow-xl">

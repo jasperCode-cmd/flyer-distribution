@@ -35,22 +35,22 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       <header className="bg-blue-900 text-white sticky top-0 z-40">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
-          <div className="flex items-center gap-3 min-w-0">
-            <Link href="/admin/crm" className="shrink-0 flex items-center gap-2">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 flex items-center justify-between h-20">
+          <div className="flex items-center gap-4 min-w-0">
+            <Link href="/admin/crm" className="shrink-0 flex items-center gap-3">
               <Image
                 src="/Flyer Distribution Logo White Cropped.png"
-                width={135}
-                height={50}
+                width={270}
+                height={100}
                 alt="Flyer Distribution Hampshire"
-                className="h-7 w-auto"
+                className="h-14 w-auto"
               />
               <span className="font-bold text-sm tracking-wide hidden sm:inline">
                 CRM
               </span>
             </Link>
             {!forcedChange && (
-              <nav className="hidden md:flex items-center gap-1 ml-4">
+              <nav className="hidden md:flex items-center gap-1 ml-6">
                 {navLinks.map((link) => {
                   const active =
                     link.href === "/admin/crm"
