@@ -11,11 +11,13 @@ const prisma = new PrismaClient({ adapter });
 const SEED_USERS = [
   {
     email: "jasper@flyerdistributionhampshire.co.uk",
+    username: "jasper",
     name: "Jasper Adams",
     password: "ChangeMe-Jasper-2026!",
   },
   {
     email: "daniel@flyerdistributionhampshire.co.uk",
+    username: "dan",
     name: "Daniel Whitby",
     password: "ChangeMe-Daniel-2026!",
   },
@@ -26,9 +28,14 @@ async function main() {
     const passwordHash = await bcrypt.hash(u.password, 12);
     await prisma.user.upsert({
       where: { email: u.email },
-      update: {},
+      // Only the username is reconciled on an existing row, so re-running
+      // the seed keeps login handles consistent without ever resetting a
+      // password the real user has since set, or re-raising the
+      // mustChangePassword flag.
+      update: { username: u.username },
       create: {
         email: u.email,
+        username: u.username,
         name: u.name,
         passwordHash,
         role: "admin",

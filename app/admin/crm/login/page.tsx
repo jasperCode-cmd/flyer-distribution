@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 
 export default function CrmLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -18,7 +18,7 @@ export default function CrmLoginPage() {
     setError(false);
 
     const res = await signIn("credentials", {
-      email,
+      username,
       password,
       redirect: false,
     });
@@ -27,7 +27,7 @@ export default function CrmLoginPage() {
 
     if (res?.error) {
       // Deliberately generic — never confirms or denies whether the
-      // email exists.
+      // username exists.
       setError(true);
       return;
     }
@@ -55,17 +55,19 @@ export default function CrmLoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label
-                htmlFor="email"
+                htmlFor="username"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Email
+                Username
               </label>
               <input
-                id="email"
-                type="email"
+                id="username"
+                name="username"
+                type="text"
+                autoComplete="username"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -78,7 +80,9 @@ export default function CrmLoginPage() {
               </label>
               <input
                 id="password"
+                name="password"
                 type="password"
+                autoComplete="current-password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -88,7 +92,7 @@ export default function CrmLoginPage() {
 
             {error && (
               <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
-                Invalid email or password.
+                Invalid username or password.
               </p>
             )}
 

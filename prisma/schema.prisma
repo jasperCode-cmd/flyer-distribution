@@ -12,6 +12,10 @@ datasource db {
 model User {
   id                 String   @id @default(cuid())
   email              String   @unique
+  // Short login handle, used instead of email to sign in. Nullable so the
+  // column could be added to a table that already had rows; every real
+  // account is expected to have one, and a row without one cannot log in.
+  username           String?  @unique
   passwordHash       String
   name               String
   role               String   @default("admin")
