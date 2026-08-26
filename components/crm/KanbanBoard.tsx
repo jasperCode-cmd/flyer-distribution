@@ -11,6 +11,7 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import LeadCard, { type KanbanLead } from "./LeadCard";
+import LostReasonModal from "./LostReasonModal";
 import { STAGES, STAGE_LABELS } from "@/lib/crm-constants";
 
 function DraggableCard({ lead }: { lead: KanbanLead }) {
@@ -84,12 +85,37 @@ function Column({
 export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead[] }) {
   const [leads, setLeads] = useState(initialLeads);
   const [pending, setPending] = useState(false);
+  const [lostPrompt, setLostPrompt] = useState<{ leadId: string; previousStage: string } | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
   );
 
-  async function handleDragEnd(event: DragEndEvent) {
+  async function commitStageChange(
+    leadId: string,
+    newStage: string,
+    previousStage: string,
+    extra?: { lostReason?: string; lostReasonNote?: string }
+  ) {
+    setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, stage: newStage } : l)));
+    setPending(true);
+
+    try {
+      const res = await fetch(`/api/crm/leads/${leadId}/stage`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stage: newStage, ...extra }),
+      });
+      if (!res.ok) throw new Error("Failed to update stage");
+    } catch {
+      // Revert on failure
+      setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, stage: previousStage } : l)));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
     if (!over) return;
 
@@ -99,23 +125,13 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
     const lead = leads.find((l) => l.id === leadId);
     if (!lead || lead.stage === newStage) return;
 
-    // Optimistic update
-    setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, stage: newStage } : l)));
-    setPending(true);
-
-    try {
-      const res = await fetch(`/api/crm/leads/${leadId}/stage`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ stage: newStage }),
-      });
-      if (!res.ok) throw new Error("Failed to update stage");
-    } catch {
-      // Revert on failure
-      setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, stage: lead.stage } : l)));
-    } finally {
-      setPending(false);
+    if (newStage === "LOST") {
+      // Don't move the card (or call the API) until a reason is confirmed.
+      setLostPrompt({ leadId, previousStage: lead.stage });
+      return;
     }
+
+    commitStageChange(leadId, newStage, lead.stage);
   }
 
   return (
@@ -128,6 +144,18 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
       {pending && (
         <p className="text-xs text-gray-400 mt-2">Saving...</p>
       )}
+      <LostReasonModal
+        open={lostPrompt !== null}
+        onCancel={() => setLostPrompt(null)}
+        onConfirm={(reason, note) => {
+          if (!lostPrompt) return;
+          commitStageChange(lostPrompt.leadId, "LOST", lostPrompt.previousStage, {
+            lostReason: reason,
+            lostReasonNote: note,
+          });
+          setLostPrompt(null);
+        }}
+      />
     </DndContext>
   );
 }

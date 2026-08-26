@@ -1,15 +1,19 @@
-import { getLeadsWithLastActivity } from "@/lib/crm-data";
+import { getLeadsWithLastActivity, flattenTags } from "@/lib/crm-data";
+import { prisma } from "@/lib/prisma";
 import LeadsView from "@/components/crm/LeadsView";
 
 export const dynamic = "force-dynamic";
 
 export default async function LeadsPage() {
-  const leads = await getLeadsWithLastActivity();
+  const [leads, users] = await Promise.all([
+    getLeadsWithLastActivity(),
+    prisma.user.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
+  ]);
 
   const serializable = leads.map((l) => ({
-    ...l,
+    ...flattenTags(l),
     dealValue: l.dealValue ? l.dealValue.toString() : null,
   }));
 
-  return <LeadsView leads={serializable} />;
+  return <LeadsView leads={serializable} users={users} />;
 }

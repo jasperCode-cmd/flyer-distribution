@@ -15,7 +15,7 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const { stage } = await req.json();
+  const { stage, lostReason, lostReasonNote } = await req.json();
 
   if (!VALID_STAGES.includes(stage)) {
     return NextResponse.json({ error: "Invalid stage" }, { status: 400 });
@@ -27,7 +27,15 @@ export async function PATCH(
   }
 
   const [lead] = await prisma.$transaction([
-    prisma.lead.update({ where: { id }, data: { stage } }),
+    prisma.lead.update({
+      where: { id },
+      data: {
+        stage,
+        ...(stage === "LOST"
+          ? { lostReason: lostReason || null, lostReasonNote: lostReasonNote || null }
+          : {}),
+      },
+    }),
     prisma.activity.create({
       data: {
         leadId: id,

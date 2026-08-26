@@ -10,15 +10,19 @@ datasource db {
 // Only "admin" is used today. Plain string (not an enum) so a future
 // role like "guest" can be introduced without a schema migration.
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  name         String
-  role         String   @default("admin")
-  createdAt    DateTime @default(now())
+  id                 String   @id @default(cuid())
+  email              String   @unique
+  passwordHash       String
+  name               String
+  role               String   @default("admin")
+  // Forces a password change (enforced server-side via middleware) before
+  // the account can use the rest of the CRM. True for newly seeded users.
+  mustChangePassword Boolean  @default(true)
+  createdAt          DateTime @default(now())
 
-  assignedLeads Lead[]     @relation("AssignedLeads")
-  activities    Activity[]
+  assignedLeads    Lead[]            @relation("AssignedLeads")
+  activities       Activity[]
+  savedFilterViews SavedFilterView[]
 }
 
 enum LeadSource {
@@ -34,6 +38,20 @@ enum PipelineStage {
   AWAITING_RESPONSE
   WON
   LOST
+}
+
+enum LostReason {
+  PRICE
+  CHOSE_COMPETITOR
+  WENT_QUIET
+  NOT_READY
+  OTHER
+}
+
+enum LeadPriority {
+  HIGH
+  MEDIUM
+  LOW
 }
 
 model Lead {
@@ -56,10 +74,16 @@ model Lead {
   printingIncluded Boolean  @default(false)
   designIncluded   Boolean  @default(false)
 
-  source LeadSource    @default(OTHER)
-  stage  PipelineStage @default(UNCONTACTED)
+  source   LeadSource    @default(OTHER)
+  stage    PipelineStage @default(UNCONTACTED)
+  priority LeadPriority  @default(MEDIUM)
   // Usable within "Awaiting Response" for a stalled/hesitant lead.
-  atRisk Boolean       @default(false)
+  atRisk Boolean @default(false)
+
+  // Prompted for when a lead is moved to the Lost stage. lostReasonNote
+  // carries the free text when lostReason is OTHER.
+  lostReason     LostReason?
+  lostReasonNote String?
 
   assignedToId String?
   assignedTo   User?   @relation("AssignedLeads", fields: [assignedToId], references: [id])
@@ -69,9 +93,12 @@ model Lead {
 
   activities Activity[]
   job        Job?
+  tasks      Task[]
+  tags       LeadTag[]
 
   @@index([stage])
   @@index([assignedToId])
+  @@index([priority])
 }
 
 enum ActivityType {
@@ -96,6 +123,55 @@ model Activity {
   user   User?   @relation(fields: [userId], references: [id])
 
   @@index([leadId, createdAt])
+}
+
+// Follow-up tasks for a lead, separate from the auto-detected "stale lead"
+// signal (which is based on last Activity, not a scheduled follow-up).
+model Task {
+  id          String   @id @default(cuid())
+  description String
+  dueDate     DateTime
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([leadId])
+  @@index([dueDate])
+}
+
+model Tag {
+  id    String @id @default(cuid())
+  name  String @unique
+  color String @default("#2563eb")
+
+  leads LeadTag[]
+}
+
+model LeadTag {
+  leadId String
+  tagId  String
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([leadId, tagId])
+}
+
+// A user's saved combination of table/Kanban filters, for quick re-selection.
+// Kept as a JSON blob rather than individual columns so new filter fields
+// (e.g. tags added later) don't require a schema change here.
+model SavedFilterView {
+  id      String @id @default(cuid())
+  name    String
+  filters Json
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 enum WorkStatus {
@@ -123,6 +199,11 @@ model Job {
 
   campaignStartDate DateTime?
   completionDate    DateTime?
+
+  // Nullable foundation for a future real map integration — not populated
+  // or read by any external mapping API today.
+  latitude  Float?
+  longitude Float?
 
   // Matches the business's actual current tracking method (Strava route
   // screenshots), not GPS hardware, which isn't live yet.

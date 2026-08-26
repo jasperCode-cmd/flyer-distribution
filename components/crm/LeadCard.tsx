@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PRIORITY_LABELS } from "@/lib/crm-constants";
 
 export type KanbanLead = {
   id: string;
@@ -6,15 +7,24 @@ export type KanbanLead = {
   businessName: string | null;
   dealValue: unknown;
   stage: string;
+  source: string;
+  priority: string;
   atRisk: boolean;
   assignedTo: { id: string; name: string } | null;
   activities: { createdAt: string | Date }[];
   createdAt: string | Date;
+  tags?: { id: string; name: string; color: string }[];
 };
 
 function formatCurrency(n: number) {
   return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(n);
 }
+
+const PRIORITY_DOT_COLOR: Record<string, string> = {
+  HIGH: "bg-red-500",
+  MEDIUM: "bg-yellow-500",
+  LOW: "bg-gray-400",
+};
 
 export default function LeadCard({ lead }: { lead: KanbanLead }) {
   return (
@@ -25,7 +35,13 @@ export default function LeadCard({ lead }: { lead: KanbanLead }) {
       }`}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-sm font-semibold text-blue-900 truncate">{lead.name}</p>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span
+            title={`${PRIORITY_LABELS[lead.priority] ?? lead.priority} priority`}
+            className={`shrink-0 w-2 h-2 rounded-full ${PRIORITY_DOT_COLOR[lead.priority] ?? "bg-gray-300"}`}
+          />
+          <p className="text-sm font-semibold text-blue-900 truncate">{lead.name}</p>
+        </div>
         {lead.atRisk && (
           <span
             title="At risk"
@@ -38,6 +54,19 @@ export default function LeadCard({ lead }: { lead: KanbanLead }) {
       </div>
       {lead.businessName && (
         <p className="text-xs text-gray-500 truncate mt-0.5">{lead.businessName}</p>
+      )}
+      {lead.tags && lead.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-1.5">
+          {lead.tags.map((t) => (
+            <span
+              key={t.id}
+              className="text-[10px] font-medium px-1.5 py-0.5 rounded-full text-white"
+              style={{ backgroundColor: t.color }}
+            >
+              {t.name}
+            </span>
+          ))}
+        </div>
       )}
       <div className="flex items-center justify-between mt-2">
         <span className="text-xs font-medium text-gray-700">

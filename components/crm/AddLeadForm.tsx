@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { SOURCE_LABELS } from "@/lib/crm-constants";
+import { SOURCE_LABELS, PRIORITIES, PRIORITY_LABELS } from "@/lib/crm-constants";
+
+type Duplicate = { id: string; name: string; email: string | null; phone: string | null };
 
 export default function AddLeadForm({ users }: { users: { id: string; name: string }[] }) {
   const router = useRouter();
@@ -19,10 +22,12 @@ export default function AddLeadForm({ users }: { users: { id: string; name: stri
     printingIncluded: false,
     designIncluded: false,
     source: "INSTAGRAM_DM",
+    priority: "MEDIUM",
     assignedToId: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<{ leadId: string; duplicates: Duplicate[] } | null>(null);
 
   function set<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -54,7 +59,15 @@ export default function AddLeadForm({ users }: { users: { id: string; name: stri
       return;
     }
 
-    const { lead } = await res.json();
+    const { lead, duplicates } = await res.json();
+
+    if (duplicates && duplicates.length > 0) {
+      // Don't block creation — the lead is already saved — but pause here
+      // so staff can see the possible match before moving on.
+      setResult({ leadId: lead.id, duplicates });
+      return;
+    }
+
     router.push(`/admin/crm/leads/${lead.id}`);
   }
 
@@ -76,6 +89,36 @@ export default function AddLeadForm({ users }: { users: { id: string; name: stri
       />
     </div>
   );
+
+  if (result) {
+    return (
+      <div className="max-w-2xl">
+        <h1 className="text-xl font-bold text-blue-900 mb-4">Add Lead</h1>
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5 space-y-4">
+          <div className="bg-yellow-50 border border-yellow-300 rounded-md px-4 py-3">
+            <p className="text-sm font-semibold text-yellow-800 mb-2">
+              This lead was saved, but it may be a duplicate:
+            </p>
+            <ul className="space-y-1">
+              {result.duplicates.map((d) => (
+                <li key={d.id}>
+                  <Link href={`/admin/crm/leads/${d.id}`} className="text-sm text-blue-700 hover:underline">
+                    {d.name} {d.email ? `— ${d.email}` : d.phone ? `— ${d.phone}` : ""}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <Link
+            href={`/admin/crm/leads/${result.leadId}`}
+            className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-5 py-2.5 rounded-md text-sm"
+          >
+            Continue to New Lead
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl">
@@ -101,6 +144,18 @@ export default function AddLeadForm({ users }: { users: { id: string; name: stri
             >
               {Object.entries(SOURCE_LABELS).map(([k, v]) => (
                 <option key={k} value={k}>{v}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Priority</label>
+            <select
+              value={form.priority}
+              onChange={(e) => set("priority", e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm bg-white"
+            >
+              {PRIORITIES.map((p) => (
+                <option key={p} value={p}>{PRIORITY_LABELS[p]}</option>
               ))}
             </select>
           </div>

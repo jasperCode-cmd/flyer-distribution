@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { findDuplicateLeads } from "@/lib/crm-data";
 
 // Called from the public /quote form alongside (not instead of) the
 // existing Web3Forms email notification. Best-effort field mapping —
@@ -35,6 +36,15 @@ export async function POST(req: Request) {
   if (data.message) noteLines.push(`Message: ${data.message}`);
 
   try {
+    // No live session/UI to show a duplicate warning to at this point (an
+    // anonymous site visitor is submitting this), so a possible match is
+    // recorded as an Activity note instead, for staff to see on the timeline.
+    const duplicates = await findDuplicateLeads(data.email, data.phone);
+    if (duplicates.length > 0) {
+      const names = duplicates.map((d) => `${d.name} (${d.id})`).join(", ");
+      noteLines.push(`Possible duplicate of existing lead(s): ${names}`);
+    }
+
     const lead = await prisma.lead.create({
       data: {
         name,

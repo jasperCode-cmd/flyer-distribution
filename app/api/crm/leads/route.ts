@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { leadWithLastActivityArgs } from "@/lib/crm-data";
+import { leadWithLastActivityArgs, findDuplicateLeads } from "@/lib/crm-data";
 
 export async function GET() {
   const session = await auth();
@@ -38,12 +38,17 @@ export async function POST(req: Request) {
     printingIncluded,
     designIncluded,
     source,
+    priority,
     assignedToId,
   } = body;
 
   if (!name || typeof name !== "string") {
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
   }
+
+  // Don't block creation — just surface what's already on file so staff
+  // can decide whether this is really a new lead.
+  const duplicates = await findDuplicateLeads(email, phone);
 
   const lead = await prisma.lead.create({
     data: {
@@ -59,9 +64,10 @@ export async function POST(req: Request) {
       printingIncluded: Boolean(printingIncluded),
       designIncluded: Boolean(designIncluded),
       source: source || "OTHER",
+      priority: priority || "MEDIUM",
       assignedToId: assignedToId || null,
     },
   });
 
-  return NextResponse.json({ lead }, { status: 201 });
+  return NextResponse.json({ lead, duplicates }, { status: 201 });
 }

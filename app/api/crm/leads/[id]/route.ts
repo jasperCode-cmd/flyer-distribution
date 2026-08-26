@@ -54,8 +54,11 @@ export async function PATCH(
     "printingIncluded",
     "designIncluded",
     "source",
+    "priority",
     "atRisk",
     "assignedToId",
+    "lostReason",
+    "lostReasonNote",
   ] as const;
 
   const data: Record<string, unknown> = {};

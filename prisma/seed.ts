@@ -32,6 +32,7 @@ async function main() {
         name: u.name,
         passwordHash,
         role: "admin",
+        mustChangePassword: true,
       },
     });
     console.log(`Seeded user: ${u.email} (placeholder password: ${u.password})`);

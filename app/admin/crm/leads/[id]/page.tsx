@@ -20,6 +20,8 @@ export default async function LeadDetailPage({
           include: { user: { select: { name: true } } },
         },
         job: true,
+        tags: { include: { tag: true } },
+        tasks: { orderBy: { dueDate: "asc" } },
       },
     }),
     prisma.user.findMany({ select: { id: true, name: true } }),
@@ -42,6 +44,8 @@ export default async function LeadDetailPage({
           completionDate: lead.job.completionDate?.toISOString() ?? null,
         }
       : null,
+    tags: lead.tags.map((lt) => lt.tag),
+    tasks: lead.tasks.map((t) => ({ ...t, dueDate: t.dueDate.toISOString() })),
   };
 
   return <LeadDetail lead={serializable} users={users} />;

@@ -1,13 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import KanbanBoard from "./KanbanBoard";
 import LeadTable from "./LeadTable";
+import LeadFilterBar from "./LeadFilterBar";
 import type { KanbanLead } from "./LeadCard";
+import { applyLeadFilters, type LeadFilters } from "@/lib/crm-constants";
 
-export default function LeadsView({ leads }: { leads: KanbanLead[] }) {
+export default function LeadsView({
+  leads,
+  users,
+}: {
+  leads: KanbanLead[];
+  users: { id: string; name: string }[];
+}) {
   const [view, setView] = useState<"kanban" | "table">("kanban");
+  const [filters, setFilters] = useState<LeadFilters>({});
+
+  const filteredLeads = useMemo(
+    () => applyLeadFilters(leads, view === "kanban" ? { ...filters, stage: undefined } : filters),
+    [leads, filters, view]
+  );
+
+  const exportParams = new URLSearchParams();
+  if (filters.stage) exportParams.set("stage", filters.stage);
+  if (filters.source) exportParams.set("source", filters.source);
+  if (filters.assignedToId) exportParams.set("assignedToId", filters.assignedToId);
+  if (filters.priority) exportParams.set("priority", filters.priority);
+  if (filters.tagId) exportParams.set("tagId", filters.tagId);
+  if (filters.atRiskOnly) exportParams.set("atRiskOnly", "true");
 
   return (
     <div>
@@ -43,7 +65,21 @@ export default function LeadsView({ leads }: { leads: KanbanLead[] }) {
         </div>
       </div>
 
-      {view === "kanban" ? <KanbanBoard initialLeads={leads} /> : <LeadTable leads={leads} />}
+      <LeadFilterBar
+        filters={filters}
+        onChange={setFilters}
+        showStageFilter={view === "table"}
+        assignees={users}
+        exportHref={`/api/crm/leads/export?${exportParams.toString()}`}
+      />
+
+      {view === "kanban" ? (
+        // Keyed on the filters so KanbanBoard's internal drag state resets
+        // to the newly filtered set whenever a filter changes.
+        <KanbanBoard key={JSON.stringify(filters)} initialLeads={filteredLeads} />
+      ) : (
+        <LeadTable leads={filteredLeads} assignees={users} />
+      )}
     </div>
   );
 }

@@ -72,3 +72,67 @@ export const SOURCE_LABELS: Record<string, string> = {
   COLD_OUTREACH: "Cold Outreach",
   OTHER: "Other",
 };
+
+export const PRIORITIES = ["HIGH", "MEDIUM", "LOW"] as const;
+
+export const PRIORITY_LABELS: Record<string, string> = {
+  HIGH: "High",
+  MEDIUM: "Medium",
+  LOW: "Low",
+};
+
+export const LOST_REASONS = ["PRICE", "CHOSE_COMPETITOR", "WENT_QUIET", "NOT_READY", "OTHER"] as const;
+
+export const LOST_REASON_LABELS: Record<string, string> = {
+  PRICE: "Price",
+  CHOSE_COMPETITOR: "Chose Competitor",
+  WENT_QUIET: "Went Quiet",
+  NOT_READY: "Not Ready",
+  OTHER: "Other",
+};
+
+export type LeadFilters = {
+  stage?: string;
+  source?: string;
+  assignedToId?: string;
+  priority?: string;
+  tagId?: string;
+  atRiskOnly?: boolean;
+};
+
+type FilterableLead = {
+  stage: string;
+  source: string;
+  priority: string;
+  atRisk: boolean;
+  assignedTo: { id: string } | null;
+  tags?: { id: string }[];
+};
+
+export function applyLeadFilters<T extends FilterableLead>(leads: T[], filters: LeadFilters): T[] {
+  let result = leads;
+  if (filters.stage) result = result.filter((l) => l.stage === filters.stage);
+  if (filters.source) result = result.filter((l) => l.source === filters.source);
+  if (filters.assignedToId) result = result.filter((l) => l.assignedTo?.id === filters.assignedToId);
+  if (filters.priority) result = result.filter((l) => l.priority === filters.priority);
+  if (filters.tagId) result = result.filter((l) => (l.tags ?? []).some((t) => t.id === filters.tagId));
+  if (filters.atRiskOnly) result = result.filter((l) => l.atRisk);
+  return result;
+}
+
+export function isOverdue(dueDate: Date | string): boolean {
+  const d = toDate(dueDate);
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  return d.getTime() < startOfToday.getTime();
+}
+
+export function isDueToday(dueDate: Date | string): boolean {
+  const d = toDate(dueDate);
+  const now = new Date();
+  return (
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth() &&
+    d.getDate() === now.getDate()
+  );
+}

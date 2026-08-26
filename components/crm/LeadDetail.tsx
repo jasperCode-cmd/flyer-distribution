@@ -1,9 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import QuickLogModal from "./QuickLogModal";
-import { STAGE_LABELS, SOURCE_LABELS, STAGES } from "@/lib/crm-constants";
+import LostReasonModal from "./LostReasonModal";
+import ScheduleFollowUpModal from "./ScheduleFollowUpModal";
+import {
+  STAGE_LABELS,
+  SOURCE_LABELS,
+  STAGES,
+  PRIORITIES,
+  PRIORITY_LABELS,
+  LOST_REASON_LABELS,
+  isOverdue,
+} from "@/lib/crm-constants";
 
 type Activity = {
   id: string;
@@ -25,6 +35,15 @@ type Job = {
   status: string;
 };
 
+type Tag = { id: string; name: string; color: string };
+
+type Task = {
+  id: string;
+  description: string;
+  dueDate: string;
+  completed: boolean;
+};
+
 export type LeadDetailData = {
   id: string;
   name: string;
@@ -40,11 +59,16 @@ export type LeadDetailData = {
   designIncluded: boolean;
   source: string;
   stage: string;
+  priority: string;
   atRisk: boolean;
+  lostReason: string | null;
+  lostReasonNote: string | null;
   assignedToId: string | null;
   createdAt: string;
   activities: Activity[];
   job: Job | null;
+  tags: Tag[];
+  tasks: Task[];
 };
 
 const ACTIVITY_LABELS: Record<string, string> = {
@@ -86,6 +110,7 @@ export default function LeadDetail({
     printingIncluded: lead.printingIncluded,
     designIncluded: lead.designIncluded,
     source: lead.source,
+    priority: lead.priority,
     assignedToId: lead.assignedToId ?? "",
   });
   const [saving, setSaving] = useState(false);
@@ -93,10 +118,26 @@ export default function LeadDetail({
 
   const [stage, setStage] = useState(lead.stage);
   const [atRisk, setAtRisk] = useState(lead.atRisk);
+  const [lostReason, setLostReason] = useState(lead.lostReason);
+  const [lostReasonNote, setLostReasonNote] = useState(lead.lostReasonNote);
+  const [lostPromptOpen, setLostPromptOpen] = useState(false);
 
   const [modalOpen, setModalOpen] = useState<"call" | "email" | null>(null);
   const [newNote, setNewNote] = useState("");
   const [addingNote, setAddingNote] = useState(false);
+
+  const [allTags, setAllTags] = useState<Tag[]>([]);
+  const [tags, setTags] = useState(lead.tags);
+
+  const [tasks, setTasks] = useState(lead.tasks);
+  const [followUpModalOpen, setFollowUpModalOpen] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/crm/tags")
+      .then((r) => r.json())
+      .then((d) => setAllTags(d.tags ?? []))
+      .catch(() => {});
+  }, []);
 
   async function saveFields() {
     setSaving(true);
@@ -115,14 +156,26 @@ export default function LeadDetail({
     setTimeout(() => setSaved(false), 2000);
   }
 
-  async function changeStage(newStage: string) {
+  async function commitStage(newStage: string, extra?: { lostReason?: string; lostReasonNote?: string }) {
     setStage(newStage);
+    if (extra) {
+      setLostReason(extra.lostReason ?? null);
+      setLostReasonNote(extra.lostReasonNote ?? null);
+    }
     await fetch(`/api/crm/leads/${lead.id}/stage`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stage: newStage }),
+      body: JSON.stringify({ stage: newStage, ...extra }),
     });
     router.refresh();
+  }
+
+  function changeStage(newStage: string) {
+    if (newStage === "LOST") {
+      setLostPromptOpen(true);
+      return;
+    }
+    commitStage(newStage);
   }
 
   async function toggleAtRisk() {
@@ -161,6 +214,47 @@ export default function LeadDetail({
       body: JSON.stringify({ [field]: value }),
     });
     router.refresh();
+  }
+
+  async function addTag(tagId: string) {
+    const tag = allTags.find((t) => t.id === tagId);
+    if (!tag) return;
+    setTags((prev) => [...prev, tag]);
+    await fetch(`/api/crm/leads/${lead.id}/tags`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tagId: tag.id }),
+    });
+  }
+
+  async function removeTag(tagId: string) {
+    setTags((prev) => prev.filter((t) => t.id !== tagId));
+    await fetch(`/api/crm/leads/${lead.id}/tags`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tagId }),
+    });
+  }
+
+  async function addFollowUp(description: string, dueDate: string) {
+    const res = await fetch(`/api/crm/leads/${lead.id}/tasks`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ description, dueDate }),
+    });
+    if (res.ok) {
+      const { task } = await res.json();
+      setTasks((prev) => [...prev, task]);
+    }
+  }
+
+  async function toggleTask(taskId: string, completed: boolean) {
+    setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, completed } : t)));
+    await fetch(`/api/crm/tasks/${taskId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ completed }),
+    });
   }
 
   const field = (
@@ -203,7 +297,7 @@ export default function LeadDetail({
           </button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-4">
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Stage</label>
             <select
@@ -213,6 +307,18 @@ export default function LeadDetail({
             >
               {STAGES.map((s) => (
                 <option key={s} value={s}>{STAGE_LABELS[s]}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-500 mb-1">Priority</label>
+            <select
+              value={form.priority}
+              onChange={(e) => setForm((f) => ({ ...f, priority: e.target.value }))}
+              className="w-full border border-gray-300 rounded-md px-2 py-2 text-sm bg-white"
+            >
+              {PRIORITIES.map((p) => (
+                <option key={p} value={p}>{PRIORITY_LABELS[p]}</option>
               ))}
             </select>
           </div>
@@ -247,6 +353,66 @@ export default function LeadDetail({
               {new Date(lead.createdAt).toLocaleDateString("en-GB")}
             </p>
           </div>
+        </div>
+
+        {stage === "LOST" && (
+          <div className="mt-3 bg-gray-50 border border-gray-200 rounded-md px-3 py-2.5">
+            <label className="block text-xs font-medium text-gray-500 mb-1">Lost Reason</label>
+            <select
+              value={lostReason ?? ""}
+              onChange={(e) => {
+                const value = e.target.value;
+                setLostReason(value || null);
+                fetch(`/api/crm/leads/${lead.id}`, {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ lostReason: value || null }),
+                });
+              }}
+              className="w-full sm:w-64 border border-gray-300 rounded-md px-2 py-2 text-sm bg-white"
+            >
+              <option value="">Not set</option>
+              {Object.entries(LOST_REASON_LABELS).map(([k, v]) => (
+                <option key={k} value={k}>{v}</option>
+              ))}
+            </select>
+            {lostReasonNote && (
+              <p className="text-sm text-gray-600 mt-2">{lostReasonNote}</p>
+            )}
+          </div>
+        )}
+
+        {/* Tags */}
+        <div className="flex flex-wrap items-center gap-1.5 mt-3">
+          {tags.map((t) => (
+            <span
+              key={t.id}
+              className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full text-white"
+              style={{ backgroundColor: t.color }}
+            >
+              {t.name}
+              <button
+                type="button"
+                onClick={() => removeTag(t.id)}
+                aria-label={`Remove ${t.name}`}
+                className="opacity-80 hover:opacity-100"
+              >
+                ×
+              </button>
+            </span>
+          ))}
+          <select
+            value=""
+            onChange={(e) => e.target.value && addTag(e.target.value)}
+            className="text-xs border border-gray-300 rounded-full px-2 py-1 bg-white text-gray-500"
+          >
+            <option value="">+ Add tag</option>
+            {allTags
+              .filter((t) => !tags.some((existing) => existing.id === t.id))
+              .map((t) => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+          </select>
         </div>
 
         {/* Call / Email quick actions */}
@@ -415,6 +581,46 @@ export default function LeadDetail({
         </div>
       )}
 
+      {/* Follow-up tasks */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-bold text-blue-900">Follow-ups</h2>
+          <button
+            type="button"
+            onClick={() => setFollowUpModalOpen(true)}
+            className="text-xs font-semibold text-blue-700 hover:underline"
+          >
+            + Schedule follow-up
+          </button>
+        </div>
+        {tasks.filter((t) => !t.completed).length === 0 ? (
+          <p className="text-sm text-gray-400">No open follow-ups.</p>
+        ) : (
+          <ul className="space-y-2">
+            {tasks
+              .filter((t) => !t.completed)
+              .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+              .map((t) => (
+                <li key={t.id} className="flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    checked={t.completed}
+                    onChange={(e) => toggleTask(t.id, e.target.checked)}
+                    className="h-4 w-4 mt-0.5"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm text-gray-700">{t.description}</p>
+                    <p className={`text-xs ${isOverdue(t.dueDate) ? "text-red-600 font-semibold" : "text-gray-400"}`}>
+                      Due {new Date(t.dueDate).toLocaleDateString("en-GB")}
+                      {isOverdue(t.dueDate) && " (overdue)"}
+                    </p>
+                  </div>
+                </li>
+              ))}
+          </ul>
+        )}
+      </div>
+
       {/* Activity timeline */}
       <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5">
         <h2 className="text-sm font-bold text-blue-900 mb-3">Activity</h2>
@@ -470,6 +676,19 @@ export default function LeadDetail({
         onClose={() => setModalOpen(null)}
         defaultText={`Emailed ${lead.name}`}
         onSave={(detail) => logActivity("EMAIL", detail)}
+      />
+      <LostReasonModal
+        open={lostPromptOpen}
+        onCancel={() => setLostPromptOpen(false)}
+        onConfirm={(reason, note) => {
+          commitStage("LOST", { lostReason: reason, lostReasonNote: note });
+          setLostPromptOpen(false);
+        }}
+      />
+      <ScheduleFollowUpModal
+        open={followUpModalOpen}
+        onClose={() => setFollowUpModalOpen(false)}
+        onSave={addFollowUp}
       />
     </div>
   );

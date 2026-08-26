@@ -10,8 +10,10 @@ export const authConfig = {
   callbacks: {
     authorized({ auth, request }) {
       const isLoggedIn = !!auth?.user;
-      const isOnLogin = request.nextUrl.pathname === "/admin/crm/login";
-      const isOnCrm = request.nextUrl.pathname.startsWith("/admin/crm");
+      const pathname = request.nextUrl.pathname;
+      const isOnLogin = pathname === "/admin/crm/login";
+      const isOnChangePassword = pathname === "/admin/crm/change-password";
+      const isOnCrm = pathname.startsWith("/admin/crm");
 
       if (isOnLogin) {
         if (isLoggedIn) {
@@ -21,10 +23,37 @@ export const authConfig = {
       }
 
       if (isOnCrm) {
-        return isLoggedIn;
+        if (!isLoggedIn) return false;
+
+        // Enforced here (server-side, edge middleware) rather than only
+        // client-side, so it can't be bypassed by skipping a redirect.
+        if (auth.user.mustChangePassword && !isOnChangePassword) {
+          return Response.redirect(new URL("/admin/crm/change-password", request.nextUrl));
+        }
+
+        return true;
       }
 
       return true;
+    },
+    async jwt({ token, user, trigger, session }) {
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
+        token.mustChangePassword = user.mustChangePassword;
+      }
+      if (trigger === "update" && session && typeof session.mustChangePassword === "boolean") {
+        token.mustChangePassword = session.mustChangePassword;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
+        session.user.mustChangePassword = token.mustChangePassword as boolean;
+      }
+      return session;
     },
   },
   providers: [],

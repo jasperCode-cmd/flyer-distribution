@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getLeadsWithLastActivity } from "@/lib/crm-data";
+import { getLeadsWithLastActivity, getFollowUpTasks } from "@/lib/crm-data";
 import { computeDashboardStats, getLastInteracted, STAGE_LABELS } from "@/lib/crm-constants";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +18,7 @@ function daysAgo(date: Date) {
 export default async function CrmDashboardPage() {
   const leads = await getLeadsWithLastActivity();
   const stats = computeDashboardStats(leads);
+  const { overdue, today } = await getFollowUpTasks();
 
   return (
     <div className="space-y-6">
@@ -52,6 +53,61 @@ export default async function CrmDashboardPage() {
             <p className="text-xl font-bold text-blue-900">{stats.stageCounts[stage] ?? 0}</p>
           </div>
         ))}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="bg-white rounded-lg border border-gray-200">
+          <div className="px-4 py-3 border-b border-gray-200">
+            <h2 className="text-sm font-bold text-red-600">Overdue Follow-ups ({overdue.length})</h2>
+          </div>
+          {overdue.length === 0 ? (
+            <p className="px-4 py-4 text-sm text-gray-400">Nothing overdue.</p>
+          ) : (
+            <ul className="divide-y divide-gray-100">
+              {overdue.map((t) => (
+                <li key={t.id}>
+                  <Link
+                    href={`/admin/crm/leads/${t.lead.id}`}
+                    className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-blue-900 truncate">{t.lead.name}</p>
+                      <p className="text-xs text-gray-500 truncate">{t.description}</p>
+                    </div>
+                    <span className="text-xs text-red-600 font-medium shrink-0 ml-3">
+                      {new Date(t.dueDate).toLocaleDateString("en-GB")}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="bg-white rounded-lg border border-gray-200">
+          <div className="px-4 py-3 border-b border-gray-200">
+            <h2 className="text-sm font-bold text-blue-900">Today&apos;s Follow-ups ({today.length})</h2>
+          </div>
+          {today.length === 0 ? (
+            <p className="px-4 py-4 text-sm text-gray-400">Nothing due today.</p>
+          ) : (
+            <ul className="divide-y divide-gray-100">
+              {today.map((t) => (
+                <li key={t.id}>
+                  <Link
+                    href={`/admin/crm/leads/${t.lead.id}`}
+                    className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-blue-900 truncate">{t.lead.name}</p>
+                      <p className="text-xs text-gray-500 truncate">{t.description}</p>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200">

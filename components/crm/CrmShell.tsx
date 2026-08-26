@@ -5,11 +5,15 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useState } from "react";
+import SearchBar from "./SearchBar";
 
 const navLinks = [
   { href: "/admin/crm", label: "Dashboard" },
   { href: "/admin/crm/leads", label: "Leads" },
   { href: "/admin/crm/leads/new", label: "Add Lead" },
+  { href: "/admin/crm/jobs-by-area", label: "Jobs by Area" },
+  { href: "/admin/crm/map", label: "Map" },
+  { href: "/admin/crm/tags", label: "Tags" },
   { href: "/admin/crm/import", label: "Import" },
 ];
 
@@ -22,6 +26,11 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
   if (pathname === "/admin/crm/login") {
     return <>{children}</>;
   }
+
+  // While a password change is forced, hide the rest of the nav so the
+  // only way forward is the change-password page middleware already
+  // redirects everything else back to.
+  const forcedChange = session?.user?.mustChangePassword === true;
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
@@ -40,34 +49,45 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
                 CRM
               </span>
             </Link>
-            <nav className="hidden md:flex items-center gap-1 ml-4">
-              {navLinks.map((link) => {
-                const active =
-                  link.href === "/admin/crm"
-                    ? pathname === "/admin/crm"
-                    : pathname.startsWith(link.href);
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
-                      active
-                        ? "bg-blue-800 text-yellow-400"
-                        : "text-blue-100 hover:bg-blue-800/60"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
-            </nav>
+            {!forcedChange && (
+              <nav className="hidden md:flex items-center gap-1 ml-4">
+                {navLinks.map((link) => {
+                  const active =
+                    link.href === "/admin/crm"
+                      ? pathname === "/admin/crm"
+                      : pathname.startsWith(link.href);
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
+                        active
+                          ? "bg-blue-800 text-yellow-400"
+                          : "text-blue-100 hover:bg-blue-800/60"
+                      }`}
+                    >
+                      {link.label}
+                    </Link>
+                  );
+                })}
+              </nav>
+            )}
           </div>
 
           <div className="flex items-center gap-3">
+            {!forcedChange && <div className="hidden lg:block"><SearchBar /></div>}
             {session?.user && (
               <span className="hidden sm:inline text-xs text-blue-200 truncate max-w-[160px]">
                 {session.user.name}
               </span>
+            )}
+            {!forcedChange && (
+              <Link
+                href="/admin/crm/change-password"
+                className="hidden md:inline-block text-xs text-blue-100 hover:text-yellow-400 px-2"
+              >
+                Account Settings
+              </Link>
             )}
             <button
               type="button"
@@ -99,16 +119,31 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
 
         {menuOpen && (
           <nav className="md:hidden border-t border-blue-800 bg-blue-900 px-4 py-2">
-            {navLinks.map((link) => (
+            {!forcedChange && (
+              <div className="py-2">
+                <SearchBar />
+              </div>
+            )}
+            {!forcedChange &&
+              navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="block px-2 py-2.5 text-sm text-blue-100 hover:text-yellow-400"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            {!forcedChange && (
               <Link
-                key={link.href}
-                href={link.href}
+                href="/admin/crm/change-password"
                 onClick={() => setMenuOpen(false)}
                 className="block px-2 py-2.5 text-sm text-blue-100 hover:text-yellow-400"
               >
-                {link.label}
+                Account Settings
               </Link>
-            ))}
+            )}
             <button
               type="button"
               onClick={() => signOut({ callbackUrl: "/admin/crm/login" })}
