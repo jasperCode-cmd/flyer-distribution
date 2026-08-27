@@ -12,6 +12,14 @@ function formatCurrency(n: number) {
   return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(n);
 }
 
+// The Google Maps import set businessName to the same company name as name on
+// every row it created, so both layouts would otherwise repeat identical text.
+// Shared so the match rule stays identical between table and cards.
+function businessMatchesName(lead: KanbanLead): boolean {
+  const business = lead.businessName?.trim() ?? "";
+  return business !== "" && business === lead.name.trim();
+}
+
 export default function LeadTable({
   leads,
   assignees,
@@ -224,9 +232,14 @@ export default function LeadTable({
                     {lead.dealValue ? formatCurrency(Number(lead.dealValue)) : "—"}
                   </span>
                 </div>
-                {lead.businessName && (
-                  <p className="text-[11px] text-gray-500 truncate mt-0.5">{lead.businessName}</p>
-                )}
+                {lead.businessName &&
+                  (businessMatchesName(lead) ? (
+                    <p className="text-[11px] italic text-gray-400 truncate mt-0.5">
+                      same as name
+                    </p>
+                  ) : (
+                    <p className="text-[11px] text-gray-500 truncate mt-0.5">{lead.businessName}</p>
+                  ))}
                 <dl className="grid grid-cols-2 gap-x-3 gap-y-0.5 mt-1.5 text-[11px]">
                   <div className="flex gap-1 min-w-0">
                     <dt className="text-gray-400 shrink-0">Stage</dt>
@@ -294,12 +307,10 @@ export default function LeadTable({
           </thead>
           <tbody className="divide-y divide-gray-100">
             {sorted.map((lead) => {
-              // The Google Maps import set businessName to the same company
-              // name as name on every row it created, so for most leads these
-              // two columns held identical text at full weight. Show a muted
-              // marker instead — distinct from "—", which means no business.
+              // Muted marker when the two match — kept distinct from "—",
+              // which means no business recorded at all.
               const business = lead.businessName?.trim() ?? "";
-              const sameAsName = business !== "" && business === lead.name.trim();
+              const sameAsName = businessMatchesName(lead);
 
               return (
               <tr key={lead.id} className={lead.atRisk ? "bg-red-50/40" : ""}>
