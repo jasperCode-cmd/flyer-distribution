@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   DndContext,
   MouseSensor,
@@ -57,14 +57,17 @@ function Column({
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col w-72 sm:w-80 shrink-0 rounded-lg border transition-colors ${
+      // Mobile: one stage fills the viewport and snaps, so a swipe lands
+      // cleanly on the next stage instead of half-way between two.
+      // Desktop keeps the original fixed 320px columns.
+      className={`flex flex-col w-[calc(100vw-2.5rem)] sm:w-80 shrink-0 snap-center sm:snap-align-none rounded-lg border transition-colors ${
         isOver ? "bg-blue-50 border-blue-300" : "bg-gray-50 border-gray-200"
       }`}
     >
-      <div className="px-3 py-2.5 border-b border-gray-200">
+      <div className="px-2.5 sm:px-3 py-2 sm:py-2.5 border-b border-gray-200">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-blue-900">{STAGE_LABELS[stage]}</h3>
-          <span className="text-xs text-gray-500">{leads.length}</span>
+          <h3 className="text-[13px] sm:text-sm font-bold text-blue-900">{STAGE_LABELS[stage]}</h3>
+          <span className="text-[11px] sm:text-xs text-gray-500">{leads.length}</span>
         </div>
         {totalValue > 0 && (
           <p className="text-[11px] text-gray-500 mt-0.5">
@@ -74,7 +77,7 @@ function Column({
           </p>
         )}
       </div>
-      <div className="flex-1 p-2 space-y-2 min-h-[120px] max-h-[calc(100vh-220px)] overflow-y-auto">
+      <div className="flex-1 p-1.5 sm:p-2 space-y-1.5 sm:space-y-2 min-h-[120px] max-h-[calc(100vh-260px)] sm:max-h-[calc(100vh-220px)] overflow-y-auto">
         {leads.map((lead) => (
           <DraggableCard key={lead.id} lead={lead} />
         ))}
@@ -90,6 +93,28 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
   const [leads, setLeads] = useState(initialLeads);
   const [pending, setPending] = useState(false);
   const [lostPrompt, setLostPrompt] = useState<{ leadId: string; previousStage: string } | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeStage, setActiveStage] = useState(0);
+
+  // Column width is viewport-derived on mobile, so the step is measured from
+  // the rendered column rather than assumed. 12px is the gap-3 between them.
+  function stageStep(el: HTMLDivElement): number {
+    const first = el.firstElementChild as HTMLElement | null;
+    return first ? first.offsetWidth + 12 : 0;
+  }
+
+  function handleScroll() {
+    const el = scrollRef.current;
+    if (!el) return;
+    const step = stageStep(el);
+    if (step > 0) setActiveStage(Math.round(el.scrollLeft / step));
+  }
+
+  function jumpToStage(index: number) {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ left: index * stageStep(el), behavior: "smooth" });
+  }
 
   // Split deliberately: one PointerSensor would apply the same constraint to
   // both input types. Mouse keeps the original 8px threshold, unchanged.
@@ -146,7 +171,38 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-      <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
+      {/* Mobile-only stage pills: show which stage is in view and jump
+          between them, since only one column fits a phone screen. */}
+      <div className="sm:hidden flex gap-1.5 overflow-x-auto pb-2 -mx-1 px-1">
+        {STAGES.map((stage, i) => {
+          const count = leads.filter((l) => l.stage === stage).length;
+          const active = activeStage === i;
+          return (
+            <button
+              key={stage}
+              type="button"
+              onClick={() => jumpToStage(i)}
+              aria-current={active ? "true" : undefined}
+              className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                active
+                  ? "bg-blue-700 text-white"
+                  : "bg-white border border-gray-300 text-gray-700"
+              }`}
+            >
+              {STAGE_LABELS[stage]}
+              <span className={`ml-1.5 ${active ? "text-blue-200" : "text-gray-400"}`}>
+                {count}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory sm:snap-none"
+      >
         {STAGES.map((stage) => (
           <Column key={stage} stage={stage} leads={leads.filter((l) => l.stage === stage)} />
         ))}

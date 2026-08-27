@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
@@ -10,6 +10,16 @@ const inter = Inter({
   variable: "--font-inter",
   display: "swap",
 });
+
+// Declared explicitly rather than relying on the framework default, so the
+// zoom guarantee is visible in code: no maximumScale and no
+// userScalable:false — pinch-to-zoom must always stay available as an
+// accessibility fallback, whatever the responsive layout does.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  userScalable: true,
+};
 
 export const metadata: Metadata = {
   title: {

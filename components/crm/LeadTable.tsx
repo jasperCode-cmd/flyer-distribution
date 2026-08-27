@@ -154,7 +154,110 @@ export default function LeadTable({
         </div>
       )}
 
-      <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
+      {/* Mobile: each row becomes a stacked card. The table's sortable
+          headers and select-all live in <thead>, which is hidden here, so
+          both are re-exposed in this toolbar. */}
+      <div className="sm:hidden mb-2 flex items-center gap-2">
+        <label className="flex items-center gap-1.5 text-xs text-gray-600">
+          <input
+            type="checkbox"
+            checked={sorted.length > 0 && selected.size === sorted.length}
+            onChange={toggleSelectAll}
+            className="h-3.5 w-3.5"
+          />
+          Select all
+        </label>
+        <select
+          value={`${sortKey}:${sortDir}`}
+          onChange={(e) => {
+            const [k, d] = e.target.value.split(":");
+            setSortKey(k as SortKey);
+            setSortDir(d as "asc" | "desc");
+          }}
+          className="ml-auto border border-gray-300 rounded-md px-2 py-1.5 text-xs bg-white"
+        >
+          <option value="createdAt:desc">Newest first</option>
+          <option value="createdAt:asc">Oldest first</option>
+          <option value="name:asc">Name A–Z</option>
+          <option value="name:desc">Name Z–A</option>
+          <option value="dealValue:desc">Value high–low</option>
+          <option value="dealValue:asc">Value low–high</option>
+          <option value="stage:asc">Stage</option>
+        </select>
+      </div>
+
+      <div className="sm:hidden space-y-2">
+        {sorted.map((lead) => (
+          <div
+            key={lead.id}
+            className={`bg-white rounded-lg border p-3 shadow-sm transition-shadow hover:shadow-md ${
+              lead.atRisk
+                ? "border-l-4 border-l-red-500 border-y-gray-200 border-r-gray-200"
+                : "border-gray-200"
+            }`}
+          >
+            <div className="flex items-start gap-2.5">
+              <input
+                type="checkbox"
+                checked={selected.has(lead.id)}
+                onChange={() => toggleSelected(lead.id)}
+                className="h-3.5 w-3.5 mt-1 shrink-0"
+              />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-2">
+                  <Link
+                    href={`/admin/crm/leads/${lead.id}`}
+                    className="text-[13px] font-semibold text-blue-900 hover:underline truncate"
+                  >
+                    {lead.atRisk && <span className="text-red-500 mr-1">⚑</span>}
+                    {lead.name}
+                  </Link>
+                  <span className="text-[11px] font-medium text-gray-700 shrink-0">
+                    {lead.dealValue ? formatCurrency(Number(lead.dealValue)) : "—"}
+                  </span>
+                </div>
+                {lead.businessName && (
+                  <p className="text-[11px] text-gray-500 truncate mt-0.5">{lead.businessName}</p>
+                )}
+                <dl className="grid grid-cols-2 gap-x-3 gap-y-0.5 mt-1.5 text-[11px]">
+                  <div className="flex gap-1 min-w-0">
+                    <dt className="text-gray-400 shrink-0">Stage</dt>
+                    <dd className="text-gray-700 truncate">{STAGE_LABELS[lead.stage]}</dd>
+                  </div>
+                  <div className="flex gap-1 min-w-0">
+                    <dt className="text-gray-400 shrink-0">Priority</dt>
+                    <dd className="text-gray-700 truncate">
+                      {PRIORITY_LABELS[lead.priority] ?? lead.priority}
+                    </dd>
+                  </div>
+                  <div className="flex gap-1 min-w-0">
+                    <dt className="text-gray-400 shrink-0">Source</dt>
+                    <dd className="text-gray-700 truncate">{SOURCE_LABELS[lead.source] ?? "—"}</dd>
+                  </div>
+                  <div className="flex gap-1 min-w-0">
+                    <dt className="text-gray-400 shrink-0">Assigned</dt>
+                    <dd className="text-gray-700 truncate">{lead.assignedTo?.name ?? "—"}</dd>
+                  </div>
+                  <div className="flex gap-1 min-w-0 col-span-2">
+                    <dt className="text-gray-400 shrink-0">Created</dt>
+                    <dd className="text-gray-500 truncate">
+                      {new Date(lead.createdAt).toLocaleDateString("en-GB")}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            </div>
+          </div>
+        ))}
+        {sorted.length === 0 && (
+          <div className="bg-white rounded-lg border border-gray-200 px-3 py-8 text-center text-sm text-gray-400">
+            No leads match these filters.
+          </div>
+        )}
+      </div>
+
+      {/* Desktop: the original table, unchanged. */}
+      <div className="hidden sm:block bg-white rounded-lg border border-gray-200 overflow-x-auto">
         <table className="w-full min-w-[720px]">
           <thead className="border-b border-gray-200">
             <tr>

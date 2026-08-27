@@ -30,7 +30,7 @@ export default function LeadCard({ lead }: { lead: KanbanLead }) {
   return (
     <Link
       href={`/admin/crm/leads/${lead.id}`}
-      className={`block bg-white rounded-md border p-3 shadow-sm hover:shadow-md transition-shadow ${
+      className={`block bg-white rounded-md border p-2 sm:p-3 shadow-sm hover:shadow-md transition-shadow ${
         lead.atRisk ? "border-l-4 border-l-red-500 border-y-gray-200 border-r-gray-200" : "border-gray-200"
       }`}
     >
@@ -40,7 +40,7 @@ export default function LeadCard({ lead }: { lead: KanbanLead }) {
             title={`${PRIORITY_LABELS[lead.priority] ?? lead.priority} priority`}
             className={`shrink-0 w-2 h-2 rounded-full ${PRIORITY_DOT_COLOR[lead.priority] ?? "bg-gray-300"}`}
           />
-          <p className="text-sm font-semibold text-blue-900 truncate">{lead.name}</p>
+          <p className="text-[13px] sm:text-sm font-semibold text-blue-900 truncate">{lead.name}</p>
         </div>
         {lead.atRisk && (
           <span
@@ -53,7 +53,7 @@ export default function LeadCard({ lead }: { lead: KanbanLead }) {
         )}
       </div>
       {lead.businessName && (
-        <p className="text-xs text-gray-500 truncate mt-0.5">{lead.businessName}</p>
+        <p className="text-[11px] sm:text-xs text-gray-500 truncate mt-0.5">{lead.businessName}</p>
       )}
       {lead.tags && lead.tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-1.5">
@@ -68,8 +68,8 @@ export default function LeadCard({ lead }: { lead: KanbanLead }) {
           ))}
         </div>
       )}
-      <div className="flex items-center justify-between mt-2">
-        <span className="text-xs font-medium text-gray-700">
+      <div className="flex items-center justify-between mt-1.5 sm:mt-2">
+        <span className="text-[11px] sm:text-xs font-medium text-gray-700">
           {lead.dealValue ? formatCurrency(Number(lead.dealValue)) : "—"}
         </span>
         {lead.assignedTo && (
