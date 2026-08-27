@@ -27,6 +27,7 @@ model User {
   assignedLeads    Lead[]            @relation("AssignedLeads")
   activities       Activity[]
   savedFilterViews SavedFilterView[]
+  calendarEvents   CalendarEvent[]
 }
 
 enum LeadSource {
@@ -82,7 +83,7 @@ model Lead {
   stage    PipelineStage @default(UNCONTACTED)
   priority LeadPriority  @default(MEDIUM)
   // Usable within "Awaiting Response" for a stalled/hesitant lead.
-  atRisk Boolean @default(false)
+  atRisk   Boolean       @default(false)
 
   // Prompted for when a lead is moved to the Lost stage. lostReasonNote
   // carries the free text when lostReason is OTHER.
@@ -95,10 +96,11 @@ model Lead {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  activities Activity[]
-  job        Job?
-  tasks      Task[]
-  tags       LeadTag[]
+  activities     Activity[]
+  job            Job?
+  tasks          Task[]
+  tags           LeadTag[]
+  calendarEvents CalendarEvent[]
 
   @@index([stage])
   @@index([assignedToId])
@@ -195,11 +197,16 @@ model Job {
   leadId String @unique
   lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
-  printStatus  WorkStatus @default(NOT_STARTED)
-  designStatus WorkStatus @default(NOT_STARTED)
+  printStatus     WorkStatus   @default(NOT_STARTED)
+  designStatus    WorkStatus   @default(NOT_STARTED)
   // Plain text for now; structured so a real Distributor table could
   // reference it later without reshaping this field.
   distributorName String?
+  // Structured link to a real Distributor. Deliberately kept alongside
+  // distributorName rather than replacing it — existing free-text values
+  // are NOT auto-matched to Distributor rows; that stays a manual step.
+  distributorId   String?
+  distributor     Distributor? @relation(fields: [distributorId], references: [id], onDelete: SetNull)
 
   campaignStartDate DateTime?
   completionDate    DateTime?
@@ -218,4 +225,75 @@ model Job {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  calendarEvents CalendarEvent[]
+
+  @@index([distributorId])
+}
+
+// A person or subcontractor who delivers leaflets. Deactivated via the
+// active flag rather than deleted, so past Jobs and CalendarEvents keep
+// pointing at a real row.
+model Distributor {
+  id     String  @id @default(cuid())
+  name   String
+  phone  String?
+  email  String?
+  notes  String?
+  active Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  jobs           Job[]
+  calendarEvents CalendarEvent[]
+
+  @@index([active])
+}
+
+enum CalendarEventType {
+  CALL
+  COLD_CALL_BLOCK
+  DISTRIBUTOR_SHIFT
+  GENERAL
+}
+
+// Manually created calendar entries. Job dates and Task due dates are
+// surfaced on the calendar too, but are read from their own models at
+// query time rather than duplicated as rows here.
+model CalendarEvent {
+  id            String            @id @default(cuid())
+  type          CalendarEventType
+  title         String
+  startDateTime DateTime
+  // Null for a point-in-time entry; set for a multi-hour or multi-day one.
+  endDateTime   DateTime?
+  notes         String?
+  completed     Boolean           @default(false)
+
+  // All four links are optional and set null on delete, so removing a
+  // lead, job, user, or distributor never silently deletes a calendar
+  // entry someone scheduled.
+  linkedLeadId String?
+  linkedLead   Lead?   @relation(fields: [linkedLeadId], references: [id], onDelete: SetNull)
+
+  linkedJobId String?
+  linkedJob   Job?    @relation(fields: [linkedJobId], references: [id], onDelete: SetNull)
+
+  assignedToUserId String?
+  assignedToUser   User?   @relation(fields: [assignedToUserId], references: [id], onDelete: SetNull)
+
+  // Only meaningful for DISTRIBUTOR_SHIFT entries.
+  distributorId String?
+  distributor   Distributor? @relation(fields: [distributorId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startDateTime])
+  @@index([type])
+  @@index([assignedToUserId])
+  @@index([distributorId])
+  @@index([linkedLeadId])
+  @@index([linkedJobId])
 }

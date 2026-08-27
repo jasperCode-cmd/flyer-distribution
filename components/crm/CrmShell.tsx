@@ -12,6 +12,8 @@ const navLinks = [
   { href: "/admin/crm/leads", label: "Leads" },
   { href: "/admin/crm/leads/new", label: "Add Lead" },
   { href: "/admin/crm/jobs-by-area", label: "Jobs by Area" },
+  { href: "/admin/crm/calendar", label: "Calendar" },
+  { href: "/admin/crm/distributors", label: "Distributors" },
   { href: "/admin/crm/map", label: "Map" },
   { href: "/admin/crm/tags", label: "Tags" },
   { href: "/admin/crm/import", label: "Import" },
