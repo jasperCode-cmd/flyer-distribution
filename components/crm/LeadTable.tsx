@@ -90,12 +90,20 @@ export default function LeadTable({
     router.refresh();
   }
 
-  const Th = ({ sortableKey, children }: { sortableKey?: SortKey; children: React.ReactNode }) => (
+  const Th = ({
+    sortableKey,
+    width,
+    children,
+  }: {
+    sortableKey?: SortKey;
+    width?: string;
+    children: React.ReactNode;
+  }) => (
     <th
       onClick={sortableKey ? () => toggleSort(sortableKey) : undefined}
       className={`text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap ${
-        sortableKey ? "cursor-pointer select-none hover:text-blue-700" : ""
-      }`}
+        width ?? ""
+      } ${sortableKey ? "cursor-pointer select-none hover:text-blue-700" : ""}`}
     >
       {children}
       {sortableKey && sortKey === sortableKey && (sortDir === "asc" ? " ↑" : " ↓")}
@@ -258,7 +266,11 @@ export default function LeadTable({
 
       {/* Desktop: the original table, unchanged. */}
       <div className="hidden sm:block bg-white rounded-lg border border-gray-200 overflow-x-auto">
-        <table className="w-full min-w-[720px]">
+        {/* table-fixed: with auto layout every column stretched to its longest
+            value, and the imported company names pushed the later columns off
+            screen. Fixed layout honours the widths below and lets long values
+            ellipsis instead. */}
+        <table className="w-full table-fixed min-w-[780px]">
           <thead className="border-b border-gray-200">
             <tr>
               <th className="px-3 py-2 w-8">
@@ -269,19 +281,27 @@ export default function LeadTable({
                   className="h-3.5 w-3.5"
                 />
               </th>
-              <Th sortableKey="name">Name</Th>
-              <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Business</th>
-              <Th sortableKey="stage">Stage</Th>
-              <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Priority</th>
-              <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Source</th>
-              <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Assigned</th>
-              <Th sortableKey="dealValue">Value</Th>
-              <Th sortableKey="createdAt">Created</Th>
-              <th className="px-3 py-2" />
+              <Th sortableKey="name" width="w-[19%]">Name</Th>
+              <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide w-[16%]">Business</th>
+              <Th sortableKey="stage" width="w-[12%]">Stage</Th>
+              <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide w-[9%]">Priority</th>
+              <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide w-[12%]">Source</th>
+              <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide w-[11%]">Assigned</th>
+              <Th sortableKey="dealValue" width="w-[7%]">Value</Th>
+              <Th sortableKey="createdAt" width="w-[8%]">Created</Th>
+              <th className="px-3 py-2 w-[6%]" />
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {sorted.map((lead) => (
+            {sorted.map((lead) => {
+              // The Google Maps import set businessName to the same company
+              // name as name on every row it created, so for most leads these
+              // two columns held identical text at full weight. Show a muted
+              // marker instead — distinct from "—", which means no business.
+              const business = lead.businessName?.trim() ?? "";
+              const sameAsName = business !== "" && business === lead.name.trim();
+
+              return (
               <tr key={lead.id} className={lead.atRisk ? "bg-red-50/40" : ""}>
                 <td className="px-3 py-2.5">
                   <input
@@ -291,19 +311,31 @@ export default function LeadTable({
                     className="h-3.5 w-3.5"
                   />
                 </td>
-                <td className="px-3 py-2.5 text-sm font-medium text-blue-900 whitespace-nowrap">
+                <td className="px-3 py-2.5 text-sm font-medium text-blue-900 truncate" title={lead.name}>
                   {lead.atRisk && <span className="text-red-500 mr-1">⚑</span>}
                   {lead.name}
                 </td>
-                <td className="px-3 py-2.5 text-sm text-gray-600 whitespace-nowrap">{lead.businessName ?? "—"}</td>
-                <td className="px-3 py-2.5 text-sm text-gray-600 whitespace-nowrap">{STAGE_LABELS[lead.stage]}</td>
-                <td className="px-3 py-2.5 text-sm text-gray-600 whitespace-nowrap">
+                <td className="px-3 py-2.5 text-sm text-gray-600 truncate">
+                  {business === "" ? (
+                    "—"
+                  ) : sameAsName ? (
+                    <span className="text-xs italic text-gray-400" title={business}>
+                      same as name
+                    </span>
+                  ) : (
+                    <span title={business}>{business}</span>
+                  )}
+                </td>
+                <td className="px-3 py-2.5 text-sm text-gray-600 truncate">{STAGE_LABELS[lead.stage]}</td>
+                <td className="px-3 py-2.5 text-sm text-gray-600 truncate">
                   {PRIORITY_LABELS[lead.priority] ?? lead.priority}
                 </td>
-                <td className="px-3 py-2.5 text-sm text-gray-600 whitespace-nowrap">
+                <td className="px-3 py-2.5 text-sm text-gray-600 truncate" title={SOURCE_LABELS[lead.source] ?? ""}>
                   {SOURCE_LABELS[lead.source] ?? "—"}
                 </td>
-                <td className="px-3 py-2.5 text-sm text-gray-600 whitespace-nowrap">{lead.assignedTo?.name ?? "—"}</td>
+                <td className="px-3 py-2.5 text-sm text-gray-600 truncate" title={lead.assignedTo?.name ?? ""}>
+                  {lead.assignedTo?.name ?? "—"}
+                </td>
                 <td className="px-3 py-2.5 text-sm text-gray-600 whitespace-nowrap">
                   {lead.dealValue ? formatCurrency(Number(lead.dealValue)) : "—"}
                 </td>
@@ -316,7 +348,8 @@ export default function LeadTable({
                   </Link>
                 </td>
               </tr>
-            ))}
+              );
+            })}
             {sorted.length === 0 && (
               <tr>
                 <td colSpan={10} className="px-3 py-8 text-center text-sm text-gray-400">
