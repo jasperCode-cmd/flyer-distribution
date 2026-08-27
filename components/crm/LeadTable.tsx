@@ -33,6 +33,7 @@ export default function LeadTable({
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkStage, setBulkStage] = useState("");
   const [bulkAssignee, setBulkAssignee] = useState("");
+  const [bulkSource, setBulkSource] = useState("");
   const [applying, setApplying] = useState(false);
 
   const sorted = useMemo(() => {
@@ -57,6 +58,18 @@ export default function LeadTable({
     }
   }
 
+  // The selection is scoped to the rows currently on screen. `leads` is
+  // already the filtered set, but the raw `selected` state survives a filter
+  // change — so a lead selected under one filter could otherwise still be
+  // caught by a bulk action taken under another, with no row visible to show
+  // it. Intersecting with the visible ids makes what you see what you change.
+  const visibleIds = useMemo(() => new Set(sorted.map((l) => l.id)), [sorted]);
+  const activeSelection = useMemo(
+    () => Array.from(selected).filter((id) => visibleIds.has(id)),
+    [selected, visibleIds]
+  );
+  const selectedCount = activeSelection.length;
+
   function toggleSelected(id: string) {
     setSelected((prev) => {
       const next = new Set(prev);
@@ -66,36 +79,44 @@ export default function LeadTable({
     });
   }
 
+  // Selects exactly the rows on screen — i.e. the current filtered set —
+  // never the whole table.
   function toggleSelectAll() {
-    setSelected((prev) => (prev.size === sorted.length ? new Set() : new Set(sorted.map((l) => l.id))));
+    setSelected(
+      selectedCount === sorted.length ? new Set() : new Set(sorted.map((l) => l.id))
+    );
+  }
+
+  async function applyBulk(body: Record<string, unknown>, reset: () => void) {
+    if (selectedCount === 0) return;
+    setApplying(true);
+    await fetch("/api/crm/leads/bulk", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: activeSelection, ...body }),
+    });
+    setApplying(false);
+    reset();
+    setSelected(new Set());
+    router.refresh();
   }
 
   async function applyBulkStage() {
-    if (!bulkStage || selected.size === 0) return;
-    setApplying(true);
-    await fetch("/api/crm/leads/bulk", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids: Array.from(selected), stage: bulkStage }),
-    });
-    setApplying(false);
-    setBulkStage("");
-    setSelected(new Set());
-    router.refresh();
+    if (!bulkStage) return;
+    await applyBulk({ stage: bulkStage }, () => setBulkStage(""));
   }
 
   async function applyBulkAssignee() {
-    if (bulkAssignee === "" || selected.size === 0) return;
-    setApplying(true);
-    await fetch("/api/crm/leads/bulk", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids: Array.from(selected), assignedToId: bulkAssignee === "unassigned" ? null : bulkAssignee }),
-    });
-    setApplying(false);
-    setBulkAssignee("");
-    setSelected(new Set());
-    router.refresh();
+    if (bulkAssignee === "") return;
+    await applyBulk(
+      { assignedToId: bulkAssignee === "unassigned" ? null : bulkAssignee },
+      () => setBulkAssignee("")
+    );
+  }
+
+  async function applyBulkSource() {
+    if (!bulkSource) return;
+    await applyBulk({ source: bulkSource }, () => setBulkSource(""));
   }
 
   const Th = ({
@@ -120,9 +141,9 @@ export default function LeadTable({
 
   return (
     <div>
-      {selected.size > 0 && (
+      {selectedCount > 0 && (
         <div className="flex flex-wrap items-center gap-2 mb-3 bg-blue-50 border border-blue-200 rounded-md px-3 py-2">
-          <span className="text-xs font-semibold text-blue-800">{selected.size} selected</span>
+          <span className="text-xs font-semibold text-blue-800">{selectedCount} selected</span>
           <select
             value={bulkStage}
             onChange={(e) => setBulkStage(e.target.value)}
@@ -160,6 +181,24 @@ export default function LeadTable({
           >
             Apply
           </button>
+          <select
+            value={bulkSource}
+            onChange={(e) => setBulkSource(e.target.value)}
+            className="border border-gray-300 rounded-md px-2 py-1.5 text-xs bg-white"
+          >
+            <option value="">Change source to...</option>
+            {Object.entries(SOURCE_LABELS).map(([k, v]) => (
+              <option key={k} value={k}>{v}</option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={applyBulkSource}
+            disabled={!bulkSource || applying}
+            className="bg-blue-700 hover:bg-blue-800 disabled:opacity-50 text-white text-xs font-bold px-3 py-1.5 rounded-md"
+          >
+            Apply
+          </button>
           <button
             type="button"
             onClick={() => setSelected(new Set())}
@@ -177,7 +216,7 @@ export default function LeadTable({
         <label className="flex items-center gap-1.5 text-xs text-gray-600">
           <input
             type="checkbox"
-            checked={sorted.length > 0 && selected.size === sorted.length}
+            checked={sorted.length > 0 && selectedCount === sorted.length}
             onChange={toggleSelectAll}
             className="h-3.5 w-3.5"
           />
@@ -289,7 +328,7 @@ export default function LeadTable({
               <th className="px-3 py-2 w-8">
                 <input
                   type="checkbox"
-                  checked={sorted.length > 0 && selected.size === sorted.length}
+                  checked={sorted.length > 0 && selectedCount === sorted.length}
                   onChange={toggleSelectAll}
                   className="h-3.5 w-3.5"
                 />
