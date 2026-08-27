@@ -70,6 +70,7 @@ export const SOURCE_LABELS: Record<string, string> = {
   INSTAGRAM_DM: "Instagram DM",
   REFERRAL: "Referral",
   COLD_OUTREACH: "Cold Outreach",
+  MET_IN_PERSON: "Met In Person",
   OTHER: "Other",
 };
 

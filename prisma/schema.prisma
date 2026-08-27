@@ -35,6 +35,9 @@ enum LeadSource {
   INSTAGRAM_DM
   REFERRAL
   COLD_OUTREACH
+  // Gathered face-to-face — canvassing, events, trade shows. Distinct from
+  // a scraped cold-outreach list and from a referral.
+  MET_IN_PERSON
   OTHER
 }
 
