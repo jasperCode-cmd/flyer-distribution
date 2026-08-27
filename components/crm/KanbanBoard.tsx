@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   DndContext,
   MouseSensor,
@@ -36,7 +36,13 @@ function DraggableCard({ lead }: { lead: KanbanLead }) {
       // touch-action must permit panning while idle, or a swipe starting on a
       // card can't scroll the column strip at all. Suppressed only once a
       // drag is actually active.
-      className={isDragging ? "touch-none opacity-50" : "touch-auto"}
+      //
+      // select-none and the iOS touch-callout reset stop a long press on the
+      // card (which is an <a>) from raising the text-selection handles or the
+      // link preview sheet, both of which fight the drag gesture.
+      className={`select-none [-webkit-touch-callout:none] ${
+        isDragging ? "touch-none opacity-50" : "touch-auto"
+      }`}
     >
       <LeadCard lead={lead} />
     </div>
@@ -96,6 +102,47 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeStage, setActiveStage] = useState(0);
 
+  // Every card is a <Link>, so after a touch drag ends the browser still
+  // synthesises a click on the anchor under the finger and navigates — which
+  // is why a long-press was opening the lead instead of picking the card up.
+  // dnd-kit does not suppress that click itself. Latch on drag activation and
+  // swallow the single click that follows; a tap that never reaches the 250ms
+  // threshold never starts a drag, so it never sets the latch and navigates
+  // exactly as before.
+  const suppressClickRef = useRef(false);
+  const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+    };
+  }, []);
+
+  function handleDragStart() {
+    suppressClickRef.current = true;
+    if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+  }
+
+  // Failsafe: if no click materialises (a drag that moved far enough for the
+  // browser to suppress the click on its own), drop the latch so it can never
+  // swallow a later, genuine tap.
+  function armLatchRelease() {
+    if (clearTimerRef.current) clearTimeout(clearTimerRef.current);
+    clearTimerRef.current = setTimeout(() => {
+      suppressClickRef.current = false;
+    }, 400);
+  }
+
+  // Capture phase on the board: runs before the anchor's own handler, so
+  // stopPropagation keeps Next's Link onClick from firing and preventDefault
+  // cancels the native href navigation. Both are needed.
+  function handleBoardClickCapture(e: React.MouseEvent) {
+    if (!suppressClickRef.current) return;
+    e.preventDefault();
+    e.stopPropagation();
+    suppressClickRef.current = false;
+  }
+
   // Column width is viewport-derived on mobile, so the step is measured from
   // the rendered column rather than assumed. 12px is the gap-3 between them.
   function stageStep(el: HTMLDivElement): number {
@@ -151,6 +198,9 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
   }
 
   function handleDragEnd(event: DragEndEvent) {
+    // Arm the failsafe on every drag end, including the early returns below.
+    armLatchRelease();
+
     const { active, over } = event;
     if (!over) return;
 
@@ -170,7 +220,7 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
   }
 
   return (
-    <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       {/* Mobile-only stage pills: show which stage is in view and jump
           between them, since only one column fits a phone screen. */}
       <div className="sm:hidden flex gap-1.5 overflow-x-auto pb-2 -mx-1 px-1">
@@ -201,6 +251,7 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
       <div
         ref={scrollRef}
         onScroll={handleScroll}
+        onClickCapture={handleBoardClickCapture}
         className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory sm:snap-none"
       >
         {STAGES.map((stage) => (
