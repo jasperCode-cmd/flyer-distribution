@@ -3,7 +3,8 @@
 import { useState } from "react";
 import {
   DndContext,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   useDraggable,
@@ -32,7 +33,10 @@ function DraggableCard({ lead }: { lead: KanbanLead }) {
       style={style}
       {...listeners}
       {...attributes}
-      className={`touch-none ${isDragging ? "opacity-50" : ""}`}
+      // touch-action must permit panning while idle, or a swipe starting on a
+      // card can't scroll the column strip at all. Suppressed only once a
+      // drag is actually active.
+      className={isDragging ? "touch-none opacity-50" : "touch-auto"}
     >
       <LeadCard lead={lead} />
     </div>
@@ -87,8 +91,14 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
   const [pending, setPending] = useState(false);
   const [lostPrompt, setLostPrompt] = useState<{ leadId: string; previousStage: string } | null>(null);
 
+  // Split deliberately: one PointerSensor would apply the same constraint to
+  // both input types. Mouse keeps the original 8px threshold, unchanged.
+  // Touch instead requires a stationary long-press, so a swipe across the
+  // column strip scrolls rather than picking a card up — moving more than
+  // `tolerance` before `delay` elapses cancels the activation.
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } })
   );
 
   async function commitStageChange(
