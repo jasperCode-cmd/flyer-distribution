@@ -12,7 +12,10 @@ export default async function LeadsPage() {
 
   const serializable = leads.map((l) => ({
     ...flattenTags(l),
+    // Decimal columns can't cross into a Client Component as-is; both go over
+    // as strings and are parsed back where they're displayed.
     dealValue: l.dealValue ? l.dealValue.toString() : null,
+    amountPaid: l.amountPaid ? l.amountPaid.toString() : null,
   }));
 
   return <LeadsView leads={serializable} users={users} />;

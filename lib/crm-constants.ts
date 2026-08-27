@@ -82,6 +82,38 @@ export const PRIORITY_LABELS: Record<string, string> = {
   LOW: "Low",
 };
 
+// Both of these only carry meaning once a lead is Won, but every lead holds a
+// default, so nothing needs to special-case a non-Won lead.
+export const REVIEW_STATUSES = ["NOT_REQUESTED", "REQUESTED", "RECEIVED"] as const;
+
+export const REVIEW_STATUS_LABELS: Record<string, string> = {
+  NOT_REQUESTED: "Not Requested",
+  REQUESTED: "Requested",
+  RECEIVED: "Received",
+};
+
+export const PAYMENT_STATUSES = [
+  "NOT_PAID",
+  "DEPOSIT_PAID",
+  "PARTIAL_PAID",
+  "PAID_IN_FULL",
+] as const;
+
+export const PAYMENT_STATUS_LABELS: Record<string, string> = {
+  NOT_PAID: "Not Paid",
+  DEPOSIT_PAID: "Deposit Paid",
+  PARTIAL_PAID: "Partial",
+  PAID_IN_FULL: "Paid in Full",
+};
+
+// The share of dealValue to pre-fill when a status is picked. Partial is
+// absent deliberately — there is no sensible default for it, so the user
+// types the figure. Null deal value means no auto-fill for any status.
+export const PAYMENT_AUTOFILL_FRACTION: Record<string, number> = {
+  DEPOSIT_PAID: 0.5,
+  PAID_IN_FULL: 1,
+};
+
 export const LOST_REASONS = ["PRICE", "CHOSE_COMPETITOR", "WENT_QUIET", "NOT_READY", "OTHER"] as const;
 
 export const LOST_REASON_LABELS: Record<string, string> = {
@@ -99,6 +131,8 @@ export type LeadFilters = {
   priority?: string;
   tagId?: string;
   atRiskOnly?: boolean;
+  reviewStatus?: string;
+  paymentStatus?: string;
 };
 
 type FilterableLead = {
@@ -108,6 +142,10 @@ type FilterableLead = {
   atRisk: boolean;
   assignedTo: { id: string } | null;
   tags?: { id: string }[];
+  // Optional so callers that project a narrower lead shape still satisfy
+  // this; a lead without them simply never matches those two filters.
+  reviewStatus?: string;
+  paymentStatus?: string;
 };
 
 export function applyLeadFilters<T extends FilterableLead>(leads: T[], filters: LeadFilters): T[] {
@@ -118,6 +156,10 @@ export function applyLeadFilters<T extends FilterableLead>(leads: T[], filters: 
   if (filters.priority) result = result.filter((l) => l.priority === filters.priority);
   if (filters.tagId) result = result.filter((l) => (l.tags ?? []).some((t) => t.id === filters.tagId));
   if (filters.atRiskOnly) result = result.filter((l) => l.atRisk);
+  if (filters.reviewStatus) result = result.filter((l) => l.reviewStatus === filters.reviewStatus);
+  if (filters.paymentStatus) {
+    result = result.filter((l) => l.paymentStatus === filters.paymentStatus);
+  }
   return result;
 }
 

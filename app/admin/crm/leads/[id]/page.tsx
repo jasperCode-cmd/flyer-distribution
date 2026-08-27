@@ -32,6 +32,9 @@ export default async function LeadDetailPage({
   const serializable = {
     ...lead,
     dealValue: lead.dealValue ? lead.dealValue.toString() : null,
+    // Decimal isn't serialisable across the server/client boundary, so it
+    // crosses as a string exactly like dealValue above.
+    amountPaid: lead.amountPaid ? lead.amountPaid.toString() : null,
     createdAt: lead.createdAt.toISOString(),
     activities: lead.activities.map((a) => ({
       ...a,

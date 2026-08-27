@@ -5,6 +5,8 @@ import {
   STAGE_LABELS,
   SOURCE_LABELS,
   PRIORITY_LABELS,
+  REVIEW_STATUS_LABELS,
+  PAYMENT_STATUS_LABELS,
   type LeadFilters,
 } from "@/lib/crm-constants";
 
@@ -120,6 +122,29 @@ export default function LeadFilterBar({
           <option value="">All tags</option>
           {tags.map((t) => (
             <option key={t.id} value={t.id}>{t.name}</option>
+          ))}
+        </select>
+        {/* Independent of each other and of stage: these only carry meaning
+            on Won leads, but filtering by them is left unrestricted so a
+            filter can be combined however the user wants. */}
+        <select
+          value={filters.reviewStatus ?? ""}
+          onChange={(e) => set("reviewStatus", e.target.value)}
+          className="border border-gray-300 rounded-md px-2 py-1.5 text-xs bg-white"
+        >
+          <option value="">Any review status</option>
+          {Object.entries(REVIEW_STATUS_LABELS).map(([k, v]) => (
+            <option key={k} value={k}>{v}</option>
+          ))}
+        </select>
+        <select
+          value={filters.paymentStatus ?? ""}
+          onChange={(e) => set("paymentStatus", e.target.value)}
+          className="border border-gray-300 rounded-md px-2 py-1.5 text-xs bg-white"
+        >
+          <option value="">Any payment status</option>
+          {Object.entries(PAYMENT_STATUS_LABELS).map(([k, v]) => (
+            <option key={k} value={k}>{v}</option>
           ))}
         </select>
         <label className="flex items-center gap-1.5 text-xs text-gray-600 px-1">

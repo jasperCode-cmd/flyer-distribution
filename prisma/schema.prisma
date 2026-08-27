@@ -62,6 +62,22 @@ enum LeadPriority {
   LOW
 }
 
+// Both of the below are only meaningful once a lead is Won, but they carry a
+// default on every lead so the columns can be NOT NULL and no row needs
+// special handling.
+enum ReviewStatus {
+  NOT_REQUESTED
+  REQUESTED
+  RECEIVED
+}
+
+enum PaymentStatus {
+  NOT_PAID
+  DEPOSIT_PAID
+  PARTIAL_PAID
+  PAID_IN_FULL
+}
+
 model Lead {
   id           String  @id @default(cuid())
   name         String
@@ -92,6 +108,13 @@ model Lead {
   // carries the free text when lostReason is OTHER.
   lostReason     LostReason?
   lostReasonNote String?
+
+  // Surfaced on the Won stage. amountPaid mirrors dealValue's precision so
+  // the two can be compared without rounding surprises; it stays nullable
+  // because a lead with no quoted value has nothing to auto-fill from.
+  reviewStatus  ReviewStatus  @default(NOT_REQUESTED)
+  paymentStatus PaymentStatus @default(NOT_PAID)
+  amountPaid    Decimal?      @db.Decimal(10, 2)
 
   assignedToId String?
   assignedTo   User?   @relation("AssignedLeads", fields: [assignedToId], references: [id])

@@ -59,12 +59,29 @@ export async function PATCH(
     "assignedToId",
     "lostReason",
     "lostReasonNote",
+    "reviewStatus",
+    "paymentStatus",
+    "amountPaid",
   ] as const;
+
+  // Both decimal columns arrive as strings from the form inputs and have to
+  // be coerced; an empty or unparseable value clears the column rather than
+  // writing NaN.
+  const DECIMAL_FIELDS = new Set(["dealValue", "amountPaid"]);
 
   const data: Record<string, unknown> = {};
   for (const field of allowedFields) {
-    if (field in body) {
-      data[field] = field === "dealValue" && body[field] !== null ? Number(body[field]) : body[field];
+    if (!(field in body)) continue;
+    const value = body[field];
+    if (DECIMAL_FIELDS.has(field)) {
+      if (value === null || value === "") {
+        data[field] = null;
+      } else {
+        const n = Number(value);
+        data[field] = Number.isNaN(n) ? null : n;
+      }
+    } else {
+      data[field] = value;
     }
   }
 
