@@ -4,25 +4,57 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import SearchBar from "./SearchBar";
 
-const navLinks = [
+// "Add Lead" is deliberately not here — /admin/crm/leads/new is still a
+// live route, reached via the "+ Add Lead" button on the Leads page. The
+// Leads entry stays highlighted while on it, since the check is a prefix.
+const primaryLinks = [
   { href: "/admin/crm", label: "Dashboard" },
   { href: "/admin/crm/leads", label: "Leads" },
-  { href: "/admin/crm/leads/new", label: "Add Lead" },
-  { href: "/admin/crm/jobs-by-area", label: "Jobs by Area" },
   { href: "/admin/crm/calendar", label: "Calendar" },
   { href: "/admin/crm/distributors", label: "Distributors" },
+];
+
+// Secondary destinations, grouped under "More" to keep the primary bar short.
+const moreLinks = [
+  { href: "/admin/crm/jobs-by-area", label: "Jobs by Area" },
   { href: "/admin/crm/map", label: "Map" },
   { href: "/admin/crm/tags", label: "Tags" },
   { href: "/admin/crm/import", label: "Import" },
 ];
 
+function isActive(pathname: string, href: string): boolean {
+  return href === "/admin/crm" ? pathname === "/admin/crm" : pathname.startsWith(href);
+}
+
 export default function CrmShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
+  const moreRef = useRef<HTMLDivElement>(null);
+
+  // Dismiss the desktop dropdown on an outside click, the way a menu is
+  // expected to behave.
+  useEffect(() => {
+    if (!moreOpen) return;
+    function onDocClick(e: MouseEvent) {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
+        setMoreOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [moreOpen]);
+
+  // Navigating away should never leave a menu hanging open.
+  useEffect(() => {
+    setMoreOpen(false);
+    setMobileMoreOpen(false);
+  }, [pathname]);
 
   // The login page renders standalone, without the authenticated shell.
   if (pathname === "/admin/crm/login") {
@@ -53,25 +85,70 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
             </Link>
             {!forcedChange && (
               <nav className="hidden md:flex items-center gap-1 ml-6">
-                {navLinks.map((link) => {
-                  const active =
-                    link.href === "/admin/crm"
-                      ? pathname === "/admin/crm"
-                      : pathname.startsWith(link.href);
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
-                        active
-                          ? "bg-blue-800 text-yellow-400"
-                          : "text-blue-100 hover:bg-blue-800/60"
+                {primaryLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
+                      isActive(pathname, link.href)
+                        ? "bg-blue-800 text-yellow-400"
+                        : "text-blue-100 hover:bg-blue-800/60"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+
+                <div className="relative" ref={moreRef}>
+                  <button
+                    type="button"
+                    onClick={() => setMoreOpen((o) => !o)}
+                    aria-expanded={moreOpen}
+                    aria-haspopup="menu"
+                    className={`inline-flex items-center gap-1 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
+                      moreLinks.some((l) => isActive(pathname, l.href)) || moreOpen
+                        ? "bg-blue-800 text-yellow-400"
+                        : "text-blue-100 hover:bg-blue-800/60"
+                    }`}
+                  >
+                    More
+                    <svg
+                      className={`w-3 h-3 transition-transform duration-150 ${
+                        moreOpen ? "rotate-180" : ""
                       }`}
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2.5}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     >
-                      {link.label}
-                    </Link>
-                  );
-                })}
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </button>
+                  {moreOpen && (
+                    <div
+                      role="menu"
+                      className="absolute left-0 mt-1 w-44 bg-white rounded-md border border-gray-200 shadow-lg py-1 z-50"
+                    >
+                      {moreLinks.map((link) => (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          role="menuitem"
+                          onClick={() => setMoreOpen(false)}
+                          className={`block px-3 py-2 text-sm transition-colors ${
+                            isActive(pathname, link.href)
+                              ? "bg-blue-50 text-blue-700 font-semibold"
+                              : "text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          {link.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </nav>
             )}
           </div>
@@ -126,17 +203,54 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
                 <SearchBar />
               </div>
             )}
-            {!forcedChange &&
-              navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMenuOpen(false)}
-                  className="block px-2 py-2.5 text-sm text-blue-100 hover:text-yellow-400"
+            {!forcedChange && (
+              <>
+                {primaryLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMenuOpen(false)}
+                    className="block px-2 py-2.5 text-sm text-blue-100 hover:text-yellow-400"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+
+                {/* Same grouping as desktop, collapsed so the menu stays short. */}
+                <button
+                  type="button"
+                  onClick={() => setMobileMoreOpen((o) => !o)}
+                  aria-expanded={mobileMoreOpen}
+                  className="flex w-full items-center justify-between px-2 py-2.5 text-sm text-blue-100 hover:text-yellow-400"
                 >
-                  {link.label}
-                </Link>
-              ))}
+                  More
+                  <svg
+                    className={`w-3.5 h-3.5 transition-transform duration-150 ${
+                      mobileMoreOpen ? "rotate-180" : ""
+                    }`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+                {mobileMoreOpen &&
+                  moreLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="block pl-5 pr-2 py-2.5 text-sm text-blue-200 hover:text-yellow-400"
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+              </>
+            )}
             {!forcedChange && (
               <Link
                 href="/admin/crm/change-password"

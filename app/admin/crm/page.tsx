@@ -1,11 +1,23 @@
 import Link from "next/link";
-import { getLeadsWithLastActivity, getFollowUpTasks } from "@/lib/crm-data";
+import { getLeadsWithLastActivity, getFollowUpTasks, getUpcomingSchedule } from "@/lib/crm-data";
 import { computeDashboardStats, getLastInteracted, STAGE_LABELS } from "@/lib/crm-constants";
 
 export const dynamic = "force-dynamic";
 
 function formatCurrency(n: number) {
   return new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(n);
+}
+
+// "Today"/"Tomorrow" for the near dates, a short date beyond that, with the
+// time appended so an entry's slot in the day is visible at a glance.
+function whenLabel(date: Date) {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const days = Math.floor((date.getTime() - startOfToday.getTime()) / (24 * 60 * 60 * 1000));
+  const time = date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  if (days === 0) return `Today ${time}`;
+  if (days === 1) return `Tomorrow ${time}`;
+  return `${date.toLocaleDateString("en-GB", { day: "numeric", month: "short" })} ${time}`;
 }
 
 function daysAgo(date: Date) {
@@ -19,6 +31,7 @@ export default async function CrmDashboardPage() {
   const leads = await getLeadsWithLastActivity();
   const stats = computeDashboardStats(leads);
   const { overdue, today } = await getFollowUpTasks();
+  const upcoming = await getUpcomingSchedule(7);
 
   return (
     <div className="space-y-6">
@@ -108,6 +121,37 @@ export default async function CrmDashboardPage() {
             </ul>
           )}
         </div>
+      </div>
+
+      <div className="bg-white rounded-lg border border-gray-200">
+        <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+          <h2 className="text-sm font-bold text-blue-900">Upcoming ({upcoming.length})</h2>
+          <Link href="/admin/crm/calendar" className="text-xs text-blue-700 hover:underline">
+            View full calendar
+          </Link>
+        </div>
+        {upcoming.length === 0 ? (
+          <p className="px-4 py-4 text-sm text-gray-400">Nothing scheduled from today onward.</p>
+        ) : (
+          <ul className="divide-y divide-gray-100">
+            {upcoming.map((e) => (
+              <li key={e.id}>
+                <Link
+                  href={e.href}
+                  className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-blue-900 truncate">{e.title}</p>
+                    <p className="text-xs text-gray-500 truncate">{e.typeLabel}</p>
+                  </div>
+                  <span className="text-xs text-gray-600 font-medium shrink-0 ml-3">
+                    {whenLabel(e.when)}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200">
