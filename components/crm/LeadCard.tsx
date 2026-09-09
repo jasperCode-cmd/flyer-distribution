@@ -48,7 +48,16 @@ const PAYMENT_PILL: Record<string, string> = {
 // value and "Not Paid" is nothing.
 const PAYMENT_SHOWS_AMOUNT = new Set(["DEPOSIT_PAID", "PARTIAL_PAID"]);
 
-export default function LeadCard({ lead }: { lead: KanbanLead }) {
+export default function LeadCard({
+  lead,
+  onAdvance,
+}: {
+  lead: KanbanLead;
+  // Present only on the Kanban board, where a fresh lead genuinely sits in
+  // an Uncontacted column to advance out of. Omitting it (e.g. anywhere
+  // LeadCard might render outside that context) simply hides the button.
+  onAdvance?: (leadId: string) => void;
+}) {
   // Both fields exist on every lead, but only mean anything once it is Won,
   // so the badges are confined to that column.
   const isWon = lead.stage === "WON";
@@ -57,11 +66,20 @@ export default function LeadCard({ lead }: { lead: KanbanLead }) {
   const paidAmount =
     lead.amountPaid !== null && lead.amountPaid !== undefined ? Number(lead.amountPaid) : null;
 
+  // A genuine live inbound enquiry, not yet actioned — distinct from the
+  // cold-outreach/import leads it would otherwise sit among in that column.
+  const isNewWebsiteEnquiry = lead.stage === "UNCONTACTED" && lead.source === "WEBSITE_QUOTE_FORM";
+  const canAdvance = lead.stage === "UNCONTACTED" && !!onAdvance;
+
   return (
     <Link
       href={`/admin/crm/leads/${lead.id}`}
       className={`block bg-white rounded-md border p-2 sm:p-3 shadow-sm hover:shadow-md transition-shadow ${
-        lead.atRisk ? "border-l-4 border-l-red-500 border-y-gray-200 border-r-gray-200" : "border-gray-200"
+        lead.atRisk
+          ? "border-l-4 border-l-red-500 border-y-gray-200 border-r-gray-200"
+          : isNewWebsiteEnquiry
+          ? "border-l-4 border-l-blue-500 border-y-gray-200 border-r-gray-200"
+          : "border-gray-200"
       }`}
     >
       <div className="flex items-start justify-between gap-2">
@@ -84,6 +102,11 @@ export default function LeadCard({ lead }: { lead: KanbanLead }) {
       </div>
       {lead.businessName && (
         <p className="text-[11px] sm:text-xs text-gray-500 truncate mt-0.5">{lead.businessName}</p>
+      )}
+      {isNewWebsiteEnquiry && (
+        <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-blue-50 text-blue-700 mt-1.5">
+          ● New Enquiry
+        </span>
       )}
       {lead.tags && lead.tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-1.5">
@@ -128,6 +151,28 @@ export default function LeadCard({ lead }: { lead: KanbanLead }) {
           </span>
         )}
       </div>
+      {canAdvance && (
+        <button
+          type="button"
+          title="Move to Awaiting Response"
+          aria-label="Move to Awaiting Response"
+          // The card itself is a Link, and this button sits inside a
+          // draggable wrapper on the Kanban board — preventDefault/
+          // stopPropagation on click stops the Link navigating, and
+          // stopPropagation on pointerDown stops dnd-kit's drag sensors
+          // (attached to an ancestor) from ever seeing the gesture start.
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onAdvance(lead.id);
+          }}
+          className="mt-1.5 sm:mt-2 flex w-full items-center justify-center gap-1 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 text-[11px] font-semibold py-1"
+        >
+          Awaiting Response
+          <span aria-hidden="true">→</span>
+        </button>
+      )}
     </Link>
   );
 }

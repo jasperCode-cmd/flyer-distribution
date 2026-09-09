@@ -119,6 +119,23 @@ export default function LeadTable({
     await applyBulk({ source: bulkSource }, () => setBulkSource(""));
   }
 
+  // Same underlying action as dragging the card on the Kanban board — same
+  // PATCH endpoint, so the same server-side Stage Change activity log either
+  // way. Rows here aren't wrapped in a row-level Link (only the name text
+  // and the "View" link are), but preventDefault/stopPropagation are kept
+  // anyway for consistency with the same button on the Kanban card, and as
+  // insurance against a future layout change.
+  async function advanceToAwaitingResponse(leadId: string, e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    await fetch(`/api/crm/leads/${leadId}/stage`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stage: "AWAITING_RESPONSE" }),
+    });
+    router.refresh();
+  }
+
   const Th = ({
     sortableKey,
     width,
@@ -305,6 +322,16 @@ export default function LeadTable({
                     </dd>
                   </div>
                 </dl>
+                {lead.stage === "UNCONTACTED" && (
+                  <button
+                    type="button"
+                    onClick={(e) => advanceToAwaitingResponse(lead.id, e)}
+                    className="mt-2 flex w-full items-center justify-center gap-1 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 text-[11px] font-semibold py-1"
+                  >
+                    Move to Awaiting Response
+                    <span aria-hidden="true">→</span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -334,14 +361,14 @@ export default function LeadTable({
                 />
               </th>
               <Th sortableKey="name" width="w-[19%]">Name</Th>
-              <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide w-[16%]">Business</th>
+              <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide w-[12%]">Business</th>
               <Th sortableKey="stage" width="w-[12%]">Stage</Th>
               <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide w-[9%]">Priority</th>
               <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide w-[12%]">Source</th>
               <th className="text-left px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide w-[11%]">Assigned</th>
               <Th sortableKey="dealValue" width="w-[7%]">Value</Th>
               <Th sortableKey="createdAt" width="w-[8%]">Created</Th>
-              <th className="px-3 py-2 w-[6%]" />
+              <th className="px-3 py-2 w-[10%]" />
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -393,9 +420,22 @@ export default function LeadTable({
                   {new Date(lead.createdAt).toLocaleDateString("en-GB")}
                 </td>
                 <td className="px-3 py-2.5 text-right whitespace-nowrap">
-                  <Link href={`/admin/crm/leads/${lead.id}`} className="text-xs text-blue-700 hover:underline">
-                    View
-                  </Link>
+                  <div className="flex items-center justify-end gap-2">
+                    {lead.stage === "UNCONTACTED" && (
+                      <button
+                        type="button"
+                        title="Move to Awaiting Response"
+                        aria-label="Move to Awaiting Response"
+                        onClick={(e) => advanceToAwaitingResponse(lead.id, e)}
+                        className="text-blue-700 hover:bg-blue-50 rounded-full p-1 leading-none"
+                      >
+                        →
+                      </button>
+                    )}
+                    <Link href={`/admin/crm/leads/${lead.id}`} className="text-xs text-blue-700 hover:underline">
+                      View
+                    </Link>
+                  </div>
                 </td>
               </tr>
               );

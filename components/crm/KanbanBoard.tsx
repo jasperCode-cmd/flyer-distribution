@@ -15,7 +15,13 @@ import LeadCard, { type KanbanLead } from "./LeadCard";
 import LostReasonModal from "./LostReasonModal";
 import { STAGES, STAGE_LABELS } from "@/lib/crm-constants";
 
-function DraggableCard({ lead }: { lead: KanbanLead }) {
+function DraggableCard({
+  lead,
+  onAdvance,
+}: {
+  lead: KanbanLead;
+  onAdvance: (leadId: string) => void;
+}) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: lead.id,
   });
@@ -44,7 +50,7 @@ function DraggableCard({ lead }: { lead: KanbanLead }) {
         isDragging ? "touch-none opacity-50" : "touch-auto"
       }`}
     >
-      <LeadCard lead={lead} />
+      <LeadCard lead={lead} onAdvance={onAdvance} />
     </div>
   );
 }
@@ -52,9 +58,11 @@ function DraggableCard({ lead }: { lead: KanbanLead }) {
 function Column({
   stage,
   leads,
+  onAdvance,
 }: {
   stage: string;
   leads: KanbanLead[];
+  onAdvance: (leadId: string) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: stage });
 
@@ -85,7 +93,7 @@ function Column({
       </div>
       <div className="flex-1 p-1.5 sm:p-2 space-y-1.5 sm:space-y-2 min-h-[120px] max-h-[calc(100vh-260px)] sm:max-h-[calc(100vh-220px)] overflow-y-auto">
         {leads.map((lead) => (
-          <DraggableCard key={lead.id} lead={lead} />
+          <DraggableCard key={lead.id} lead={lead} onAdvance={onAdvance} />
         ))}
         {leads.length === 0 && (
           <p className="text-xs text-gray-400 text-center py-6">No leads</p>
@@ -219,6 +227,13 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
     commitStageChange(leadId, newStage, lead.stage);
   }
 
+  // Same underlying action as dragging a card from Uncontacted to Awaiting
+  // Response — same commitStageChange call, so the same PATCH request and
+  // the same server-side Stage Change activity log either way.
+  function handleAdvance(leadId: string) {
+    commitStageChange(leadId, "AWAITING_RESPONSE", "UNCONTACTED");
+  }
+
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       {/* Mobile-only stage pills: show which stage is in view and jump
@@ -255,7 +270,12 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
         className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory sm:snap-none"
       >
         {STAGES.map((stage) => (
-          <Column key={stage} stage={stage} leads={leads.filter((l) => l.stage === stage)} />
+          <Column
+            key={stage}
+            stage={stage}
+            leads={leads.filter((l) => l.stage === stage)}
+            onAdvance={handleAdvance}
+          />
         ))}
       </div>
       {pending && (
