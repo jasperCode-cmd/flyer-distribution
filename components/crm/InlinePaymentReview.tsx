@@ -29,9 +29,15 @@ const REVIEW_ICON: Record<string, { icon: string; className: string; title: stri
   RECEIVED: { icon: "★", className: "text-emerald-600", title: "Review received — click to update" },
 };
 
-// Editable version of the payment/review pill+star shown on Won and
-// Completed Kanban cards. Collapsed by default at the exact same size as
-// the old read-only badges; only grows into the full control on click.
+// A shared, tight class string so the select genuinely reads as "the pill,
+// now editable" rather than a form control dropped onto the card.
+const COMPACT_SELECT =
+  "text-[10px] leading-none font-medium px-1.5 py-0.5 rounded-full border-0 bg-gray-100 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400";
+
+// Editable version of the payment/review pills shown on Won and Completed
+// Kanban cards — two independent pills, each collapsed by default at the
+// same small footprint as the old read-only badges, only growing (and only
+// its own pill, not both) on click.
 export default function InlinePaymentReview({
   leadId,
   dealValue,
@@ -45,7 +51,7 @@ export default function InlinePaymentReview({
   paymentStatus: string;
   amountPaid: string | null;
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expandedField, setExpandedField] = useState<"payment" | "review" | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -65,19 +71,32 @@ export default function InlinePaymentReview({
     initialAmountPaid,
   });
 
+  // mousedown (which drives the outside-click collapse below) always fires
+  // before the input's own blur, so without this ref the listener — set up
+  // once per expandedField transition, not per keystroke — would close over
+  // a stale commitAmountPaid from before the user finished typing and never
+  // see the value actually save. The ref always holds the latest render's
+  // closure regardless of when the listener itself was attached.
+  const latestRef = useRef({ expandedField, commitAmountPaid });
+  latestRef.current = { expandedField, commitAmountPaid };
+
   useEffect(() => {
-    if (!expanded) return;
+    if (!expandedField) return;
     function handleClickOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setExpanded(false);
+        if (latestRef.current.expandedField === "payment") {
+          latestRef.current.commitAmountPaid();
+        }
+        setExpandedField(null);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [expanded]);
+  }, [expandedField]);
 
   const paidAmount = amountPaid === "" ? null : Number(amountPaid);
   const review = REVIEW_ICON[reviewStatus] ?? REVIEW_ICON.NOT_REQUESTED;
+  const paymentNeedsAmount = PAYMENT_SHOWS_AMOUNT.has(paymentStatus);
 
   return (
     <div
@@ -93,78 +112,82 @@ export default function InlinePaymentReview({
         e.preventDefault();
         e.stopPropagation();
       }}
+      className="flex flex-wrap items-center gap-1 mt-1.5"
     >
-      {!expanded ? (
-        <div className="flex flex-wrap items-center gap-1 mt-1.5">
-          <button
-            type="button"
-            onClick={() => setExpanded(true)}
-            className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
-              PAYMENT_PILL[paymentStatus] ?? PAYMENT_PILL.NOT_PAID
-            }`}
-            title={`Payment: ${PAYMENT_STATUS_LABELS[paymentStatus] ?? paymentStatus} — click to edit`}
-          >
-            {PAYMENT_STATUS_LABELS[paymentStatus] ?? paymentStatus}
-            {PAYMENT_SHOWS_AMOUNT.has(paymentStatus) && paidAmount !== null && (
-              <> · {formatCurrency(paidAmount)}</>
-            )}
-          </button>
-          <button
-            type="button"
-            onClick={() => setExpanded(true)}
-            className={`text-xs leading-none ${review.className}`}
-            title={review.title}
-          >
-            {review.icon}
-          </button>
-        </div>
+      {/* Payment pill / compact editor */}
+      {expandedField !== "payment" ? (
+        <button
+          type="button"
+          onClick={() => setExpandedField("payment")}
+          className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
+            PAYMENT_PILL[paymentStatus] ?? PAYMENT_PILL.NOT_PAID
+          }`}
+          title={`Payment: ${PAYMENT_STATUS_LABELS[paymentStatus] ?? paymentStatus} — click to edit`}
+        >
+          {PAYMENT_STATUS_LABELS[paymentStatus] ?? paymentStatus}
+          {paymentNeedsAmount && paidAmount !== null && <> · {formatCurrency(paidAmount)}</>}
+        </button>
       ) : (
-        <div className="mt-1.5 bg-gray-50 border border-gray-200 rounded-md p-2 space-y-1.5">
-          <div>
-            <label className="block text-[10px] font-medium text-gray-500 mb-0.5">Review</label>
-            <select
-              autoFocus
-              value={reviewStatus}
-              onChange={(e) => setReviewStatus(e.target.value)}
-              className="w-full text-[11px] border border-gray-300 rounded px-1.5 py-1 bg-white"
-            >
-              {Object.entries(REVIEW_STATUS_LABELS).map(([k, v]) => (
-                <option key={k} value={k}>{v}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-[10px] font-medium text-gray-500 mb-0.5">Payment</label>
-            <select
-              value={paymentStatus}
-              onChange={(e) => onPaymentStatusChange(e.target.value)}
-              className="w-full text-[11px] border border-gray-300 rounded px-1.5 py-1 bg-white"
-            >
-              {Object.entries(PAYMENT_STATUS_LABELS).map(([k, v]) => (
-                <option key={k} value={k}>{v}</option>
-              ))}
-            </select>
-          </div>
-          {paymentStatus !== "NOT_PAID" && (
-            <div>
-              <label className="block text-[10px] font-medium text-gray-500 mb-0.5">Amount Paid</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                inputMode="decimal"
-                value={amountPaid}
-                onChange={(e) => setAmountPaid(e.target.value)}
-                onBlur={commitAmountPaid}
-                placeholder={dealValue ? "" : "Enter amount"}
-                className="w-full text-[11px] border border-gray-300 rounded px-1.5 py-1"
-              />
-              {overpaid && (
-                <p className="text-[10px] text-amber-700 mt-1">More than the quoted deal value.</p>
-              )}
-            </div>
+        <span className="inline-flex items-center gap-1">
+          <select
+            autoFocus
+            value={paymentStatus}
+            onChange={(e) => {
+              const next = e.target.value;
+              onPaymentStatusChange(next);
+              if (!PAYMENT_SHOWS_AMOUNT.has(next)) setExpandedField(null);
+            }}
+            className={COMPACT_SELECT}
+          >
+            {Object.entries(PAYMENT_STATUS_LABELS).map(([k, v]) => (
+              <option key={k} value={k}>{v}</option>
+            ))}
+          </select>
+          {paymentNeedsAmount && (
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              inputMode="decimal"
+              value={amountPaid}
+              onChange={(e) => setAmountPaid(e.target.value)}
+              // Commits on blur (e.g. tabbing away) but doesn't collapse —
+              // that stays the outside-click handler's job, so clicking
+              // over to the status select right beside this input doesn't
+              // yank the editor closed mid-adjustment.
+              onBlur={commitAmountPaid}
+              placeholder={dealValue ? "" : "£"}
+              title={overpaid ? "More than the quoted deal value" : undefined}
+              className={`w-14 ${COMPACT_SELECT} ${overpaid ? "ring-1 ring-amber-400" : ""}`}
+            />
           )}
-        </div>
+        </span>
+      )}
+
+      {/* Review pill / compact editor */}
+      {expandedField !== "review" ? (
+        <button
+          type="button"
+          onClick={() => setExpandedField("review")}
+          className={`text-xs leading-none ${review.className}`}
+          title={review.title}
+        >
+          {review.icon}
+        </button>
+      ) : (
+        <select
+          autoFocus
+          value={reviewStatus}
+          onChange={(e) => {
+            setReviewStatus(e.target.value);
+            setExpandedField(null);
+          }}
+          className={COMPACT_SELECT}
+        >
+          {Object.entries(REVIEW_STATUS_LABELS).map(([k, v]) => (
+            <option key={k} value={k}>{v}</option>
+          ))}
+        </select>
       )}
     </div>
   );
