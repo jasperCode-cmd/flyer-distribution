@@ -32,6 +32,15 @@ function daysAgo(iso: string) {
   return `${days} days ago`;
 }
 
+function Spinner({ className = "" }: { className?: string }) {
+  return (
+    <svg className={`animate-spin ${className}`} viewBox="0 0 24 24" fill="none">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+    </svg>
+  );
+}
+
 export default function DialerScreen({ tags }: { tags: { id: string; name: string }[] }) {
   const [source, setSource] = useState("COLD_OUTREACH");
   const [tagId, setTagId] = useState("");
@@ -45,6 +54,21 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
   const [queueOpen, setQueueOpen] = useState(false);
   const [warmSaved, setWarmSaved] = useState(false);
   const [noAnswerPrompt, setNoAnswerPrompt] = useState<{ leadId: string; leadName: string; streak: number } | null>(null);
+  // Both No Answer and Skip trigger a network round-trip before the next
+  // lead appears — with no other feedback in between, a click can read as
+  // "did that actually register?". actionInFlight puts a spinner directly
+  // on the button that was clicked; toast leaves a brief confirmation
+  // visible while the next lead loads in. Back is deliberately excluded —
+  // it only swaps to an already-held-in-memory snapshot, no network call,
+  // so there's no gap for either to fill.
+  const [actionInFlight, setActionInFlight] = useState<"NO_ANSWER" | "SKIP" | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 1600);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   const fetchState = useCallback(
     async (excludeIds: string[]) => {
@@ -76,16 +100,20 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
     fetchState([]);
   }
 
-  function handleSkip() {
-    if (!current) return;
+  async function handleSkip() {
+    if (!current || actionInFlight) return;
+    setActionInFlight("SKIP");
     setPrevious(current);
     const next = [...skippedIds, current.id];
     setSkippedIds(next);
-    fetchState(next);
+    await fetchState(next);
+    setToast("Skipped");
+    setActionInFlight(null);
   }
 
   async function handleNoAnswer() {
-    if (!current) return;
+    if (!current || actionInFlight) return;
+    setActionInFlight("NO_ANSWER");
     const lead = current;
     setPrevious(lead);
     const res = await fetch(`/api/crm/dialer/leads/${lead.id}/outcome`, {
@@ -93,13 +121,20 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ outcome: "NO_ANSWER" }),
     });
+    let promptScrap = false;
+    let streak = 0;
     if (res.ok) {
-      const { streak, promptScrap } = await res.json();
-      if (promptScrap) {
-        setNoAnswerPrompt({ leadId: lead.id, leadName: lead.name, streak });
-      }
+      ({ streak, promptScrap } = await res.json());
     }
-    goToNext();
+    setSkippedIds([]);
+    setWarmSaved(false);
+    setAnswering(false);
+    await fetchState([]);
+    setToast("Marked No Answer");
+    setActionInFlight(null);
+    if (promptScrap) {
+      setNoAnswerPrompt({ leadId: lead.id, leadName: lead.name, streak });
+    }
   }
 
   async function resolveNoAnswerPrompt(remove: boolean) {
@@ -273,14 +308,17 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
               <button
                 type="button"
                 onClick={handleNoAnswer}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold py-3 rounded-md"
+                disabled={actionInFlight !== null}
+                className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 disabled:opacity-70 text-gray-700 text-sm font-bold py-3 rounded-md"
               >
+                {actionInFlight === "NO_ANSWER" && <Spinner className="w-4 h-4" />}
                 No Answer
               </button>
               <button
                 type="button"
                 onClick={handleAnswered}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold py-3 rounded-md"
+                disabled={actionInFlight !== null}
+                className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-70 text-white text-sm font-bold py-3 rounded-md"
               >
                 Answered
               </button>
@@ -297,7 +335,13 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
               >
                 ← Back
               </button>
-              <button type="button" onClick={handleSkip} className="text-gray-500 hover:text-gray-700 font-medium">
+              <button
+                type="button"
+                onClick={handleSkip}
+                disabled={actionInFlight !== null}
+                className="flex items-center gap-1.5 text-gray-500 hover:text-gray-700 disabled:opacity-60 font-medium"
+              >
+                {actionInFlight === "SKIP" && <Spinner className="w-3 h-3" />}
                 Skip →
               </button>
             </div>
@@ -334,6 +378,12 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
 
       {queueOpen && (
         <DialerQueueModal source={source} tagId={tagId} onClose={() => setQueueOpen(false)} />
+      )}
+
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] bg-gray-900 text-white text-sm font-medium rounded-full shadow-lg px-4 py-2">
+          {toast}
+        </div>
       )}
     </div>
   );
