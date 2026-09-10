@@ -21,12 +21,13 @@ const PAYMENT_PILL: Record<string, string> = {
 const PAYMENT_SHOWS_AMOUNT = new Set(["DEPOSIT_PAID", "PARTIAL_PAID"]);
 
 // Review has no "nothing to show" state here (unlike the plain read-only
-// badge elsewhere) — every state needs its own small trigger so Not
-// Requested is still clickable to set.
-const REVIEW_ICON: Record<string, { icon: string; className: string; title: string }> = {
-  NOT_REQUESTED: { icon: "☆", className: "text-gray-300", title: "Review not requested — click to update" },
-  REQUESTED: { icon: "☆", className: "text-amber-500", title: "Review requested — click to update" },
-  RECEIVED: { icon: "★", className: "text-emerald-600", title: "Review received — click to update" },
+// badge elsewhere used before this was made editable) — every state needs
+// its own visible pill so Not Requested is still clickable to set, same as
+// the payment pill always showing even at its Not Paid default.
+const REVIEW_PILL: Record<string, string> = {
+  NOT_REQUESTED: "bg-gray-100 text-gray-500",
+  REQUESTED: "bg-amber-50 text-amber-700",
+  RECEIVED: "bg-emerald-50 text-emerald-700",
 };
 
 // A shared, tight class string so the select genuinely reads as "the pill,
@@ -95,7 +96,6 @@ export default function InlinePaymentReview({
   }, [expandedField]);
 
   const paidAmount = amountPaid === "" ? null : Number(amountPaid);
-  const review = REVIEW_ICON[reviewStatus] ?? REVIEW_ICON.NOT_REQUESTED;
   const paymentNeedsAmount = PAYMENT_SHOWS_AMOUNT.has(paymentStatus);
 
   return (
@@ -104,10 +104,25 @@ export default function InlinePaymentReview({
       // The card is a Link, and on the Kanban board it also sits inside a
       // draggable wrapper — preventDefault/stopPropagation on click keeps
       // every interaction in here (trigger or expanded controls alike) from
-      // firing the Link's navigation, and stopPropagation on pointerDown
-      // keeps dnd-kit's drag sensors from ever seeing the gesture start.
-      // Same pattern already proven for the one-click stage-advance button.
-      onPointerDown={(e) => e.stopPropagation()}
+      // firing the Link's navigation.
+      //
+      // The drag sensors configured on the board are MouseSensor and
+      // TouchSensor, which activate on native onMouseDown/onTouchStart —
+      // NOT onPointerDown (confirmed by reading dnd-kit's source; the two
+      // are separate native events, and stopping one does nothing to stop
+      // the other). Stopping only onPointerDown, as the stage-advance
+      // button originally did, left mousedown free to reach the ancestor
+      // draggable wrapper. On a real desktop click there is almost always
+      // a pixel or two of incidental hand movement between mousedown and
+      // mouseup; once that crosses MouseSensor's 8px activation distance,
+      // dnd-kit calls its own document-level capture-phase click swallower
+      // (to stop a real drag's release from also registering as a click),
+      // which ate the very click that had just opened this dropdown —
+      // reproduced directly with a jittered mouse.move between down and up.
+      // Stopping mousedown/touchstart here means the sensors never see the
+      // gesture start at all, regardless of any incidental movement.
+      onMouseDown={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -169,10 +184,12 @@ export default function InlinePaymentReview({
         <button
           type="button"
           onClick={() => setExpandedField("review")}
-          className={`text-xs leading-none ${review.className}`}
-          title={review.title}
+          className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
+            REVIEW_PILL[reviewStatus] ?? REVIEW_PILL.NOT_REQUESTED
+          }`}
+          title={`Review: ${REVIEW_STATUS_LABELS[reviewStatus] ?? reviewStatus} — click to edit`}
         >
-          {review.icon}
+          {REVIEW_STATUS_LABELS[reviewStatus] ?? reviewStatus}
         </button>
       ) : (
         <select

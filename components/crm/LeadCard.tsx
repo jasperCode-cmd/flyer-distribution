@@ -52,6 +52,18 @@ export default function LeadCard({
   return (
     <Link
       href={`/admin/crm/leads/${lead.id}`}
+      // Anchors are natively draggable by default in every browser — with
+      // zero jitter tolerance, unlike dnd-kit's own 8px activation distance.
+      // A real hand's mousedown-to-mouseup on a pill inside this card almost
+      // always drifts a pixel or two, which is enough for the browser to
+      // start its own native HTML5 drag gesture on the <a> itself, and that
+      // native drag swallows the click before it ever reaches the pill's
+      // onClick — confirmed via instrumented Playwright repro (a stray
+      // "dragstart" fired with no accompanying "click" at all). This is a
+      // separate mechanism from dnd-kit's sensors (already guarded against
+      // above) and needs its own, native fix.
+      draggable={false}
+      onDragStart={(e) => e.preventDefault()}
       className={`block bg-white rounded-md border p-2 sm:p-3 shadow-sm hover:shadow-md transition-shadow ${
         lead.atRisk
           ? "border-l-4 border-l-red-500 border-y-gray-200 border-r-gray-200"
@@ -125,10 +137,14 @@ export default function LeadCard({
           aria-label="Move to Awaiting Response"
           // The card itself is a Link, and this button sits inside a
           // draggable wrapper on the Kanban board — preventDefault/
-          // stopPropagation on click stops the Link navigating, and
-          // stopPropagation on pointerDown stops dnd-kit's drag sensors
-          // (attached to an ancestor) from ever seeing the gesture start.
-          onPointerDown={(e) => e.stopPropagation()}
+          // stopPropagation on click stops the Link navigating. The board's
+          // drag sensors (MouseSensor/TouchSensor) activate on native
+          // mousedown/touchstart, not pointerdown, so those are the events
+          // that need stopping here to keep an ancestor draggable wrapper
+          // from ever seeing the gesture start — including from the small
+          // incidental mouse movement a real click almost always has.
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
