@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import QuickLogModal from "./QuickLogModal";
 import LostReasonModal from "./LostReasonModal";
 import ScheduleFollowUpModal from "./ScheduleFollowUpModal";
+import DeleteLeadModal from "./DeleteLeadModal";
 import { usePaymentReviewEditor } from "./usePaymentReviewEditor";
 import {
   STAGE_LABELS,
@@ -174,6 +175,7 @@ export default function LeadDetail({
 
   const [tasks, setTasks] = useState(lead.tasks);
   const [followUpModalOpen, setFollowUpModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/crm/tags")
@@ -298,6 +300,19 @@ export default function LeadDetail({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ completed }),
     });
+  }
+
+  // Returns an error message on failure, or null on success — the modal
+  // stays open and shows the message rather than the page navigating away
+  // out from under a failed delete (e.g. blocked by an existing Job).
+  async function deleteLead(): Promise<string | null> {
+    const res = await fetch(`/api/crm/leads/${lead.id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      return body?.error ?? "Something went wrong deleting this lead.";
+    }
+    router.push(`/admin/crm/leads?deleted=${encodeURIComponent(lead.name)}`);
+    return null;
   }
 
   const field = (
@@ -772,6 +787,23 @@ export default function LeadDetail({
         )}
       </div>
 
+      {/* Danger zone — kept visually distinct and separated from every other
+          section so it can't be reached by an accidental click. */}
+      <div className="border border-red-200 rounded-lg p-4 sm:p-5">
+        <h2 className="text-sm font-bold text-red-700 mb-1">Danger Zone</h2>
+        <p className="text-xs text-gray-500 mb-3">
+          Deleting a lead permanently removes it, along with its activity, follow-ups, and tags.
+          This cannot be undone.
+        </p>
+        <button
+          type="button"
+          onClick={() => setDeleteModalOpen(true)}
+          className="text-sm font-bold text-red-600 hover:text-red-700 border border-red-300 hover:bg-red-50 px-4 py-2 rounded-md transition-colors"
+        >
+          Delete Lead
+        </button>
+      </div>
+
       <QuickLogModal
         open={modalOpen === "call"}
         onClose={() => setModalOpen(null)}
@@ -796,6 +828,12 @@ export default function LeadDetail({
         open={followUpModalOpen}
         onClose={() => setFollowUpModalOpen(false)}
         onSave={addFollowUp}
+      />
+      <DeleteLeadModal
+        open={deleteModalOpen}
+        leadName={lead.name}
+        onCancel={() => setDeleteModalOpen(false)}
+        onConfirm={deleteLead}
       />
     </div>
   );

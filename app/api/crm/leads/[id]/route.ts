@@ -92,3 +92,38 @@ export async function PATCH(
 
   return NextResponse.json({ lead });
 }
+
+export async function DELETE(
+  _req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await params;
+
+  const lead = await prisma.lead.findUnique({
+    where: { id },
+    select: { id: true, name: true, job: { select: { id: true } } },
+  });
+
+  if (!lead) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  // A Job represents real completed work — deleting the lead would silently
+  // cascade the Job away too (the FK is ON DELETE CASCADE), so that's
+  // blocked here rather than left to the database to do quietly.
+  if (lead.job) {
+    return NextResponse.json(
+      { error: "This lead has a Job on record and can't be deleted. Remove the Job first if you're sure." },
+      { status: 409 }
+    );
+  }
+
+  await prisma.lead.delete({ where: { id } });
+
+  return NextResponse.json({ ok: true });
+}

@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import KanbanBoard from "./KanbanBoard";
 import LeadTable from "./LeadTable";
 import LeadFilterBar from "./LeadFilterBar";
@@ -15,6 +16,17 @@ export default function LeadsView({
   leads: KanbanLead[];
   users: { id: string; name: string }[];
 }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const deletedName = searchParams.get("deleted");
+  const [deletedBanner, setDeletedBanner] = useState(deletedName);
+
+  // Strips ?deleted= from the URL once shown, so refreshing or coming back
+  // to this page later doesn't keep re-showing the same message.
+  useEffect(() => {
+    if (deletedName) router.replace("/admin/crm/leads", { scroll: false });
+  }, [deletedName, router]);
+
   const [view, setView] = useState<"kanban" | "table">("kanban");
   const [filters, setFilters] = useState<LeadFilters>({});
 
@@ -33,6 +45,19 @@ export default function LeadsView({
 
   return (
     <div>
+      {deletedBanner && (
+        <div className="flex items-center justify-between gap-3 bg-green-50 border border-green-200 text-green-800 text-sm rounded-md px-3 py-2 mb-3">
+          <span>{deletedBanner} was deleted.</span>
+          <button
+            type="button"
+            onClick={() => setDeletedBanner(null)}
+            aria-label="Dismiss"
+            className="text-green-600 hover:text-green-800 font-bold"
+          >
+            ×
+          </button>
+        </div>
+      )}
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold text-blue-900">Leads</h1>
         <div className="flex items-center gap-2">
