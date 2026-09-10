@@ -135,16 +135,14 @@ export default function LeadCard({
           type="button"
           title="Move to Awaiting Response"
           aria-label="Move to Awaiting Response"
-          // The card itself is a Link, and this button sits inside a
-          // draggable wrapper on the Kanban board — preventDefault/
-          // stopPropagation on click stops the Link navigating. The board's
-          // drag sensors (MouseSensor/TouchSensor) activate on native
-          // mousedown/touchstart, not pointerdown, so those are the events
-          // that need stopping here to keep an ancestor draggable wrapper
-          // from ever seeing the gesture start — including from the small
-          // incidental mouse movement a real click almost always has.
-          onMouseDown={(e) => e.stopPropagation()}
-          onTouchStart={(e) => e.stopPropagation()}
+          // The card itself is a Link — preventDefault/stopPropagation on
+          // click stops the Link navigating. Deliberately not stopping
+          // mousedown/touchstart (see InlinePaymentReview.tsx for the full
+          // reasoning): that unconditionally kept the board's drag sensors
+          // from ever seeing a gesture that started on this button at all,
+          // meaning a card could never be picked up by grabbing it here.
+          // The sensors' own activation thresholds already distinguish a
+          // plain click from a real drag without that.
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();

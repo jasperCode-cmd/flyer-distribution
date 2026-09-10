@@ -116,28 +116,27 @@ export default function InlinePaymentReview({
   return (
     <div
       ref={containerRef}
-      // The card is a Link, and on the Kanban board it also sits inside a
-      // draggable wrapper — preventDefault/stopPropagation on click keeps
-      // every interaction in here (trigger or expanded controls alike) from
+      // The card is a Link, so preventDefault/stopPropagation on click keeps
+      // a click on either pill (trigger or expanded controls alike) from
       // firing the Link's navigation.
       //
-      // The drag sensors configured on the board are MouseSensor and
-      // TouchSensor, which activate on native onMouseDown/onTouchStart —
-      // NOT onPointerDown (confirmed by reading dnd-kit's source; the two
-      // are separate native events, and stopping one does nothing to stop
-      // the other). Stopping only onPointerDown, as the stage-advance
-      // button originally did, left mousedown free to reach the ancestor
-      // draggable wrapper. On a real desktop click there is almost always
-      // a pixel or two of incidental hand movement between mousedown and
-      // mouseup; once that crosses MouseSensor's 8px activation distance,
-      // dnd-kit calls its own document-level capture-phase click swallower
-      // (to stop a real drag's release from also registering as a click),
-      // which ate the very click that had just opened this dropdown —
-      // reproduced directly with a jittered mouse.move between down and up.
-      // Stopping mousedown/touchstart here means the sensors never see the
-      // gesture start at all, regardless of any incidental movement.
-      onMouseDown={(e) => e.stopPropagation()}
-      onTouchStart={(e) => e.stopPropagation()}
+      // Deliberately NOT stopping mousedown/touchstart here (an earlier
+      // version of this guard did, to protect against dnd-kit's own
+      // click-swallowing after a real drag) — that unconditionally stopped
+      // the gesture from ever reaching the board's draggable wrapper at
+      // all, which also meant a card could never be picked up by grabbing
+      // it on top of either pill: confirmed directly, dragging by the pill
+      // left the card's stage unchanged while dragging by any other part of
+      // the same card worked. The drag sensors (MouseSensor: 8px distance;
+      // TouchSensor: 250ms delay) already make their own correct call on a
+      // plain click that never crosses their threshold — they never
+      // activate, so the click reaches this button's onClick normally — and
+      // on a real drag that does cross it, dnd-kit's own capture-phase
+      // click swallower (registered only once a drag actually activates)
+      // stops the stray click from reopening the pill. The native-drag
+      // issue this guard was originally layered onto (the card's own <a>
+      // being draggable by default) is handled separately, via
+      // draggable={false} on that Link.
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
