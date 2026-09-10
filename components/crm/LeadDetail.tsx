@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import QuickLogModal from "./QuickLogModal";
 import LostReasonModal from "./LostReasonModal";
 import ScheduleFollowUpModal from "./ScheduleFollowUpModal";
+import { usePaymentReviewEditor } from "./usePaymentReviewEditor";
 import {
   STAGE_LABELS,
   SOURCE_LABELS,
@@ -14,7 +15,7 @@ import {
   LOST_REASON_LABELS,
   REVIEW_STATUS_LABELS,
   PAYMENT_STATUS_LABELS,
-  PAYMENT_AUTOFILL_FRACTION,
+  CLOSED_WON_STAGES,
   isOverdue,
 } from "@/lib/crm-constants";
 
@@ -136,9 +137,25 @@ export default function LeadDetail({
   const [lostReasonNote, setLostReasonNote] = useState(lead.lostReasonNote);
   const [lostPromptOpen, setLostPromptOpen] = useState(false);
 
-  const [reviewStatus, setReviewStatus] = useState(lead.reviewStatus);
-  const [paymentStatus, setPaymentStatus] = useState(lead.paymentStatus);
-  const [amountPaid, setAmountPaid] = useState(lead.amountPaid ?? "");
+  // Shared with the Kanban card's inline editor, so "editable directly from
+  // the Kanban card" is genuinely the same behaviour as this page rather
+  // than a second reimplementation of it.
+  const {
+    reviewStatus,
+    setReviewStatus,
+    paymentStatus,
+    onPaymentStatusChange,
+    amountPaid,
+    setAmountPaid,
+    commitAmountPaid,
+    overpaid,
+  } = usePaymentReviewEditor({
+    leadId: lead.id,
+    dealValue: lead.dealValue,
+    initialReviewStatus: lead.reviewStatus,
+    initialPaymentStatus: lead.paymentStatus,
+    initialAmountPaid: lead.amountPaid,
+  });
 
   function patchLead(body: Record<string, unknown>) {
     return fetch(`/api/crm/leads/${lead.id}`, {
@@ -147,42 +164,6 @@ export default function LeadDetail({
       body: JSON.stringify(body),
     });
   }
-
-  // Picking a status pre-fills the amount from the deal value where there is
-  // a sensible share to take (50% deposit, 100% in full). Partial has no
-  // default — the figure is arbitrary, so the user types it. With no deal
-  // value there is nothing to derive from, so every status just leaves the
-  // field open to type into. The pre-filled figure stays editable either way.
-  function onPaymentStatusChange(next: string) {
-    setPaymentStatus(next);
-
-    const dealValue = lead.dealValue ? Number(lead.dealValue) : null;
-    const fraction = PAYMENT_AUTOFILL_FRACTION[next];
-
-    let nextAmount: string;
-    if (next === "NOT_PAID") {
-      // Leaving a figure against "Not Paid" would misreport the lead; it is
-      // one click to restore by choosing a paid status again.
-      nextAmount = "";
-    } else if (fraction !== undefined && dealValue !== null && !Number.isNaN(dealValue)) {
-      nextAmount = (dealValue * fraction).toFixed(2);
-    } else {
-      nextAmount = amountPaid;
-    }
-
-    setAmountPaid(nextAmount);
-    patchLead({ paymentStatus: next, amountPaid: nextAmount === "" ? null : nextAmount });
-  }
-
-  const dealValueNumber = lead.dealValue ? Number(lead.dealValue) : null;
-  const amountPaidNumber = amountPaid === "" ? null : Number(amountPaid);
-  // Flagged rather than blocked: revised quotes, fees and overpayments are
-  // all real, so this warns without preventing the save.
-  const overpaid =
-    dealValueNumber !== null &&
-    amountPaidNumber !== null &&
-    !Number.isNaN(amountPaidNumber) &&
-    amountPaidNumber > dealValueNumber;
 
   const [modalOpen, setModalOpen] = useState<"call" | "email" | null>(null);
   const [newNote, setNewNote] = useState("");
@@ -444,20 +425,16 @@ export default function LeadDetail({
           </div>
         )}
 
-        {/* Only meaningful once the lead is Won — same conditional pattern as
-            the Lost Reason block above. */}
-        {stage === "WON" && (
+        {/* Only meaningful once the lead is Won or Completed — same
+            conditional pattern as the Lost Reason block above. */}
+        {(CLOSED_WON_STAGES as readonly string[]).includes(stage) && (
           <div className="mt-3 bg-gray-50 border border-gray-200 rounded-md px-3 py-2.5">
             <div className="grid sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-gray-500 mb-1">Review Status</label>
                 <select
                   value={reviewStatus}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setReviewStatus(value);
-                    patchLead({ reviewStatus: value });
-                  }}
+                  onChange={(e) => setReviewStatus(e.target.value)}
                   className="w-full border border-gray-300 rounded-md px-2 py-2 text-sm bg-white"
                 >
                   {Object.entries(REVIEW_STATUS_LABELS).map(([k, v]) => (
@@ -498,9 +475,7 @@ export default function LeadDetail({
                   inputMode="decimal"
                   value={amountPaid}
                   onChange={(e) => setAmountPaid(e.target.value)}
-                  onBlur={() =>
-                    patchLead({ amountPaid: amountPaid === "" ? null : amountPaid })
-                  }
+                  onBlur={commitAmountPaid}
                   placeholder={lead.dealValue ? "" : "Enter amount"}
                   className="w-full sm:w-48 border border-gray-300 rounded-md px-2 py-2 text-sm"
                 />
@@ -620,7 +595,7 @@ export default function LeadDetail({
         </div>
       </div>
 
-      {/* Job (only present once Won) */}
+      {/* Job (created once Won or Completed, stays visible afterward) */}
       {lead.job && (
         <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5">
           <h2 className="text-sm font-bold text-blue-900 mb-3">Job</h2>

@@ -45,6 +45,7 @@ enum PipelineStage {
   UNCONTACTED
   AWAITING_RESPONSE
   WON
+  COMPLETED
   LOST
 }
 
@@ -62,9 +63,9 @@ enum LeadPriority {
   LOW
 }
 
-// Both of the below are only meaningful once a lead is Won, but they carry a
-// default on every lead so the columns can be NOT NULL and no row needs
-// special handling.
+// Both of the below are only meaningful once a lead is Won or Completed, but
+// they carry a default on every lead so the columns can be NOT NULL and no
+// row needs special handling.
 enum ReviewStatus {
   NOT_REQUESTED
   REQUESTED
@@ -109,9 +110,10 @@ model Lead {
   lostReason     LostReason?
   lostReasonNote String?
 
-  // Surfaced on the Won stage. amountPaid mirrors dealValue's precision so
-  // the two can be compared without rounding surprises; it stays nullable
-  // because a lead with no quoted value has nothing to auto-fill from.
+  // Surfaced on the Won and Completed stages. amountPaid mirrors dealValue's
+  // precision so the two can be compared without rounding surprises; it
+  // stays nullable because a lead with no quoted value has nothing to
+  // auto-fill from.
   reviewStatus  ReviewStatus  @default(NOT_REQUESTED)
   paymentStatus PaymentStatus @default(NOT_PAID)
   amountPaid    Decimal?      @db.Decimal(10, 2)

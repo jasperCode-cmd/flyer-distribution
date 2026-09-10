@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { PRIORITY_LABELS, PAYMENT_STATUS_LABELS } from "@/lib/crm-constants";
+import { PRIORITY_LABELS, CLOSED_WON_STAGES } from "@/lib/crm-constants";
+import InlinePaymentReview from "./InlinePaymentReview";
 
 export type KanbanLead = {
   id: string;
@@ -29,25 +30,6 @@ const PRIORITY_DOT_COLOR: Record<string, string> = {
   LOW: "bg-gray-400",
 };
 
-// Not Requested renders nothing — it is the default on every lead, so showing
-// it would put a badge on every Won card while saying nothing.
-const REVIEW_BADGE: Record<string, { icon: string; className: string; title: string }> = {
-  REQUESTED: { icon: "☆", className: "text-amber-500", title: "Review requested" },
-  RECEIVED: { icon: "★", className: "text-emerald-600", title: "Review received" },
-};
-
-const PAYMENT_PILL: Record<string, string> = {
-  NOT_PAID: "bg-gray-100 text-gray-500",
-  DEPOSIT_PAID: "bg-amber-50 text-amber-700",
-  PARTIAL_PAID: "bg-amber-50 text-amber-700",
-  PAID_IN_FULL: "bg-emerald-50 text-emerald-700",
-};
-
-// Amount is worth showing only where it is not implied by the status itself:
-// a part-payment is an arbitrary figure, whereas "Paid in Full" is the deal
-// value and "Not Paid" is nothing.
-const PAYMENT_SHOWS_AMOUNT = new Set(["DEPOSIT_PAID", "PARTIAL_PAID"]);
-
 export default function LeadCard({
   lead,
   onAdvance,
@@ -58,13 +40,9 @@ export default function LeadCard({
   // LeadCard might render outside that context) simply hides the button.
   onAdvance?: (leadId: string) => void;
 }) {
-  // Both fields exist on every lead, but only mean anything once it is Won,
-  // so the badges are confined to that column.
-  const isWon = lead.stage === "WON";
-  const review = isWon ? REVIEW_BADGE[lead.reviewStatus ?? ""] : undefined;
-  const paymentStatus = isWon ? lead.paymentStatus : undefined;
-  const paidAmount =
-    lead.amountPaid !== null && lead.amountPaid !== undefined ? Number(lead.amountPaid) : null;
+  // Both fields exist on every lead, but only mean anything once it is Won
+  // or Completed, so the editor is confined to those columns.
+  const isClosedWon = (CLOSED_WON_STAGES as readonly string[]).includes(lead.stage);
 
   // A genuine live inbound enquiry, not yet actioned — distinct from the
   // cold-outreach/import leads it would otherwise sit among in that column.
@@ -121,25 +99,14 @@ export default function LeadCard({
           ))}
         </div>
       )}
-      {paymentStatus && (
-        <div className="flex flex-wrap items-center gap-1 mt-1.5">
-          <span
-            className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
-              PAYMENT_PILL[paymentStatus] ?? PAYMENT_PILL.NOT_PAID
-            }`}
-            title={`Payment: ${PAYMENT_STATUS_LABELS[paymentStatus] ?? paymentStatus}`}
-          >
-            {PAYMENT_STATUS_LABELS[paymentStatus] ?? paymentStatus}
-            {PAYMENT_SHOWS_AMOUNT.has(paymentStatus) && paidAmount !== null && (
-              <> · {formatCurrency(paidAmount)}</>
-            )}
-          </span>
-          {review && (
-            <span className={`text-xs leading-none ${review.className}`} title={review.title}>
-              {review.icon}
-            </span>
-          )}
-        </div>
+      {isClosedWon && (
+        <InlinePaymentReview
+          leadId={lead.id}
+          dealValue={typeof lead.dealValue === "string" ? lead.dealValue : null}
+          reviewStatus={lead.reviewStatus ?? "NOT_REQUESTED"}
+          paymentStatus={lead.paymentStatus ?? "NOT_PAID"}
+          amountPaid={typeof lead.amountPaid === "string" ? lead.amountPaid : null}
+        />
       )}
       <div className="flex items-center justify-between mt-1.5 sm:mt-2">
         <span className="text-[11px] sm:text-xs font-medium text-gray-700">

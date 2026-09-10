@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { STAGE_LABELS, SOURCE_LABELS } from "@/lib/crm-constants";
 
-const VALID_STAGES = ["UNCONTACTED", "AWAITING_RESPONSE", "WON", "LOST"];
+const VALID_STAGES = ["UNCONTACTED", "AWAITING_RESPONSE", "WON", "COMPLETED", "LOST"];
 // Derived from the label map rather than a second hand-written list, so a new
 // LeadSource can never be offered in the UI but rejected here.
 const VALID_SOURCES = Object.keys(SOURCE_LABELS);
@@ -91,7 +91,7 @@ export async function PATCH(req: Request) {
     await prisma.$transaction(ops);
   }
 
-  if (stage === "WON") {
+  if (stage === "WON" || stage === "COMPLETED") {
     for (const lead of leads) {
       const job = await prisma.job.findUnique({ where: { leadId: lead.id } });
       if (!job) await prisma.job.create({ data: { leadId: lead.id } });

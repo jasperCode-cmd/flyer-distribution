@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { STAGE_LABELS } from "@/lib/crm-constants";
 
-const VALID_STAGES = ["UNCONTACTED", "AWAITING_RESPONSE", "WON", "LOST"];
+const VALID_STAGES = ["UNCONTACTED", "AWAITING_RESPONSE", "WON", "COMPLETED", "LOST"];
 
 export async function PATCH(
   req: Request,
@@ -46,8 +46,10 @@ export async function PATCH(
     }),
   ]);
 
-  // A Won lead gets a Job record created automatically if it doesn't have one yet.
-  if (stage === "WON") {
+  // A Won or Completed lead gets a Job record created automatically if it
+  // doesn't have one yet (normally already true by the time a lead reaches
+  // Completed, but this covers a lead moved there directly).
+  if (stage === "WON" || stage === "COMPLETED") {
     const job = await prisma.job.findUnique({ where: { leadId: id } });
     if (!job) {
       await prisma.job.create({ data: { leadId: id } });

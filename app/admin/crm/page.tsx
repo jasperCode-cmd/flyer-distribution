@@ -51,7 +51,7 @@ export default async function CrmDashboardPage() {
           <p className="text-2xl font-bold text-blue-900">
             {(stats.conversionRate * 100).toFixed(0)}%
           </p>
-          <p className="text-[11px] text-gray-400 mt-0.5">Won ÷ (Won + Lost)</p>
+          <p className="text-[11px] text-gray-400 mt-0.5">(Won + Completed) ÷ (Won + Completed + Lost)</p>
         </div>
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <p className="text-xs text-gray-500 mb-1">Stale Leads (5+ days)</p>
@@ -59,7 +59,7 @@ export default async function CrmDashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {Object.entries(STAGE_LABELS).map(([stage, label]) => (
           <div key={stage} className="bg-white rounded-lg border border-gray-200 p-4 text-center">
             <p className="text-xs text-gray-500 mb-1">{label}</p>

@@ -34,14 +34,18 @@ export function computeDashboardStats<
     UNCONTACTED: 0,
     AWAITING_RESPONSE: 0,
     WON: 0,
+    COMPLETED: 0,
     LOST: 0,
   };
   for (const l of leads) {
     stageCounts[l.stage] = (stageCounts[l.stage] ?? 0) + 1;
   }
 
-  const nonOpenCount = stageCounts.WON + stageCounts.LOST;
-  const conversionRate = nonOpenCount > 0 ? stageCounts.WON / nonOpenCount : 0;
+  // Completed is Won further along, not a separate outcome — a lead moving
+  // from one to the other must not shift this number.
+  const closedWonCount = stageCounts.WON + stageCounts.COMPLETED;
+  const nonOpenCount = closedWonCount + stageCounts.LOST;
+  const conversionRate = nonOpenCount > 0 ? closedWonCount / nonOpenCount : 0;
 
   const staleLeads = leads
     .filter((l) => isStale(l))
@@ -60,10 +64,16 @@ export const STAGE_LABELS: Record<string, string> = {
   UNCONTACTED: "Uncontacted",
   AWAITING_RESPONSE: "Awaiting Response",
   WON: "Won",
+  COMPLETED: "Completed",
   LOST: "Lost",
 };
 
-export const STAGES = ["UNCONTACTED", "AWAITING_RESPONSE", "WON", "LOST"] as const;
+export const STAGES = ["UNCONTACTED", "AWAITING_RESPONSE", "WON", "COMPLETED", "LOST"] as const;
+
+// Stages where payment/review tracking applies and pipeline value no longer
+// counts the deal as open. Won and Completed are the same outcome at two
+// points in the job lifecycle, not two different outcomes.
+export const CLOSED_WON_STAGES = ["WON", "COMPLETED"] as const;
 
 export const SOURCE_LABELS: Record<string, string> = {
   WEBSITE_QUOTE_FORM: "Website Quote Form",
@@ -82,8 +92,9 @@ export const PRIORITY_LABELS: Record<string, string> = {
   LOW: "Low",
 };
 
-// Both of these only carry meaning once a lead is Won, but every lead holds a
-// default, so nothing needs to special-case a non-Won lead.
+// Both of these only carry meaning once a lead is Won or Completed, but
+// every lead holds a default, so nothing needs to special-case one that
+// isn't.
 export const REVIEW_STATUSES = ["NOT_REQUESTED", "REQUESTED", "RECEIVED"] as const;
 
 export const REVIEW_STATUS_LABELS: Record<string, string> = {
