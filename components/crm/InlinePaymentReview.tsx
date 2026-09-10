@@ -116,27 +116,38 @@ export default function InlinePaymentReview({
   return (
     <div
       ref={containerRef}
-      // The card is a Link, so preventDefault/stopPropagation on click keeps
-      // a click on either pill (trigger or expanded controls alike) from
+      // The card is a Link, and on the Kanban board it also sits inside a
+      // draggable wrapper — preventDefault/stopPropagation on click keeps
+      // every interaction in here (trigger or expanded controls alike) from
       // firing the Link's navigation.
       //
-      // Deliberately NOT stopping mousedown/touchstart here (an earlier
-      // version of this guard did, to protect against dnd-kit's own
-      // click-swallowing after a real drag) — that unconditionally stopped
-      // the gesture from ever reaching the board's draggable wrapper at
-      // all, which also meant a card could never be picked up by grabbing
-      // it on top of either pill: confirmed directly, dragging by the pill
-      // left the card's stage unchanged while dragging by any other part of
-      // the same card worked. The drag sensors (MouseSensor: 8px distance;
-      // TouchSensor: 250ms delay) already make their own correct call on a
-      // plain click that never crosses their threshold — they never
-      // activate, so the click reaches this button's onClick normally — and
-      // on a real drag that does cross it, dnd-kit's own capture-phase
-      // click swallower (registered only once a drag actually activates)
-      // stops the stray click from reopening the pill. The native-drag
-      // issue this guard was originally layered onto (the card's own <a>
-      // being draggable by default) is handled separately, via
-      // draggable={false} on that Link.
+      // Reinstated after a round-trip: a version of this guard without
+      // mousedown/touchstart stopPropagation (to let a card be picked up by
+      // grabbing directly on a pill) shipped briefly, and broke BOTH pills
+      // in Firefox — where before, only the review pill had a Firefox
+      // problem and payment (which has always had this exact guard) was
+      // fine. That points at dnd-kit's MouseSensor itself: once mousedown
+      // reaches it, it starts "pending" a possible drag and keeps
+      // document-level listeners attached for up to 50ms after mouseup even
+      // if the distance threshold is never crossed (confirmed by reading
+      // dnd-kit's source — AbstractPointerSensor.detach() delays removing
+      // them). Opening a native <select> with autoFocus the instant this
+      // click's onClick fires is exactly the kind of thing Firefox is
+      // already known (from the review-pill investigation) to handle with
+      // extra, differently-timed internal events around a native popup —
+      // if any of that lands inside that leftover window, it's plausible
+      // dnd-kit mistakes it for continued pointer movement and activates a
+      // drag retroactively, which would explain a flash-open-then-close on
+      // both pills, Firefox only. Restoring the guard keeps mousedown from
+      // ever reaching the sensor for a pill click at all, removing that
+      // window entirely — matching payment's original, still-correct
+      // behaviour. This does mean a card can't be picked up by grabbing
+      // directly on a pill, same trade-off as before; that turned out to
+      // be a real but likely unrelated bug, not the actual cause of the
+      // Won->Completed report (which read as an optimistic update being
+      // reverted by the server, not a drag failing to start at all).
+      onMouseDown={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();

@@ -135,14 +135,16 @@ export default function LeadCard({
           type="button"
           title="Move to Awaiting Response"
           aria-label="Move to Awaiting Response"
-          // The card itself is a Link — preventDefault/stopPropagation on
-          // click stops the Link navigating. Deliberately not stopping
-          // mousedown/touchstart (see InlinePaymentReview.tsx for the full
-          // reasoning): that unconditionally kept the board's drag sensors
-          // from ever seeing a gesture that started on this button at all,
-          // meaning a card could never be picked up by grabbing it here.
-          // The sensors' own activation thresholds already distinguish a
-          // plain click from a real drag without that.
+          // The card itself is a Link, and this button sits inside a
+          // draggable wrapper on the Kanban board — preventDefault/
+          // stopPropagation on click stops the Link navigating, and on
+          // mousedown/touchstart keeps the board's drag sensors from ever
+          // seeing the gesture start (see InlinePaymentReview.tsx for the
+          // full reasoning — this guard was briefly removed to let a card
+          // be dragged by grabbing a pill directly, which broke both pills
+          // in Firefox, so it's reinstated here for the same reason).
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();

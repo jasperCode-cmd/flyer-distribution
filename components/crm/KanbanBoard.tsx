@@ -106,6 +106,7 @@ function Column({
 export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead[] }) {
   const [leads, setLeads] = useState(initialLeads);
   const [pending, setPending] = useState(false);
+  const [stageError, setStageError] = useState<string | null>(null);
   const [lostPrompt, setLostPrompt] = useState<{ leadId: string; previousStage: string } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeStage, setActiveStage] = useState(0);
@@ -172,25 +173,18 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
   }
 
   // Split deliberately: one PointerSensor would apply the same constraint to
-  // both input types. Touch requires a stationary long-press, so a swipe
-  // across the column strip scrolls rather than picking a card up — moving
-  // more than `tolerance` before `delay` elapses cancels the activation.
+  // both input types. Mouse keeps the original 8px threshold. Touch instead
+  // requires a stationary long-press, so a swipe across the column strip
+  // scrolls rather than picking a card up — moving more than `tolerance`
+  // before `delay` elapses cancels the activation.
   //
-  // Mouse's distance was raised from the original 8px to 16px after cards
-  // gained clickable pills (payment/review status) — dragging a card by
-  // grabbing directly on top of one only works if mousedown is allowed to
-  // reach this sensor at all (see InlinePaymentReview.tsx for why that
-  // guard was removed), but once it does, the incidental pixel or two of
-  // drift a real click always has can itself cross a too-tight distance
-  // threshold, activating a drag and, via dnd-kit's own document-level
-  // click swallower for a real drag's release, silently eating the click
-  // that should have opened the pill — reproduced directly with a jittered
-  // mouse.move (~10px) between down and up, the same jitter this session
-  // has used throughout to simulate realistic click imprecision. 16px gives
-  // that headroom while staying far short of the tens-to-hundreds of pixels
-  // an actual drag between columns moves.
+  // (This was briefly raised to 16px, paired with letting mousedown reach
+  // this sensor from inside the pills, to support dragging a card by
+  // grabbing a pill directly. That combination broke both pills in Firefox
+  // — see InlinePaymentReview.tsx — so both changes were reverted together;
+  // pills are back to being fully outside dnd-kit's reach, same as before.)
   const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 16 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } })
   );
 
@@ -202,6 +196,7 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
   ) {
     setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, stage: newStage } : l)));
     setPending(true);
+    setStageError(null);
 
     try {
       const res = await fetch(`/api/crm/leads/${leadId}/stage`, {
@@ -209,10 +204,17 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stage: newStage, ...extra }),
       });
-      if (!res.ok) throw new Error("Failed to update stage");
-    } catch {
-      // Revert on failure
+      if (!res.ok) {
+        // Surfaced instead of just reverting silently — a card moving then
+        // snapping back with no visible reason is nearly undiagnosable
+        // remotely; the server's actual error (e.g. a database rejecting a
+        // stage value it doesn't actually have yet) is worth showing.
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error || `Failed to update stage (${res.status})`);
+      }
+    } catch (err) {
       setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, stage: previousStage } : l)));
+      setStageError(err instanceof Error ? err.message : "Failed to update stage");
     } finally {
       setPending(false);
     }
@@ -293,6 +295,14 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
       </div>
       {pending && (
         <p className="text-xs text-gray-400 mt-2">Saving...</p>
+      )}
+      {stageError && (
+        <p className="text-xs text-red-600 mt-2">
+          {stageError} — the card was moved back.{" "}
+          <button type="button" onClick={() => setStageError(null)} className="underline">
+            Dismiss
+          </button>
+        </p>
       )}
       <LostReasonModal
         open={lostPrompt !== null}
