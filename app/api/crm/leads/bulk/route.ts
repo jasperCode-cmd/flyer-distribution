@@ -87,16 +87,21 @@ export async function PATCH(req: Request) {
     }
   }
 
-  if (ops.length > 0) {
-    await prisma.$transaction(ops);
-  }
-
-  if (stage === "WON" || stage === "COMPLETED") {
-    for (const lead of leads) {
-      const job = await prisma.job.findUnique({ where: { leadId: lead.id } });
-      if (!job) await prisma.job.create({ data: { leadId: lead.id } });
+  try {
+    if (ops.length > 0) {
+      await prisma.$transaction(ops);
     }
-  }
 
-  return NextResponse.json({ updated: leads.length });
+    if (stage === "WON" || stage === "COMPLETED") {
+      for (const lead of leads) {
+        const job = await prisma.job.findUnique({ where: { leadId: lead.id } });
+        if (!job) await prisma.job.create({ data: { leadId: lead.id } });
+      }
+    }
+
+    return NextResponse.json({ updated: leads.length });
+  } catch (err) {
+    console.error(`Failed bulk update (stage=${stage}) for leads ${ids.join(", ")}:`, err);
+    return NextResponse.json({ error: "Failed to apply bulk update" }, { status: 500 });
+  }
 }
