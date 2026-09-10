@@ -91,8 +91,23 @@ export default function InlinePaymentReview({
         setExpandedField(null);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    // Attaching on the very next tick, not synchronously in this effect, is
+    // deliberate: Firefox renders a native <select>'s open dropdown as an
+    // OS-level popup rather than in-page like Chrome, and combined with
+    // autoFocus firing the instant the select mounts, it can emit its own
+    // focus/mousedown handling as a side effect of that same click that
+    // opened this editor — observed in Firefox only (never Chrome) as the
+    // editor flashing open and immediately collapsing again. Deferring the
+    // listener past the current call stack means any such same-click,
+    // browser-internal event has already happened before we start listening,
+    // so it can no longer be mistaken for a genuine subsequent outside click.
+    const timer = setTimeout(() => {
+      document.addEventListener("mousedown", handleClickOutside);
+    }, 0);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, [expandedField]);
 
   const paidAmount = amountPaid === "" ? null : Number(amountPaid);
@@ -192,19 +207,27 @@ export default function InlinePaymentReview({
           {REVIEW_STATUS_LABELS[reviewStatus] ?? reviewStatus}
         </button>
       ) : (
-        <select
-          autoFocus
-          value={reviewStatus}
-          onChange={(e) => {
-            setReviewStatus(e.target.value);
-            setExpandedField(null);
-          }}
-          className={COMPACT_SELECT}
-        >
-          {Object.entries(REVIEW_STATUS_LABELS).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
-          ))}
-        </select>
+        // Wrapped the same way as the payment select above — even though
+        // review never has a sibling input — for structural parity, on the
+        // chance the difference itself (a bare <select> as a direct flex
+        // child vs. one nested inside a span) is what's letting Firefox's
+        // native-popup behaviour reach the outside-click check differently
+        // than it does for payment's already-working, wrapped version.
+        <span className="inline-flex items-center gap-1">
+          <select
+            autoFocus
+            value={reviewStatus}
+            onChange={(e) => {
+              setReviewStatus(e.target.value);
+              setExpandedField(null);
+            }}
+            className={COMPACT_SELECT}
+          >
+            {Object.entries(REVIEW_STATUS_LABELS).map(([k, v]) => (
+              <option key={k} value={k}>{v}</option>
+            ))}
+          </select>
+        </span>
       )}
     </div>
   );
