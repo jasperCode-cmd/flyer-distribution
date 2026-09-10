@@ -176,6 +176,7 @@ export default function LeadDetail({
   const [tasks, setTasks] = useState(lead.tasks);
   const [followUpModalOpen, setFollowUpModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
 
   useEffect(() => {
     fetch("/api/crm/tags")
@@ -221,6 +222,17 @@ export default function LeadDetail({
       return;
     }
     commitStage(newStage);
+  }
+
+  async function duplicateLead() {
+    setDuplicating(true);
+    const res = await fetch(`/api/crm/leads/${lead.id}/duplicate`, { method: "POST" });
+    if (!res.ok) {
+      setDuplicating(false);
+      return;
+    }
+    const { lead: newLead } = await res.json();
+    router.push(`/admin/crm/leads/${newLead.id}`);
   }
 
   async function toggleAtRisk() {
@@ -342,17 +354,28 @@ export default function LeadDetail({
               <p className="text-sm text-gray-500">{lead.businessName}</p>
             )}
           </div>
-          <button
-            type="button"
-            onClick={toggleAtRisk}
-            className={`shrink-0 text-xs font-semibold px-3 py-1.5 rounded-md border transition-colors ${
-              atRisk
-                ? "bg-red-50 text-red-600 border-red-300"
-                : "bg-white text-gray-500 border-gray-300"
-            }`}
-          >
-            {atRisk ? "⚑ At Risk" : "Mark At Risk"}
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={duplicateLead}
+              disabled={duplicating}
+              title="Create a new lead pre-filled with this one's contact details, for a separate job or campaign"
+              className="text-xs font-semibold px-3 py-1.5 rounded-md border border-gray-300 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-60 transition-colors"
+            >
+              {duplicating ? "Duplicating..." : "Duplicate Lead"}
+            </button>
+            <button
+              type="button"
+              onClick={toggleAtRisk}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-md border transition-colors ${
+                atRisk
+                  ? "bg-red-50 text-red-600 border-red-300"
+                  : "bg-white text-gray-500 border-gray-300"
+              }`}
+            >
+              {atRisk ? "⚑ At Risk" : "Mark At Risk"}
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-4">
