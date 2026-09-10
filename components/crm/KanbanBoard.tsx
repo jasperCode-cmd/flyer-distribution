@@ -250,7 +250,21 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
   }
 
   return (
-    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      // Default acceleration (10) combined with the 5ms tick interval covers
+      // a full column's width (~330px) in well under 200ms once the pointer
+      // sits near the board's edge — confirmed directly: holding at the
+      // edge for 150ms+ scrolls straight past the intended column (e.g.
+      // Won -> Completed) onto the next one (Lost) before the drop lands,
+      // rather than stopping at Completed. A real user pausing briefly at
+      // the edge — completely ordinary — reproduces this. Lowering
+      // acceleration slows the scroll enough that a normal pause lands on
+      // the intended column instead of sailing past it.
+      autoScroll={{ acceleration: 1 }}
+    >
       {/* Mobile-only stage pills: show which stage is in view and jump
           between them, since only one column fits a phone screen. */}
       <div className="sm:hidden flex gap-1.5 overflow-x-auto pb-2 -mx-1 px-1">
