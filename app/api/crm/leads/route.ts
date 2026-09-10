@@ -10,6 +10,7 @@ export async function GET() {
   }
 
   const leads = await prisma.lead.findMany({
+    where: { scrapped: false },
     include: leadWithLastActivityArgs(),
     orderBy: { createdAt: "desc" },
   });

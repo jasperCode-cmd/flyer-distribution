@@ -12,6 +12,7 @@ export function leadWithLastActivityArgs() {
 
 export async function getLeadsWithLastActivity() {
   return prisma.lead.findMany({
+    where: { scrapped: false },
     include: leadWithLastActivityArgs(),
     orderBy: { createdAt: "desc" },
   });
@@ -124,6 +125,114 @@ export async function getUpcomingSchedule(limit = 6): Promise<UpcomingEntry[]> {
   }
 
   return entries.sort((a, b) => a.when.getTime() - b.when.getTime()).slice(0, limit);
+}
+
+// Shared WHERE clause for the dialer's active queue — see crm-constants'
+// queue-ordering comment for the full algorithm this pairs with. Kept as a
+// plain object builder (not a query itself) so /next (take 1) and /queue
+// (the full list view) stay byte-for-byte consistent with each other.
+export function dialerQueueWhere({
+  source,
+  tagId,
+  userId,
+  excludeIds,
+}: {
+  source: string;
+  tagId?: string;
+  userId: string;
+  excludeIds?: string[];
+}) {
+  return {
+    scrapped: false,
+    stage: "UNCONTACTED" as const,
+    source: source as never,
+    ...(tagId ? { tags: { some: { tagId } } } : {}),
+    OR: [{ assignedToId: null }, { assignedToId: userId }],
+    AND: [
+      { OR: [{ nextCallableAt: null }, { nextCallableAt: { lte: new Date() } }] },
+      ...(excludeIds && excludeIds.length > 0 ? [{ id: { notIn: excludeIds } }] : []),
+    ],
+  };
+}
+
+// nextCallableAt ascending with nulls last (never-called leads sort after
+// any real, overdue callback date), then createdAt ascending as the
+// tiebreak among never-called leads — oldest/first-imported first.
+export const dialerQueueOrderBy = [
+  { nextCallableAt: { sort: "asc" as const, nulls: "last" as const } },
+  { createdAt: "asc" as const },
+];
+
+export function dialerLeadSelect() {
+  return {
+    id: true,
+    name: true,
+    businessName: true,
+    phone: true,
+    source: true,
+    addressArea: true,
+    targetAreas: true,
+    postcode: true,
+    dealValue: true,
+    noAnswerStreak: true,
+    nextCallableAt: true,
+    assignedToId: true,
+    assignedTo: { select: { id: true, name: true } },
+    createdAt: true,
+    activities: {
+      where: { type: "CALL" as const },
+      orderBy: { createdAt: "desc" as const },
+      take: 1,
+      include: { user: { select: { name: true } } },
+    },
+  };
+}
+
+export async function getNextDialerLead(params: {
+  source: string;
+  tagId?: string;
+  userId: string;
+  excludeIds?: string[];
+}) {
+  return prisma.lead.findFirst({
+    where: dialerQueueWhere(params),
+    orderBy: dialerQueueOrderBy,
+    select: dialerLeadSelect(),
+  });
+}
+
+export async function getDialerQueueList(params: { source: string; tagId?: string; userId: string }) {
+  return prisma.lead.findMany({
+    where: dialerQueueWhere(params),
+    orderBy: dialerQueueOrderBy,
+    select: dialerLeadSelect(),
+    take: 200,
+  });
+}
+
+export async function getCallsMadeToday(userId: string) {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  return prisma.activity.count({
+    where: {
+      userId,
+      type: "CALL",
+      detail: { startsWith: "Dialer:" },
+      createdAt: { gte: startOfToday },
+    },
+  });
+}
+
+export async function getInboundLeadCount() {
+  return prisma.lead.count({
+    where: { scrapped: false, stage: "UNCONTACTED", source: "WEBSITE_QUOTE_FORM" },
+  });
+}
+
+export async function getDueCallbackCount() {
+  return prisma.lead.count({
+    where: { scrapped: false, stage: "UNCONTACTED", nextCallableAt: { lte: new Date() } },
+  });
 }
 
 export async function getFollowUpTasks() {

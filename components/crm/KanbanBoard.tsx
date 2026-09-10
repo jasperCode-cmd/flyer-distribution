@@ -11,6 +11,7 @@ import {
   useDroppable,
   type DragEndEvent,
 } from "@dnd-kit/core";
+import Link from "next/link";
 import LeadCard, { type KanbanLead } from "./LeadCard";
 import LostReasonModal from "./LostReasonModal";
 import { STAGES, STAGE_LABELS } from "@/lib/crm-constants";
@@ -79,9 +80,19 @@ function Column({
       }`}
     >
       <div className="px-2.5 sm:px-3 py-2 sm:py-2.5 border-b border-gray-200">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <h3 className="text-[13px] sm:text-sm font-bold text-blue-900">{STAGE_LABELS[stage]}</h3>
-          <span className="text-[11px] sm:text-xs text-gray-500">{leads.length}</span>
+          <div className="flex items-center gap-2 shrink-0">
+            {stage === "UNCONTACTED" && (
+              <Link
+                href="/admin/crm/dialer"
+                className="text-[11px] font-semibold text-blue-700 hover:underline"
+              >
+                Dial →
+              </Link>
+            )}
+            <span className="text-[11px] sm:text-xs text-gray-500">{leads.length}</span>
+          </div>
         </div>
         {totalValue > 0 && (
           <p className="text-[11px] text-gray-500 mt-0.5">

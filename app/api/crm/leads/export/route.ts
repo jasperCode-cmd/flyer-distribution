@@ -38,6 +38,7 @@ export async function GET(req: Request) {
   const params = url.searchParams;
 
   const leads = await prisma.lead.findMany({
+    where: { scrapped: false },
     include: { assignedTo: { select: { id: true, name: true } }, tags: { include: { tag: true } } },
     orderBy: { createdAt: "desc" },
   });

@@ -15,6 +15,7 @@ export async function GET(req: Request) {
 
   const leads = await prisma.lead.findMany({
     where: {
+      scrapped: false,
       OR: [
         { name: { contains: q, mode: "insensitive" } },
         { phone: { contains: q, mode: "insensitive" } },

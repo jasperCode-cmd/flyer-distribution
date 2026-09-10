@@ -105,3 +105,33 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Failed to apply bulk update" }, { status: 500 });
   }
 }
+
+// Used by the Scrapped Leads bin's "Delete selected" and "Clear Bin" — same
+// Job-block restriction as the single-lead delete route, applied per lead
+// rather than all-or-nothing, so one blocked lead doesn't stop the rest
+// from being removed.
+export async function DELETE(req: Request) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { ids } = await req.json();
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return NextResponse.json({ error: "No leads selected" }, { status: 400 });
+  }
+
+  const leads = await prisma.lead.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, name: true, job: { select: { id: true } } },
+  });
+
+  const blocked = leads.filter((l) => l.job).map((l) => ({ id: l.id, name: l.name }));
+  const deletable = leads.filter((l) => !l.job).map((l) => l.id);
+
+  if (deletable.length > 0) {
+    await prisma.lead.deleteMany({ where: { id: { in: deletable } } });
+  }
+
+  return NextResponse.json({ deleted: deletable.length, blocked });
+}

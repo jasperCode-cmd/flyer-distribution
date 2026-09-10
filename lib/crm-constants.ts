@@ -62,7 +62,7 @@ export function computeDashboardStats<
 
 export const STAGE_LABELS: Record<string, string> = {
   UNCONTACTED: "Uncontacted",
-  AWAITING_RESPONSE: "Awaiting Response",
+  AWAITING_RESPONSE: "Warm / Awaiting Response",
   WON: "Won",
   COMPLETED: "Completed",
   LOST: "Lost",
@@ -134,6 +134,33 @@ export const LOST_REASON_LABELS: Record<string, string> = {
   NOT_READY: "Not Ready",
   OTHER: "Other",
 };
+
+export const SCRAP_REASONS = [
+  "NOT_INTERESTED",
+  "WRONG_NUMBER",
+  "ALREADY_CUSTOMER",
+  "ASKED_NOT_TO_CONTACT",
+  "NO_ANSWER",
+  "OTHER",
+] as const;
+
+export const SCRAP_REASON_LABELS: Record<string, string> = {
+  NOT_INTERESTED: "Not Interested",
+  WRONG_NUMBER: "Wrong Number",
+  ALREADY_CUSTOMER: "Already a Customer",
+  ASKED_NOT_TO_CONTACT: "Asked Not to Contact",
+  NO_ANSWER: "No Answer",
+  OTHER: "Other",
+};
+
+// Preset callback offsets the dialer's Call Back form buttons map to —
+// centralised so the form and any future summary display agree on what
+// "Tomorrow"/"In 2 Days"/"Next Week" actually mean.
+export const CALLBACK_PRESETS = [
+  { key: "TOMORROW", label: "Tomorrow", days: 1 },
+  { key: "IN_2_DAYS", label: "In 2 Days", days: 2 },
+  { key: "NEXT_WEEK", label: "Next Week", days: 7 },
+] as const;
 
 export type LeadFilters = {
   stage?: string;

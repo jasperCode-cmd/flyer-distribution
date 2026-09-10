@@ -6,13 +6,17 @@ import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import SearchBar from "./SearchBar";
+import NotificationBell from "./NotificationBell";
 
 // "Add Lead" is deliberately not here — /admin/crm/leads/new is still a
 // live route, reached via the "+ Add Lead" button on the Leads page. The
 // Leads entry stays highlighted while on it, since the check is a prefix.
+// Dialer sits at the same visual weight as the rest — it's a primary daily
+// workflow, not a secondary destination.
 const primaryLinks = [
   { href: "/admin/crm", label: "Dashboard" },
   { href: "/admin/crm/leads", label: "Leads" },
+  { href: "/admin/crm/dialer", label: "Dialer" },
   { href: "/admin/crm/calendar", label: "Calendar" },
   { href: "/admin/crm/distributors", label: "Distributors" },
 ];
@@ -23,6 +27,7 @@ const moreLinks = [
   { href: "/admin/crm/map", label: "Map" },
   { href: "/admin/crm/tags", label: "Tags" },
   { href: "/admin/crm/import", label: "Import" },
+  { href: "/admin/crm/scrapped-leads", label: "Scrapped Leads" },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -155,6 +160,7 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-3">
             {!forcedChange && <div className="hidden lg:block"><SearchBar /></div>}
+            {!forcedChange && <NotificationBell />}
             {session?.user && (
               <span className="hidden sm:inline text-xs text-blue-200 truncate max-w-[160px]">
                 {session.user.name}

@@ -1,0 +1,382 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { SOURCE_LABELS } from "@/lib/crm-constants";
+import DialerAnsweredPanel from "./DialerAnsweredPanel";
+
+type LastCall = { createdAt: string; user: { name: string } | null };
+
+export type DialerLead = {
+  id: string;
+  name: string;
+  businessName: string | null;
+  phone: string | null;
+  source: string;
+  addressArea: string | null;
+  targetAreas: string | null;
+  postcode: string | null;
+  dealValue: string | null;
+  noAnswerStreak: number;
+  nextCallableAt: string | null;
+  assignedToId: string | null;
+  assignedTo: { id: string; name: string } | null;
+  createdAt: string;
+  activities: LastCall[];
+};
+
+function daysAgo(iso: string) {
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / (24 * 60 * 60 * 1000));
+  if (days <= 0) return "today";
+  if (days === 1) return "1 day ago";
+  return `${days} days ago`;
+}
+
+export default function DialerScreen({ tags }: { tags: { id: string; name: string }[] }) {
+  const [source, setSource] = useState("COLD_OUTREACH");
+  const [tagId, setTagId] = useState("");
+  const [current, setCurrent] = useState<DialerLead | null | undefined>(undefined); // undefined = loading
+  const [previous, setPrevious] = useState<DialerLead | null>(null);
+  const [skippedIds, setSkippedIds] = useState<string[]>([]);
+  const [callsToday, setCallsToday] = useState(0);
+  const [inboundCount, setInboundCount] = useState(0);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+  const [answering, setAnswering] = useState(false);
+  const [queueOpen, setQueueOpen] = useState(false);
+  const [warmSaved, setWarmSaved] = useState(false);
+  const [noAnswerPrompt, setNoAnswerPrompt] = useState<{ leadId: string; leadName: string; streak: number } | null>(null);
+
+  const fetchState = useCallback(
+    async (excludeIds: string[]) => {
+      const params = new URLSearchParams({ source });
+      if (tagId) params.set("tagId", tagId);
+      if (excludeIds.length > 0) params.set("excludeIds", excludeIds.join(","));
+      const res = await fetch(`/api/crm/dialer/state?${params}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setCurrent(data.lead);
+      setCallsToday(data.callsToday);
+      setInboundCount(data.inboundCount);
+    },
+    [source, tagId]
+  );
+
+  useEffect(() => {
+    setSkippedIds([]);
+    setPrevious(null);
+    setWarmSaved(false);
+    setCurrent(undefined);
+    fetchState([]);
+  }, [fetchState]);
+
+  function goToNext() {
+    setSkippedIds([]);
+    setWarmSaved(false);
+    setAnswering(false);
+    fetchState([]);
+  }
+
+  function handleSkip() {
+    if (!current) return;
+    setPrevious(current);
+    const next = [...skippedIds, current.id];
+    setSkippedIds(next);
+    fetchState(next);
+  }
+
+  async function handleNoAnswer() {
+    if (!current) return;
+    const lead = current;
+    setPrevious(lead);
+    const res = await fetch(`/api/crm/dialer/leads/${lead.id}/outcome`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ outcome: "NO_ANSWER" }),
+    });
+    if (res.ok) {
+      const { streak, promptScrap } = await res.json();
+      if (promptScrap) {
+        setNoAnswerPrompt({ leadId: lead.id, leadName: lead.name, streak });
+      }
+    }
+    goToNext();
+  }
+
+  async function resolveNoAnswerPrompt(remove: boolean) {
+    if (!noAnswerPrompt) return;
+    if (remove) {
+      await fetch(`/api/crm/dialer/leads/${noAnswerPrompt.leadId}/outcome`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ outcome: "SCRAP", reason: "NO_ANSWER" }),
+      });
+    }
+    setNoAnswerPrompt(null);
+  }
+
+  function handleAnswered() {
+    setAnswering(true);
+  }
+
+  function handleAnsweredSaved(outcome: "WARM" | "CALL_BACK" | "SCRAP") {
+    if (!current) return;
+    setPrevious(current);
+    if (outcome === "WARM") {
+      setAnswering(false);
+      setWarmSaved(true);
+    } else {
+      goToNext();
+    }
+  }
+
+  function handleBack() {
+    if (!previous) return;
+    setCurrent(previous);
+    setPrevious(null);
+    setAnswering(false);
+    setWarmSaved(false);
+  }
+
+  const loading = current === undefined;
+
+  return (
+    <div className="max-w-xl mx-auto space-y-3">
+      {inboundCount > 0 && !bannerDismissed && (
+        <div className="flex items-center justify-between gap-3 bg-blue-50 border border-blue-200 text-blue-800 text-sm rounded-md px-3 py-2.5">
+          <Link href="/admin/crm/leads" className="font-medium hover:underline">
+            {inboundCount} new website {inboundCount === 1 ? "enquiry needs" : "enquiries need"} to be contacted
+          </Link>
+          <button type="button" onClick={() => setBannerDismissed(true)} aria-label="Dismiss" className="text-blue-500 hover:text-blue-700 font-bold shrink-0">
+            ×
+          </button>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between gap-2">
+        <h1 className="text-xl font-bold text-blue-900">Dialer</h1>
+        <div className="flex items-center gap-2">
+          <Link href="/admin/crm/scrapped-leads" aria-label="Scrapped Leads" title="Scrapped Leads" className="text-gray-400 hover:text-red-600 p-1.5">
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0l-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6h16z" />
+            </svg>
+          </Link>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <select
+          value={source}
+          onChange={(e) => setSource(e.target.value)}
+          className="border border-gray-300 rounded-md px-2 py-1.5 text-xs bg-white"
+        >
+          {Object.entries(SOURCE_LABELS).map(([k, v]) => (
+            <option key={k} value={k}>{v}</option>
+          ))}
+        </select>
+        <select
+          value={tagId}
+          onChange={(e) => setTagId(e.target.value)}
+          className="border border-gray-300 rounded-md px-2 py-1.5 text-xs bg-white"
+        >
+          <option value="">All tags</option>
+          {tags.map((t) => (
+            <option key={t.id} value={t.id}>{t.name}</option>
+          ))}
+        </select>
+        <span className="ml-auto text-xs text-gray-500">{callsToday} calls today</span>
+        <button type="button" onClick={() => setQueueOpen(true)} className="text-xs font-semibold text-blue-700 hover:underline">
+          View queue
+        </button>
+      </div>
+
+      {loading && (
+        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center text-sm text-gray-400">Loading...</div>
+      )}
+
+      {!loading && current === null && (
+        <div className="bg-white rounded-lg border border-gray-200 p-8 text-center space-y-3">
+          <p className="text-sm font-semibold text-gray-700">No Leads Left</p>
+          <p className="text-xs text-gray-500">Nothing eligible right now for this filter.</p>
+          <Link
+            href="/admin/crm/scheduled-callbacks"
+            className="inline-block bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold px-4 py-2 rounded-md"
+          >
+            Show Scheduled Call Backs
+          </Link>
+        </div>
+      )}
+
+      {!loading && current && (
+        <div className="space-y-3">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5">
+            <h2 className="text-lg font-bold text-blue-900">{current.name}</h2>
+            {current.businessName && <p className="text-sm text-gray-500">{current.businessName}</p>}
+            <dl className="grid grid-cols-2 gap-x-3 gap-y-1.5 mt-3 text-xs">
+              <div>
+                <dt className="text-gray-400">Source</dt>
+                <dd className="text-gray-700">{SOURCE_LABELS[current.source] ?? current.source}</dd>
+              </div>
+              <div>
+                <dt className="text-gray-400">Area</dt>
+                <dd className="text-gray-700">{current.addressArea || current.postcode || "—"}</dd>
+              </div>
+              {current.targetAreas && (
+                <div className="col-span-2">
+                  <dt className="text-gray-400">Target Areas on File</dt>
+                  <dd className="text-gray-700">{current.targetAreas}</dd>
+                </div>
+              )}
+              <div className="col-span-2">
+                <dt className="text-gray-400">Last Called</dt>
+                <dd className="text-gray-700">
+                  {current.activities[0]
+                    ? `${current.activities[0].user?.name ?? "Someone"}, ${daysAgo(current.activities[0].createdAt)}`
+                    : "Never called"}
+                </dd>
+              </div>
+            </dl>
+
+            <div className="mt-4 flex items-center gap-3">
+              {current.phone ? (
+                <>
+                  <a
+                    href={`tel:${current.phone}`}
+                    className="sm:hidden flex-1 text-center bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold py-3 rounded-md"
+                  >
+                    Call {current.phone}
+                  </a>
+                  <p className="hidden sm:block flex-1 text-center bg-gray-50 border border-gray-200 rounded-md py-3 text-lg font-bold text-blue-900 tracking-wide">
+                    {current.phone}
+                  </p>
+                </>
+              ) : (
+                <p className="flex-1 text-center text-sm text-gray-400 py-3">No phone on file</p>
+              )}
+            </div>
+          </div>
+
+          {warmSaved ? (
+            <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-center space-y-3">
+              <p className="text-sm font-semibold text-emerald-800">Saved — moved to Warm / Awaiting Response.</p>
+              <button
+                type="button"
+                onClick={goToNext}
+                className="bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold px-4 py-2 rounded-md"
+              >
+                Next
+              </button>
+            </div>
+          ) : answering ? (
+            <DialerAnsweredPanel leadId={current.id} onSaved={handleAnsweredSaved} onCancel={() => setAnswering(false)} />
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={handleNoAnswer}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold py-3 rounded-md"
+              >
+                No Answer
+              </button>
+              <button
+                type="button"
+                onClick={handleAnswered}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold py-3 rounded-md"
+              >
+                Answered
+              </button>
+            </div>
+          )}
+
+          {!answering && !warmSaved && (
+            <div className="flex items-center justify-between text-xs">
+              <button
+                type="button"
+                onClick={handleBack}
+                disabled={!previous}
+                className="text-gray-500 hover:text-gray-700 disabled:opacity-30 font-medium"
+              >
+                ← Back
+              </button>
+              <button type="button" onClick={handleSkip} className="text-gray-500 hover:text-gray-700 font-medium">
+                Skip →
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {noAnswerPrompt && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white w-full sm:max-w-sm rounded-t-xl sm:rounded-xl p-5">
+            <h3 className="text-sm font-bold text-gray-900 mb-1">
+              No Answer — {noAnswerPrompt.streak} Calls in a Row
+            </h3>
+            <p className="text-xs text-gray-500 mb-4">Remove {noAnswerPrompt.leadName}?</p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => resolveNoAnswerPrompt(false)}
+                className="flex-1 border border-gray-300 text-gray-700 text-sm font-medium py-2.5 rounded-md"
+              >
+                No
+              </button>
+              <button
+                type="button"
+                onClick={() => resolveNoAnswerPrompt(true)}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2.5 rounded-md"
+              >
+                Yes, Remove
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {queueOpen && (
+        <DialerQueueModal source={source} tagId={tagId} onClose={() => setQueueOpen(false)} />
+      )}
+    </div>
+  );
+}
+
+function DialerQueueModal({ source, tagId, onClose }: { source: string; tagId: string; onClose: () => void }) {
+  const [leads, setLeads] = useState<DialerLead[] | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams({ source });
+    if (tagId) params.set("tagId", tagId);
+    fetch(`/api/crm/dialer/queue?${params}`)
+      .then((r) => r.json())
+      .then((d) => setLeads(d.leads ?? []));
+  }, [source, tagId]);
+
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="bg-white w-full sm:max-w-md sm:max-h-[80vh] rounded-t-xl sm:rounded-xl flex flex-col">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+          <h3 className="text-sm font-bold text-blue-900">Queue{leads ? ` (${leads.length})` : ""}</h3>
+          <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-600 font-bold">×</button>
+        </div>
+        <div className="overflow-y-auto">
+          {leads === null ? (
+            <p className="px-4 py-6 text-sm text-gray-400 text-center">Loading...</p>
+          ) : leads.length === 0 ? (
+            <p className="px-4 py-6 text-sm text-gray-400 text-center">Nothing in the queue.</p>
+          ) : (
+            <ul className="divide-y divide-gray-100">
+              {leads.map((l) => (
+                <li key={l.id} className="px-4 py-2.5">
+                  <p className="text-sm font-medium text-blue-900">{l.name}</p>
+                  <p className="text-xs text-gray-400">
+                    {l.nextCallableAt ? `Due ${new Date(l.nextCallableAt).toLocaleDateString("en-GB")}` : "Never called"}
+                    {l.assignedTo && ` · Assigned to ${l.assignedTo.name}`}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

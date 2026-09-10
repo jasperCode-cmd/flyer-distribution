@@ -63,6 +63,15 @@ enum LeadPriority {
   LOW
 }
 
+enum ScrapReason {
+  NOT_INTERESTED
+  WRONG_NUMBER
+  ALREADY_CUSTOMER
+  ASKED_NOT_TO_CONTACT
+  NO_ANSWER
+  OTHER
+}
+
 // Both of the below are only meaningful once a lead is Won or Completed, but
 // they carry a default on every lead so the columns can be NOT NULL and no
 // row needs special handling.
@@ -121,6 +130,24 @@ model Lead {
   assignedToId String?
   assignedTo   User?   @relation("AssignedLeads", fields: [assignedToId], references: [id])
 
+  // Dialer fields. noAnswerStreak counts consecutive no-answer outcomes and
+  // resets to 0 the moment a call is actually answered; nextCallableAt is
+  // when the lead becomes eligible for the dialer's active queue again —
+  // null means never called, immediately eligible. assignedTo (above) is
+  // reused as the dialer's callback-locking mechanism: it's set to the
+  // calling user only on a Call Back outcome, so a lead someone was asked
+  // to specifically follow up on doesn't surface for the other user.
+  noAnswerStreak Int       @default(0)
+  nextCallableAt DateTime?
+
+  // Leads scrapped from the dialer (or elsewhere) never show in the Kanban
+  // board, main Leads list, filters, or search — only in the Scrapped
+  // Leads bin. scrapNote is only populated when scrapReason is OTHER.
+  scrapped    Boolean      @default(false)
+  scrapReason ScrapReason?
+  scrapNote   String?
+  scrappedAt  DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -133,6 +160,8 @@ model Lead {
   @@index([stage])
   @@index([assignedToId])
   @@index([priority])
+  @@index([scrapped])
+  @@index([nextCallableAt])
 }
 
 enum ActivityType {
