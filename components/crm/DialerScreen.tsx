@@ -164,6 +164,17 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
     }
   }
 
+  async function copyPhone(phone: string) {
+    try {
+      await navigator.clipboard.writeText(phone);
+      setToast("Copied");
+    } catch {
+      // Clipboard access can be denied (permissions, insecure context); the
+      // tel: link right next to this button still works either way.
+      setToast("Couldn't copy — clipboard access denied");
+    }
+  }
+
   function handleBack() {
     if (!previous) return;
     setCurrent(previous);
@@ -271,7 +282,7 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
               </div>
             </dl>
 
-            <div className="mt-4 flex items-center gap-3">
+            <div className="mt-4 flex items-center gap-2">
               {current.phone ? (
                 <>
                   <a
@@ -280,9 +291,27 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
                   >
                     Call {current.phone}
                   </a>
-                  <p className="hidden sm:block flex-1 text-center bg-gray-50 border border-gray-200 rounded-md py-3 text-lg font-bold text-blue-900 tracking-wide">
+                  {/* Desktop: a real tel: link (browsers hand it to whatever's
+                      registered, or harmlessly do nothing) plus a copy
+                      button, since most desktop machines have nothing
+                      registered to actually place the call. */}
+                  <a
+                    href={`tel:${current.phone}`}
+                    className="hidden sm:block flex-1 text-center bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-md py-3 text-lg font-bold text-blue-900 tracking-wide transition-colors"
+                  >
                     {current.phone}
-                  </p>
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => copyPhone(current.phone!)}
+                    title="Copy number"
+                    aria-label="Copy phone number"
+                    className="hidden sm:flex shrink-0 items-center justify-center border border-gray-200 hover:bg-gray-50 text-gray-500 hover:text-blue-700 rounded-md p-3 transition-colors"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </button>
                 </>
               ) : (
                 <p className="flex-1 text-center text-sm text-gray-400 py-3">No phone on file</p>
