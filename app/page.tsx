@@ -235,6 +235,14 @@ export default function HomePage() {
             Why Choose Us?
           </h2>
           <TrustCards />
+          <div className="text-center mt-10">
+            <Link
+              href="/case-studies"
+              className="text-blue-700 hover:text-blue-900 font-semibold text-sm underline underline-offset-2"
+            >
+              See our case studies →
+            </Link>
+          </div>
         </div>
       </section>
 

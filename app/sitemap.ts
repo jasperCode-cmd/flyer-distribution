@@ -22,6 +22,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/areas/dorset",
     "/areas/eastleigh",
     "/leaflet-distribution-jobs",
+    "/case-studies",
+    "/services/public-notice-leafleting",
   ]; // /blog excluded — noindex
 
   return routes.map((route) => ({

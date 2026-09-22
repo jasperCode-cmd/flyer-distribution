@@ -79,6 +79,13 @@ const supportingServices = [
     image: "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=800&q=80",
     alt: "Parked cars in a car park where leaflets can be distributed",
   },
+  {
+    title: "Public Notice Leafleting",
+    desc: "Statutory door-to-door distribution supporting Section 47 and Section 48 Planning Act 2008 consultation requirements for Nationally Significant Infrastructure Projects across Hampshire.",
+    image: "https://images.pexels.com/photos/17144737/pexels-photo-17144737.jpeg?auto=compress&cs=tinysrgb&w=800",
+    alt: "Residential street where public notice leaflets are distributed",
+    href: "/services/public-notice-leafleting",
+  },
 ];
 
 const servicesSchema = {
@@ -155,6 +162,18 @@ const servicesSchema = {
         "url": "https://www.flyerdistributionhampshire.co.uk",
       },
       "areaServed": "Hampshire and Dorset",
+    },
+    {
+      "@type": "Service",
+      "name": "Public Notice Leafleting",
+      "description":
+        "Statutory door-to-door distribution supporting Section 47 and Section 48 Planning Act 2008 consultation requirements for Nationally Significant Infrastructure Projects across Hampshire.",
+      "provider": {
+        "@type": "LocalBusiness",
+        "name": "Flyer Distribution Hampshire",
+        "url": "https://www.flyerdistributionhampshire.co.uk",
+      },
+      "areaServed": "Hampshire",
     },
   ],
 };
@@ -236,26 +255,41 @@ export default function ServicesPage() {
             Distribution Services
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {supportingServices.map((svc) => (
-              <div
-                key={svc.title}
-                className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-md transition-all"
-              >
-                <Image
-                  src={svc.image}
-                  alt={svc.alt}
-                  width={600}
-                  height={300}
-                  className="w-full h-44 object-cover"
-                />
-                <div className="p-5">
-                  <h3 className="text-base font-semibold text-blue-900 mb-2">
-                    {svc.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{svc.desc}</p>
+            {supportingServices.map((svc) => {
+              const cardClass =
+                "group bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-md transition-all block";
+              const content = (
+                <>
+                  <Image
+                    src={svc.image}
+                    alt={svc.alt}
+                    width={600}
+                    height={300}
+                    className="w-full h-44 object-cover"
+                  />
+                  <div className="p-5">
+                    <h3 className="text-base font-semibold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors">
+                      {svc.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">{svc.desc}</p>
+                    {svc.href && (
+                      <span className="mt-3 inline-block text-blue-600 text-xs font-semibold">
+                        Learn more →
+                      </span>
+                    )}
+                  </div>
+                </>
+              );
+              return svc.href ? (
+                <Link key={svc.title} href={svc.href} className={cardClass}>
+                  {content}
+                </Link>
+              ) : (
+                <div key={svc.title} className={cardClass}>
+                  {content}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

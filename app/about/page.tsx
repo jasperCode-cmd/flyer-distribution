@@ -75,7 +75,7 @@ export default function AboutPage() {
               for businesses looking to grow their presence online as well as
               offline.
             </p>
-            <p className="text-gray-600 text-lg leading-relaxed">
+            <p className="text-gray-600 text-lg leading-relaxed mb-7">
               We&apos;re small enough to offer a genuinely personal service, with
               distributors who are{" "}
               <strong className="font-semibold text-gray-800">
@@ -83,6 +83,13 @@ export default function AboutPage() {
               </strong>
               , and know their routes inside out, covering Hampshire and into
               Dorset including Bournemouth and Poole.
+            </p>
+            <p className="text-gray-600 leading-relaxed">
+              Want to see examples of our work?{" "}
+              <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
+                Take a look at our case studies
+              </Link>
+              .
             </p>
           </div>
           <div className="max-w-sm mx-auto lg:mx-0">

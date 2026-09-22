@@ -9,6 +9,7 @@ const footerLinks = [
   { href: "/services", label: "Services" },
   { href: "/areas", label: "Areas" },
   { href: "/quote", label: "Get a Quote" },
+  { href: "/case-studies", label: "Case Studies" },
   { href: "/about", label: "About" },
   { href: "/faq", label: "FAQ" },
   { href: "/leaflet-distribution-jobs", label: "Work With Us" },
