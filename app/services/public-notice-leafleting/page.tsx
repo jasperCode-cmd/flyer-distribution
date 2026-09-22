@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
+import ScrollReveal from "@/components/ScrollReveal";
 
 export const metadata: Metadata = {
   title: "Public Notice Leafleting for NSIPs",
@@ -101,36 +103,55 @@ export default function PublicNoticeLeafletingPage() {
           <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-6">
             What This Service Covers
           </h2>
-          <div className="max-w-3xl space-y-4 text-gray-600 leading-relaxed">
-            <p>
-              Nationally Significant Infrastructure Projects carry specific
-              public consultation obligations under the Planning Act 2008.
-              Before an applicant can submit a Development Consent Order
-              application, they need to consult the communities their
-              project affects, and be able to show that consultation was
-              carried out properly.
-            </p>
-            <p>
-              Flyer Distribution Hampshire handles the physical side of that
-              obligation. We deliver consultation leaflets, notices, and
-              supporting materials door to door across the area your
-              project defines. We are not a planning consultancy, and this
-              page is not planning advice. For our wider leaflet
-              distribution work across Hampshire, see our{" "}
-              <Link href="/services" className="text-blue-700 hover:underline font-medium">
-                standard services
-              </Link>
-              .
-            </p>
-            <p>
-              The distribution geography for a statutory notice comes from
-              your Statement of Community Consultation, not from our usual
-              postcode boundaries, so we work to the exact area your project
-              sets out rather than a standard coverage zone. Your
-              consultation schedule sets the timeline too. Before we take on
-              a job, we tell you plainly whether your deadline is
-              achievable, rather than agreeing to a date we cannot meet.
-            </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            <div className="space-y-4 text-gray-600 leading-relaxed">
+              <p>
+                Nationally Significant Infrastructure Projects carry specific
+                public consultation obligations under the Planning Act 2008.
+                Before an applicant can submit a Development Consent Order
+                application, they need to consult the communities their
+                project affects, and be able to show that consultation was
+                carried out properly.
+              </p>
+              <p>
+                Flyer Distribution Hampshire handles the physical side of that
+                obligation. We deliver consultation leaflets, notices, and
+                supporting materials door to door across the area your
+                project defines. We are not a planning consultancy, and this
+                page is not planning advice. For our wider leaflet
+                distribution work across Hampshire, see our{" "}
+                <Link href="/services" className="text-blue-700 hover:underline font-medium">
+                  standard services
+                </Link>
+                .
+              </p>
+              <p>
+                The distribution geography for a statutory notice comes from
+                your Statement of Community Consultation, not from our usual
+                postcode boundaries, so we work to the exact area your project
+                sets out rather than a standard coverage zone. Your
+                consultation schedule sets the timeline too. Before we take on
+                a job, we tell you plainly whether your deadline is
+                achievable, rather than agreeing to a date we cannot meet.
+              </p>
+            </div>
+            <div className="max-w-md mx-auto lg:mx-0 lg:mt-1">
+              <ScrollReveal>
+                <div className="rounded-lg overflow-hidden shadow-lg ring-1 ring-black/5">
+                  <Image
+                    src="/Road-Closure-Public-Notice-Leaflet.jpeg"
+                    alt="A stack of 'ROAD CLOSURE' public notice leaflets produced for Hampshire County Council, held alongside a Flyer Distribution Hampshire business card"
+                    width={1600}
+                    height={1200}
+                    className="w-full h-auto object-cover"
+                  />
+                </div>
+              </ScrollReveal>
+              <p className="text-xs text-gray-500 mt-3 text-center lg:text-left">
+                A road closure notice we distributed on behalf of Hampshire
+                County Council.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -210,7 +231,7 @@ export default function PublicNoticeLeafletingPage() {
           <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-6">
             How Confirmation Works
           </h2>
-          <div className="max-w-3xl space-y-4 text-gray-600 leading-relaxed">
+          <div className="max-w-4xl space-y-4 text-gray-600 leading-relaxed">
             <p>
               Statutory consultation work is deadline-driven, so we
               schedule distribution rounds around your project&apos;s
@@ -230,7 +251,7 @@ export default function PublicNoticeLeafletingPage() {
           <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-6">
             Post-Distribution Documentation
           </h2>
-          <div className="max-w-3xl space-y-4 text-gray-600 leading-relaxed">
+          <div className="max-w-4xl space-y-4 text-gray-600 leading-relaxed">
             <p>
               For each round we can provide confirmation of the areas
               covered, completion dates, and notes on any properties we
@@ -278,7 +299,7 @@ export default function PublicNoticeLeafletingPage() {
           <h2 className="text-xl font-bold text-blue-900 mb-4">
             From a Handful of Streets to a Whole Project Area
           </h2>
-          <p className="text-gray-600 max-w-3xl leading-relaxed">
+          <p className="text-gray-600 max-w-4xl leading-relaxed">
             Our teams scale to the job, whether that means a handful of
             streets around a single substation upgrade or a much larger
             area spanning several parishes for a major infrastructure
