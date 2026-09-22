@@ -114,6 +114,13 @@ export default function SouthamptonPage() {
                 Get a Southampton Quote
               </Link>
             </div>
+            <p className="text-gray-500 text-sm mt-4">
+              Live locally and want to deliver for us instead?{" "}
+              <Link href="/leaflet-distribution-jobs" className="text-blue-700 hover:underline font-medium">
+                See our distributor jobs
+              </Link>
+              .
+            </p>
           </div>
           <div>
             <Image

@@ -177,6 +177,13 @@ export default function AboutPage() {
             >
               Get a Free Quote
             </Link>
+            <p className="text-gray-500 text-sm mt-6">
+              Prefer to be part of the team instead?{" "}
+              <Link href="/leaflet-distribution-jobs" className="text-blue-700 hover:underline font-medium">
+                See our distributor jobs
+              </Link>
+              .
+            </p>
           </div>
         </div>
       </section>

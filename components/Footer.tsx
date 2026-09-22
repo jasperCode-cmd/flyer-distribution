@@ -11,6 +11,7 @@ const footerLinks = [
   { href: "/quote", label: "Get a Quote" },
   { href: "/about", label: "About" },
   { href: "/faq", label: "FAQ" },
+  { href: "/leaflet-distribution-jobs", label: "Work With Us" },
   { href: "/blog", label: "Blog" },
 ];
 

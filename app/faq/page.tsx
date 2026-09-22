@@ -251,6 +251,13 @@ export default function FaqPage() {
             >
               Get a Free Quote
             </Link>
+            <p className="text-gray-500 text-xs mt-4">
+              Interested in delivering leaflets for us instead?{" "}
+              <Link href="/leaflet-distribution-jobs" className="text-blue-700 hover:underline font-medium">
+                See our distributor jobs
+              </Link>
+              .
+            </p>
           </div>
         </div>
       </section>

@@ -122,6 +122,13 @@ export default function DorsetPage() {
                 Get a Dorset Quote
               </Link>
             </div>
+            <p className="text-gray-500 text-sm mt-4">
+              Live in Dorset and want to deliver for us instead?{" "}
+              <Link href="/leaflet-distribution-jobs" className="text-blue-700 hover:underline font-medium">
+                See our distributor jobs
+              </Link>
+              .
+            </p>
           </div>
           <div className="aspect-square overflow-hidden rounded-lg">
             <Image

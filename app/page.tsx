@@ -401,6 +401,25 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+
+      {/* Join the team */}
+      <section className="bg-blue-950 text-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4">
+            Want to Deliver Leaflets For Us?
+          </h2>
+          <p className="text-blue-200 max-w-lg mx-auto mb-8 leading-relaxed">
+            Earn flexible, self-employed income across Hampshire and Dorset.
+            No experience needed, and quick payment agreed before every job.
+          </p>
+          <Link
+            href="/leaflet-distribution-jobs"
+            className="inline-block bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold px-8 py-3.5 rounded-md text-base transition duration-200 ease-out hover:scale-105 shadow"
+          >
+            Become a Distributor
+          </Link>
+        </div>
+      </section>
     </>
   );
 }
