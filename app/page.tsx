@@ -7,6 +7,7 @@ import AreaCarousel from "@/components/AreaCarousel";
 import TrustBar from "@/components/TrustBar";
 import TrustCards from "@/components/TrustCards";
 import StaggerGroup from "@/components/StaggerGroup";
+import ScrollReveal from "@/components/ScrollReveal";
 
 export const metadata: Metadata = {
   title: "Flyer Distribution Hampshire | Local Leaflet & Flyer Delivery",
@@ -229,6 +230,27 @@ export default function HomePage() {
               />
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Overhead residential photo — modest supporting visual, not a banner */}
+      <section className="bg-white py-10 border-b border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
+          <ScrollReveal>
+            <div className="w-56 sm:w-64 mx-auto rounded-lg overflow-hidden shadow-lg ring-1 ring-black/5">
+              <Image
+                src="/Overhead-shot-residential-areas.jpeg"
+                alt="Overhead view of a residential street with houses and gardens, the kind of area covered door to door"
+                width={999}
+                height={1074}
+                sizes="256px"
+                className="w-full h-auto object-cover"
+              />
+            </div>
+          </ScrollReveal>
+          <p className="text-gray-500 text-sm mt-4 max-w-md">
+            The kind of residential streets our distributors cover, door to door.
+          </p>
         </div>
       </section>
 
