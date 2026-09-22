@@ -169,7 +169,7 @@ export default function DistributorApplicationForm() {
           </div>
         </div>
         <p className="-mt-3 text-xs text-gray-500">
-          A car and full UK driving licence are preferred but not essential — plenty of our rounds don&apos;t need either.
+          A car and full UK driving licence are preferred but not essential, plenty of our rounds don&apos;t need either.
         </p>
 
         {/* Availability */}
