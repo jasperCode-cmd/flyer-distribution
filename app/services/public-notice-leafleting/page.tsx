@@ -276,7 +276,7 @@ export default function PublicNoticeLeafletingPage() {
             ].map((item, i) => (
               <div
                 key={i}
-                className="group relative bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:border-blue-300 hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-out"
+                className="group relative bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:border-blue-300 hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-out h-full"
               >
                 <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-lg bg-blue-200 group-hover:bg-blue-500 transition-colors duration-300" aria-hidden="true" />
                 <svg className="w-6 h-6 text-blue-600 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -343,7 +343,7 @@ export default function PublicNoticeLeafletingPage() {
             ].map((item, i) => (
               <div
                 key={i}
-                className="group relative bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:border-blue-300 hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-out"
+                className="group relative bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:border-blue-300 hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-out h-full"
               >
                 <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-lg bg-blue-200 group-hover:bg-blue-500 transition-colors duration-300" aria-hidden="true" />
                 <svg className="w-6 h-6 text-blue-600 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -408,21 +408,13 @@ export default function PublicNoticeLeafletingPage() {
                 From a Handful of Streets to a Whole Project Area
               </h2>
             </div>
-            <p className="text-gray-600 max-w-3xl leading-relaxed mb-6">
+            <p className="text-gray-600 max-w-3xl leading-relaxed">
               Our teams scale to the job, whether that means a handful of
               streets around a single substation upgrade or a much larger
               area spanning several parishes for a major infrastructure
               project. The planning and the documentation work the same way
               either way.
             </p>
-            <div className="grid grid-cols-2 gap-4 max-w-md">
-              <div className="text-center bg-slate-50 border border-gray-200 rounded-lg py-4 px-3">
-                <p className="text-sm font-semibold text-blue-900">A Handful of Streets</p>
-              </div>
-              <div className="text-center bg-slate-50 border border-gray-200 rounded-lg py-4 px-3">
-                <p className="text-sm font-semibold text-blue-900">A Whole Project Area</p>
-              </div>
-            </div>
           </ScrollReveal>
         </div>
       </section>
