@@ -76,7 +76,49 @@ export default function DistributorApplicationForm() {
           value="New Distributor Application - Flyer Distribution Hampshire"
         />
 
-        {/* Where do you live — first, sole visible field until answered */}
+        {/* Name */}
+        <div>
+          <label htmlFor="dist-name" className="block text-sm font-medium text-gray-700 mb-1">
+            Full name <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="dist-name"
+            name="name"
+            required
+            className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
+        {/* Phone */}
+        <div>
+          <label htmlFor="dist-phone" className="block text-sm font-medium text-gray-700 mb-1">
+            Phone number <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="tel"
+            id="dist-phone"
+            name="phone"
+            required
+            className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <p className="mt-1 text-xs text-gray-500">We&apos;ll most likely reach out on WhatsApp.</p>
+        </div>
+
+        {/* Email */}
+        <div>
+          <label htmlFor="dist-email" className="block text-sm font-medium text-gray-700 mb-1">
+            Email address
+          </label>
+          <input
+            type="email"
+            id="dist-email"
+            name="email"
+            className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+
+        {/* Where do you live — last of the initial fields; answering it reveals the rest */}
         <div>
           <label htmlFor="dist-area" className="block text-sm font-medium text-gray-700 mb-1">
             Where do you live? <span className="text-red-500">*</span>
@@ -99,48 +141,6 @@ export default function DistributorApplicationForm() {
               showRest ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2"
             }`}
           >
-            {/* Name */}
-            <div>
-              <label htmlFor="dist-name" className="block text-sm font-medium text-gray-700 mb-1">
-                Full name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="dist-name"
-                name="name"
-                required
-                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
-            {/* Phone */}
-            <div>
-              <label htmlFor="dist-phone" className="block text-sm font-medium text-gray-700 mb-1">
-                Phone number <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="tel"
-                id="dist-phone"
-                name="phone"
-                required
-                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <p className="mt-1 text-xs text-gray-500">We&apos;ll most likely reach out on WhatsApp.</p>
-            </div>
-
-            {/* Email */}
-            <div>
-              <label htmlFor="dist-email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email address
-              </label>
-              <input
-                type="email"
-                id="dist-email"
-                name="email"
-                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-
             {/* Age */}
             <div>
               <label htmlFor="dist-age" className="block text-sm font-medium text-gray-700 mb-1">
