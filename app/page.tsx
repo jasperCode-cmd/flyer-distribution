@@ -303,61 +303,61 @@ export default function HomePage() {
       {/* Coverage areas */}
       <section className="bg-blue-900 text-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-10 items-center mb-10">
+          <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-10 lg:gap-16 items-start">
             <div>
               <h2 className="text-2xl sm:text-3xl font-bold mb-3">
                 Areas We Cover
               </h2>
-              <p className="text-blue-200 max-w-xl">
+              <p className="text-blue-200 max-w-xl mb-10">
                 We cover the Hampshire and Dorset corridor, from Winchester in
                 the north to Poole in the west, including:
               </p>
+              <div className="flex flex-wrap gap-3 mb-8">
+                {areas.map((area) => (
+                  <Link
+                    key={area.name}
+                    href={area.href}
+                    className="bg-blue-800 hover:bg-blue-700 border border-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-md transition-colors"
+                  >
+                    {area.name}
+                  </Link>
+                ))}
+              </div>
+              <p className="text-blue-400 text-xs font-semibold uppercase tracking-wide mb-3">
+                Also covering
+              </p>
+              <div className="flex flex-wrap gap-2 mb-8">
+                {["Brockenhurst", "Romsey", "Hythe", "Totton", "Hedge End", "Chandler's Ford"].map((a) => (
+                  <span
+                    key={a}
+                    className="bg-blue-800 border border-blue-700 text-blue-200 text-sm px-4 py-1.5 rounded-full"
+                  >
+                    {a}
+                  </span>
+                ))}
+              </div>
+              <Link
+                href="/areas"
+                className="text-blue-300 hover:text-white font-semibold text-sm underline underline-offset-2"
+              >
+                See all coverage areas →
+              </Link>
             </div>
             <div className="flex justify-center lg:justify-end">
               <ScrollReveal>
-                <div className="w-28 sm:w-32 aspect-square overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
+                <div className="w-full max-w-xs sm:max-w-sm lg:max-w-none mx-auto lg:mx-0 aspect-square overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
                   <Image
                     src="/Overhead-shot-residential-areas.jpeg"
                     alt="Overhead view of a residential street with houses and gardens, the kind of area covered door to door"
                     width={999}
                     height={999}
-                    sizes="128px"
+                    sizes="(max-width: 640px) 320px, (max-width: 1024px) 384px, 400px"
                     className="w-full h-full object-cover"
                   />
                 </div>
               </ScrollReveal>
             </div>
           </div>
-          <div className="flex flex-wrap gap-3 mb-8">
-            {areas.map((area) => (
-              <Link
-                key={area.name}
-                href={area.href}
-                className="bg-blue-800 hover:bg-blue-700 border border-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-md transition-colors"
-              >
-                {area.name}
-              </Link>
-            ))}
-          </div>
-          <p className="text-blue-400 text-xs font-semibold uppercase tracking-wide mb-3">
-            Also covering
-          </p>
-          <div className="flex flex-wrap gap-2 mb-8">
-            {["Brockenhurst", "Romsey", "Hythe", "Totton", "Hedge End", "Chandler's Ford"].map((a) => (
-              <span
-                key={a}
-                className="bg-blue-800 border border-blue-700 text-blue-200 text-sm px-4 py-1.5 rounded-full"
-              >
-                {a}
-              </span>
-            ))}
-          </div>
-          <Link
-            href="/areas"
-            className="text-blue-300 hover:text-white font-semibold text-sm underline underline-offset-2"
-          >
-            See all coverage areas →
-          </Link>
         </div>
       </section>
 
