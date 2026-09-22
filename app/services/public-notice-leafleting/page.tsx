@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import ScrollReveal from "@/components/ScrollReveal";
+import StaggerGroup from "@/components/StaggerGroup";
 
 export const metadata: Metadata = {
   title: "Public Notice Leafleting for NSIPs",
@@ -135,15 +136,15 @@ export default function PublicNoticeLeafletingPage() {
                 achievable, rather than agreeing to a date we cannot meet.
               </p>
             </div>
-            <div className="max-w-md mx-auto lg:mx-0 lg:mt-1">
+            <div className="max-w-md mx-auto lg:mx-0">
               <ScrollReveal>
-                <div className="rounded-lg overflow-hidden shadow-lg ring-1 ring-black/5">
+                <div className="aspect-square overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
                   <Image
                     src="/Road-Closure-Public-Notice-Leaflet.jpeg"
                     alt="A stack of 'ROAD CLOSURE' public notice leaflets produced for Hampshire County Council, held alongside a Flyer Distribution Hampshire business card"
                     width={1600}
-                    height={1200}
-                    className="w-full h-auto object-cover"
+                    height={1600}
+                    className="w-full h-full object-cover"
                   />
                 </div>
               </ScrollReveal>
@@ -228,84 +229,201 @@ export default function PublicNoticeLeafletingPage() {
       {/* Tracking / confirmation */}
       <section className="bg-slate-50 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-6">
-            How Confirmation Works
-          </h2>
-          <div className="max-w-4xl space-y-4 text-gray-600 leading-relaxed">
-            <p>
+          <ScrollReveal>
+            <div className="flex items-center gap-3 mb-6">
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 text-blue-700 flex-shrink-0">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M8.5 12.5l2.5 2.5 4.5-5" />
+                </svg>
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-blue-900">
+                How Confirmation Works
+              </h2>
+            </div>
+            <p className="text-gray-600 leading-relaxed max-w-3xl mb-8">
               Statutory consultation work is deadline-driven, so we
               schedule distribution rounds around your project&apos;s
-              timetable rather than our own. Once a round is complete, we
-              confirm it the same way we do for every campaign we run: our
-              distributors record each round with Strava route screenshots,
-              giving you a genuine, tracked record of the streets covered
-              and when.
+              timetable rather than our own.
             </p>
-          </div>
+          </ScrollReveal>
+          <StaggerGroup className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            {[
+              {
+                icon: (
+                  <path d="M20 6L9 17l-5-5" />
+                ),
+                body: "Confirmed the same way as every campaign we run.",
+              },
+              {
+                icon: (
+                  <>
+                    <path d="M12 21s-7-6.1-7-11a7 7 0 0114 0c0 4.9-7 11-7 11z" />
+                    <circle cx="12" cy="10" r="2.5" />
+                  </>
+                ),
+                body: "Distributors record each round with Strava route screenshots.",
+              },
+              {
+                icon: (
+                  <>
+                    <rect x="6" y="4" width="12" height="17" rx="2" />
+                    <path d="M9 4V3a1 1 0 011-1h4a1 1 0 011 1v1M9 11h6M9 15h6" />
+                  </>
+                ),
+                body: "A genuine, tracked record of the streets covered, and when.",
+              },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="group relative bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:border-blue-300 hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-out"
+              >
+                <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-lg bg-blue-200 group-hover:bg-blue-500 transition-colors duration-300" aria-hidden="true" />
+                <svg className="w-6 h-6 text-blue-600 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  {item.icon}
+                </svg>
+                <p className="text-gray-700 text-sm leading-relaxed">{item.body}</p>
+              </div>
+            ))}
+          </StaggerGroup>
         </div>
       </section>
 
       {/* Post-distribution documentation */}
       <section className="bg-white border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-6">
-            Post-Distribution Documentation
-          </h2>
-          <div className="max-w-4xl space-y-4 text-gray-600 leading-relaxed">
-            <p>
-              For each round we can provide confirmation of the areas
-              covered, completion dates, and notes on any properties we
-              could not access, for example gated developments or locked
-              communal entrances. Where a project needs multiple
-              distribution rounds, whether repeated across a large area or
-              split by phase, each round is tracked and documented
-              separately, so your records clearly show what was delivered,
-              where, and when.
+          <ScrollReveal>
+            <div className="flex items-center gap-3 mb-6">
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 text-blue-700 flex-shrink-0">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M7 3h7l4 4v14a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1z" />
+                  <path d="M14 3v4h4" />
+                  <path d="M9 13h6M9 17h6" />
+                </svg>
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-bold text-blue-900">
+                Post-Distribution Documentation
+              </h2>
+            </div>
+            <p className="text-gray-600 leading-relaxed max-w-3xl mb-8">
+              For each round, we provide documentation your records can
+              rely on:
             </p>
-            <p>
+          </ScrollReveal>
+          <StaggerGroup className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+            {[
+              {
+                icon: (
+                  <>
+                    <rect x="4" y="5" width="16" height="16" rx="2" />
+                    <path d="M8 3v4M16 3v4M4 10h16" />
+                    <path d="M9 15l2 2 4-4" />
+                  </>
+                ),
+                body: "Confirmation of the areas covered and completion dates.",
+              },
+              {
+                icon: (
+                  <>
+                    <rect x="6" y="11" width="12" height="9" rx="2" />
+                    <path d="M9 11V8a3 3 0 016 0v3" />
+                  </>
+                ),
+                body: "Notes on any properties we could not access, for example gated developments or locked communal entrances.",
+              },
+              {
+                icon: (
+                  <>
+                    <path d="M12 3l9 5-9 5-9-5 9-5z" />
+                    <path d="M3 13l9 5 9-5" />
+                  </>
+                ),
+                body: "Multiple rounds, whether repeated across a large area or split by phase, each tracked and documented separately, so your records clearly show what was delivered, where, and when.",
+              },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="group relative bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:border-blue-300 hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-out"
+              >
+                <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-lg bg-blue-200 group-hover:bg-blue-500 transition-colors duration-300" aria-hidden="true" />
+                <svg className="w-6 h-6 text-blue-600 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  {item.icon}
+                </svg>
+                <p className="text-gray-700 text-sm leading-relaxed">{item.body}</p>
+              </div>
+            ))}
+          </StaggerGroup>
+          <ScrollReveal>
+            <p className="text-gray-600 leading-relaxed max-w-3xl">
               This documentation is designed to support your application
               file. It is not a substitute for your own consultant&apos;s
               record-keeping.
             </p>
-          </div>
+          </ScrollReveal>
         </div>
       </section>
 
       {/* Legal disclaimer */}
       <section className="bg-slate-50 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="max-w-3xl bg-amber-50 border border-amber-200 rounded-lg p-6">
-            <h2 className="text-sm font-bold text-amber-900 mb-2">
-              Scope of This Service
-            </h2>
-            <p className="text-amber-900/90 text-sm leading-relaxed">
-              Flyer Distribution Hampshire provides physical leaflet and
-              notice distribution only. We are not a planning consultancy
-              and do not provide legal advice. This page is a general guide
-              to how our distribution service works and should not be
-              relied on as guidance on your statutory obligations. Your
-              planning consultant or solicitor should confirm your
-              Statement of Community Consultation requirements and wider
-              statutory compliance before you rely on any distribution
-              timeline we agree.
-            </p>
-          </div>
+          <ScrollReveal>
+            <div className="max-w-3xl bg-amber-50 border border-amber-200 rounded-lg p-6">
+              <div className="flex items-center gap-2.5 mb-2">
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-100 text-amber-700 flex-shrink-0">
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z" />
+                  </svg>
+                </span>
+                <h2 className="text-sm font-bold text-amber-900">
+                  Scope of This Service
+                </h2>
+              </div>
+              <p className="text-amber-900/90 text-sm leading-relaxed">
+                Flyer Distribution Hampshire provides physical leaflet and
+                notice distribution only. We are not a planning consultancy
+                and do not provide legal advice. This page is a general guide
+                to how our distribution service works and should not be
+                relied on as guidance on your statutory obligations. Your
+                planning consultant or solicitor should confirm your
+                Statement of Community Consultation requirements and wider
+                statutory compliance before you rely on any distribution
+                timeline we agree.
+              </p>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
       {/* Scaling note */}
       <section className="bg-white border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <h2 className="text-xl font-bold text-blue-900 mb-4">
-            From a Handful of Streets to a Whole Project Area
-          </h2>
-          <p className="text-gray-600 max-w-4xl leading-relaxed">
-            Our teams scale to the job, whether that means a handful of
-            streets around a single substation upgrade or a much larger
-            area spanning several parishes for a major infrastructure
-            project. The planning and the documentation work the same way
-            either way.
-          </p>
+          <ScrollReveal>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-blue-50 text-blue-700 flex-shrink-0">
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+                </svg>
+              </span>
+              <h2 className="text-xl font-bold text-blue-900">
+                From a Handful of Streets to a Whole Project Area
+              </h2>
+            </div>
+            <p className="text-gray-600 max-w-3xl leading-relaxed mb-6">
+              Our teams scale to the job, whether that means a handful of
+              streets around a single substation upgrade or a much larger
+              area spanning several parishes for a major infrastructure
+              project. The planning and the documentation work the same way
+              either way.
+            </p>
+            <div className="grid grid-cols-2 gap-4 max-w-md">
+              <div className="text-center bg-slate-50 border border-gray-200 rounded-lg py-4 px-3">
+                <p className="text-sm font-semibold text-blue-900">A Handful of Streets</p>
+              </div>
+              <div className="text-center bg-slate-50 border border-gray-200 rounded-lg py-4 px-3">
+                <p className="text-sm font-semibold text-blue-900">A Whole Project Area</p>
+              </div>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
