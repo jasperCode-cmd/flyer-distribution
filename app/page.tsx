@@ -6,6 +6,7 @@ import StatsBar from "@/components/StatsBar";
 import AreaCarousel from "@/components/AreaCarousel";
 import TrustBar from "@/components/TrustBar";
 import TrustCards from "@/components/TrustCards";
+import StaggerGroup from "@/components/StaggerGroup";
 
 export const metadata: Metadata = {
   title: "Flyer Distribution Hampshire | Local Leaflet & Flyer Delivery",
@@ -47,26 +48,37 @@ const services = [
   {
     title: "Design, Print and Deliver",
     desc: "Our full end-to-end service. We handle everything from design and printing in A6, A5, A4 or DL through to full distribution across your chosen areas.",
+    href: "/services",
   },
   {
     title: "Print and Deliver",
     desc: "Already have your design ready? We handle the printing in A6, A5, A4 or DL and deliver your leaflets directly through letterboxes across Hampshire and Dorset.",
+    href: "/services",
   },
   {
     title: "Leaflet Distribution",
     desc: "Door-to-door delivery to households across your chosen areas. Your printed materials posted directly through letterboxes across Hampshire and Dorset.",
+    href: "/services",
   },
   {
     title: "Targeted Postcode Campaigns",
     desc: "We use postcode data to focus your distribution on the areas most likely to respond to your campaign. Rather than blanket coverage, we put your leaflets where your potential customers actually live.",
+    href: "/services",
   },
   {
     title: "Vehicle Leaflet Distribution",
     desc: "Leaflets placed on parked cars in car parks, retail areas, and high-footfall locations across Hampshire and Dorset.",
+    href: "/services",
   },
   {
     title: "Campaign Planning",
     desc: "Not sure where to start? We sit down with you to understand your business, your customers and your goals. Then we build a campaign plan around your budget and timeline.",
+    href: "/services",
+  },
+  {
+    title: "Public Notice Leafleting",
+    desc: "Statutory door-to-door distribution for Nationally Significant Infrastructure Projects across Hampshire, meeting Section 47 and Section 48 Planning Act 2008 requirements.",
+    href: "/services/public-notice-leafleting",
   },
 ];
 
@@ -258,12 +270,15 @@ export default function HomePage() {
               service to suit every budget and campaign goal.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <StaggerGroup
+            className="flex flex-wrap justify-center gap-6"
+            itemClassName="w-full sm:w-[calc(50%-0.75rem)]"
+          >
             {services.map((svc) => (
               <Link
                 key={svc.title}
-                href="/services"
-                className="group relative bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:border-blue-300 hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-out block"
+                href={svc.href}
+                className="group relative bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:border-blue-300 hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-out block h-full"
               >
                 <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-lg bg-blue-200 group-hover:bg-blue-500 transition-colors duration-300" aria-hidden="true" />
                 <h3 className="text-base font-semibold text-blue-900 mb-2">
@@ -272,7 +287,7 @@ export default function HomePage() {
                 <p className="text-gray-600 text-sm leading-relaxed">{svc.desc}</p>
               </Link>
             ))}
-          </div>
+          </StaggerGroup>
           <div className="mt-8">
             <Link
               href="/services"
