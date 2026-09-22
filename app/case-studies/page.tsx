@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import RoutePlaceholderGraphic from "@/components/RoutePlaceholderGraphic";
+import CaseStudyCollage from "@/components/CaseStudyCollage";
 
 export const metadata: Metadata = {
   title: "Case Studies",
@@ -60,26 +60,69 @@ const breadcrumbSchema = {
 // specific leaflet counts, client names, dates, or measured outcomes to
 // publish for them. Copy is deliberately written at the level of "what
 // kind of work this was" rather than specific figures, and nothing here
-// should be treated as final. Swap in real details (and a real Strava
-// route export in place of RoutePlaceholderGraphic) once available.
+// should be treated as final. Swap in real details once available.
 const caseStudies = [
   {
     place: "West Wellow",
     body: "A residential door-to-door leaflet drop across West Wellow, delivering printed materials directly to households throughout the village.",
     linkHref: "/areas",
     linkLabel: "See our coverage areas",
+    collage: {
+      hero: {
+        src: "/Wellow-Route1.jpeg",
+        alt: "Aerial Strava route map showing a dense door-to-door leaflet round through the Whinwhistle Road and The Drive area of West Wellow",
+      },
+      stacked: [
+        {
+          src: "/Wellow-Route2.jpeg",
+          alt: "Aerial Strava route map showing a leaflet round along Maurys Lane, Slab Lane and Gazing Lane in West Wellow",
+        },
+        {
+          src: "/Wellow-Route3.jpeg",
+          alt: "Aerial Strava route map showing a leaflet round through Buttons Lane, Gazing Lane and School Road in West Wellow",
+        },
+      ],
+    },
   },
   {
     place: "Micheldever & Winchester Area",
     body: "Leaflet distribution covering Micheldever and the wider Winchester area, reaching households and local businesses within a defined round.",
     linkHref: "/areas/winchester",
     linkLabel: "See our Winchester coverage",
+    collage: {
+      hero: {
+        src: "/Micheldever-Route2.jpeg",
+        alt: "Aerial Strava route map showing a leaflet round along Northbrook in Micheldever",
+      },
+      stacked: [
+        {
+          src: "/Micheldever-Route1.jpeg",
+          alt: "Aerial Strava route map showing a leaflet round through Sloe Lane, past Micheldever Village Store",
+        },
+        {
+          src: "/Micheldever-Route3.jpeg",
+          alt: "Aerial Strava route map showing a leaflet round through Wonston Road, Old Stoke Road and Weston Down Road near Micheldever",
+        },
+      ],
+    },
   },
   {
     place: "Oakley",
     body: "A completed leaflet distribution round in Oakley, delivering door-to-door across residential streets in the village.",
     linkHref: "/areas",
     linkLabel: "See our coverage areas",
+    collage: {
+      hero: {
+        src: "/Oakley-Route1.jpeg",
+        alt: "Aerial Strava route map showing an extensive leaflet round covering East Oakley, Kennet Way, The Drive and Hill Road",
+      },
+      stacked: [
+        {
+          src: "/Oakley-Route2.jpeg",
+          alt: "Aerial Strava route map showing a leaflet round through the streets of Oakley village",
+        },
+      ],
+    },
   },
   {
     place: "Across Hampshire",
@@ -87,6 +130,26 @@ const caseStudies = [
     body: "Statutory public notice leafleting supporting community consultation requirements for a Nationally Significant Infrastructure Project, distributed across the project-defined area rather than a standard postcode round.",
     linkHref: "/services/public-notice-leafleting",
     linkLabel: "Learn about Public Notice Leafleting",
+    collage: {
+      hero: {
+        src: "/Road-Closure-Hampshire-Route4.jpeg",
+        alt: "Aerial Strava route map showing a road closure notice round along Clay Hill near Lyndhurst",
+      },
+      stacked: [
+        {
+          src: "/Road-Closure-Hampshire-Route1.jpeg",
+          alt: "Aerial Strava route map showing a road closure notice round through an industrial and retail park, past car dealerships and takeaway outlets",
+        },
+        {
+          src: "/Road-Closure-Hampshire-Route3.jpeg",
+          alt: "Aerial Strava route map showing a road closure notice round along Sandy Lane and Winchester Road in Fair Oak",
+        },
+        {
+          src: "/Road-Closure-Hampshire-Route2.jpeg",
+          alt: "Aerial Strava route map showing a road closure notice round along Witt Road and Brookfield Road in Fair Oak",
+        },
+      ],
+    },
   },
 ];
 
@@ -117,7 +180,7 @@ export default function CaseStudiesPage() {
                 className="group bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 ease-out"
               >
                 <div className="p-4 pb-0">
-                  <RoutePlaceholderGraphic />
+                  <CaseStudyCollage hero={study.collage.hero} stacked={study.collage.stacked} />
                 </div>
                 <div className="p-6">
                   {study.subtitle && (
