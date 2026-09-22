@@ -233,27 +233,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Overhead residential photo — modest supporting visual, not a banner */}
-      <section className="bg-white py-10 border-b border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
-          <ScrollReveal>
-            <div className="w-56 sm:w-64 mx-auto rounded-lg overflow-hidden shadow-lg ring-1 ring-black/5">
-              <Image
-                src="/Overhead-shot-residential-areas.jpeg"
-                alt="Overhead view of a residential street with houses and gardens, the kind of area covered door to door"
-                width={999}
-                height={1074}
-                sizes="256px"
-                className="w-full h-auto object-cover"
-              />
-            </div>
-          </ScrollReveal>
-          <p className="text-gray-500 text-sm mt-4 max-w-md">
-            The kind of residential streets our distributors cover, door to door.
-          </p>
-        </div>
-      </section>
-
       <TrustBar />
 
       <AreaCarousel />
@@ -324,13 +303,31 @@ export default function HomePage() {
       {/* Coverage areas */}
       <section className="bg-blue-900 text-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-3">
-            Areas We Cover
-          </h2>
-          <p className="text-blue-200 mb-10 max-w-xl">
-            We cover the Hampshire and Dorset corridor, from Winchester in
-            the north to Poole in the west, including:
-          </p>
+          <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-10 items-center mb-10">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-3">
+                Areas We Cover
+              </h2>
+              <p className="text-blue-200 max-w-xl">
+                We cover the Hampshire and Dorset corridor, from Winchester in
+                the north to Poole in the west, including:
+              </p>
+            </div>
+            <div className="flex justify-center lg:justify-end">
+              <ScrollReveal>
+                <div className="w-28 sm:w-32 aspect-square overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
+                  <Image
+                    src="/Overhead-shot-residential-areas.jpeg"
+                    alt="Overhead view of a residential street with houses and gardens, the kind of area covered door to door"
+                    width={999}
+                    height={999}
+                    sizes="128px"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </ScrollReveal>
+            </div>
+          </div>
           <div className="flex flex-wrap gap-3 mb-8">
             {areas.map((area) => (
               <Link
