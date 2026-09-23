@@ -181,11 +181,12 @@ export default function AreasPage() {
           <p className="text-gray-600 mb-8">
             From design and print through to targeted postcode campaigns, we have a service to suit every budget.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {[
               { title: "Design, Print and Deliver", href: "/services" },
               { title: "Print and Deliver", href: "/services" },
               { title: "Leaflet Distribution", href: "/services" },
+              { title: "Public Notice Leafleting", href: "/services/public-notice-leafleting" },
             ].map((svc) => (
               <Link
                 key={svc.title}
