@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { campaignSlots } from "@/lib/campaign-constants";
 
-const DURATION = 1700;
+const DURATION = 1050;
 
 export function prefersReducedMotion() {
   return (
