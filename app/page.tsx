@@ -106,6 +106,14 @@ const localBusinessSchema = {
     "Professional flyer and leaflet distribution across Hampshire and Dorset. Reach real households in Southampton, Bournemouth, Poole and Winchester.",
   "url": "https://www.flyerdistributionhampshire.co.uk",
   "email": "flyerdistributionhampshire@gmail.com",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "11 Forest Reach",
+    "addressLocality": "St Leonards",
+    "addressRegion": "Dorset",
+    "postalCode": "BH24 2NR",
+    "addressCountry": "GB"
+  },
   "image": "https://www.flyerdistributionhampshire.co.uk/Flyer%20Distribution%20Logo%20White%20Cropped.webp",
   "sameAs": [
     "https://share.google/RVxyPi4TzXAzkt1Am",

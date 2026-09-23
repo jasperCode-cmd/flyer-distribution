@@ -83,7 +83,10 @@ const jobPostingSchema = {
     "@type": "Place",
     address: {
       "@type": "PostalAddress",
-      addressRegion: ["Hampshire", "Dorset"],
+      streetAddress: "11 Forest Reach",
+      addressLocality: "St Leonards",
+      addressRegion: "Dorset",
+      postalCode: "BH24 2NR",
       addressCountry: "GB",
     },
   },
