@@ -362,7 +362,7 @@ export default function HomePage() {
                   <Link
                     key={a.name}
                     href={a.href}
-                    className="bg-blue-800 hover:bg-blue-700 border border-blue-700 text-blue-200 hover:text-white text-sm px-4 py-1.5 rounded-full transition-colors"
+                    className="bg-blue-800 hover:bg-blue-700 border border-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-md transition-colors"
                   >
                     {a.name}
                   </Link>
