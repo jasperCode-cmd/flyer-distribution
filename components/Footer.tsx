@@ -89,6 +89,7 @@ export default function Footer() {
                 <address className="not-italic">
                   11 Forest Reach<br />
                   St Leonards<br />
+                  Ringwood<br />
                   BH24 2NR
                 </address>
               </li>

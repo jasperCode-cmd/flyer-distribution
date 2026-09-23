@@ -83,8 +83,8 @@ const jobPostingSchema = {
     "@type": "Place",
     address: {
       "@type": "PostalAddress",
-      streetAddress: "11 Forest Reach",
-      addressLocality: "St Leonards",
+      streetAddress: "11 Forest Reach, St Leonards",
+      addressLocality: "Ringwood",
       addressRegion: "Dorset",
       postalCode: "BH24 2NR",
       addressCountry: "GB",
