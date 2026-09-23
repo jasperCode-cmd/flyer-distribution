@@ -119,9 +119,9 @@ export default function WinchesterPage() {
               Winchester&apos;s county town professional base makes it
               particularly effective for premium services such as home
               improvements, fine dining, private schools, and specialist
-              professional services, delivered through our full{" "}
+              professional services, all delivered through{" "}
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
-                leaflet distribution service
+                our full leaflet distribution service
               </Link>
               .
             </p>

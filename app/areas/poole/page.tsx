@@ -102,12 +102,11 @@ export default function PooléPage() {
               Poole is one of the most affluent towns in Dorset, with
               prestigious areas like Sandbanks, Canford Cliffs, and Branksome
               Park attracting high-income households. Our distributors cover
-              BH13 through BH17 and surrounding postcodes as part of our
-              wider{" "}
+              BH13 through BH17 and surrounding postcodes as part of{" "}
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
-                leaflet distribution service
-              </Link>
-              .
+                the service we offer
+              </Link>{" "}
+              across the wider area.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
               For businesses targeting higher-income demographics, Poole&apos;s
