@@ -20,6 +20,15 @@ export default function SlotPopup() {
 
   useEffect(() => {
     if (skip) return;
+
+    // ?resetpopup=1 clears a stale "dismissed this session" flag so the
+    // popup can be re-tested without opening a fresh browser context.
+    try {
+      if (new URLSearchParams(window.location.search).get("resetpopup") === "1") {
+        sessionStorage.removeItem(DISMISS_KEY);
+      }
+    } catch {}
+
     let dismissed = false;
     try {
       dismissed = sessionStorage.getItem(DISMISS_KEY) === "1";
