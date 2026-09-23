@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { campaignSlots } from "@/lib/campaign-constants";
 
-const DURATION = 2600;
+const DURATION = 1700;
 
-function prefersReducedMotion() {
+export function prefersReducedMotion() {
   return (
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -23,9 +23,11 @@ function prefersReducedMotion() {
 export default function SlotCountdown({
   triggered,
   className = "",
+  onDone,
 }: {
   triggered?: boolean;
   className?: string;
+  onDone?: () => void;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [count, setCount] = useState(campaignSlots.totalSlots);
@@ -38,6 +40,7 @@ export default function SlotCountdown({
 
     if (prefersReducedMotion()) {
       setCount(campaignSlots.slotsRemaining);
+      onDone?.();
       return;
     }
 
@@ -52,7 +55,11 @@ export default function SlotCountdown({
       // time, so the count is actually readable rather than blurring
       // through the early numbers.
       setCount(Math.round(from - progress * (from - to)));
-      if (progress < 1) requestAnimationFrame(step);
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        onDone?.();
+      }
     };
     requestAnimationFrame(step);
   }
