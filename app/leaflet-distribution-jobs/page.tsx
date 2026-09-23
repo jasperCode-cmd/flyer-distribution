@@ -75,7 +75,7 @@ const jobPostingSchema = {
   description:
     "Self-employed leaflet distributor role covering Hampshire and Dorset. Flexible hours, no experience needed, payment agreed per job and usually paid the same day. Apply online, we'll be in touch to get you started.",
   hiringOrganization: {
-    "@type": "LocalBusiness",
+    "@type": "Organization",
     name: "Flyer Distribution Hampshire",
     sameAs: "https://www.flyerdistributionhampshire.co.uk",
   },
