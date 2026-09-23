@@ -202,9 +202,9 @@ export default function HomePage() {
                 </Link>
                 <Link
                   href="/case-studies"
-                  className="inline-block border-2 border-white text-white hover:bg-white hover:text-blue-900 font-bold px-8 py-4 rounded-md text-base transition duration-200 ease-out hover:scale-105"
+                  className="cta-shimmer relative overflow-hidden inline-block border-2 border-white text-white hover:bg-white hover:text-blue-900 font-bold px-8 py-4 rounded-md text-base transition duration-200 ease-out hover:scale-105"
                 >
-                  See Our Case Studies
+                  <span className="relative z-10">See Our Case Studies</span>
                 </Link>
               </div>
               <HeroCaseStudyTeaser />
