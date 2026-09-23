@@ -70,16 +70,16 @@ const caseStudies = [
     collage: {
       hero: {
         src: "/Wellow-Route1.webp",
-        alt: "Aerial Strava route map showing a dense door-to-door leaflet round through the Whinwhistle Road and The Drive area of West Wellow",
+        alt: "Aerial GPS-recorded route map showing a dense door-to-door leaflet round through the Whinwhistle Road and The Drive area of West Wellow",
       },
       stacked: [
         {
           src: "/Wellow-Route2.webp",
-          alt: "Aerial Strava route map showing a leaflet round along Maurys Lane, Slab Lane and Gazing Lane in West Wellow",
+          alt: "Aerial GPS-recorded route map showing a leaflet round along Maurys Lane, Slab Lane and Gazing Lane in West Wellow",
         },
         {
           src: "/Wellow-Route3.webp",
-          alt: "Aerial Strava route map showing a leaflet round through Buttons Lane, Gazing Lane and School Road in West Wellow",
+          alt: "Aerial GPS-recorded route map showing a leaflet round through Buttons Lane, Gazing Lane and School Road in West Wellow",
         },
       ],
     },
@@ -92,16 +92,16 @@ const caseStudies = [
     collage: {
       hero: {
         src: "/Micheldever-Route2.webp",
-        alt: "Aerial Strava route map showing a leaflet round along Northbrook in Micheldever",
+        alt: "Aerial GPS-recorded route map showing a leaflet round along Northbrook in Micheldever",
       },
       stacked: [
         {
           src: "/Micheldever-Route1.webp",
-          alt: "Aerial Strava route map showing a leaflet round through Sloe Lane, past Micheldever Village Store",
+          alt: "Aerial GPS-recorded route map showing a leaflet round through Sloe Lane, past Micheldever Village Store",
         },
         {
           src: "/Micheldever-Route3.webp",
-          alt: "Aerial Strava route map showing a leaflet round through Wonston Road, Old Stoke Road and Weston Down Road near Micheldever",
+          alt: "Aerial GPS-recorded route map showing a leaflet round through Wonston Road, Old Stoke Road and Weston Down Road near Micheldever",
         },
       ],
     },
@@ -114,12 +114,12 @@ const caseStudies = [
     collage: {
       hero: {
         src: "/Oakley-Route1.webp",
-        alt: "Aerial Strava route map showing an extensive leaflet round covering East Oakley, Kennet Way, The Drive and Hill Road",
+        alt: "Aerial GPS-recorded route map showing an extensive leaflet round covering East Oakley, Kennet Way, The Drive and Hill Road",
       },
       stacked: [
         {
           src: "/Oakley-Route2.webp",
-          alt: "Aerial Strava route map showing a leaflet round through the streets of Oakley village",
+          alt: "Aerial GPS-recorded route map showing a leaflet round through the streets of Oakley village",
         },
       ],
     },
@@ -133,20 +133,20 @@ const caseStudies = [
     collage: {
       hero: {
         src: "/Road-Closure-Hampshire-Route4.webp",
-        alt: "Aerial Strava route map showing a road closure notice round along Clay Hill near Lyndhurst",
+        alt: "Aerial GPS-recorded route map showing a road closure notice round along Clay Hill near Lyndhurst",
       },
       stacked: [
         {
           src: "/Road-Closure-Hampshire-Route1.webp",
-          alt: "Aerial Strava route map showing a road closure notice round through an industrial and retail park, past car dealerships and takeaway outlets",
+          alt: "Aerial GPS-recorded route map showing a road closure notice round through an industrial and retail park, past car dealerships and takeaway outlets",
         },
         {
           src: "/Road-Closure-Hampshire-Route3.webp",
-          alt: "Aerial Strava route map showing a road closure notice round along Sandy Lane and Winchester Road in Fair Oak",
+          alt: "Aerial GPS-recorded route map showing a road closure notice round along Sandy Lane and Winchester Road in Fair Oak",
         },
         {
           src: "/Road-Closure-Hampshire-Route2.webp",
-          alt: "Aerial Strava route map showing a road closure notice round along Witt Road and Brookfield Road in Fair Oak",
+          alt: "Aerial GPS-recorded route map showing a road closure notice round along Witt Road and Brookfield Road in Fair Oak",
         },
       ],
     },
@@ -163,7 +163,7 @@ export default function CaseStudiesPage() {
 
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3">Case Studies</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-3">Case Studies - What Does GPS Tracked Leaflet Distribution Look Like?</h1>
           <p className="text-blue-200 text-lg max-w-xl">
             A look at real leaflet distribution campaigns we&apos;ve completed
             across Hampshire.

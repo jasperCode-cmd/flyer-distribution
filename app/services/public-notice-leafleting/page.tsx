@@ -262,7 +262,7 @@ export default function PublicNoticeLeafletingPage() {
                     <circle cx="12" cy="10" r="2.5" />
                   </>
                 ),
-                body: "Distributors record each round with Strava route screenshots.",
+                body: "Each round is tracked via GPS and confirmed once complete.",
               },
               {
                 icon: (
