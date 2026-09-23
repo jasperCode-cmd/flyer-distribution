@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { campaignSlots } from "@/lib/campaign-constants";
-import SlotCountReveal from "./SlotCountReveal";
+import SlotCountdown from "./SlotCountdown";
 
 const DISMISS_KEY = "fdh-slot-popup-dismissed";
-const SHOW_AFTER_MS = 12000;
+const SHOW_AFTER_MS = 16000;
 const BACKDROP_GUARD_MS = 1000;
 
 export default function SlotPopup() {
@@ -86,8 +86,8 @@ export default function SlotPopup() {
           </svg>
         </button>
         <p className="text-blue-900 font-bold text-lg mb-2 pr-6">
-          <SlotCountReveal value={campaignSlots.slotsRemaining} /> Distribution
-          Campaign Slots Left for {campaignSlots.monthLabel}
+          <SlotCountdown triggered={visible} /> Distribution Campaign Slots
+          Left for {campaignSlots.monthLabel}
         </p>
         <p className="text-gray-600 text-sm mb-5">
           Get in touch before this month&apos;s slots are gone.
