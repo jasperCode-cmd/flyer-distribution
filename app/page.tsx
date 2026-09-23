@@ -162,7 +162,7 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
       />
       {/* Hero */}
-      <section className="relative bg-blue-900 text-white overflow-hidden">
+      <section id="hero" className="relative bg-blue-900 text-white overflow-hidden">
         {/* Background photo — darkened to stay behind content */}
         <Image
           src="https://images.unsplash.com/photo-1464082354059-27db6ce50048?w=1920&q=80"
