@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { campaignSlots } from "@/lib/campaign-constants";
 
-const DURATION = 1300;
+const DURATION = 2600;
 
 function prefersReducedMotion() {
   return (
@@ -48,8 +48,10 @@ export default function SlotCountdown({
     const step = (timestamp: number) => {
       if (start === null) start = timestamp;
       const progress = Math.min((timestamp - start) / DURATION, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.round(from - eased * (from - to)));
+      // Linear rather than eased — each digit gets roughly equal screen
+      // time, so the count is actually readable rather than blurring
+      // through the early numbers.
+      setCount(Math.round(from - progress * (from - to)));
       if (progress < 1) requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
