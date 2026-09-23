@@ -56,9 +56,9 @@ const questions = [
 
 /* Plain-text versions for FAQPage schema — no markdown, no link syntax */
 const schemaAnswers = [
-  "We cover the Hampshire and Dorset corridor, offering flyer distribution and leaflet distribution across Southampton, Bournemouth, Poole, Winchester, Eastleigh, the New Forest, Romsey, Ringwood, Christchurch, and Dorset more widely, along with Hythe, Totton, Hedge End, and Chandler's Ford. See our full coverage areas for details, and if your target area isn't listed, get in touch, as we can often accommodate additional postcodes on request.",
-  "Once we have your printed leaflets, we take care of getting them delivered. Our door-to-door leaflet distribution service posts them directly through letterboxes across your chosen postcode areas in Hampshire and Dorset. Once your materials are received, our team carries out the rounds and confirms completion.",
-  "Yes. Our Design, Print and Deliver package is a complete end-to-end service where we handle everything from initial artwork through to delivery across Hampshire and Dorset. Just let us know when requesting your quote and we'll talk you through the options.",
+  "We cover the Hampshire and Dorset corridor, offering flyer distribution and leaflet distribution across Southampton, Bournemouth, Poole, Winchester, Eastleigh, the New Forest, Romsey, Ringwood, Christchurch, and Dorset more widely, along with Hythe, Totton, Hedge End, Chandler's Ford, and Brockenhurst. See our full coverage areas for details, and if your target area isn't listed, get in touch, as we can often accommodate additional postcodes on request.",
+  "Once we have your printed leaflets, we take care of getting them delivered. Our door-to-door leaflet distribution service posts them directly through letterboxes across your chosen postcode areas in Hampshire and Dorset. Once your materials are received, our team carries out the rounds and confirms completion. You can see examples of completed rounds in our case studies.",
+  "Yes. Our Design, Print and Deliver package is a complete end-to-end service where we handle everything from initial artwork through to delivery across Hampshire and Dorset. Just let us know when requesting your quote and we'll talk you through the options. We also handle statutory Public Notice Leafleting for infrastructure projects across Hampshire.",
   "Yes. Postcode-level targeting is central to how we work. You choose the postcode areas you want to reach, and we focus your flyer distribution campaign there. Our Campaign Planning service can help if you're unsure which postcode areas in Hampshire or Dorset are best suited to your business.",
   "Not necessarily. You can supply your own printed materials, or choose our Print and Deliver service and we'll handle the printing for you. We have established relationships with print partners which means we can offer competitive pricing on A6, A5, A4 and DL formats. Just let us know when requesting your quote and we'll include printing in your package.",
   "Use our Get a Quote page and tell us your target postcode areas and approximate quantity. We'll come back to you within 24 hours with a tailored price for your leaflet distribution campaign.",
@@ -115,11 +115,16 @@ export default function FaqPage() {
                 <Link href="/areas/poole" className={a}>Poole</Link>,{" "}
                 <Link href="/areas/winchester" className={a}>Winchester</Link>,{" "}
                 <Link href="/areas/eastleigh" className={a}>Eastleigh</Link>, the{" "}
-                <Link href="/areas/new-forest" className={a}>New Forest</Link>, Romsey,{" "}
+                <Link href="/areas/new-forest" className={a}>New Forest</Link>,{" "}
+                <Link href="/areas/romsey" className={a}>Romsey</Link>,{" "}
                 <Link href="/areas/ringwood" className={a}>Ringwood</Link>,{" "}
                 <Link href="/areas/christchurch" className={a}>Christchurch</Link>, and{" "}
-                <Link href="/areas/dorset" className={a}>Dorset</Link> more widely, along with
-                Hythe, Totton, Hedge End, and Chandler&apos;s Ford. See our full{" "}
+                <Link href="/areas/dorset" className={a}>Dorset</Link> more widely, along with{" "}
+                <Link href="/areas/hythe" className={a}>Hythe</Link>,{" "}
+                <Link href="/areas/totton" className={a}>Totton</Link>,{" "}
+                <Link href="/areas/hedge-end" className={a}>Hedge End</Link>,{" "}
+                <Link href="/areas/chandlers-ford" className={a}>Chandler&apos;s Ford</Link>, and{" "}
+                <Link href="/areas/brockenhurst" className={a}>Brockenhurst</Link>. See our full{" "}
                 <Link href="/areas" className={a}>coverage areas</Link> for details, and if
                 your target area isn&apos;t listed,{" "}
                 <Link href="/quote" className={a}>get in touch</Link>, as we can often
@@ -135,7 +140,8 @@ export default function FaqPage() {
                 <Link href="/services" className={a}>door-to-door leaflet distribution service</Link>{" "}
                 posts them directly through letterboxes across your chosen postcode areas in Hampshire
                 and Dorset. Once your materials are received, our team carries out the rounds and
-                confirms completion.
+                confirms completion. You can see examples of completed rounds in our{" "}
+                <Link href="/case-studies" className={a}>case studies</Link>.
               </p>
             </div>
 
@@ -148,7 +154,9 @@ export default function FaqPage() {
                 is a complete end-to-end service where we handle everything from initial artwork
                 through to delivery across Hampshire and Dorset. Just let us know when{" "}
                 <Link href="/quote" className={a}>requesting your quote</Link> and we&apos;ll
-                talk you through the options.
+                talk you through the options. We also handle statutory{" "}
+                <Link href="/services/public-notice-leafleting" className={a}>Public Notice Leafleting</Link>{" "}
+                for infrastructure projects across Hampshire.
               </p>
             </div>
 
@@ -243,7 +251,9 @@ export default function FaqPage() {
               Still have questions?
             </h2>
             <p className="text-gray-600 text-sm mb-6">
-              Get in touch and we&apos;ll be happy to help.
+              Get in touch and we&apos;ll be happy to help. Want to know more
+              about who we are first? Read{" "}
+              <Link href="/about" className={a}>our story</Link>.
             </p>
             <Link
               href="/quote"

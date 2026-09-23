@@ -5,6 +5,7 @@ import WebDesignCards from "@/components/WebDesignCards";
 import WebDesignBenefits from "@/components/WebDesignBenefits";
 import ScrollReveal from "@/components/ScrollReveal";
 import BrowserMockup from "@/components/BrowserMockup";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Web Design & SEO",
@@ -66,9 +67,38 @@ const trustStripItems = [
 // (BrowserMockup itself now lives in components/BrowserMockup.tsx, shared
 // with the homepage's Additional Services card.)
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: "https://www.flyerdistributionhampshire.co.uk",
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Services",
+      item: "https://www.flyerdistributionhampshire.co.uk/services",
+    },
+    {
+      "@type": "ListItem",
+      position: 3,
+      name: "Web Design & SEO",
+      item: "https://www.flyerdistributionhampshire.co.uk/services/web-design-seo",
+    },
+  ],
+};
+
 export default function WebDesignSeoPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       {/* Hero */}
       <section className="relative bg-blue-900 text-white overflow-hidden">
         <div
@@ -91,6 +121,13 @@ export default function WebDesignSeoPage() {
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16 lg:py-24">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             <div>
+              <Breadcrumb
+                items={[
+                  { label: "Home", href: "/" },
+                  { label: "Services", href: "/services" },
+                  { label: "Web Design & SEO" },
+                ]}
+              />
               <p className="text-blue-300 text-sm font-semibold uppercase tracking-widest mb-3">
                 Web Design &amp; SEO, Hampshire and Dorset
               </p>
@@ -273,6 +310,17 @@ export default function WebDesignSeoPage() {
           <h2 className="text-2xl font-bold text-blue-900 mb-8">
             Leaflet Services
           </h2>
+          <p className="text-gray-600 mb-8 max-w-2xl leading-relaxed">
+            We also run door-to-door leaflet distribution across our full{" "}
+            <Link href="/areas" className="text-blue-700 hover:underline font-medium">
+              coverage area
+            </Link>
+            . If you&apos;re planning an event, our{" "}
+            <Link href="/services/screen-hire" className="text-blue-700 hover:underline font-medium">
+              mobile screen trailer hire
+            </Link>{" "}
+            is worth a look too.
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Link
               href="/services"

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Flyer Distribution Southampton",
@@ -71,6 +72,13 @@ export default function SouthamptonPage() {
       />
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Areas", href: "/areas" },
+              { label: "Southampton" },
+            ]}
+          />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
@@ -99,12 +107,21 @@ export default function SouthamptonPage() {
             <p className="text-gray-600 mb-4 leading-relaxed">
               Whether you&apos;re targeting the city centre, Shirley, Portswood,
               Bitterne, or the waterfront areas, we deliver your flyers reliably
-              and efficiently to the right letterboxes.
+              and efficiently to the right letterboxes. Campaigns here often
+              extend out to{" "}
+              <Link href="/areas/romsey" className="text-blue-700 hover:underline font-medium">
+                Romsey
+              </Link>{" "}
+              too.
             </p>
             <p className="text-gray-600 leading-relaxed">
               We work with restaurants, tradespeople, estate agents, gyms,
-              retailers, and many other local businesses to help them grow their
-              customer base through effective print marketing.
+              retailers, and many other local businesses to help them grow
+              their customer base through our full range of{" "}
+              <Link href="/services" className="text-blue-700 hover:underline font-medium">
+                leaflet distribution services
+              </Link>
+              .
             </p>
             <div className="mt-8">
               <Link

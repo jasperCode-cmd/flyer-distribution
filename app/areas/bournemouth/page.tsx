@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Flyer Distribution Bournemouth",
@@ -71,6 +72,13 @@ export default function BournemouthPage() {
       />
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Areas", href: "/areas" },
+              { label: "Bournemouth" },
+            ]}
+          />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
@@ -94,12 +102,26 @@ export default function BournemouthPage() {
               Bournemouth is one of Dorset&apos;s largest towns, known for its
               beaches, vibrant town centre, and large student population.
               We cover BH1 through BH12 and surrounding postcodes, reaching
-              residential areas across all neighbourhoods.
+              residential areas across all neighbourhoods, backed by our
+              full range of{" "}
+              <Link href="/services" className="text-blue-700 hover:underline font-medium">
+                distribution services
+              </Link>
+              .
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
               Whether you need to reach the Westbourne boutique area,
               Boscombe, Winton, or the leafy suburbs, our experienced
-              distributors know these routes well.
+              distributors know these routes well. Many campaigns here run
+              alongside neighbouring{" "}
+              <Link href="/areas/poole" className="text-blue-700 hover:underline font-medium">
+                Poole
+              </Link>
+              .{" "}
+              <Link href="/areas/christchurch" className="text-blue-700 hover:underline font-medium">
+                Christchurch
+              </Link>
+              , just along the coast, is another popular pairing.
             </p>
             <p className="text-gray-600 leading-relaxed">
               Bournemouth&apos;s large student population and year-round tourism

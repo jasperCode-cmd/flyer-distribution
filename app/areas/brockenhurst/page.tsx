@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Leaflet Distribution Brockenhurst",
@@ -71,6 +72,13 @@ export default function BrockenhurstPage() {
       />
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Areas", href: "/areas" },
+              { label: "Brockenhurst" },
+            ]}
+          />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
@@ -111,10 +119,13 @@ export default function BrockenhurstPage() {
               .
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Vehicle leaflet distribution is also available around
-              Brockenhurst&apos;s Brookley Road and station car parks, a
-              useful way to reach visitors as well as the village&apos;s
-              own residents.
+              Vehicle{" "}
+              <Link href="/services" className="text-blue-700 hover:underline font-medium">
+                leaflet distribution
+              </Link>{" "}
+              is also available around Brockenhurst&apos;s Brookley Road and
+              station car parks, a useful way to reach visitors as well as
+              the village&apos;s own residents.
             </p>
             <div className="mt-8">
               <Link

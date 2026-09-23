@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Leaflet Distribution Totton",
@@ -71,6 +72,13 @@ export default function TottonPage() {
       />
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Areas", href: "/areas" },
+              { label: "Totton" },
+            ]}
+          />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
@@ -102,7 +110,11 @@ export default function TottonPage() {
               With the River Test on one side and the New Forest on the
               other, Totton has a genuinely mixed audience, from young
               families in newer developments to long-established residents
-              near Eling. That mix suits a wide range of campaigns, from
+              near Eling. Campaigns here often pair naturally with nearby{" "}
+              <Link href="/areas/hythe" className="text-blue-700 hover:underline font-medium">
+                Hythe
+              </Link>{" "}
+              too. That mix suits a wide range of campaigns, from
               trades and home services to local retail and food businesses,
               and it sits naturally alongside{" "}
               <Link href="/areas/romsey" className="text-blue-700 hover:underline font-medium">
@@ -115,10 +127,17 @@ export default function TottonPage() {
               campaigns for businesses covering the wider area.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              We also offer vehicle leaflet distribution around
-              Totton&apos;s retail areas and car parks, a good option for
-              reaching shoppers heading to the shops near Eling Tide Mill
-              and the town centre.
+              We also offer vehicle{" "}
+              <Link href="/services" className="text-blue-700 hover:underline font-medium">
+                leaflet distribution
+              </Link>{" "}
+              around Totton&apos;s retail areas and car parks, a good option
+              for reaching shoppers heading to the shops near Eling Tide Mill
+              and the town centre. West Wellow campaigns, visible in our{" "}
+              <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
+                case studies
+              </Link>
+              , often route through here too.
             </p>
             <div className="mt-8">
               <Link

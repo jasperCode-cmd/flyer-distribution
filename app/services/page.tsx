@@ -257,6 +257,13 @@ export default function ServicesPage() {
           <h2 className="text-2xl font-bold text-blue-900 mb-8">
             Distribution Services
           </h2>
+          <p className="text-gray-600 mb-8 max-w-2xl">
+            Growing online too? We also build{" "}
+            <Link href="/services/web-design-seo" className="text-blue-700 hover:underline font-medium">
+              fast, SEO-friendly websites
+            </Link>{" "}
+            for local businesses.
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {supportingServices.map((svc) => {
               const cardClass =
@@ -305,7 +312,12 @@ export default function ServicesPage() {
           </h2>
           <p className="text-blue-200 mb-10 max-w-xl">
             We cover the Hampshire and Dorset corridor, from Winchester in
-            the north to Poole in the west, including:
+            the north to Poole in the west, and everywhere in between. See
+            our full{" "}
+            <Link href="/areas" className="text-white underline underline-offset-2 hover:text-blue-200">
+              coverage areas
+            </Link>{" "}
+            for the complete list, including:
           </p>
           <div className="flex flex-wrap gap-3 mb-8">
             {[
@@ -344,8 +356,22 @@ export default function ServicesPage() {
             Not Sure Which Service Is Right for You?
           </h2>
           <p className="text-gray-600 mb-8 max-w-md mx-auto">
-            Get in touch and we&apos;ll recommend the most effective distribution
-            strategy for your business and budget.
+            Get in touch and we&apos;ll recommend the most effective
+            distribution strategy for your business and budget. Curious what
+            a completed round looks like? Take a look at our{" "}
+            <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
+              case studies
+            </Link>
+            . Or check our{" "}
+            <Link href="/faq" className="text-blue-700 hover:underline font-medium">
+              FAQ
+            </Link>{" "}
+            for quick answers. Hiring for an event instead? Take a look at
+            our{" "}
+            <Link href="/services/screen-hire" className="text-blue-700 hover:underline font-medium">
+              mobile screen trailer hire
+            </Link>
+            .
           </p>
           <Link
             href="/quote"

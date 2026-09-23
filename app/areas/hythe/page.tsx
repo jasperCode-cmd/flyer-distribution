@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Leaflet Distribution Hythe",
@@ -71,6 +72,13 @@ export default function HythePage() {
       />
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Areas", href: "/areas" },
+              { label: "Hythe" },
+            ]}
+          />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
@@ -111,12 +119,20 @@ export default function HythePage() {
               <Link href="/areas/new-forest" className="text-blue-700 hover:underline font-medium">
                 New Forest
               </Link>{" "}
-              villages.
+              villages.{" "}
+              <Link href="/areas/brockenhurst" className="text-blue-700 hover:underline font-medium">
+                Brockenhurst
+              </Link>{" "}
+              is another popular addition for wider New Forest campaigns.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              We can also run vehicle leaflet distribution around
-              Hythe&apos;s marina and shopping area, putting your materials
-              in front of boat owners and visitors as well as residents.
+              We can also run vehicle{" "}
+              <Link href="/services" className="text-blue-700 hover:underline font-medium">
+                leaflet distribution
+              </Link>{" "}
+              around Hythe&apos;s marina and shopping area, putting your
+              materials in front of boat owners and visitors as well as
+              residents.
             </p>
             <div className="mt-8">
               <Link

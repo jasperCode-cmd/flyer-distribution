@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ScrollReveal from "@/components/ScrollReveal";
 import StaggerGroup from "@/components/StaggerGroup";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Public Notice Leafleting for NSIPs",
@@ -67,7 +68,7 @@ const breadcrumbSchema = {
 const beyondStatutory = [
   { title: "Utility Works Notifications", body: "Notices ahead of planned upgrades or works to gas, water, electricity, or telecoms infrastructure." },
   { title: "Traffic Management & Road Closures", body: "Distribution supporting Temporary Traffic Regulation Orders (TTROs) and other road closure or diversion notices." },
-  { title: "Local Authority Announcements", body: "Council-led notices and community announcements delivered to the households and streets they affect." },
+  { title: "Local Authority Announcements", body: "Council-led notices and community announcements delivered to the households and roads they affect." },
   { title: "Highways Maintenance Notices", body: "Advance notice of resurfacing, drainage work, or other planned highways maintenance." },
   { title: "Construction Project Updates", body: "Keeping nearby residents informed as a project progresses, not just at the consultation stage." },
   { title: "Supporting Print Materials", body: "Lamp post wraps, banners, and site signage to sit alongside your leaflet distribution where useful." },
@@ -84,6 +85,13 @@ export default function PublicNoticeLeafletingPage() {
       {/* Hero */}
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Services", href: "/services" },
+              { label: "Public Notice Leafleting" },
+            ]}
+          />
           <p className="text-blue-300 text-sm font-semibold uppercase tracking-widest mb-3">
             Hampshire &middot; Statutory Consultation Leafleting
           </p>
@@ -135,6 +143,11 @@ export default function PublicNoticeLeafletingPage() {
                 <Link href="/services" className="text-blue-700 hover:underline font-medium">
                   standard services
                 </Link>
+                . We&apos;ve completed statutory notice work across the
+                county, documented in our{" "}
+                <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
+                  case studies
+                </Link>
                 .
               </p>
               <p>
@@ -144,7 +157,12 @@ export default function PublicNoticeLeafletingPage() {
                 sets out rather than a standard coverage zone. Your
                 consultation schedule sets the timeline too. Before we take on
                 a job, we tell you plainly whether your deadline is
-                achievable, rather than agreeing to a date we cannot meet.
+                achievable, rather than agreeing to a date we cannot meet. If
+                you have questions before getting in touch, our{" "}
+                <Link href="/faq" className="text-blue-700 hover:underline font-medium">
+                  FAQ
+                </Link>{" "}
+                covers common queries about how we work.
               </p>
             </div>
             <div className="max-w-md mx-auto lg:mx-0">
@@ -189,7 +207,7 @@ export default function PublicNoticeLeafletingPage() {
                 how. Once the SoCC is finalised, following the local
                 authority&apos;s 28-day response window, we distribute the
                 consultation materials exactly as the statement requires, to
-                the streets, postcodes, or areas it specifies.
+                the roads, postcodes, or areas it specifies.
               </p>
             </div>
             <div className="group relative bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:border-blue-300 hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-out">
@@ -282,7 +300,7 @@ export default function PublicNoticeLeafletingPage() {
                     <path d="M9 4V3a1 1 0 011-1h4a1 1 0 011 1v1M9 11h6M9 15h6" />
                   </>
                 ),
-                body: "A genuine, tracked record of the streets covered, and when.",
+                body: "A genuine, tracked record of the roads covered, and when.",
               },
             ].map((item, i) => (
               <div
@@ -416,12 +434,12 @@ export default function PublicNoticeLeafletingPage() {
                 </svg>
               </span>
               <h2 className="text-xl font-bold text-blue-900">
-                From a Handful of Streets to a Whole Project Area
+                From a Handful of Roads to a Whole Project Area
               </h2>
             </div>
             <p className="text-gray-600 max-w-3xl leading-relaxed">
               Our teams scale to the job, whether that means a handful of
-              streets around a single substation upgrade or a much larger
+              roads around a single substation upgrade or a much larger
               area spanning several parishes for a major infrastructure
               project. The planning and the documentation work the same way
               either way.

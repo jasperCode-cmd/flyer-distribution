@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Leaflet Distribution Romsey",
@@ -71,6 +72,13 @@ export default function RomseyPage() {
       />
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Areas", href: "/areas" },
+              { label: "Romsey" },
+            ]}
+          />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
@@ -114,9 +122,18 @@ export default function RomseyPage() {
               for businesses wanting wider reach across the Test Valley.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Vehicle leaflet distribution is also available around Romsey&apos;s
-              car parks and retail areas, useful for reaching visitors to the
-              Abbey and Sir Harold Hillier Gardens alongside residents.
+              Vehicle{" "}
+              <Link href="/services" className="text-blue-700 hover:underline font-medium">
+                leaflet distribution
+              </Link>{" "}
+              is also available around Romsey&apos;s car parks and retail
+              areas, useful for reaching visitors to the Abbey and Sir Harold
+              Hillier Gardens alongside residents. We&apos;ve also completed
+              residential rounds out towards West Wellow, featured in our{" "}
+              <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
+                case studies
+              </Link>
+              .
             </p>
             <div className="mt-8">
               <Link

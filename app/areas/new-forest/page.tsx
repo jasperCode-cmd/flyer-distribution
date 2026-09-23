@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Flyer Distribution New Forest",
@@ -71,6 +72,13 @@ export default function NewForestPage() {
       />
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Areas", href: "/areas" },
+              { label: "New Forest" },
+            ]}
+          />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
@@ -113,9 +121,19 @@ export default function NewForestPage() {
               independent retailers.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Vehicle leaflet distribution is also available in car parks and
-              high-footfall locations across New Forest towns for businesses
-              looking to reach visitors and day-trippers as well as residents.
+              Vehicle{" "}
+              <Link href="/services" className="text-blue-700 hover:underline font-medium">
+                leaflet distribution
+              </Link>{" "}
+              is also available in car parks and high-footfall locations
+              across New Forest towns for businesses looking to reach
+              visitors and day-trippers as well as residents. We&apos;ve also
+              delivered statutory notice work here, including a road closure
+              campaign around Lyndhurst featured in our{" "}
+              <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
+                case studies
+              </Link>
+              .
             </p>
             <div className="mt-8">
               <Link

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Leaflet Distribution Eastleigh",
@@ -71,6 +72,13 @@ export default function EastleighPage() {
       />
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Areas", href: "/areas" },
+              { label: "Eastleigh" },
+            ]}
+          />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
@@ -97,14 +105,32 @@ export default function EastleighPage() {
               delivering directly through letterboxes across the town.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              Whether you&apos;re targeting the town centre, Chandler&apos;s
-              Ford, Hedge End, or surrounding villages, our experienced
-              distributors know these routes well.
+              Whether you&apos;re targeting the town centre or nearby{" "}
+              <Link href="/areas/chandlers-ford" className="text-blue-700 hover:underline font-medium">
+                Chandler&apos;s Ford
+              </Link>
+              , our experienced distributors know these routes well. The same
+              goes for{" "}
+              <Link href="/areas/hedge-end" className="text-blue-700 hover:underline font-medium">
+                Hedge End
+              </Link>{" "}
+              and the surrounding villages. Many campaigns here also pair
+              naturally with nearby{" "}
+              <Link href="/areas/winchester" className="text-blue-700 hover:underline font-medium">
+                Winchester
+              </Link>
+              .
             </p>
             <p className="text-gray-600 leading-relaxed">
               Eastleigh&apos;s proximity to Southampton Airport and strong
-              commuter population also makes it well suited to targeted postcode
-              campaigns for local service businesses.
+              commuter population also makes it well suited to targeted
+              postcode campaigns for local service businesses. We&apos;ve also
+              delivered statutory notice work out towards Fair Oak, part of a
+              Hampshire-wide road closure campaign featured in our{" "}
+              <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
+                case studies
+              </Link>
+              .
             </p>
             <div className="mt-8">
               <Link

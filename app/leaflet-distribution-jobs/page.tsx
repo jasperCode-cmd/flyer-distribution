@@ -161,15 +161,11 @@ export default function LeafletDistributionJobsPage() {
               <div className="bg-white rounded-lg border border-gray-200 p-6 hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-out">
                 <h3 className="text-sm font-semibold text-blue-900 mb-1">Serving Hampshire &amp; Dorset</h3>
                 <p className="text-gray-600 text-sm leading-relaxed">
-                  Rounds available across the areas we cover, including{" "}
-                  <Link href="/areas/southampton" className="text-blue-700 hover:underline">
-                    Southampton
-                  </Link>{" "}
-                  and{" "}
-                  <Link href="/areas/dorset" className="text-blue-700 hover:underline">
-                    Dorset
+                  Rounds are available right across our{" "}
+                  <Link href="/areas" className="text-blue-700 hover:underline">
+                    coverage area
                   </Link>
-                  .
+                  , from Southampton to Dorset and everywhere in between.
                 </p>
               </div>
             </StaggerGroup>

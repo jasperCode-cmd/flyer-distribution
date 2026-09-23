@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Leaflet Distribution Hedge End",
@@ -71,6 +72,13 @@ export default function HedgeEndPage() {
       />
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Areas", href: "/areas" },
+              { label: "Hedge End" },
+            ]}
+          />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
@@ -96,7 +104,11 @@ export default function HedgeEndPage() {
               shoppers from across the area. We cover SO30 and the
               surrounding roads, delivering door to door across Hedge
               End&apos;s housing estates and into the neighbouring
-              communities nearby.
+              communities nearby, including{" "}
+              <Link href="/areas/chandlers-ford" className="text-blue-700 hover:underline font-medium">
+                Chandler&apos;s Ford
+              </Link>
+              .
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
               Most homes here are owner-occupied family houses, built up
@@ -115,9 +127,13 @@ export default function HedgeEndPage() {
               campaigns too.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Vehicle leaflet distribution is available around Hedge End
-              Retail Park and the surrounding car parks, useful for reaching
-              shoppers travelling in from outside the immediate area.
+              Vehicle{" "}
+              <Link href="/services" className="text-blue-700 hover:underline font-medium">
+                leaflet distribution
+              </Link>{" "}
+              is available around Hedge End Retail Park and the surrounding
+              car parks, useful for reaching shoppers travelling in from
+              outside the immediate area.
             </p>
             <div className="mt-8">
               <Link

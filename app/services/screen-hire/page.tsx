@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import ScreenHireCards from "@/components/ScreenHireCards";
 import ScrollReveal from "@/components/ScrollReveal";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Mobile Screen Trailer Hire",
@@ -28,12 +29,48 @@ export const metadata: Metadata = {
   },
 };
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: "Home",
+      item: "https://www.flyerdistributionhampshire.co.uk",
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Services",
+      item: "https://www.flyerdistributionhampshire.co.uk/services",
+    },
+    {
+      "@type": "ListItem",
+      position: 3,
+      name: "Mobile Screen Trailer Hire",
+      item: "https://www.flyerdistributionhampshire.co.uk/services/screen-hire",
+    },
+  ],
+};
+
 export default function ScreenHirePage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       {/* Hero */}
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Services", href: "/services" },
+              { label: "Mobile Screen Trailer Hire" },
+            ]}
+          />
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Mobile Screen Trailer Hire
           </h1>
@@ -78,7 +115,15 @@ export default function ScreenHirePage() {
           <p className="text-gray-600 max-w-lg mx-auto mb-8 leading-relaxed">
             Get in touch for availability, pricing, and to discuss your event or
             campaign. We cover Hampshire and Dorset and are happy to advise on
-            the best setup for your needs.
+            the best setup for your needs, wherever you are across our{" "}
+            <Link href="/areas" className="text-blue-700 hover:underline font-medium">
+              coverage area
+            </Link>
+            . See examples of completed work in our{" "}
+            <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
+              case studies
+            </Link>
+            .
           </p>
           <Link
             href="/quote"

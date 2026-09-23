@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Leaflet Distribution Christchurch",
@@ -71,6 +72,13 @@ export default function ChristchurchPage() {
       />
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Areas", href: "/areas" },
+              { label: "Christchurch" },
+            ]}
+          />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
@@ -91,23 +99,38 @@ export default function ChristchurchPage() {
               About Our Christchurch Coverage
             </h2>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              Christchurch sits on the Dorset coast between Bournemouth and the
-              New Forest, with a settled residential population and a strong
-              seasonal visitor trade. We cover BH23 and surrounding postcodes,
-              delivering to households across the town and into nearby villages
-              including Burton, Walkford, and Highcliffe.
+              Christchurch sits on the Dorset coast between{" "}
+              <Link href="/areas/bournemouth" className="text-blue-700 hover:underline font-medium">
+                Bournemouth
+              </Link>{" "}
+              and the New Forest, with a settled residential population and a
+              strong seasonal visitor trade. We cover BH23 and surrounding
+              postcodes, delivering to households across the town and into
+              nearby villages including Burton, Walkford, and Highcliffe.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
               The town&apos;s homeowner-heavy demographic makes it particularly
               effective for home improvement, trades, and professional services
               campaigns. Its position between Bournemouth and the New Forest
               also makes it a natural add-on for businesses running wider
-              coastal or county campaigns.
+              coastal or county campaigns, often paired with nearby{" "}
+              <Link href="/areas/ringwood" className="text-blue-700 hover:underline font-medium">
+                Ringwood
+              </Link>
+              . It also sits naturally alongside our wider{" "}
+              <Link href="/areas/dorset" className="text-blue-700 hover:underline font-medium">
+                Dorset coverage
+              </Link>
+              .
             </p>
             <p className="text-gray-600 leading-relaxed">
               Christchurch&apos;s harbourside and town centre retail areas are
-              also available for vehicle leaflet distribution, reaching visitors
-              and day-trippers alongside the resident population.
+              also available for{" "}
+              <Link href="/services" className="text-blue-700 hover:underline font-medium">
+                vehicle leaflet distribution
+              </Link>
+              , reaching visitors and day-trippers alongside the resident
+              population.
             </p>
             <div className="mt-8">
               <Link

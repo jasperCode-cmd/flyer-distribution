@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Leaflet Distribution Chandler's Ford",
@@ -71,6 +72,13 @@ export default function ChandlersFordPage() {
       />
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Areas", href: "/areas" },
+              { label: "Chandler's Ford" },
+            ]}
+          />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
@@ -97,7 +105,11 @@ export default function ChandlersFordPage() {
               Hiltingbury and Valley Park around the shops at Fryern. We
               cover SO53 and the surrounding roads, delivering door to
               door across its estates and into the smaller pockets of
-              housing nearby.
+              housing nearby, including neighbouring{" "}
+              <Link href="/areas/hedge-end" className="text-blue-700 hover:underline font-medium">
+                Hedge End
+              </Link>
+              .
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
               It&apos;s firmly a commuter area, with residents travelling
@@ -116,10 +128,13 @@ export default function ChandlersFordPage() {
               itself.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              We can also run vehicle leaflet distribution around the shops
-              at Fryern and the wider Chandler&apos;s Ford area, putting
-              your materials in front of people already out and about
-              locally.
+              We can also run vehicle{" "}
+              <Link href="/services" className="text-blue-700 hover:underline font-medium">
+                leaflet distribution
+              </Link>{" "}
+              around the shops at Fryern and the wider Chandler&apos;s Ford
+              area, putting your materials in front of people already out
+              and about locally.
             </p>
             <div className="mt-8">
               <Link

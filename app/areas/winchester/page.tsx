@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Flyer Distribution Winchester",
@@ -71,6 +72,13 @@ export default function WinchesterPage() {
       />
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Areas", href: "/areas" },
+              { label: "Winchester" },
+            ]}
+          />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
@@ -101,12 +109,22 @@ export default function WinchesterPage() {
               We cover SO21, SO22, SO23, and surrounding postcode areas
               including the city centre, St Cross, Badger Farm, Harestock, and
               the outlying villages such as Colden Common and Bishopstoke.
+              We&apos;ve run campaigns as far out as Micheldever too,
+              documented in our{" "}
+              <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
+                case studies
+              </Link>
+              .
             </p>
             <p className="text-gray-600 leading-relaxed">
               Winchester&apos;s county town professional base makes it
               particularly effective for premium services such as home
               improvements, fine dining, private schools, and specialist
-              professional services.
+              professional services, delivered through our full{" "}
+              <Link href="/services" className="text-blue-700 hover:underline font-medium">
+                leaflet distribution service
+              </Link>
+              .
             </p>
             <div className="mt-8">
               <Link

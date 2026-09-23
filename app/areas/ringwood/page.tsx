@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Flyer Distribution Ringwood",
@@ -71,6 +72,13 @@ export default function RingwoodPage() {
       />
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Areas", href: "/areas" },
+              { label: "Ringwood" },
+            ]}
+          />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
@@ -93,8 +101,8 @@ export default function RingwoodPage() {
             <p className="text-gray-600 mb-4 leading-relaxed">
               Ringwood is a busy market town on the edge of the New Forest, well
               positioned between Bournemouth and Salisbury and serving a broad
-              mix of residential streets, rural properties, and a strong local
-              high street. We cover BH24 and surrounding postcodes, delivering
+              mix of residential roads, rural properties, and a strong town
+              centre. We cover BH24 and surrounding postcodes, delivering
               directly through letterboxes across the town and into the
               surrounding villages.
             </p>
@@ -106,9 +114,18 @@ export default function RingwoodPage() {
               addresses in one round.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Vehicle leaflet distribution is also available across Ringwood&apos;s
-              car parks and retail areas for businesses looking to reach people
-              already out and spending locally.
+              Vehicle{" "}
+              <Link href="/services" className="text-blue-700 hover:underline font-medium">
+                leaflet distribution
+              </Link>{" "}
+              is also available across Ringwood&apos;s car parks and retail
+              areas for businesses looking to reach people already out and
+              spending locally. We also handle statutory{" "}
+              <Link href="/services/public-notice-leafleting" className="text-blue-700 hover:underline font-medium">
+                Public Notice Leafleting
+              </Link>{" "}
+              for infrastructure projects reaching into this part of
+              Hampshire.
             </p>
             <div className="mt-8">
               <Link

@@ -7,13 +7,15 @@ import { usePathname } from "next/navigation";
 const footerLinks = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
+  { href: "/services/public-notice-leafleting", label: "Public Notice Leafleting" },
+  { href: "/services/web-design-seo", label: "Web Design & SEO" },
+  { href: "/services/screen-hire", label: "Screen Hire" },
   { href: "/areas", label: "Areas" },
   { href: "/quote", label: "Get a Quote" },
   { href: "/case-studies", label: "Case Studies" },
   { href: "/about", label: "About" },
   { href: "/faq", label: "FAQ" },
   { href: "/leaflet-distribution-jobs", label: "Work With Us" },
-  { href: "/blog", label: "Blog" },
 ];
 
 export default function Footer() {
@@ -47,18 +49,13 @@ export default function Footer() {
             </h3>
             <ul className="space-y-2">
               {footerLinks.map((link) => (
-                <li key={link.href} className="flex items-center gap-2">
+                <li key={link.href}>
                   <Link
                     href={link.href}
                     className="text-sm text-blue-300 hover:text-white transition-colors"
                   >
                     {link.label}
                   </Link>
-                  {link.href === "/blog" && (
-                    <span className="text-xs text-blue-500 border border-blue-700 rounded px-1.5 py-0.5 leading-none">
-                      Coming soon
-                    </span>
-                  )}
                 </li>
               ))}
             </ul>

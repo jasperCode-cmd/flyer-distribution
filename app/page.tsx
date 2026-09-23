@@ -282,8 +282,13 @@ export default function HomePage() {
               Leaflet Services
             </h2>
             <p className="text-gray-600 max-w-xl">
-              From door-to-door delivery to targeted postcode campaigns, we have a
-              service to suit every budget and campaign goal.
+              From door-to-door delivery to targeted postcode campaigns, we
+              have a service to suit every budget and campaign goal. We also
+              handle statutory{" "}
+              <Link href="/services/public-notice-leafleting" className="text-blue-700 hover:underline font-medium">
+                Public Notice Leafleting
+              </Link>{" "}
+              for infrastructure projects across Hampshire.
             </p>
           </div>
           <StaggerGroup
@@ -324,8 +329,12 @@ export default function HomePage() {
                 Areas We Cover
               </h2>
               <p className="text-blue-200 max-w-xl mb-10">
-                We cover the Hampshire and Dorset corridor, from Winchester in
-                the north to Poole in the west, including:
+                We cover the Hampshire and Dorset corridor, from{" "}
+                <Link href="/areas/winchester" className="text-white underline underline-offset-2 hover:text-blue-200">
+                  Winchester
+                </Link>{" "}
+                in the north to Poole in the west, and everywhere in
+                between.
               </p>
               <div className="flex flex-wrap gap-3 mb-8">
                 {areas.map((area) => (
@@ -395,7 +404,16 @@ export default function HomePage() {
               Additional Services
             </h2>
             <p className="text-gray-600 max-w-xl">
-              Beyond leaflet distribution, we offer web design and SEO, and mobile screen trailer hire across Hampshire and Dorset.
+              Beyond leaflet distribution, we also offer{" "}
+              <Link href="/services/web-design-seo" className="text-blue-700 hover:underline font-medium">
+                web design and SEO
+              </Link>{" "}
+              for growing your business online. And if you need something
+              bigger for an event, our{" "}
+              <Link href="/services/screen-hire" className="text-blue-700 hover:underline font-medium">
+                mobile screen trailer hire
+              </Link>{" "}
+              is worth a look.
             </p>
           </div>
           <StaggerGroup className="grid grid-cols-1 sm:grid-cols-2 gap-6">

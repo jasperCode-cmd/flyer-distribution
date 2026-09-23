@@ -65,9 +65,18 @@ const caseStudies = [
   {
     place: "West Wellow",
     stat: "2,500 Leaflets (Financial Services)",
-    body: "A residential door-to-door leaflet drop across West Wellow, delivering printed materials directly to households throughout the village.",
-    linkHref: "/areas",
-    linkLabel: "See our coverage areas",
+    body: (
+      <>
+        A residential door-to-door{" "}
+        <Link href="/services" className="text-blue-700 hover:underline font-medium">
+          leaflet drop
+        </Link>{" "}
+        across West Wellow, delivering printed materials directly to
+        households throughout the village.
+      </>
+    ),
+    linkHref: "/areas/romsey",
+    linkLabel: "See our Romsey coverage",
     collage: {
       hero: {
         src: "/Wellow-Route1.webp",
@@ -89,7 +98,18 @@ const caseStudies = [
     place: "Across Hampshire",
     subtitle: "Public Notice Leafleting",
     stat: "3,500+ Leaflets (Hampshire Council Road Closure)",
-    body: "Statutory public notice leafleting supporting community consultation requirements for a Nationally Significant Infrastructure Project, distributed across the project-defined area rather than a standard postcode round.",
+    body: (
+      <>
+        Statutory public notice leafleting supporting community consultation
+        requirements for a Nationally Significant Infrastructure Project,
+        distributed across the project-defined area, taking in locations
+        from Lyndhurst to{" "}
+        <Link href="/areas/eastleigh" className="text-blue-700 hover:underline font-medium">
+          Fair Oak
+        </Link>
+        , rather than a standard postcode round.
+      </>
+    ),
     linkHref: "/services/public-notice-leafleting",
     linkLabel: "Learn about Public Notice Leafleting",
     collage: {
@@ -116,7 +136,15 @@ const caseStudies = [
   {
     place: "Oakley",
     stat: "1,000 Leaflets (Beauty & Wellness Services)",
-    body: "A completed leaflet distribution round in Oakley, delivering door-to-door across residential streets in the village.",
+    body: (
+      <>
+        A completed{" "}
+        <Link href="/services" className="text-blue-700 hover:underline font-medium">
+          leaflet distribution
+        </Link>{" "}
+        round in Oakley, delivering door to door across the village.
+      </>
+    ),
     linkHref: "/areas",
     linkLabel: "See our coverage areas",
     collage: {
@@ -135,7 +163,15 @@ const caseStudies = [
   {
     place: "Micheldever & Winchester Area",
     stat: "1,000 Leaflets (Opera Performance)",
-    body: "Leaflet distribution covering Micheldever and the wider Winchester area, reaching households and local businesses within a defined round.",
+    body: (
+      <>
+        <Link href="/services" className="text-blue-700 hover:underline font-medium">
+          Leaflet distribution
+        </Link>{" "}
+        covering Micheldever and the wider Winchester area, reaching
+        households and local businesses within a defined round.
+      </>
+    ),
     linkHref: "/areas/winchester",
     linkLabel: "See our Winchester coverage",
     collage: {
@@ -217,7 +253,11 @@ export default function CaseStudiesPage() {
           </h2>
           <p className="text-gray-600 mb-8 max-w-md mx-auto">
             Get in touch for a free, no-obligation quote for your own
-            leaflet distribution campaign.
+            leaflet distribution campaign. Or find out{" "}
+            <Link href="/about" className="text-blue-700 hover:underline font-medium">
+              who we are
+            </Link>{" "}
+            first.
           </p>
           <Link
             href="/quote"

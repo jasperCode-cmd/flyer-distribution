@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Flyer Distribution Poole",
@@ -71,6 +72,13 @@ export default function PooléPage() {
       />
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Areas", href: "/areas" },
+              { label: "Poole" },
+            ]}
+          />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
@@ -94,17 +102,36 @@ export default function PooléPage() {
               Poole is one of the most affluent towns in Dorset, with
               prestigious areas like Sandbanks, Canford Cliffs, and Branksome
               Park attracting high-income households. Our distributors cover
-              BH13 through BH17 and surrounding postcodes.
+              BH13 through BH17 and surrounding postcodes as part of our
+              wider{" "}
+              <Link href="/services" className="text-blue-700 hover:underline font-medium">
+                leaflet distribution service
+              </Link>
+              .
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
               For businesses targeting higher-income demographics, Poole&apos;s
               waterfront and marina postcodes offer some of the highest-value
               residential distribution in Dorset, particularly for luxury
-              services, premium restaurants, and home improvement.
+              services, premium restaurants, and home improvement. We also
+              run county-wide{" "}
+              <Link href="/areas/dorset" className="text-blue-700 hover:underline font-medium">
+                Dorset campaigns
+              </Link>{" "}
+              for businesses wanting broader reach.
             </p>
             <p className="text-gray-600 leading-relaxed">
               We also cover Parkstone, Upton, Hamworthy, and the wider
-              residential areas around the harbour.
+              residential areas around the harbour. Many campaigns here
+              extend naturally into neighbouring{" "}
+              <Link href="/areas/bournemouth" className="text-blue-700 hover:underline font-medium">
+                Bournemouth
+              </Link>
+              . Others reach further, across the county boundary into{" "}
+              <Link href="/areas/ringwood" className="text-blue-700 hover:underline font-medium">
+                Ringwood
+              </Link>
+              .
             </p>
             <div className="mt-8">
               <Link

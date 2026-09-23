@@ -125,8 +125,13 @@ export default function AreasPage() {
             Areas We Cover
           </h1>
           <p className="text-blue-200 text-lg max-w-xl">
-            We distribute flyers and leaflets across Hampshire and into Dorset,
-            covering hundreds of postcodes and thousands of homes.
+            We distribute flyers and leaflets across Hampshire and into
+            Dorset, covering hundreds of postcodes and thousands of homes as
+            part of our full{" "}
+            <Link href="/services" className="text-white underline underline-offset-2 hover:text-blue-200">
+              leaflet distribution service
+            </Link>
+            .
           </p>
         </div>
       </section>
@@ -169,7 +174,11 @@ export default function AreasPage() {
             ))}
           </div>
           <p className="mt-6 text-gray-500 text-sm">
-            Don&apos;t see your area listed? Get in touch and we can often accommodate additional postcodes on request.
+            Don&apos;t see your area listed?{" "}
+            <Link href="/quote" className="text-blue-700 hover:underline font-medium">
+              Get in touch
+            </Link>{" "}
+            and we can often accommodate additional postcodes on request.
           </p>
         </div>
       </section>

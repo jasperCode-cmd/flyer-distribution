@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Breadcrumb from "@/components/Breadcrumb";
 
 export const metadata: Metadata = {
   title: "Leaflet Distribution Dorset",
@@ -71,6 +72,13 @@ export default function DorsetPage() {
       />
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Areas", href: "/areas" },
+              { label: "Dorset" },
+            ]}
+          />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
@@ -108,11 +116,18 @@ export default function DorsetPage() {
               towns at once.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Where you need coverage in specific towns such as Bournemouth,
-              Poole, or Christchurch, we also offer targeted campaigns for each
-              of those areas individually. County-wide and multi-town campaigns
-              are priced and planned as a single campaign, so you get one point
-              of contact and one coordinated delivery.
+              Where you need coverage in a specific town such as{" "}
+              <Link href="/areas/poole" className="text-blue-700 hover:underline font-medium">
+                Poole
+              </Link>{" "}
+              or Bournemouth, we also offer targeted campaigns for each area
+              individually. The same goes for{" "}
+              <Link href="/areas/christchurch" className="text-blue-700 hover:underline font-medium">
+                Christchurch
+              </Link>
+              . County-wide and multi-town campaigns are priced and planned
+              as a single campaign, so you get one point of contact and one
+              coordinated delivery.
             </p>
             <div className="mt-8">
               <Link

@@ -69,9 +69,9 @@ export default function AboutPage() {
             <p className="text-gray-600 text-lg mb-7 leading-relaxed">
               Leaflet distribution is at the heart of what we do, with services
               extending to{" "}
-              <strong className="font-semibold text-gray-800">
+              <Link href="/services/web-design-seo" className="font-semibold text-blue-700 hover:underline">
                 website design and SEO
-              </strong>{" "}
+              </Link>{" "}
               for businesses looking to grow their presence online as well as
               offline.
             </p>
@@ -88,6 +88,10 @@ export default function AboutPage() {
               Want to see examples of our work?{" "}
               <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
                 Take a look at our case studies
+              </Link>
+              . Or see the full list of{" "}
+              <Link href="/areas" className="text-blue-700 hover:underline font-medium">
+                areas we cover
               </Link>
               .
             </p>
@@ -188,6 +192,10 @@ export default function AboutPage() {
               Prefer to be part of the team instead?{" "}
               <Link href="/leaflet-distribution-jobs" className="text-blue-700 hover:underline font-medium">
                 See our distributor jobs
+              </Link>
+              . Got a quick question first? Check our{" "}
+              <Link href="/faq" className="text-blue-700 hover:underline font-medium">
+                FAQ
               </Link>
               .
             </p>
