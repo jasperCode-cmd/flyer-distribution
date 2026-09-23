@@ -7,7 +7,7 @@ import { campaignSlots } from "@/lib/campaign-constants";
 import SlotCountdown from "./SlotCountdown";
 
 const DISMISS_KEY = "fdh-slot-popup-dismissed";
-const SHOW_AFTER_MS = 16000;
+const SHOW_AFTER_MS = 13000;
 const BACKDROP_GUARD_MS = 1000;
 
 export default function SlotPopup() {
