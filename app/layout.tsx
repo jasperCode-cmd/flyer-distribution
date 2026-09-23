@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import AnnouncementBar from "@/components/AnnouncementBar";
+import SlotPopup from "@/components/SlotPopup";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -87,6 +88,7 @@ export default function RootLayout({
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
+        <SlotPopup />
       </body>
     </html>
   );

@@ -8,6 +8,8 @@ import TrustBar from "@/components/TrustBar";
 import TrustCards from "@/components/TrustCards";
 import StaggerGroup from "@/components/StaggerGroup";
 import ScrollReveal from "@/components/ScrollReveal";
+import HeroSlotBadge from "@/components/HeroSlotBadge";
+import HeroCaseStudyTeaser from "@/components/HeroCaseStudyTeaser";
 
 export const metadata: Metadata = {
   title: "Flyer Distribution Hampshire | Local Leaflet & Flyer Delivery",
@@ -179,13 +181,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-10 lg:gap-16 items-center">
             {/* Text — 60% of row width at desktop */}
             <div>
-              <Link
-                href="/quote"
-                className="inline-block bg-yellow-400 hover:bg-yellow-300 hover:shadow-[0_0_20px_rgba(250,204,21,0.5)] text-blue-900 text-[11px] leading-tight sm:text-sm font-semibold px-3 py-1 sm:px-4 sm:py-1.5 rounded-full mb-4 transition duration-200 ease-out hover:scale-105"
-              >
-                <span className="font-bold">End of Summer Deal:</span> New
-                customers get 10% off their first campaign
-              </Link>
+              <HeroSlotBadge />
               <p className="text-blue-300 text-sm font-semibold uppercase tracking-widest mb-4">
                 Hampshire &amp; Dorset
               </p>
@@ -197,12 +193,21 @@ export default function HomePage() {
                 letterboxes across Hampshire and Dorset, helping local businesses
                 reach real customers in the right postcodes.
               </p>
-              <Link
-                href="/quote"
-                className="inline-block bg-white text-blue-900 hover:bg-blue-50 font-bold px-8 py-4 rounded-md text-base transition duration-200 ease-out hover:scale-105 shadow-lg"
-              >
-                Get a Free Quote
-              </Link>
+              <div className="flex flex-wrap gap-4">
+                <Link
+                  href="/quote"
+                  className="inline-block bg-white text-blue-900 hover:bg-blue-50 font-bold px-8 py-4 rounded-md text-base transition duration-200 ease-out hover:scale-105 shadow-lg"
+                >
+                  Get a Free Quote
+                </Link>
+                <Link
+                  href="/case-studies"
+                  className="inline-block border-2 border-white text-white hover:bg-white hover:text-blue-900 font-bold px-8 py-4 rounded-md text-base transition duration-200 ease-out hover:scale-105"
+                >
+                  See Our Case Studies
+                </Link>
+              </div>
+              <HeroCaseStudyTeaser />
             </div>
             {/* Image column — square on mobile, cropped portrait on desktop */}
             <div className="flex justify-center lg:justify-end">
