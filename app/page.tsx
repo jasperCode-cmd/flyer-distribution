@@ -10,6 +10,8 @@ import StaggerGroup from "@/components/StaggerGroup";
 import ScrollReveal from "@/components/ScrollReveal";
 import HeroSlotBadge from "@/components/HeroSlotBadge";
 import HeroCaseStudyTeaser from "@/components/HeroCaseStudyTeaser";
+import AdditionalServiceCard from "@/components/AdditionalServiceCard";
+import BrowserMockup from "@/components/BrowserMockup";
 
 export const metadata: Metadata = {
   title: "Flyer Distribution Hampshire | Local Leaflet & Flyer Delivery",
@@ -378,6 +380,9 @@ export default function HomePage() {
       <section className="bg-slate-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="mb-10">
+            <p className="text-xs font-semibold uppercase tracking-widest text-blue-500 mb-2">
+              More Ways We Can Help
+            </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-3">
               Additional Services
             </h2>
@@ -385,56 +390,34 @@ export default function HomePage() {
               Beyond leaflet distribution, we offer web design and SEO, and mobile screen trailer hire across Hampshire and Dorset.
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {/* Web Design & SEO */}
-            <Link
+          <StaggerGroup className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <AdditionalServiceCard
               href="/services/web-design-seo"
-              className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 transition-colors group"
-            >
-              <div className="relative h-80 w-full">
-                <Image
-                  src="https://images.pexels.com/photos/3913016/pexels-photo-3913016.jpeg?auto=compress&cs=tinysrgb&w=800"
-                  alt="Laptop on a desk representing web design and SEO work"
-                  fill
-                  sizes="(max-width: 640px) 100vw, 50vw"
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-base font-semibold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors">
-                  Web Design &amp; SEO
-                </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  We build fast, professional websites and handle search engine optimisation to help your business get found online. From design through to delivery, we manage the process end to end.
-                </p>
-              </div>
-            </Link>
-
-            {/* Mobile Screen Trailer Hire */}
-            <Link
+              badge="Get Online for Less"
+              title="Web Design & SEO"
+              description="Get found online and turn visitors into enquiries with a fast, professional website. We handle SEO, design and delivery, managed for you from start to finish."
+              chips={["Mobile-first", "SEO built in", "Managed for you"]}
+              exploreLabel="Explore Web Design & SEO"
+              visual={
+                <div className="absolute inset-0 bg-blue-900 flex items-center justify-center">
+                  <div className="scale-[0.68] transition-transform duration-500 ease-out group-hover:scale-[0.74]">
+                    <BrowserMockup />
+                  </div>
+                </div>
+              }
+            />
+            <AdditionalServiceCard
               href="/services/screen-hire"
-              className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 transition-colors group"
-            >
-              <div className="relative h-80 w-full">
-                <Image
-                  src="/Mobile%20Screen%20Trailer%20Hire.webp"
-                  alt="Mobile LED screen trailer"
-                  fill
-                  sizes="(max-width: 640px) 100vw, 50vw"
-                  className="object-cover"
-                  style={{ objectPosition: "center 30%" }}
-                />
-              </div>
-              <div className="p-6">
-                <h3 className="text-base font-semibold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors">
-                  Mobile Screen Trailer Hire
-                </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  Hire our mobile LED screen trailer for events, advertising, movies, or gaming. Mounted on a trailer with a 7m&sup2; screen, it&apos;s easy to set up and guaranteed to get you noticed.
-                </p>
-              </div>
-            </Link>
-          </div>
+              badge="Available to Hire"
+              title="Mobile Screen Trailer Hire"
+              description="Hire our mobile LED screen trailer for events, advertising, movies, or gaming. A bright 7m&sup2; screen mounted on a trailer, easy to set up and hard to miss."
+              chips={["7m² LED screen", "Events and advertising", "Easy setup"]}
+              exploreLabel="Explore Screen Hire"
+              imageSrc="/Mobile%20Screen%20Trailer%20Hire.webp"
+              imageAlt="Mobile LED screen trailer"
+              imagePosition="center 30%"
+            />
+          </StaggerGroup>
         </div>
       </section>
 

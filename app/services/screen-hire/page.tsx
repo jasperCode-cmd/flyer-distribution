@@ -7,14 +7,14 @@ import ScrollReveal from "@/components/ScrollReveal";
 export const metadata: Metadata = {
   title: "Mobile Screen Trailer Hire",
   description:
-    "Hire our mobile LED screen trailer for events, advertising, movies, or gaming across Hampshire and Dorset. A 7m² screen mounted on a trailer, easy to set up and guaranteed to get you noticed.",
+    "Hire our mobile LED screen trailer for events, advertising, movies, or gaming across Hampshire and Dorset. A bright 7m² screen mounted on a trailer, easy to set up and hard to miss.",
   alternates: {
     canonical: "https://www.flyerdistributionhampshire.co.uk/services/screen-hire",
   },
   openGraph: {
     title: "Mobile Screen Trailer Hire | Flyer Distribution Hampshire",
     description:
-      "Hire our mobile LED screen trailer for events, advertising, movies, or gaming across Hampshire and Dorset. A 7m² screen mounted on a trailer, easy to set up and guaranteed to get you noticed.",
+      "Hire our mobile LED screen trailer for events, advertising, movies, or gaming across Hampshire and Dorset. A bright 7m² screen mounted on a trailer, easy to set up and hard to miss.",
     url: "https://www.flyerdistributionhampshire.co.uk/services/screen-hire",
     siteName: "Flyer Distribution Hampshire",
     locale: "en_GB",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Mobile Screen Trailer Hire | Flyer Distribution Hampshire",
     description:
-      "Hire our mobile LED screen trailer for events, advertising, movies, or gaming across Hampshire and Dorset. A 7m² screen mounted on a trailer, easy to set up and guaranteed to get you noticed.",
+      "Hire our mobile LED screen trailer for events, advertising, movies, or gaming across Hampshire and Dorset. A bright 7m² screen mounted on a trailer, easy to set up and hard to miss.",
   },
 };
 
