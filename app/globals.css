@@ -111,3 +111,25 @@ body {
     display: none;
   }
 }
+
+/* ── Web Design & SEO hero browser mockup float ── */
+@keyframes hero-mockup-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+
+.hero-mockup-float {
+  animation: hero-mockup-float 5s ease-in-out infinite;
+}
+
+.hero-mockup-float-delay {
+  animation: hero-mockup-float 5s ease-in-out infinite;
+  animation-delay: -2.5s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-mockup-float,
+  .hero-mockup-float-delay {
+    animation: none;
+  }
+}
