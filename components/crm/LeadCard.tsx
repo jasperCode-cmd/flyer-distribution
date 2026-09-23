@@ -84,6 +84,7 @@ export default function LeadCard({
           <span
             title="At risk"
             className="shrink-0 text-red-500 text-xs font-bold"
+            role="img"
             aria-label="At risk"
           >
             ⚑

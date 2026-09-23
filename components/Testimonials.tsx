@@ -12,7 +12,7 @@ type Testimonial = {
 };
 
 const Stars = () => (
-  <div className="flex gap-0.5 mb-3" aria-label="5 out of 5 stars">
+  <div className="flex gap-0.5 mb-3" role="img" aria-label="5 out of 5 stars">
     {[...Array(5)].map((_, i) => (
       <svg
         key={i}
