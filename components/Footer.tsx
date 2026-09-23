@@ -84,6 +84,17 @@ export default function Footer() {
 
               <li>
                 <span className="block text-blue-400 text-xs uppercase tracking-wide mb-0.5">
+                  Address
+                </span>
+                <address className="not-italic">
+                  11 Forest Reach<br />
+                  St Leonards<br />
+                  BH24 2NR
+                </address>
+              </li>
+
+              <li>
+                <span className="block text-blue-400 text-xs uppercase tracking-wide mb-0.5">
                   Serving
                 </span>
                 Hampshire &amp; Dorset
