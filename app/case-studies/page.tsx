@@ -64,7 +64,7 @@ const breadcrumbSchema = {
 const caseStudies = [
   {
     place: "West Wellow",
-    stat: "2,500 Leaflets — Financial Services",
+    stat: "2,500 Leaflets (Financial Services)",
     body: "A residential door-to-door leaflet drop across West Wellow, delivering printed materials directly to households throughout the village.",
     linkHref: "/areas",
     linkLabel: "See our coverage areas",
@@ -88,7 +88,7 @@ const caseStudies = [
   {
     place: "Across Hampshire",
     subtitle: "Public Notice Leafleting",
-    stat: "3,500+ Leaflets — Hampshire Council Road Closure",
+    stat: "3,500+ Leaflets (Hampshire Council Road Closure)",
     body: "Statutory public notice leafleting supporting community consultation requirements for a Nationally Significant Infrastructure Project, distributed across the project-defined area rather than a standard postcode round.",
     linkHref: "/services/public-notice-leafleting",
     linkLabel: "Learn about Public Notice Leafleting",
@@ -115,7 +115,7 @@ const caseStudies = [
   },
   {
     place: "Oakley",
-    stat: "1,000 Leaflets — Beauty & Wellness Services",
+    stat: "1,000 Leaflets (Beauty & Wellness Services)",
     body: "A completed leaflet distribution round in Oakley, delivering door-to-door across residential streets in the village.",
     linkHref: "/areas",
     linkLabel: "See our coverage areas",
@@ -134,7 +134,7 @@ const caseStudies = [
   },
   {
     place: "Micheldever & Winchester Area",
-    stat: "1,000 Leaflets — Opera Performance",
+    stat: "1,000 Leaflets (Opera Performance)",
     body: "Leaflet distribution covering Micheldever and the wider Winchester area, reaching households and local businesses within a defined round.",
     linkHref: "/areas/winchester",
     linkLabel: "See our Winchester coverage",

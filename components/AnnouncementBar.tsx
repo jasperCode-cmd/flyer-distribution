@@ -18,8 +18,8 @@ export default function AnnouncementBar() {
         <span className="font-bold">
           <SlotCountReveal value={campaignSlots.slotsRemaining} /> Campaign
           Slots Left for {campaignSlots.monthLabel}
-        </span>{" "}
-        — Secure your slot today
+        </span>
+        , secure your slot today
       </p>
     </Link>
   );
