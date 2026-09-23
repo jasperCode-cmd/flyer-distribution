@@ -342,13 +342,21 @@ export default function HomePage() {
                 Also covering
               </p>
               <div className="flex flex-wrap gap-2 mb-8">
-                {["Brockenhurst", "Romsey", "Hythe", "Totton", "Hedge End", "Chandler's Ford"].map((a) => (
-                  <span
-                    key={a}
-                    className="bg-blue-800 border border-blue-700 text-blue-200 text-sm px-4 py-1.5 rounded-full"
+                {[
+                  { name: "Brockenhurst", href: "/areas/brockenhurst" },
+                  { name: "Romsey", href: "/areas/romsey" },
+                  { name: "Hythe", href: "/areas/hythe" },
+                  { name: "Totton", href: "/areas/totton" },
+                  { name: "Hedge End", href: "/areas/hedge-end" },
+                  { name: "Chandler's Ford", href: "/areas/chandlers-ford" },
+                ].map((a) => (
+                  <Link
+                    key={a.name}
+                    href={a.href}
+                    className="bg-blue-800 hover:bg-blue-700 border border-blue-700 text-blue-200 hover:text-white text-sm px-4 py-1.5 rounded-full transition-colors"
                   >
-                    {a}
-                  </span>
+                    {a.name}
+                  </Link>
                 ))}
               </div>
               <Link

@@ -3,17 +3,17 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Flyer Distribution Winchester",
+  title: "Leaflet Distribution Romsey",
   description:
-    "Leaflet and flyer distribution across Winchester, Hampshire. Professional door-to-door delivery in the county town and surrounding villages.",
+    "Leaflet and flyer distribution across Romsey and SO51 postcodes. Targeted door-to-door delivery in this historic Hampshire market town.",
   alternates: {
-    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/winchester",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/romsey",
   },
   openGraph: {
-    title: "Flyer Distribution Winchester",
+    title: "Leaflet Distribution Romsey",
     description:
-      "Leaflet and flyer distribution across Winchester, Hampshire. Professional door-to-door delivery in the county town and surrounding villages.",
-    url: "https://www.flyerdistributionhampshire.co.uk/areas/winchester",
+      "Leaflet and flyer distribution across Romsey and SO51 postcodes. Targeted door-to-door delivery in this historic Hampshire market town.",
+    url: "https://www.flyerdistributionhampshire.co.uk/areas/romsey",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -28,9 +28,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Flyer Distribution Winchester",
+    title: "Leaflet Distribution Romsey",
     description:
-      "Leaflet and flyer distribution across Winchester, Hampshire. Professional door-to-door delivery in the county town and surrounding villages.",
+      "Leaflet and flyer distribution across Romsey and SO51 postcodes. Targeted door-to-door delivery in this historic Hampshire market town.",
     images: [
       "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
     ],
@@ -56,13 +56,13 @@ const breadcrumbSchema = {
     {
       "@type": "ListItem",
       position: 3,
-      name: "Winchester",
-      item: "https://www.flyerdistributionhampshire.co.uk/areas/winchester",
+      name: "Romsey",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas/romsey",
     },
   ],
 };
 
-export default function WinchesterPage() {
+export default function RomseyPage() {
   return (
     <>
       <script
@@ -75,12 +75,11 @@ export default function WinchesterPage() {
             Coverage Area
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            Leaflet Distribution Winchester
+            Leaflet Distribution Romsey
           </h1>
           <p className="text-blue-200 text-lg max-w-xl">
-            Professional leaflet delivery across Winchester city and surrounding
-            Hampshire villages, reaching the affluent households of the county
-            town.
+            Door-to-door leaflet delivery across Romsey and SO51 postcodes,
+            reaching households in this historic Hampshire market town.
           </p>
         </div>
       </section>
@@ -89,41 +88,52 @@ export default function WinchesterPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div>
             <h2 className="text-2xl font-bold text-blue-900 mb-4">
-              About Our Winchester Coverage
+              About Our Romsey Coverage
             </h2>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              Winchester is Hampshire&apos;s historic county town, consistently
-              ranked among the best places to live in the UK. With high average
-              household incomes and a thriving independent business scene,
-              leaflet distribution here reaches an engaged, local audience.
+              Romsey is a historic market town in the Test Valley, sitting
+              between Southampton and Salisbury with a well-loved,
+              independent town centre. We cover SO51 and the
+              surrounding villages, delivering door to door across the town
+              centre, the newer residential estates, and the rural
+              properties just outside it.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              We cover SO21, SO22, SO23, and surrounding postcode areas
-              including the city centre, St Cross, Badger Farm, Harestock, and
-              the outlying villages such as Colden Common and Bishopstoke.
+              The pedestrianised town centre around Romsey Abbey draws a
+              loyal local crowd, and that same audience responds well to
+              print marketing for independent shops, cafes, trades and
+              professional services. Many of our Romsey campaigns pair the
+              town itself with nearby{" "}
+              <Link href="/areas/southampton" className="text-blue-700 hover:underline font-medium">
+                Southampton
+              </Link>{" "}
+              or{" "}
+              <Link href="/areas/totton" className="text-blue-700 hover:underline font-medium">
+                Totton
+              </Link>{" "}
+              for businesses wanting wider reach across the Test Valley.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Winchester&apos;s county town professional base makes it
-              particularly effective for premium services such as home
-              improvements, fine dining, private schools, and specialist
-              professional services.
+              Vehicle leaflet distribution is also available around Romsey&apos;s
+              car parks and retail areas, useful for reaching visitors to the
+              Abbey and Sir Harold Hillier Gardens alongside residents.
             </p>
             <div className="mt-8">
               <Link
                 href="/quote"
                 className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition duration-200 ease-out hover:scale-105"
               >
-                Get a Winchester Quote
+                Get a Romsey Quote
               </Link>
             </div>
           </div>
-          <div>
+          <div className="max-w-sm mx-auto lg:mx-0 aspect-square overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
             <Image
-              src="https://images.pexels.com/photos/11167778/pexels-photo-11167778.jpeg?auto=compress&cs=tinysrgb&w=800"
-              alt="Winchester Cathedral"
-              width={700}
-              height={500}
-              className="rounded-lg w-full object-cover"
+              src="/Overhead-shot-residential-areas.webp"
+              alt="Overhead view of a residential street with houses and gardens, typical of the neighbourhoods we cover"
+              width={999}
+              height={999}
+              className="w-full h-full object-cover"
             />
           </div>
         </div>
@@ -132,10 +142,10 @@ export default function WinchesterPage() {
       <section className="bg-white py-12 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-xl font-bold text-blue-900 mb-4">
-            Winchester Postcodes We Cover
+            Romsey Postcodes We Cover
           </h2>
           <div className="flex flex-wrap gap-2">
-            {["SO21", "SO22", "SO23", "SO24", "SO32"].map((pc) => (
+            {["SO51"].map((pc) => (
               <span
                 key={pc}
                 className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full font-medium"
@@ -154,35 +164,27 @@ export default function WinchesterPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Link
-              href="/areas/eastleigh"
-              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
-            >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Eastleigh</h3>
-              <p className="text-gray-600 text-xs mb-3">One of Hampshire&apos;s largest towns, covering SO50 postcodes.</p>
-              <span className="text-blue-600 text-xs font-semibold">View area →</span>
-            </Link>
-            <Link
               href="/areas/southampton"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Southampton</h3>
-              <p className="text-gray-600 text-xs mb-3">Hampshire&apos;s largest city with residential coverage across all major postcodes.</p>
+              <p className="text-gray-600 text-xs mb-3">Hampshire&apos;s largest city, a short drive from Romsey.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
-              href="/areas/new-forest"
+              href="/areas/winchester"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">New Forest</h3>
-              <p className="text-gray-600 text-xs mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Winchester</h3>
+              <p className="text-gray-600 text-xs mb-3">Hampshire&apos;s county town, a short drive northeast of Romsey.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
-              href="/areas/romsey"
+              href="/areas/totton"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Romsey</h3>
-              <p className="text-gray-600 text-xs mb-3">Historic market town a short drive southwest of Winchester.</p>
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Totton</h3>
+              <p className="text-gray-600 text-xs mb-3">New Forest edge town between Romsey and Southampton.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

@@ -94,8 +94,15 @@ export default function NewForestPage() {
             <p className="text-gray-600 mb-4 leading-relaxed">
               The New Forest is a unique area covering a wide spread of market
               towns, villages, and residential communities across southern
-              Hampshire. Key towns include Lyndhurst, Brockenhurst, Fordingbridge,
-              and Hythe, alongside a network of smaller villages with loyal,
+              Hampshire. Key towns include Lyndhurst,{" "}
+              <Link href="/areas/brockenhurst" className="text-blue-700 hover:underline font-medium">
+                Brockenhurst
+              </Link>
+              , Fordingbridge, and{" "}
+              <Link href="/areas/hythe" className="text-blue-700 hover:underline font-medium">
+                Hythe
+              </Link>
+              , alongside a network of smaller villages with loyal,
               locally-minded residents.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
@@ -177,6 +184,30 @@ export default function NewForestPage() {
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Bournemouth</h3>
               <p className="text-gray-600 text-xs mb-3">Major Dorset resort town with strong consumer footfall.</p>
+              <span className="text-blue-600 text-xs font-semibold">View area →</span>
+            </Link>
+            <Link
+              href="/areas/brockenhurst"
+              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
+            >
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Brockenhurst</h3>
+              <p className="text-gray-600 text-xs mb-3">One of the New Forest&apos;s best-known villages.</p>
+              <span className="text-blue-600 text-xs font-semibold">View area →</span>
+            </Link>
+            <Link
+              href="/areas/hythe"
+              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
+            >
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Hythe</h3>
+              <p className="text-gray-600 text-xs mb-3">Waterside village looking out over Southampton Water.</p>
+              <span className="text-blue-600 text-xs font-semibold">View area →</span>
+            </Link>
+            <Link
+              href="/areas/totton"
+              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
+            >
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Totton</h3>
+              <p className="text-gray-600 text-xs mb-3">Large town on the New Forest&apos;s eastern edge.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

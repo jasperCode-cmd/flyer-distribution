@@ -85,12 +85,12 @@ const featuredAreas = [
 ];
 
 const otherAreas = [
-  "Romsey",
-  "Hythe",
-  "Totton",
-  "Hedge End",
-  "Chandler's Ford",
-  "Brockenhurst",
+  { name: "Romsey", href: "/areas/romsey" },
+  { name: "Hythe", href: "/areas/hythe" },
+  { name: "Totton", href: "/areas/totton" },
+  { name: "Hedge End", href: "/areas/hedge-end" },
+  { name: "Chandler's Ford", href: "/areas/chandlers-ford" },
+  { name: "Brockenhurst", href: "/areas/brockenhurst" },
 ];
 
 const breadcrumbSchema = {
@@ -159,12 +159,13 @@ export default function AreasPage() {
           </h2>
           <div className="flex flex-wrap gap-2">
             {otherAreas.map((area) => (
-              <span
-                key={area}
-                className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full"
+              <Link
+                key={area.name}
+                href={area.href}
+                className="bg-blue-50 border border-blue-200 text-blue-800 hover:bg-blue-100 hover:border-blue-300 text-sm px-4 py-1.5 rounded-full transition-colors"
               >
-                {area}
-              </span>
+                {area.name}
+              </Link>
             ))}
           </div>
           <p className="mt-6 text-gray-500 text-sm">

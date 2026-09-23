@@ -3,17 +3,17 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Flyer Distribution Winchester",
+  title: "Leaflet Distribution Chandler's Ford",
   description:
-    "Leaflet and flyer distribution across Winchester, Hampshire. Professional door-to-door delivery in the county town and surrounding villages.",
+    "Leaflet and flyer distribution across Chandler's Ford and SO53 postcodes. Targeted door-to-door delivery across this Eastleigh borough community.",
   alternates: {
-    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/winchester",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/chandlers-ford",
   },
   openGraph: {
-    title: "Flyer Distribution Winchester",
+    title: "Leaflet Distribution Chandler's Ford",
     description:
-      "Leaflet and flyer distribution across Winchester, Hampshire. Professional door-to-door delivery in the county town and surrounding villages.",
-    url: "https://www.flyerdistributionhampshire.co.uk/areas/winchester",
+      "Leaflet and flyer distribution across Chandler's Ford and SO53 postcodes. Targeted door-to-door delivery across this Eastleigh borough community.",
+    url: "https://www.flyerdistributionhampshire.co.uk/areas/chandlers-ford",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -28,9 +28,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Flyer Distribution Winchester",
+    title: "Leaflet Distribution Chandler's Ford",
     description:
-      "Leaflet and flyer distribution across Winchester, Hampshire. Professional door-to-door delivery in the county town and surrounding villages.",
+      "Leaflet and flyer distribution across Chandler's Ford and SO53 postcodes. Targeted door-to-door delivery across this Eastleigh borough community.",
     images: [
       "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
     ],
@@ -56,13 +56,13 @@ const breadcrumbSchema = {
     {
       "@type": "ListItem",
       position: 3,
-      name: "Winchester",
-      item: "https://www.flyerdistributionhampshire.co.uk/areas/winchester",
+      name: "Chandler's Ford",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas/chandlers-ford",
     },
   ],
 };
 
-export default function WinchesterPage() {
+export default function ChandlersFordPage() {
   return (
     <>
       <script
@@ -75,12 +75,12 @@ export default function WinchesterPage() {
             Coverage Area
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            Leaflet Distribution Winchester
+            Leaflet Distribution Chandler&apos;s Ford
           </h1>
           <p className="text-blue-200 text-lg max-w-xl">
-            Professional leaflet delivery across Winchester city and surrounding
-            Hampshire villages, reaching the affluent households of the county
-            town.
+            Door-to-door leaflet delivery across Chandler&apos;s Ford and
+            SO53 postcodes, reaching households across this residential
+            community.
           </p>
         </div>
       </section>
@@ -89,41 +89,54 @@ export default function WinchesterPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div>
             <h2 className="text-2xl font-bold text-blue-900 mb-4">
-              About Our Winchester Coverage
+              About Our Chandler&apos;s Ford Coverage
             </h2>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              Winchester is Hampshire&apos;s historic county town, consistently
-              ranked among the best places to live in the UK. With high average
-              household incomes and a thriving independent business scene,
-              leaflet distribution here reaches an engaged, local audience.
+              Chandler&apos;s Ford is a largely residential part of the
+              Eastleigh borough, made up of established neighbourhoods like
+              Hiltingbury and Valley Park around the shops at Fryern. We
+              cover SO53 and the surrounding roads, delivering door to
+              door across its estates and into the smaller pockets of
+              housing nearby.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed">
-              We cover SO21, SO22, SO23, and surrounding postcode areas
-              including the city centre, St Cross, Badger Farm, Harestock, and
-              the outlying villages such as Colden Common and Bishopstoke.
+              It&apos;s firmly a commuter area, with residents travelling
+              into{" "}
+              <Link href="/areas/southampton" className="text-blue-700 hover:underline font-medium">
+                Southampton
+              </Link>{" "}
+              and beyond for work, which makes evenings and weekends the
+              times campaigns here tend to land best. Trades, home
+              services, and family-focused businesses do particularly well
+              reaching this audience directly through their letterboxes,
+              often alongside{" "}
+              <Link href="/areas/eastleigh" className="text-blue-700 hover:underline font-medium">
+                Eastleigh
+              </Link>{" "}
+              itself.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Winchester&apos;s county town professional base makes it
-              particularly effective for premium services such as home
-              improvements, fine dining, private schools, and specialist
-              professional services.
+              We can also run vehicle leaflet distribution around the shops
+              at Fryern and the wider Chandler&apos;s Ford area, putting
+              your materials in front of people already out and about
+              locally.
             </p>
             <div className="mt-8">
               <Link
                 href="/quote"
                 className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition duration-200 ease-out hover:scale-105"
               >
-                Get a Winchester Quote
+                Get a Chandler&apos;s Ford Quote
               </Link>
             </div>
           </div>
-          <div>
+          <div className="max-w-sm mx-auto lg:mx-0 aspect-square overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
             <Image
-              src="https://images.pexels.com/photos/11167778/pexels-photo-11167778.jpeg?auto=compress&cs=tinysrgb&w=800"
-              alt="Winchester Cathedral"
-              width={700}
-              height={500}
-              className="rounded-lg w-full object-cover"
+              src="/Overhead-shot-residential-areas.webp"
+              alt="Overhead view of a residential street with houses and gardens, typical of the estates we cover"
+              width={999}
+              height={999}
+              className="w-full h-full object-cover"
             />
           </div>
         </div>
@@ -132,10 +145,10 @@ export default function WinchesterPage() {
       <section className="bg-white py-12 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-xl font-bold text-blue-900 mb-4">
-            Winchester Postcodes We Cover
+            Chandler&apos;s Ford Postcodes We Cover
           </h2>
           <div className="flex flex-wrap gap-2">
-            {["SO21", "SO22", "SO23", "SO24", "SO32"].map((pc) => (
+            {["SO53"].map((pc) => (
               <span
                 key={pc}
                 className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full font-medium"
@@ -158,7 +171,7 @@ export default function WinchesterPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Eastleigh</h3>
-              <p className="text-gray-600 text-xs mb-3">One of Hampshire&apos;s largest towns, covering SO50 postcodes.</p>
+              <p className="text-gray-600 text-xs mb-3">One of Hampshire&apos;s largest towns, bordering Chandler&apos;s Ford.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -166,23 +179,15 @@ export default function WinchesterPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Southampton</h3>
-              <p className="text-gray-600 text-xs mb-3">Hampshire&apos;s largest city with residential coverage across all major postcodes.</p>
+              <p className="text-gray-600 text-xs mb-3">Hampshire&apos;s largest city, within easy reach of Chandler&apos;s Ford.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
-              href="/areas/new-forest"
+              href="/areas/hedge-end"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">New Forest</h3>
-              <p className="text-gray-600 text-xs mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
-              <span className="text-blue-600 text-xs font-semibold">View area →</span>
-            </Link>
-            <Link
-              href="/areas/romsey"
-              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
-            >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Romsey</h3>
-              <p className="text-gray-600 text-xs mb-3">Historic market town a short drive southwest of Winchester.</p>
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Hedge End</h3>
+              <p className="text-gray-600 text-xs mb-3">Residential town on the other side of Eastleigh borough.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

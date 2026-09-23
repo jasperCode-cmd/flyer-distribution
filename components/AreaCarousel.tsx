@@ -10,6 +10,12 @@ const areas = [
   { name: "Christchurch", slug: "christchurch" },
   { name: "Eastleigh",    slug: "eastleigh" },
   { name: "Dorset",       slug: "dorset" },
+  { name: "Romsey",       slug: "romsey" },
+  { name: "Hythe",        slug: "hythe" },
+  { name: "Totton",       slug: "totton" },
+  { name: "Hedge End",    slug: "hedge-end" },
+  { name: "Chandler's Ford", slug: "chandlers-ford" },
+  { name: "Brockenhurst", slug: "brockenhurst" },
 ];
 
 /*

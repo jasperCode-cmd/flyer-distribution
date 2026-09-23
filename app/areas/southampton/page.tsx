@@ -184,6 +184,30 @@ export default function SouthamptonPage() {
               <p className="text-gray-600 text-xs mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
+            <Link
+              href="/areas/totton"
+              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
+            >
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Totton</h3>
+              <p className="text-gray-600 text-xs mb-3">New Forest edge town bordering Southampton to the west.</p>
+              <span className="text-blue-600 text-xs font-semibold">View area →</span>
+            </Link>
+            <Link
+              href="/areas/hedge-end"
+              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
+            >
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Hedge End</h3>
+              <p className="text-gray-600 text-xs mb-3">Residential town just east of Southampton.</p>
+              <span className="text-blue-600 text-xs font-semibold">View area →</span>
+            </Link>
+            <Link
+              href="/areas/romsey"
+              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
+            >
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Romsey</h3>
+              <p className="text-gray-600 text-xs mb-3">Historic market town a short drive northwest of Southampton.</p>
+              <span className="text-blue-600 text-xs font-semibold">View area →</span>
+            </Link>
           </div>
         </div>
       </section>

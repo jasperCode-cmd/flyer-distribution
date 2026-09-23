@@ -175,6 +175,22 @@ export default function EastleighPage() {
               <p className="text-gray-600 text-xs mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
+            <Link
+              href="/areas/hedge-end"
+              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
+            >
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Hedge End</h3>
+              <p className="text-gray-600 text-xs mb-3">Residential town on the eastern side of Eastleigh borough.</p>
+              <span className="text-blue-600 text-xs font-semibold">View area →</span>
+            </Link>
+            <Link
+              href="/areas/chandlers-ford"
+              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
+            >
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Chandler&apos;s Ford</h3>
+              <p className="text-gray-600 text-xs mb-3">Residential community forming most of Eastleigh&apos;s urban area.</p>
+              <span className="text-blue-600 text-xs font-semibold">View area →</span>
+            </Link>
           </div>
         </div>
       </section>

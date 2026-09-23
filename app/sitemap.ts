@@ -24,6 +24,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/leaflet-distribution-jobs",
     "/case-studies",
     "/services/public-notice-leafleting",
+    "/areas/romsey",
+    "/areas/hythe",
+    "/areas/totton",
+    "/areas/hedge-end",
+    "/areas/chandlers-ford",
+    "/areas/brockenhurst",
   ]; // /blog excluded — noindex
 
   return routes.map((route) => ({
