@@ -78,7 +78,7 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-4 min-w-0">
             <Link href="/admin/crm" className="shrink-0 flex items-center gap-3">
               <Image
-                src="/Flyer Distribution Logo White Cropped.png"
+                src="/Flyer Distribution Logo White Cropped.webp"
                 width={270}
                 height={100}
                 alt="Flyer Distribution Hampshire"

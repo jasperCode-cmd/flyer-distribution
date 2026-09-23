@@ -104,7 +104,7 @@ const localBusinessSchema = {
     "Professional flyer and leaflet distribution across Hampshire and Dorset. Reach real households in Southampton, Bournemouth, Poole and Winchester.",
   "url": "https://www.flyerdistributionhampshire.co.uk",
   "email": "flyerdistributionhampshire@gmail.com",
-  "image": "https://www.flyerdistributionhampshire.co.uk/Flyer%20Distribution%20Logo%20White%20Cropped.png",
+  "image": "https://www.flyerdistributionhampshire.co.uk/Flyer%20Distribution%20Logo%20White%20Cropped.webp",
   "sameAs": [
     "https://share.google/RVxyPi4TzXAzkt1Am",
     "https://www.facebook.com/share/1EWf3WKLJZ/?mibextid=wwXIfr",
@@ -208,7 +208,7 @@ export default function HomePage() {
             <div className="flex justify-center lg:justify-end">
               {/* Mobile: square 1054×1054, hidden at lg+ */}
               <Image
-                src="/Leaflet going through door with our branding.png"
+                src="/Leaflet going through door with our branding.webp"
                 alt="Branded leaflet being delivered through a letterbox"
                 width={1054}
                 height={1054}
@@ -219,7 +219,7 @@ export default function HomePage() {
               />
               {/* Desktop: cropped portrait 700×1054, shown at lg+ */}
               <Image
-                src="/Leaflet going through door with our branding cropped.png"
+                src="/Leaflet going through door with our branding cropped.webp"
                 alt="Branded leaflet being delivered through a letterbox"
                 width={700}
                 height={1054}
@@ -347,7 +347,7 @@ export default function HomePage() {
               <ScrollReveal>
                 <div className="w-full max-w-xs sm:max-w-sm lg:max-w-none mx-auto lg:mx-0 aspect-square overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
                   <Image
-                    src="/Overhead-shot-residential-areas.jpeg"
+                    src="/Overhead-shot-residential-areas.webp"
                     alt="Overhead view of a residential street with houses and gardens, the kind of area covered door to door"
                     width={999}
                     height={999}
@@ -404,7 +404,7 @@ export default function HomePage() {
             >
               <div className="relative h-80 w-full">
                 <Image
-                  src="/Mobile%20Screen%20Trailer%20Hire.jpg"
+                  src="/Mobile%20Screen%20Trailer%20Hire.webp"
                   alt="Mobile LED screen trailer"
                   fill
                   sizes="(max-width: 640px) 100vw, 50vw"

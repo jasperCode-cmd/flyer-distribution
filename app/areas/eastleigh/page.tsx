@@ -117,7 +117,7 @@ export default function EastleighPage() {
           </div>
           <div className="aspect-square overflow-hidden rounded-lg">
             <Image
-              src="/Street%20Image%20when%20distributing%20flyers.jpg"
+              src="/Street%20Image%20when%20distributing%20flyers.webp"
               alt="Street scene during leaflet distribution in Eastleigh"
               width={1200}
               height={1600}

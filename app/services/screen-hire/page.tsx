@@ -50,7 +50,7 @@ export default function ScreenHirePage() {
           <ScrollReveal>
             <div className="relative h-96 w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-black/5">
               <Image
-                src="/Mobile%20Screen%20Trailer%20Hire%20Enquire.jpg"
+                src="/Mobile%20Screen%20Trailer%20Hire%20Enquire.webp"
                 alt="Mobile LED screen trailer ready for hire"
                 width={1244}
                 height={1600}

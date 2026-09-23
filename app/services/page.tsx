@@ -391,7 +391,7 @@ export default function ServicesPage() {
             >
               <div className="relative h-44 w-full">
                 <Image
-                  src="/Mobile%20Screen%20Trailer%20Hire.jpg"
+                  src="/Mobile%20Screen%20Trailer%20Hire.webp"
                   alt="Mobile LED screen trailer"
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"

@@ -96,7 +96,7 @@ export default function AboutPage() {
             <ScrollReveal>
               <div className="aspect-square overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
                 <Image
-                  src="/Flyer%20Distribution%20Hampshire.jpg"
+                  src="/Flyer%20Distribution%20Hampshire.webp"
                   alt="Flyer Distribution Hampshire team"
                   width={1200}
                   height={1600}

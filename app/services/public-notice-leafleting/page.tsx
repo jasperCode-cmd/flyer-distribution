@@ -140,7 +140,7 @@ export default function PublicNoticeLeafletingPage() {
               <ScrollReveal>
                 <div className="aspect-square overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
                   <Image
-                    src="/Road-Closure-Public-Notice-Leaflet.jpeg"
+                    src="/Road-Closure-Public-Notice-Leaflet.webp"
                     alt="A stack of 'ROAD CLOSURE' public notice leaflets produced for Hampshire County Council, held alongside a Flyer Distribution Hampshire business card"
                     width={1600}
                     height={1600}

@@ -46,7 +46,7 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="shrink-0">
             <Image
-              src="/website_logo_main.png"
+              src="/website_logo_main.webp"
               width={220}
               height={60}
               alt="Flyer Distribution Hampshire"

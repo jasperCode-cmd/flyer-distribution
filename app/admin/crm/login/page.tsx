@@ -41,7 +41,7 @@ export default function CrmLoginPage() {
       <div className="w-full max-w-sm">
         <div className="flex justify-center mb-8">
           <Image
-            src="/Flyer Distribution Logo White Cropped.png"
+            src="/Flyer Distribution Logo White Cropped.webp"
             width={384}
             height={142}
             alt="Flyer Distribution Hampshire"

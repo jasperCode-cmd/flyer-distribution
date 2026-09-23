@@ -28,7 +28,7 @@ export default function Footer() {
           <div>
             <div className="mb-3 flex justify-center">
               <Image
-                src="/Flyer Distribution Logo White Cropped.png"
+                src="/Flyer Distribution Logo White Cropped.webp"
                 width={280}
                 height={90}
                 alt="Flyer Distribution Hampshire"

@@ -83,7 +83,7 @@ const testimonials: Testimonial[] = [
       "Great communication from the start. Very polite competitive prices will definitely be using again. Thank you",
     header: (
       <Image
-        src="/Body by Victoria.png"
+        src="/Body by Victoria.webp"
         alt="Body by Victoria logo"
         width={913}
         height={534}
@@ -98,7 +98,7 @@ const testimonials: Testimonial[] = [
     quote: null,
     header: (
       <Image
-        src="/Coastline Print Logo.jpg"
+        src="/Coastline Print Logo.webp"
         alt="Coastline Print logo"
         width={150}
         height={150}
@@ -114,7 +114,7 @@ const testimonials: Testimonial[] = [
       "Incredible service from start to finish, these guys deal with you in a really professional way and get the job done fast. Would really recommend 🙌",
     header: (
       <Image
-        src="/Hendonis Salon.jpg"
+        src="/Hendonis Salon.webp"
         alt="Hendonis Salon logo"
         width={150}
         height={150}
@@ -129,7 +129,7 @@ const testimonials: Testimonial[] = [
     quote: "Fast and reliable team service all around",
     header: (
       <Image
-        src="/Cozy-Stoves-logo.png"
+        src="/Cozy-Stoves-logo.webp"
         alt="Cozy Stoves logo"
         width={305}
         height={100}
@@ -145,7 +145,7 @@ const testimonials: Testimonial[] = [
       "10/10 service for my cake business! Very professional, would definitely recommend.",
     header: (
       <Image
-        src="/Home bites bakery.png"
+        src="/Home bites bakery.webp"
         alt="Homebites Bakery logo"
         width={72}
         height={72}

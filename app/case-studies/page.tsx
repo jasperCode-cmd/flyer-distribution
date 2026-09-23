@@ -69,16 +69,16 @@ const caseStudies = [
     linkLabel: "See our coverage areas",
     collage: {
       hero: {
-        src: "/Wellow-Route1.jpeg",
+        src: "/Wellow-Route1.webp",
         alt: "Aerial Strava route map showing a dense door-to-door leaflet round through the Whinwhistle Road and The Drive area of West Wellow",
       },
       stacked: [
         {
-          src: "/Wellow-Route2.jpeg",
+          src: "/Wellow-Route2.webp",
           alt: "Aerial Strava route map showing a leaflet round along Maurys Lane, Slab Lane and Gazing Lane in West Wellow",
         },
         {
-          src: "/Wellow-Route3.jpeg",
+          src: "/Wellow-Route3.webp",
           alt: "Aerial Strava route map showing a leaflet round through Buttons Lane, Gazing Lane and School Road in West Wellow",
         },
       ],
@@ -91,16 +91,16 @@ const caseStudies = [
     linkLabel: "See our Winchester coverage",
     collage: {
       hero: {
-        src: "/Micheldever-Route2.jpeg",
+        src: "/Micheldever-Route2.webp",
         alt: "Aerial Strava route map showing a leaflet round along Northbrook in Micheldever",
       },
       stacked: [
         {
-          src: "/Micheldever-Route1.jpeg",
+          src: "/Micheldever-Route1.webp",
           alt: "Aerial Strava route map showing a leaflet round through Sloe Lane, past Micheldever Village Store",
         },
         {
-          src: "/Micheldever-Route3.jpeg",
+          src: "/Micheldever-Route3.webp",
           alt: "Aerial Strava route map showing a leaflet round through Wonston Road, Old Stoke Road and Weston Down Road near Micheldever",
         },
       ],
@@ -113,12 +113,12 @@ const caseStudies = [
     linkLabel: "See our coverage areas",
     collage: {
       hero: {
-        src: "/Oakley-Route1.jpeg",
+        src: "/Oakley-Route1.webp",
         alt: "Aerial Strava route map showing an extensive leaflet round covering East Oakley, Kennet Way, The Drive and Hill Road",
       },
       stacked: [
         {
-          src: "/Oakley-Route2.jpeg",
+          src: "/Oakley-Route2.webp",
           alt: "Aerial Strava route map showing a leaflet round through the streets of Oakley village",
         },
       ],
@@ -132,20 +132,20 @@ const caseStudies = [
     linkLabel: "Learn about Public Notice Leafleting",
     collage: {
       hero: {
-        src: "/Road-Closure-Hampshire-Route4.jpeg",
+        src: "/Road-Closure-Hampshire-Route4.webp",
         alt: "Aerial Strava route map showing a road closure notice round along Clay Hill near Lyndhurst",
       },
       stacked: [
         {
-          src: "/Road-Closure-Hampshire-Route1.jpeg",
+          src: "/Road-Closure-Hampshire-Route1.webp",
           alt: "Aerial Strava route map showing a road closure notice round through an industrial and retail park, past car dealerships and takeaway outlets",
         },
         {
-          src: "/Road-Closure-Hampshire-Route3.jpeg",
+          src: "/Road-Closure-Hampshire-Route3.webp",
           alt: "Aerial Strava route map showing a road closure notice round along Sandy Lane and Winchester Road in Fair Oak",
         },
         {
-          src: "/Road-Closure-Hampshire-Route2.jpeg",
+          src: "/Road-Closure-Hampshire-Route2.webp",
           alt: "Aerial Strava route map showing a road closure notice round along Witt Road and Brookfield Road in Fair Oak",
         },
       ],
