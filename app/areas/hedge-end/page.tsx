@@ -127,13 +127,13 @@ export default function HedgeEndPage() {
               campaigns too.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Vehicle{" "}
+              Vehicle campaigns are available around Hedge End Retail Park
+              and the surrounding car parks too, part of{" "}
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
-                leaflet distribution
+                what we offer
               </Link>{" "}
-              is available around Hedge End Retail Park and the surrounding
-              car parks, useful for reaching shoppers travelling in from
-              outside the immediate area.
+              for reaching shoppers travelling in from outside the immediate
+              area.
             </p>
             <div className="mt-8">
               <Link

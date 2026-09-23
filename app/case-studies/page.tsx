@@ -138,11 +138,11 @@ const caseStudies = [
     stat: "1,000 Leaflets (Beauty & Wellness Services)",
     body: (
       <>
-        A completed{" "}
+        A completed round in Oakley using{" "}
         <Link href="/services" className="text-blue-700 hover:underline font-medium">
-          leaflet distribution
-        </Link>{" "}
-        round in Oakley, delivering door to door across the village.
+          our leaflet services
+        </Link>
+        , delivering door to door across the village.
       </>
     ),
     linkHref: "/areas",

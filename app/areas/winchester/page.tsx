@@ -109,10 +109,9 @@ export default function WinchesterPage() {
               We cover SO21, SO22, SO23, and surrounding postcode areas
               including the city centre, St Cross, Badger Farm, Harestock, and
               the outlying villages such as Colden Common and Bishopstoke.
-              We&apos;ve run campaigns as far out as Micheldever too,
-              documented in our{" "}
+              We&apos;ve run campaigns as far out as Micheldever too, part of{" "}
               <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
-                case studies
+                our recent work
               </Link>
               .
             </p>

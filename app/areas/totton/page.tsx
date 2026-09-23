@@ -127,15 +127,16 @@ export default function TottonPage() {
               campaigns for businesses covering the wider area.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              We also offer vehicle{" "}
+              We also offer vehicle campaigns around Totton&apos;s retail
+              areas and car parks, part of{" "}
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
-                leaflet distribution
+                the full range of services
               </Link>{" "}
-              around Totton&apos;s retail areas and car parks, a good option
-              for reaching shoppers heading to the shops near Eling Tide Mill
-              and the town centre. West Wellow campaigns, visible in our{" "}
+              we provide, a good option for reaching shoppers heading to the
+              shops near Eling Tide Mill and the town centre. West Wellow
+              campaigns, among our{" "}
               <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
-                case studies
+                recent projects
               </Link>
               , often route through here too.
             </p>

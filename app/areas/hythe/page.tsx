@@ -126,13 +126,13 @@ export default function HythePage() {
               is another popular addition for wider New Forest campaigns.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              We can also run vehicle{" "}
+              We can also run vehicle campaigns around Hythe&apos;s marina
+              and shopping area, part of{" "}
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
-                leaflet distribution
+                our distribution options
               </Link>{" "}
-              around Hythe&apos;s marina and shopping area, putting your
-              materials in front of boat owners and visitors as well as
-              residents.
+              putting your materials in front of boat owners and visitors as
+              well as residents.
             </p>
             <div className="mt-8">
               <Link

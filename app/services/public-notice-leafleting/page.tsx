@@ -144,9 +144,9 @@ export default function PublicNoticeLeafletingPage() {
                   standard services
                 </Link>
                 . We&apos;ve completed statutory notice work across the
-                county, documented in our{" "}
+                county. Take a look at{" "}
                 <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
-                  case studies
+                  what we&apos;ve delivered
                 </Link>
                 .
               </p>

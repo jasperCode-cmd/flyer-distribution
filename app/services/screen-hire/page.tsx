@@ -119,9 +119,9 @@ export default function ScreenHirePage() {
             <Link href="/areas" className="text-blue-700 hover:underline font-medium">
               coverage area
             </Link>
-            . See examples of completed work in our{" "}
+            . Take a look at{" "}
             <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
-              case studies
+              real campaigns we&apos;ve run
             </Link>
             .
           </p>

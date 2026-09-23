@@ -129,9 +129,9 @@ export default function NewForestPage() {
               across New Forest towns for businesses looking to reach
               visitors and day-trippers as well as residents. We&apos;ve also
               delivered statutory notice work here, including a road closure
-              campaign around Lyndhurst featured in our{" "}
+              campaign around Lyndhurst that&apos;s part of{" "}
               <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
-                case studies
+                our portfolio of work
               </Link>
               .
             </p>

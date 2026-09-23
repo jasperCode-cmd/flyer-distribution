@@ -122,16 +122,16 @@ export default function RomseyPage() {
               for businesses wanting wider reach across the Test Valley.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Vehicle{" "}
+              Vehicle campaigns are also part of{" "}
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
-                leaflet distribution
+                our leaflet distribution options
               </Link>{" "}
-              is also available around Romsey&apos;s car parks and retail
-              areas, useful for reaching visitors to the Abbey and Sir Harold
-              Hillier Gardens alongside residents. We&apos;ve also completed
-              residential rounds out towards West Wellow, featured in our{" "}
+              around Romsey&apos;s car parks and retail areas, useful for
+              reaching visitors to the Abbey and Sir Harold Hillier Gardens
+              alongside residents. We&apos;ve also completed
+              residential rounds out towards West Wellow, where you can{" "}
               <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
-                case studies
+                see the results
               </Link>
               .
             </p>

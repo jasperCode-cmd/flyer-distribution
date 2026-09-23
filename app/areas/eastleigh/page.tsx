@@ -126,9 +126,9 @@ export default function EastleighPage() {
               commuter population also makes it well suited to targeted
               postcode campaigns for local service businesses. We&apos;ve also
               delivered statutory notice work out towards Fair Oak, part of a
-              Hampshire-wide road closure campaign featured in our{" "}
+              Hampshire-wide road closure campaign you can find among{" "}
               <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
-                case studies
+                our past campaigns
               </Link>
               .
             </p>

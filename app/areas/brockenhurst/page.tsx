@@ -119,13 +119,13 @@ export default function BrockenhurstPage() {
               .
             </p>
             <p className="text-gray-600 leading-relaxed">
-              Vehicle{" "}
+              Vehicle campaigns are also available around Brockenhurst&apos;s
+              Brookley Road and station car parks, part of{" "}
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
-                leaflet distribution
-              </Link>{" "}
-              is also available around Brockenhurst&apos;s Brookley Road and
-              station car parks, a useful way to reach visitors as well as
-              the village&apos;s own residents.
+                the services we provide
+              </Link>
+              , a useful way to reach visitors as well as the village&apos;s
+              own residents.
             </p>
             <div className="mt-8">
               <Link

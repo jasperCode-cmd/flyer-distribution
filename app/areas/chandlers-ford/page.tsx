@@ -128,13 +128,13 @@ export default function ChandlersFordPage() {
               itself.
             </p>
             <p className="text-gray-600 leading-relaxed">
-              We can also run vehicle{" "}
+              We can also run vehicle campaigns around the shops at Fryern
+              and the wider Chandler&apos;s Ford area, part of{" "}
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
-                leaflet distribution
-              </Link>{" "}
-              around the shops at Fryern and the wider Chandler&apos;s Ford
-              area, putting your materials in front of people already out
-              and about locally.
+                our service list
+              </Link>
+              , putting your materials in front of people already out and
+              about locally.
             </p>
             <div className="mt-8">
               <Link
