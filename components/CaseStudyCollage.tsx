@@ -21,6 +21,23 @@ export default function CaseStudyCollage({
 }) {
   const all = [hero, ...stacked];
 
+  // Single-photo entries (no stacked images) get one full-bleed tile at
+  // every breakpoint, rather than forcing the hero+stack split layout
+  // designed for multi-photo sets.
+  if (stacked.length === 0) {
+    return (
+      <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden shadow-sm ring-1 ring-black/5 bg-gray-200">
+        <Image
+          src={hero.src}
+          alt={hero.alt}
+          fill
+          sizes="(min-width: 1024px) 440px, 45vw"
+          className="object-cover"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden shadow-sm ring-1 ring-black/5 bg-gray-200">
       {/* Narrow cards: simple even grid */}

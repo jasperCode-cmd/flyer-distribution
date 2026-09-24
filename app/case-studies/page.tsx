@@ -56,11 +56,13 @@ const breadcrumbSchema = {
   ],
 };
 
-// All four entries below are real completed jobs. Leaflet counts and
-// client type are now real figures. We still don't have specific client
-// names, dates, or measured outcomes to publish, so copy stays at the
-// level of "what kind of work this was" rather than more specific detail,
-// and nothing here should be treated as final beyond the stat tags.
+// All six entries below are real completed jobs. Leaflet counts and
+// client type are now real figures where available (West End has none, so
+// its stat line names the service instead of inventing a number). We still
+// don't have specific client names, dates, or measured outcomes to publish,
+// so copy stays at the level of "what kind of work this was" rather than
+// more specific detail, and nothing here should be treated as final beyond
+// the stat tags.
 const caseStudies = [
   {
     place: "West Wellow",
@@ -189,6 +191,51 @@ const caseStudies = [
           alt: "Aerial GPS-recorded route map showing a leaflet round through Wonston Road, Old Stoke Road and Weston Down Road near Micheldever",
         },
       ],
+    },
+  },
+  {
+    place: "West End",
+    stat: "Public Notice Leafleting",
+    body: (
+      <>
+        A completed{" "}
+        <Link href="/services/public-notice-leafleting" className="text-blue-700 hover:underline font-medium">
+          public notice leafleting
+        </Link>{" "}
+        round in West End, delivered as part of statutory community
+        consultation work in the wider Eastleigh borough.
+      </>
+    ),
+    linkHref: "/areas/eastleigh",
+    linkLabel: "See our Eastleigh coverage",
+    collage: {
+      hero: {
+        src: "/West-End-Route1.webp",
+        alt: "Aerial GPS-recorded route map showing a public notice leafleting round in West End",
+      },
+      stacked: [],
+    },
+  },
+  {
+    place: "Petersfield",
+    stat: "1,000 Leaflets (Musical Performance)",
+    body: (
+      <>
+        A completed round in Petersfield using{" "}
+        <Link href="/services" className="text-blue-700 hover:underline font-medium">
+          our leaflet services
+        </Link>
+        , delivering door to door across the town.
+      </>
+    ),
+    linkHref: "/areas",
+    linkLabel: "See our coverage areas",
+    collage: {
+      hero: {
+        src: "/Petersfield-Route1.webp",
+        alt: "Aerial GPS-recorded route map showing a leaflet round in Petersfield",
+      },
+      stacked: [],
     },
   },
 ];
