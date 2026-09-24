@@ -172,7 +172,7 @@ export default function HandToHandDistributionPage() {
               </h2>
             </div>
           </ScrollReveal>
-          <div className="max-w-3xl space-y-4 text-gray-600 leading-relaxed">
+          <div className="space-y-4 text-gray-600 leading-relaxed">
             <p>
               Hand-to-hand distribution puts your leaflets directly into
               people&apos;s hands instead of through a letterbox. One of our
