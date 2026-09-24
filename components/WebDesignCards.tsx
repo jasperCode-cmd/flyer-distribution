@@ -27,7 +27,16 @@ const cards = [
         tailored to your business. Every site is mobile-friendly, easy to
         navigate, and designed to make a{" "}
         <strong className="font-semibold text-gray-800">strong first impression</strong>{" "}
-        with potential customers.
+        with potential customers. We work closely with{" "}
+        <a
+          href="https://anglerdigital.co.uk"
+          target="_blank"
+          rel="nofollow sponsored"
+          className="text-blue-700 hover:underline font-medium"
+        >
+          Angler Digital
+        </a>{" "}
+        for website design and development.
       </>
     ),
   },

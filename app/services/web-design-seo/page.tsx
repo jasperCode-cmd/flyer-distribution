@@ -10,14 +10,14 @@ import Breadcrumb from "@/components/Breadcrumb";
 export const metadata: Metadata = {
   title: "Web Design & SEO",
   description:
-    "Fast, professional websites and search engine optimisation for businesses across Hampshire and Dorset. We handle design, development, and SEO end to end.",
+    "Fast, professional websites and search engine optimisation for businesses across Hampshire and Dorset. We handle design, development, and SEO from start to finish.",
   alternates: {
     canonical: "https://www.flyerdistributionhampshire.co.uk/services/web-design-seo",
   },
   openGraph: {
     title: "Web Design & SEO | Flyer Distribution Hampshire",
     description:
-      "Fast, professional websites and search engine optimisation for businesses across Hampshire and Dorset. We handle design, development, and SEO end to end.",
+      "Fast, professional websites and search engine optimisation for businesses across Hampshire and Dorset. We handle design, development, and SEO from start to finish.",
     url: "https://www.flyerdistributionhampshire.co.uk/services/web-design-seo",
     siteName: "Flyer Distribution Hampshire",
     locale: "en_GB",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Web Design & SEO | Flyer Distribution Hampshire",
     description:
-      "Fast, professional websites and search engine optimisation for businesses across Hampshire and Dorset. We handle design, development, and SEO end to end.",
+      "Fast, professional websites and search engine optimisation for businesses across Hampshire and Dorset. We handle design, development, and SEO from start to finish.",
   },
 };
 

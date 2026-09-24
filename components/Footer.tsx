@@ -159,10 +159,23 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-blue-900 mt-10 pt-6 text-xs text-blue-400 flex flex-col sm:flex-row justify-between gap-2">
-          <p>
-            &copy; {new Date().getFullYear()} Flyer Distribution Hampshire. All
-            rights reserved.
-          </p>
+          <div>
+            <p>
+              &copy; {new Date().getFullYear()} Flyer Distribution Hampshire. All
+              rights reserved.
+            </p>
+            <p>
+              Created and partnered with{" "}
+              <a
+                href="https://anglerdigital.co.uk"
+                target="_blank"
+                rel="nofollow sponsored"
+                className="hover:text-white transition-colors"
+              >
+                Angler Digital
+              </a>
+            </p>
+          </div>
           <p>Hampshire, UK</p>
         </div>
       </div>
