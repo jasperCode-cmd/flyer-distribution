@@ -90,6 +90,11 @@ const services = [
     desc: "Direct, face-to-face handouts at shopping centres, town centres and events across Hampshire and Dorset for immediate brand exposure.",
     href: "/services/hand-to-hand-distribution",
   },
+  {
+    title: "B2B Leaflet Distribution",
+    desc: "Direct marketing to business owners and decision-makers at offices, business parks and commercial areas across Hampshire and Dorset.",
+    href: "/services/b2b-distribution",
+  },
 ];
 
 const localBusinessSchema = {

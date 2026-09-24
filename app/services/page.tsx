@@ -96,6 +96,13 @@ const supportingServices = [
     alt: "A stack of printed leaflets ready for hand-to-hand distribution",
     href: "/services/hand-to-hand-distribution",
   },
+  {
+    title: "B2B Leaflet Distribution",
+    desc: "Direct marketing to business owners and decision-makers at offices, business parks and commercial areas across Hampshire and Dorset.",
+    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80",
+    alt: "Business professional working at a desk in an office setting",
+    href: "/services/b2b-distribution",
+  },
 ];
 
 const servicesSchema = {
@@ -197,6 +204,18 @@ const servicesSchema = {
       },
       "areaServed": "Hampshire and Dorset",
     },
+    {
+      "@type": "Service",
+      "name": "B2B Leaflet Distribution",
+      "description":
+        "Direct marketing to business owners and decision-makers at offices, business parks and commercial areas across Hampshire and Dorset.",
+      "provider": {
+        "@type": "LocalBusiness",
+        "name": "Flyer Distribution Hampshire",
+        "url": "https://www.flyerdistributionhampshire.co.uk",
+      },
+      "areaServed": "Hampshire and Dorset",
+    },
   ],
 };
 
@@ -283,10 +302,13 @@ export default function ServicesPage() {
             </Link>{" "}
             for local businesses.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <StaggerGroup
+            className="flex flex-wrap justify-center gap-6"
+            itemClassName="w-full md:w-[calc(50%-0.75rem)]"
+          >
             {supportingServices.map((svc) => {
               const cardClass =
-                "group bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-md transition-all block";
+                "group bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-md transition-all block h-full";
               const content = (
                 <>
                   <Image
@@ -319,7 +341,7 @@ export default function ServicesPage() {
                 </div>
               );
             })}
-          </div>
+          </StaggerGroup>
         </div>
       </section>
 

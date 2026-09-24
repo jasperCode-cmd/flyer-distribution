@@ -8,3 +8,6 @@
 
 ## Coverage Areas
 Coverage is expanding. No town is excluded. Only describe a town as covered on the site when the business has confirmed it.
+
+## Service Naming
+B2B / business-to-business was permanently banned as a named service; this was deliberately lifted, B2B Leaflet Distribution is now a real named service on the site.

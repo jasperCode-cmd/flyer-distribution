@@ -132,7 +132,12 @@ export default function WinchesterPage() {
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
                 our full leaflet distribution service
               </Link>
-              .
+              . For reaching other businesses directly, we also offer{" "}
+              <Link href="/services/b2b-distribution" className="text-blue-700 hover:underline font-medium">
+                B2B leaflet distribution
+              </Link>{" "}
+              around Winchester&apos;s business parks and professional
+              quarters, alongside our standard door-to-door rounds.
             </p>
             <div className="mt-8">
               <Link
