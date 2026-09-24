@@ -164,7 +164,7 @@ export default function Footer() {
               &copy; {new Date().getFullYear()} Flyer Distribution Hampshire. All
               rights reserved.
             </p>
-            <p>
+            <p className="text-sm mt-2">
               Created and partnered with{" "}
               <a
                 href="https://anglerdigital.co.uk"
