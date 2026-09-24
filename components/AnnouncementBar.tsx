@@ -12,9 +12,9 @@ export default function AnnouncementBar() {
   return (
     <Link
       href="/quote"
-      className="block bg-yellow-400 hover:bg-yellow-300 transition-colors duration-200 text-center px-4 py-2"
+      className="block bg-yellow-400 hover:bg-yellow-300 transition-colors duration-200 text-center px-2 py-2.5"
     >
-      <p className="text-blue-900 text-xs sm:text-sm leading-snug">
+      <p className="text-blue-900 text-[13px] sm:text-base leading-snug">
         <span className="font-bold">
           <SlotCountReveal value={campaignSlots.slotsRemaining} /> Campaign
           Slots Left for {campaignSlots.monthLabel}

@@ -8,7 +8,6 @@ import TrustBar from "@/components/TrustBar";
 import TrustCards from "@/components/TrustCards";
 import StaggerGroup from "@/components/StaggerGroup";
 import ScrollReveal from "@/components/ScrollReveal";
-import HeroSlotBadge from "@/components/HeroSlotBadge";
 import HeroCaseStudyTeaser from "@/components/HeroCaseStudyTeaser";
 import AdditionalServiceCard from "@/components/AdditionalServiceCard";
 import BrowserMockup from "@/components/BrowserMockup";
@@ -180,7 +179,6 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-10 lg:gap-16 items-center">
             {/* Text — 60% of row width at desktop */}
             <div>
-              <HeroSlotBadge />
               <p className="text-blue-300 text-sm font-semibold uppercase tracking-widest mb-4">
                 Hampshire &amp; Dorset
               </p>
