@@ -5,13 +5,24 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 
-const servicesDropdown = [
-  { href: "/services", label: "Leaflet Services" },
-  { href: "/services/public-notice-leafleting", label: "Public Notice Leafleting" },
-  { href: "/services/hand-to-hand-distribution", label: "Hand-to-Hand Leaflet Distribution" },
-  { href: "/services/b2b-distribution", label: "B2B Leaflet Distribution" },
-  { href: "/services/web-design-seo", label: "Web Design & SEO" },
-  { href: "/services/screen-hire", label: "Screen Hire" },
+const servicesGroups = [
+  {
+    label: "Leaflet Services",
+    href: "/services",
+    items: [
+      { href: "/services/public-notice-leafleting", label: "Public Notice Leafleting" },
+      { href: "/services/hand-to-hand-distribution", label: "Hand-to-Hand Leaflet Distribution" },
+      { href: "/services/b2b-distribution", label: "B2B Leaflet Distribution" },
+    ],
+  },
+  {
+    label: "Additional Services",
+    href: null,
+    items: [
+      { href: "/services/web-design-seo", label: "Web Design & SEO" },
+      { href: "/services/screen-hire", label: "Screen Hire" },
+    ],
+  },
 ];
 
 const navLinks = [
@@ -93,17 +104,32 @@ export default function Header() {
               {servicesOpen && (
                 <div className="absolute left-0 top-full pt-2 z-50">
                   <div className="bg-white border border-blue-100 rounded-md shadow-lg py-1 min-w-[200px]">
-                    {servicesDropdown.map((item, i) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className={`block px-4 py-2.5 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 transition-colors ${
-                          i === 0 ? "font-semibold" : "font-medium"
-                        }`}
-                        onClick={() => setServicesOpen(false)}
-                      >
-                        {item.label}
-                      </Link>
+                    {servicesGroups.map((group, gi) => (
+                      <div key={group.label} className={gi > 0 ? "mt-2" : ""}>
+                        {group.href ? (
+                          <Link
+                            href={group.href}
+                            className="block px-4 py-2.5 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 transition-colors font-semibold"
+                            onClick={() => setServicesOpen(false)}
+                          >
+                            {group.label}
+                          </Link>
+                        ) : (
+                          <p className="px-4 py-2.5 text-sm text-gray-600 font-semibold">
+                            {group.label}
+                          </p>
+                        )}
+                        {group.items.map((item) => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            className="block px-4 py-2.5 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 transition-colors font-medium"
+                            onClick={() => setServicesOpen(false)}
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -179,17 +205,32 @@ export default function Header() {
                 </button>
                 {mobileServicesOpen && (
                   <div className="pl-4 flex flex-col gap-1 mt-1">
-                    {servicesDropdown.map((item, i) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className={`block text-sm text-gray-600 hover:text-blue-700 px-2 py-2 rounded hover:bg-blue-50 transition-colors ${
-                          i === 0 ? "font-semibold" : "font-medium"
-                        }`}
-                        onClick={() => { setMenuOpen(false); setMobileServicesOpen(false); }}
-                      >
-                        {item.label}
-                      </Link>
+                    {servicesGroups.map((group, gi) => (
+                      <div key={group.label} className={gi > 0 ? "mt-2" : ""}>
+                        {group.href ? (
+                          <Link
+                            href={group.href}
+                            className="block text-sm text-gray-600 hover:text-blue-700 px-2 py-2 rounded hover:bg-blue-50 transition-colors font-semibold"
+                            onClick={() => { setMenuOpen(false); setMobileServicesOpen(false); }}
+                          >
+                            {group.label}
+                          </Link>
+                        ) : (
+                          <p className="text-sm text-gray-600 px-2 py-2 font-semibold">
+                            {group.label}
+                          </p>
+                        )}
+                        {group.items.map((item) => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            className="block text-sm text-gray-600 hover:text-blue-700 px-2 py-2 rounded hover:bg-blue-50 transition-colors font-medium"
+                            onClick={() => { setMenuOpen(false); setMobileServicesOpen(false); }}
+                          >
+                            {item.label}
+                          </Link>
+                        ))}
+                      </div>
                     ))}
                   </div>
                 )}
