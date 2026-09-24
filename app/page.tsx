@@ -12,6 +12,7 @@ import HeroSlotBadge from "@/components/HeroSlotBadge";
 import HeroCaseStudyTeaser from "@/components/HeroCaseStudyTeaser";
 import AdditionalServiceCard from "@/components/AdditionalServiceCard";
 import BrowserMockup from "@/components/BrowserMockup";
+import { areas, regions } from "@/lib/areas-data";
 
 export const metadata: Metadata = {
   title: "Flyer Distribution Hampshire | Local Leaflet & Flyer Delivery",
@@ -85,18 +86,6 @@ const services = [
     desc: "Statutory door-to-door distribution for Nationally Significant Infrastructure Projects across Hampshire, meeting Section 47 and Section 48 Planning Act 2008 requirements.",
     href: "/services/public-notice-leafleting",
   },
-];
-
-const areas = [
-  { name: "Southampton", href: "/areas/southampton" },
-  { name: "Bournemouth", href: "/areas/bournemouth" },
-  { name: "Poole", href: "/areas/poole" },
-  { name: "Winchester", href: "/areas/winchester" },
-  { name: "New Forest", href: "/areas/new-forest" },
-  { name: "Ringwood", href: "/areas/ringwood" },
-  { name: "Christchurch", href: "/areas/christchurch" },
-  { name: "Dorset", href: "/areas/dorset" },
-  { name: "Eastleigh", href: "/areas/eastleigh" },
 ];
 
 const localBusinessSchema = {
@@ -336,38 +325,29 @@ export default function HomePage() {
                 in the north to Poole in the west, and everywhere in
                 between.
               </p>
-              <div className="flex flex-wrap gap-3 mb-8">
-                {areas.map((area) => (
-                  <Link
-                    key={area.name}
-                    href={area.href}
-                    className="bg-blue-800 hover:bg-blue-700 border border-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-md transition-colors"
-                  >
-                    {area.name}
-                  </Link>
-                ))}
-              </div>
-              <p className="text-blue-400 text-xs font-semibold uppercase tracking-wide mb-3">
-                Also covering
-              </p>
-              <div className="flex flex-wrap gap-2 mb-8">
-                {[
-                  { name: "Brockenhurst", href: "/areas/brockenhurst" },
-                  { name: "Romsey", href: "/areas/romsey" },
-                  { name: "Hythe", href: "/areas/hythe" },
-                  { name: "Totton", href: "/areas/totton" },
-                  { name: "Hedge End", href: "/areas/hedge-end" },
-                  { name: "Chandler's Ford", href: "/areas/chandlers-ford" },
-                ].map((a) => (
-                  <Link
-                    key={a.name}
-                    href={a.href}
-                    className="bg-blue-800 hover:bg-blue-700 border border-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-md transition-colors"
-                  >
-                    {a.name}
-                  </Link>
-                ))}
-              </div>
+              {regions.map((region) => {
+                const regionAreas = areas
+                  .filter((area) => area.region === region)
+                  .sort((a, b) => a.name.localeCompare(b.name));
+                return (
+                  <div key={region}>
+                    <p className="text-blue-400 text-xs font-semibold uppercase tracking-wide mb-3">
+                      {region}
+                    </p>
+                    <div className="flex flex-wrap gap-3 mb-8">
+                      {regionAreas.map((area) => (
+                        <Link
+                          key={area.name}
+                          href={area.href}
+                          className="bg-blue-800 hover:bg-blue-700 border border-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-md transition-colors"
+                        >
+                          {area.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
               <Link
                 href="/areas"
                 className="text-blue-300 hover:text-white font-semibold text-sm underline underline-offset-2"

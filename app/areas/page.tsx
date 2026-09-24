@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { areas, regions } from "@/lib/areas-data";
 
 export const metadata: Metadata = {
   title: "Hampshire & Dorset Coverage Areas",
@@ -35,87 +36,6 @@ export const metadata: Metadata = {
     ],
   },
 };
-
-const featuredAreas = [
-  {
-    name: "Southampton",
-    href: "/areas/southampton",
-    desc: "Hampshire's largest city. Residential coverage across all major postcode areas.",
-  },
-  {
-    name: "Bournemouth",
-    href: "/areas/bournemouth",
-    desc: "Major Dorset resort town with strong consumer footfall.",
-  },
-  {
-    name: "Poole",
-    href: "/areas/poole",
-    desc: "Affluent harbour town with excellent residential distribution routes.",
-  },
-  {
-    name: "Winchester",
-    href: "/areas/winchester",
-    desc: "Historic cathedral city and prosperous Hampshire county town.",
-  },
-  {
-    name: "New Forest",
-    href: "/areas/new-forest",
-    desc: "Towns and villages across one of Hampshire's most distinctive districts.",
-  },
-  {
-    name: "Ringwood",
-    href: "/areas/ringwood",
-    desc: "Market town on the New Forest edge, close to the Dorset border.",
-  },
-  {
-    name: "Christchurch",
-    href: "/areas/christchurch",
-    desc: "Coastal market town on the Dorset border, with strong residential coverage across BH23 postcodes.",
-  },
-  {
-    name: "Eastleigh",
-    href: "/areas/eastleigh",
-    desc: "One of Hampshire's largest towns with strong residential coverage across SO50 postcodes.",
-  },
-  {
-    name: "Dorset",
-    href: "/areas/dorset",
-    desc: "County-wide coverage across Dorset including Bournemouth, Poole, Christchurch, Weymouth and surrounding towns.",
-  },
-];
-
-const otherAreas = [
-  {
-    name: "Romsey",
-    href: "/areas/romsey",
-    desc: "Historic market town in the Test Valley, between Southampton and Salisbury.",
-  },
-  {
-    name: "Hythe",
-    href: "/areas/hythe",
-    desc: "Waterside village looking out over Southampton Water, with a working marina.",
-  },
-  {
-    name: "Totton",
-    href: "/areas/totton",
-    desc: "One of the largest towns on the edge of the New Forest, near the River Test.",
-  },
-  {
-    name: "Hedge End",
-    href: "/areas/hedge-end",
-    desc: "Residential town east of Southampton, home to a well-known retail park.",
-  },
-  {
-    name: "Chandler's Ford",
-    href: "/areas/chandlers-ford",
-    desc: "Residential part of the Eastleigh borough, with established neighbourhoods like Hiltingbury and Valley Park.",
-  },
-  {
-    name: "Brockenhurst",
-    href: "/areas/brockenhurst",
-    desc: "One of the New Forest's best-known villages, with ponies wandering along Brookley Road.",
-  },
-];
 
 const breadcrumbSchema = {
   "@context": "https://schema.org",
@@ -162,47 +82,35 @@ export default function AreasPage() {
 
       <section className="bg-slate-50 py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-blue-900 mb-8">
-            Core Coverage
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-            {featuredAreas.map((area) => (
-              <Link
-                key={area.name}
-                href={area.href}
-                className="bg-white border border-gray-200 rounded-lg p-6 hover:border-blue-400 hover:shadow-md transition-all block"
-              >
-                <h3 className="text-base font-semibold text-blue-900 mb-1">
-                  {area.name}
-                </h3>
-                <p className="text-gray-600 text-sm">{area.desc}</p>
-                <span className="mt-3 inline-block text-blue-600 text-xs font-semibold">
-                  View area →
-                </span>
-              </Link>
-            ))}
-          </div>
-
-          <h2 className="text-2xl font-bold text-blue-900 mb-8">
-            Also Covering
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {otherAreas.map((area) => (
-              <Link
-                key={area.name}
-                href={area.href}
-                className="bg-white border border-gray-200 rounded-lg p-6 hover:border-blue-400 hover:shadow-md transition-all block"
-              >
-                <h3 className="text-base font-semibold text-blue-900 mb-1">
-                  {area.name}
-                </h3>
-                <p className="text-gray-600 text-sm">{area.desc}</p>
-                <span className="mt-3 inline-block text-blue-600 text-xs font-semibold">
-                  View area →
-                </span>
-              </Link>
-            ))}
-          </div>
+          {regions.map((region, i) => {
+            const regionAreas = areas
+              .filter((area) => area.region === region)
+              .sort((a, b) => a.name.localeCompare(b.name));
+            return (
+              <div key={region} className={i < regions.length - 1 ? "mb-16" : ""}>
+                <h2 className="text-2xl font-bold text-blue-900 mb-8">
+                  {region}
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {regionAreas.map((area) => (
+                    <Link
+                      key={area.name}
+                      href={area.href}
+                      className="bg-white border border-gray-200 rounded-lg p-6 hover:border-blue-400 hover:shadow-md transition-all block"
+                    >
+                      <h3 className="text-base font-semibold text-blue-900 mb-1">
+                        {area.name}
+                      </h3>
+                      <p className="text-gray-600 text-sm">{area.desc}</p>
+                      <span className="mt-3 inline-block text-blue-600 text-xs font-semibold">
+                        View area →
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
           <p className="mt-6 text-gray-500 text-sm">
             Don&apos;t see your area listed?{" "}
             <Link href="/quote" className="text-blue-700 hover:underline font-medium">
