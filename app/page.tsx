@@ -191,17 +191,17 @@ export default function HomePage() {
             left edge is clipped on a diagonal (narrower at the top, full
             width at the bottom) rather than a plain vertical split. */}
         <div
-          className="hidden lg:block absolute inset-y-0 right-0 w-[41%]"
-          style={{ clipPath: "polygon(27% 0%, 100% 0%, 100% 100%, 0% 100%)" }}
+          className="hidden lg:block absolute inset-y-0 right-0 w-[36%]"
+          style={{ clipPath: "polygon(31% 0%, 100% 0%, 100% 100%, 0% 100%)" }}
         >
           <Image
             src="/Leaflet going through door with our branding cropped.webp"
             alt="Branded leaflet being delivered through a letterbox"
             fill
-            sizes="41vw"
+            sizes="36vw"
             quality={90}
             className="object-cover"
-            style={{ objectPosition: "center 30%" }}
+            style={{ objectPosition: "center 35%" }}
             priority
           />
         </div>
