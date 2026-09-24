@@ -191,17 +191,17 @@ export default function HomePage() {
             left edge is clipped on a diagonal (narrower at the top, full
             width at the bottom) rather than a plain vertical split. */}
         <div
-          className="hidden lg:block absolute inset-y-0 right-0 w-[32%]"
-          style={{ clipPath: "polygon(29.5% 0%, 100% 0%, 100% 100%, 0% 100%)" }}
+          className="hidden lg:block absolute inset-y-0 right-0 w-[27%]"
+          style={{ clipPath: "polygon(41% 0%, 100% 0%, 100% 100%, 0% 100%)" }}
         >
           <Image
             src="/Leaflet going through door with our branding cropped.webp"
             alt="Branded leaflet being delivered through a letterbox"
             fill
-            sizes="32vw"
+            sizes="27vw"
             quality={90}
             className="object-cover"
-            style={{ objectPosition: "center 25%" }}
+            style={{ objectPosition: "center 20%" }}
             priority
           />
         </div>
@@ -210,7 +210,7 @@ export default function HomePage() {
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-8">
           <div className="flex flex-col gap-10">
             {/* Text — constrained to keep clear of the full-bleed image at desktop */}
-            <div className="lg:max-w-[65%]">
+            <div className="lg:max-w-[52%]">
               <p className="text-blue-300 text-sm font-semibold uppercase tracking-widest mb-4">
                 Hampshire &amp; Dorset
               </p>
