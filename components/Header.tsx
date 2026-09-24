@@ -97,15 +97,17 @@ export default function Header() {
                       <div key={item.href}>
                         <Link
                           href={item.href}
-                          className={`block px-4 py-2.5 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 transition-colors ${
-                            i === 0 ? "font-bold" : "font-medium"
+                          className={`block text-gray-600 hover:text-blue-700 hover:bg-blue-50 transition-colors ${
+                            i === 0
+                              ? "px-4 pt-3 pb-2.5 text-base font-bold"
+                              : "px-4 py-2.5 text-sm font-medium"
                           }`}
                           onClick={() => setServicesOpen(false)}
                         >
                           {item.label}
                         </Link>
                         {i === 0 && (
-                          <div className="mx-2 my-1 border-t border-gray-100" />
+                          <div className="mx-2 my-2 border-t border-gray-300" />
                         )}
                       </div>
                     ))}
@@ -187,15 +189,17 @@ export default function Header() {
                       <div key={item.href}>
                         <Link
                           href={item.href}
-                          className={`block text-sm text-gray-600 hover:text-blue-700 px-2 py-2 rounded hover:bg-blue-50 transition-colors ${
-                            i === 0 ? "font-bold" : "font-medium"
+                          className={`block text-gray-600 hover:text-blue-700 rounded hover:bg-blue-50 transition-colors ${
+                            i === 0
+                              ? "px-2 pt-3 pb-2.5 text-base font-bold"
+                              : "px-2 py-2 text-sm font-medium"
                           }`}
                           onClick={() => { setMenuOpen(false); setMobileServicesOpen(false); }}
                         >
                           {item.label}
                         </Link>
                         {i === 0 && (
-                          <div className="mx-2 my-1 border-t border-gray-100" />
+                          <div className="mx-2 my-2 border-t border-gray-300" />
                         )}
                       </div>
                     ))}
