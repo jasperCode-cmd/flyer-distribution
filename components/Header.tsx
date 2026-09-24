@@ -94,22 +94,16 @@ export default function Header() {
                 <div className="absolute left-0 top-full pt-2 z-50">
                   <div className="bg-white border border-blue-100 rounded-md shadow-lg py-1 min-w-[200px]">
                     {servicesDropdown.map((item, i) => (
-                      <div key={item.href}>
-                        <Link
-                          href={item.href}
-                          className={`block text-gray-600 hover:text-blue-700 hover:bg-blue-50 transition-colors ${
-                            i === 0
-                              ? "px-4 pt-3 pb-2.5 text-base font-bold"
-                              : "px-4 py-2.5 text-sm font-medium"
-                          }`}
-                          onClick={() => setServicesOpen(false)}
-                        >
-                          {item.label}
-                        </Link>
-                        {i === 0 && (
-                          <div className="mx-2 my-2 border-t border-gray-300" />
-                        )}
-                      </div>
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`block px-4 py-2.5 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 transition-colors ${
+                          i === 0 ? "font-semibold" : "font-medium"
+                        }`}
+                        onClick={() => setServicesOpen(false)}
+                      >
+                        {item.label}
+                      </Link>
                     ))}
                   </div>
                 </div>
@@ -186,22 +180,16 @@ export default function Header() {
                 {mobileServicesOpen && (
                   <div className="pl-4 flex flex-col gap-1 mt-1">
                     {servicesDropdown.map((item, i) => (
-                      <div key={item.href}>
-                        <Link
-                          href={item.href}
-                          className={`block text-gray-600 hover:text-blue-700 rounded hover:bg-blue-50 transition-colors ${
-                            i === 0
-                              ? "px-2 pt-3 pb-2.5 text-base font-bold"
-                              : "px-2 py-2 text-sm font-medium"
-                          }`}
-                          onClick={() => { setMenuOpen(false); setMobileServicesOpen(false); }}
-                        >
-                          {item.label}
-                        </Link>
-                        {i === 0 && (
-                          <div className="mx-2 my-2 border-t border-gray-300" />
-                        )}
-                      </div>
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`block text-sm text-gray-600 hover:text-blue-700 px-2 py-2 rounded hover:bg-blue-50 transition-colors ${
+                          i === 0 ? "font-semibold" : "font-medium"
+                        }`}
+                        onClick={() => { setMenuOpen(false); setMobileServicesOpen(false); }}
+                      >
+                        {item.label}
+                      </Link>
                     ))}
                   </div>
                 )}
