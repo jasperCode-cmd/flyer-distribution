@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import Breadcrumb from "@/components/Breadcrumb";
+import PopulationCounter from "@/components/PopulationCounter";
+import { areas } from "@/lib/areas-data";
 
 export const metadata: Metadata = {
   title: "Leaflet Distribution Hedge End",
@@ -63,6 +65,8 @@ const breadcrumbSchema = {
   ],
 };
 
+const areaData = areas.find((a) => a.href === "/areas/hedge-end")!;
+
 export default function HedgeEndPage() {
   return (
     <>
@@ -98,6 +102,11 @@ export default function HedgeEndPage() {
             <h2 className="text-2xl font-bold text-blue-900 mb-4">
               About Our Hedge End Coverage
             </h2>
+            <PopulationCounter
+              population={areaData.population}
+              label={areaData.populationLabel}
+              className="mb-4"
+            />
             <p className="text-gray-600 mb-4 leading-relaxed">
               Hedge End sits just east of Southampton, a residential town
               that&apos;s grown up alongside the retail park that now draws

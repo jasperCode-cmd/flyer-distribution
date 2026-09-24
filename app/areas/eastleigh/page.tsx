@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import Breadcrumb from "@/components/Breadcrumb";
+import PopulationCounter from "@/components/PopulationCounter";
+import { areas } from "@/lib/areas-data";
 
 export const metadata: Metadata = {
   title: "Leaflet Distribution Eastleigh",
@@ -63,6 +65,8 @@ const breadcrumbSchema = {
   ],
 };
 
+const areaData = areas.find((a) => a.href === "/areas/eastleigh")!;
+
 export default function EastleighPage() {
   return (
     <>
@@ -98,6 +102,11 @@ export default function EastleighPage() {
             <h2 className="text-2xl font-bold text-blue-900 mb-4">
               About Our Eastleigh Coverage
             </h2>
+            <PopulationCounter
+              population={areaData.population}
+              label={areaData.populationLabel}
+              className="mb-4"
+            />
             <p className="text-gray-600 mb-4 leading-relaxed">
               Eastleigh is one of Hampshire&apos;s largest towns, home to around
               50,000 residents across a mix of residential neighbourhoods and

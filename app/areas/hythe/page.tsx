@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import Breadcrumb from "@/components/Breadcrumb";
+import PopulationCounter from "@/components/PopulationCounter";
+import { areas } from "@/lib/areas-data";
 
 export const metadata: Metadata = {
   title: "Leaflet Distribution Hythe",
@@ -63,6 +65,8 @@ const breadcrumbSchema = {
   ],
 };
 
+const areaData = areas.find((a) => a.href === "/areas/hythe")!;
+
 export default function HythePage() {
   return (
     <>
@@ -98,6 +102,11 @@ export default function HythePage() {
             <h2 className="text-2xl font-bold text-blue-900 mb-4">
               About Our Hythe Coverage
             </h2>
+            <PopulationCounter
+              population={areaData.population}
+              label={areaData.populationLabel}
+              className="mb-4"
+            />
             <p className="text-gray-600 mb-4 leading-relaxed">
               Hythe sits on the Waterside, looking out over Southampton
               Water with a small marina at its heart and a ferry crossing to

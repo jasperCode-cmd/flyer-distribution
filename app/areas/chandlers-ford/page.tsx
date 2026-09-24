@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import Breadcrumb from "@/components/Breadcrumb";
+import PopulationCounter from "@/components/PopulationCounter";
+import { areas } from "@/lib/areas-data";
 
 export const metadata: Metadata = {
   title: "Leaflet Distribution Chandler's Ford",
@@ -63,6 +65,8 @@ const breadcrumbSchema = {
   ],
 };
 
+const areaData = areas.find((a) => a.href === "/areas/chandlers-ford")!;
+
 export default function ChandlersFordPage() {
   return (
     <>
@@ -99,6 +103,11 @@ export default function ChandlersFordPage() {
             <h2 className="text-2xl font-bold text-blue-900 mb-4">
               About Our Chandler&apos;s Ford Coverage
             </h2>
+            <PopulationCounter
+              population={areaData.population}
+              label={areaData.populationLabel}
+              className="mb-4"
+            />
             <p className="text-gray-600 mb-4 leading-relaxed">
               Chandler&apos;s Ford is a largely residential part of the
               Eastleigh borough, made up of established neighbourhoods like

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import Breadcrumb from "@/components/Breadcrumb";
+import PopulationCounter from "@/components/PopulationCounter";
+import { areas } from "@/lib/areas-data";
 
 export const metadata: Metadata = {
   title: "Flyer Distribution Bournemouth",
@@ -63,6 +65,8 @@ const breadcrumbSchema = {
   ],
 };
 
+const areaData = areas.find((a) => a.href === "/areas/bournemouth")!;
+
 export default function BournemouthPage() {
   return (
     <>
@@ -98,6 +102,11 @@ export default function BournemouthPage() {
             <h2 className="text-2xl font-bold text-blue-900 mb-4">
               About Our Bournemouth Coverage
             </h2>
+            <PopulationCounter
+              population={areaData.population}
+              label={areaData.populationLabel}
+              className="mb-4"
+            />
             <p className="text-gray-600 mb-4 leading-relaxed">
               Bournemouth is one of Dorset&apos;s largest towns, known for its
               beaches, vibrant town centre, and large student population.
