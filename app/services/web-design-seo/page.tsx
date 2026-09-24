@@ -152,6 +152,17 @@ export default function WebDesignSeoPage() {
                   See the Offer
                 </a>
               </div>
+              <p className="text-blue-300 text-xs mt-4">
+                Built in partnership with{" "}
+                <a
+                  href="https://anglerdigital.co.uk"
+                  target="_blank"
+                  rel="nofollow sponsored"
+                  className="underline hover:text-white transition-colors"
+                >
+                  Angler Digital
+                </a>
+              </p>
             </div>
             <div className="flex justify-center lg:justify-end mt-2 lg:mt-0">
               <div className="scale-[0.72] origin-top lg:scale-100">
