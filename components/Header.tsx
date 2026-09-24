@@ -8,6 +8,7 @@ import { useState, useRef, useEffect } from "react";
 const servicesDropdown = [
   { href: "/services", label: "Leaflet Services" },
   { href: "/services/public-notice-leafleting", label: "Public Notice Leafleting" },
+  { href: "/services/hand-to-hand-distribution", label: "Hand-to-Hand Leaflet Distribution" },
   { href: "/services/web-design-seo", label: "Web Design & SEO" },
   { href: "/services/screen-hire", label: "Screen Hire" },
 ];

@@ -85,6 +85,11 @@ const services = [
     desc: "Statutory door-to-door distribution for Nationally Significant Infrastructure Projects across Hampshire, meeting Section 47 and Section 48 Planning Act 2008 requirements.",
     href: "/services/public-notice-leafleting",
   },
+  {
+    title: "Hand-to-Hand Leaflet Distribution",
+    desc: "Direct, face-to-face handouts at shopping centres, town centres and events across Hampshire and Dorset for immediate brand exposure.",
+    href: "/services/hand-to-hand-distribution",
+  },
 ];
 
 const localBusinessSchema = {

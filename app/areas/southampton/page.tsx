@@ -121,7 +121,12 @@ export default function SouthamptonPage() {
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
                 leaflet distribution services
               </Link>
-              .
+              . We also run{" "}
+              <Link href="/services/hand-to-hand-distribution" className="text-blue-700 hover:underline font-medium">
+                hand-to-hand distribution
+              </Link>{" "}
+              at Westquay Shopping Centre, putting leaflets straight into
+              shoppers&apos; hands.
             </p>
             <div className="mt-8">
               <Link

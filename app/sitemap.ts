@@ -30,6 +30,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/areas/hedge-end",
     "/areas/chandlers-ford",
     "/areas/brockenhurst",
+    "/services/hand-to-hand-distribution",
   ]; // /blog excluded — noindex
 
   return routes.map((route) => ({

@@ -89,6 +89,13 @@ const supportingServices = [
     alt: "Residential street where public notice leaflets are distributed",
     href: "/services/public-notice-leafleting",
   },
+  {
+    title: "Hand-to-Hand Leaflet Distribution",
+    desc: "Direct, face-to-face handouts at shopping centres, town centres and events, putting your leaflets straight into people's hands for immediate exposure.",
+    image: "https://images.pexels.com/photos/19843566/pexels-photo-19843566.jpeg?auto=compress&cs=tinysrgb&w=800",
+    alt: "A stack of printed leaflets ready for hand-to-hand distribution",
+    href: "/services/hand-to-hand-distribution",
+  },
 ];
 
 const servicesSchema = {
@@ -177,6 +184,18 @@ const servicesSchema = {
         "url": "https://www.flyerdistributionhampshire.co.uk",
       },
       "areaServed": "Hampshire",
+    },
+    {
+      "@type": "Service",
+      "name": "Hand-to-Hand Leaflet Distribution",
+      "description":
+        "Direct, face-to-face handouts at shopping centres, town centres and events, putting your leaflets straight into people's hands for immediate exposure.",
+      "provider": {
+        "@type": "LocalBusiness",
+        "name": "Flyer Distribution Hampshire",
+        "url": "https://www.flyerdistributionhampshire.co.uk",
+      },
+      "areaServed": "Hampshire and Dorset",
     },
   ],
 };
