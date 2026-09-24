@@ -184,11 +184,28 @@ export default function HomePage() {
         />
         {/* Dark overlay */}
         <div className="absolute inset-0 bg-blue-950/80" />
+
+        {/* Desktop-only full-bleed image panel — spans the right portion of
+            the section edge to edge, independent of the centered text
+            container below, so it isn't boxed in like an inset photo. */}
+        <div className="hidden lg:block absolute inset-y-0 right-0 w-[42%]">
+          <Image
+            src="/Leaflet going through door with our branding cropped.webp"
+            alt="Branded leaflet being delivered through a letterbox"
+            fill
+            sizes="42vw"
+            quality={90}
+            className="object-cover"
+            style={{ objectPosition: "center 35%" }}
+            priority
+          />
+        </div>
+
         {/* Content */}
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-          <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-10 lg:gap-16 items-center">
-            {/* Text — 60% of row width at desktop */}
-            <div>
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-8">
+          <div className="flex flex-col gap-10">
+            {/* Text — constrained to keep clear of the full-bleed image at desktop */}
+            <div className="lg:max-w-[52%]">
               <p className="text-blue-300 text-sm font-semibold uppercase tracking-widest mb-4">
                 Hampshire &amp; Dorset
               </p>
@@ -216,9 +233,8 @@ export default function HomePage() {
               </div>
               <HeroCaseStudyTeaser />
             </div>
-            {/* Image column — square on mobile, cropped portrait on desktop */}
-            <div className="flex justify-center lg:justify-end">
-              {/* Mobile: square 1054×1054, hidden at lg+ */}
+            {/* Mobile-only square image, unchanged from before */}
+            <div className="flex justify-center lg:hidden">
               <Image
                 src="/Leaflet going through door with our branding.webp"
                 alt="Branded leaflet being delivered through a letterbox"
@@ -226,18 +242,7 @@ export default function HomePage() {
                 height={1054}
                 quality={90}
                 sizes="min(100vw, 384px)"
-                className="w-full max-w-xs sm:max-w-sm rounded-xl shadow-2xl block lg:hidden"
-                priority
-              />
-              {/* Desktop: cropped portrait 700×1054, shown at lg+ */}
-              <Image
-                src="/Leaflet going through door with our branding cropped.webp"
-                alt="Branded leaflet being delivered through a letterbox"
-                width={700}
-                height={1054}
-                quality={90}
-                sizes="410px"
-                className="w-full rounded-xl shadow-2xl hidden lg:block"
+                className="w-full max-w-xs sm:max-w-sm rounded-xl shadow-2xl"
                 priority
               />
             </div>
