@@ -25,6 +25,7 @@ export default function Footer() {
   if (pathname.startsWith("/admin/crm")) return null;
 
   return (
+    <>
     <footer className="bg-blue-950 text-blue-200 mt-auto">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -161,26 +162,25 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-blue-900 mt-10 pt-6 text-xs text-blue-400 flex flex-col sm:flex-row justify-between gap-2">
-          <div>
-            <p>
-              &copy; {new Date().getFullYear()} Flyer Distribution Hampshire. All
-              rights reserved.
-            </p>
-            <p className="text-sm mt-2">
-              Created and partnered with{" "}
-              <a
-                href="https://anglerdigital.co.uk"
-                target="_blank"
-                rel="nofollow sponsored"
-                className="hover:text-white transition-colors"
-              >
-                Angler Digital
-              </a>
-            </p>
-          </div>
+          <p>
+            &copy; {new Date().getFullYear()} Flyer Distribution Hampshire. All
+            rights reserved.
+          </p>
           <p>Hampshire, UK</p>
         </div>
       </div>
     </footer>
+    <div className="bg-blue-900 text-blue-300 text-xs text-center py-3">
+      Created and partnered with{" "}
+      <a
+        href="https://anglerdigital.co.uk"
+        target="_blank"
+        rel="nofollow sponsored"
+        className="hover:text-white transition-colors underline"
+      >
+        Angler Digital
+      </a>
+    </div>
+    </>
   );
 }
