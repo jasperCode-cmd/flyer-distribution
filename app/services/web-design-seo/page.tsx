@@ -152,17 +152,25 @@ export default function WebDesignSeoPage() {
                   See the Offer
                 </a>
               </div>
-              <p className="text-blue-300 text-xs mt-4">
-                Built in partnership with{" "}
-                <a
-                  href="https://anglerdigital.co.uk"
-                  target="_blank"
-                  rel="nofollow sponsored"
-                  className="underline hover:text-white transition-colors"
-                >
-                  Angler Digital
-                </a>
-              </p>
+              <div className="mt-5">
+                <div className="cta-shimmer relative overflow-hidden inline-flex items-center gap-2 bg-blue-800/50 border border-blue-400/40 rounded-full px-4 py-2.5 shadow-[0_0_20px_rgba(96,165,250,0.35)]">
+                  <svg className="relative z-10 w-4 h-4 text-blue-200 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <circle cx="9" cy="12" r="6" />
+                    <circle cx="15" cy="12" r="6" />
+                  </svg>
+                  <span className="relative z-10 text-sm font-bold text-white">
+                    In Partnership With{" "}
+                    <a
+                      href="https://anglerdigital.co.uk"
+                      target="_blank"
+                      rel="nofollow sponsored"
+                      className="underline decoration-blue-300 hover:text-blue-200 transition-colors"
+                    >
+                      Angler Digital
+                    </a>
+                  </span>
+                </div>
+              </div>
             </div>
             <div className="flex justify-center lg:justify-end mt-2 lg:mt-0">
               <div className="scale-[0.72] origin-top lg:scale-100">
@@ -243,6 +251,41 @@ export default function WebDesignSeoPage() {
                     Designed, built and managed for you
                   </p>
                 </div>
+              </div>
+            </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      {/* Angler Digital partnership */}
+      <section className="bg-slate-50 py-12 sm:py-14">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ScrollReveal>
+            <div className="cta-shimmer relative overflow-hidden bg-white rounded-xl ring-1 ring-black/5 shadow-[0_0_30px_rgba(37,99,235,0.15),0_10px_25px_-5px_rgba(0,0,0,0.15)] p-8 sm:p-10 max-w-3xl mx-auto text-center">
+              <div className="relative z-10">
+                <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-50 text-blue-700 mb-4">
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <circle cx="9" cy="12" r="6" />
+                    <circle cx="15" cy="12" r="6" />
+                  </svg>
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-3">
+                  Built With a Trusted Partner
+                </h2>
+                <p className="text-gray-600 leading-relaxed max-w-xl mx-auto">
+                  We partner with{" "}
+                  <a
+                    href="https://anglerdigital.co.uk"
+                    target="_blank"
+                    rel="nofollow sponsored"
+                    className="text-blue-700 hover:underline font-medium"
+                  >
+                    Angler Digital
+                  </a>{" "}
+                  for website design and development, giving our clients
+                  access to dedicated web design expertise alongside our
+                  leaflet and marketing services.
+                </p>
               </div>
             </div>
           </ScrollReveal>
