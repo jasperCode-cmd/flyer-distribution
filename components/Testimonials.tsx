@@ -7,7 +7,9 @@ type Testimonial = {
   id: string;
   name: string;
   label: string;
+  businessLine?: string;
   quote: string | null;
+  quoteClassName?: string;
   header: React.ReactNode;
 };
 
@@ -76,6 +78,56 @@ const testimonials: Testimonial[] = [
     ),
   },
   {
+    id: "new-arts",
+    name: "John Lofthouse",
+    label: "Google Review",
+    quote:
+      "Outstanding service! Great communication; reasonably priced; excellent job! I would highly recommend these guys. I will be taking them again.",
+    header: (
+      <Image
+        src="/logo-new-arts.webp"
+        alt="New Arts logo"
+        width={762}
+        height={348}
+        className="h-14 w-auto object-contain"
+      />
+    ),
+  },
+  {
+    id: "relocation-healing-elishas",
+    name: "Auriel Cochrane",
+    label: "Google Review",
+    businessLine: "The Relocation Specialists, The Healing Hub and Elisha's Pampered Paws",
+    quote:
+      "Really pleased with the service! Everything was handled efficiently, and the flyers were distributed exactly within the area I wanted to target. Communication was great throughout, and the pricing was very reasonable compared with other distributors I contacted. The whole process was straightforward and reliable, and I'd definitely use the service again. Highly recommend!",
+    quoteClassName: "text-[10px] sm:text-xs leading-snug",
+    header: (
+      <div className="flex items-center justify-center gap-1.5">
+        <Image
+          src="/logo-the-relocation-specialists.webp"
+          alt="The Relocation Specialists logo"
+          width={780}
+          height={248}
+          className="h-5 sm:h-7 w-auto object-contain shrink-0"
+        />
+        <Image
+          src="/logo-the-healing-hub.webp"
+          alt="The Healing Hub logo"
+          width={764}
+          height={163}
+          className="h-5 sm:h-7 w-auto object-contain shrink-0"
+        />
+        <Image
+          src="/logo-elishas-pampered-paws.webp"
+          alt="Elisha's Pampered Paws logo"
+          width={331}
+          height={364}
+          className="h-5 sm:h-7 w-auto object-contain shrink-0"
+        />
+      </div>
+    ),
+  },
+  {
     id: "body-by-victoria",
     name: "Body by Victoria",
     label: "Google Review",
@@ -83,10 +135,10 @@ const testimonials: Testimonial[] = [
       "Great communication from the start. Very polite competitive prices will definitely be using again. Thank you",
     header: (
       <Image
-        src="/Body by Victoria.webp"
+        src="/logo-body-by-victoria.webp"
         alt="Body by Victoria logo"
-        width={913}
-        height={534}
+        width={466}
+        height={252}
         className="h-14 w-auto object-contain"
       />
     ),
@@ -213,7 +265,7 @@ export default function Testimonials() {
           onMouseLeave={() => setPaused(false)}
         >
           <div
-            className="relative mx-auto max-w-2xl h-[300px] sm:h-[340px]"
+            className="relative mx-auto max-w-2xl h-[410px] sm:h-[420px]"
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
@@ -236,20 +288,27 @@ export default function Testimonials() {
                     pointerEvents: isCenter ? "auto" : "none",
                   }}
                 >
-                  <div className="w-64 h-72 sm:w-80 sm:h-[310px] bg-white rounded-lg border border-gray-200 shadow-lg p-5 sm:p-6 flex flex-col">
+                  <div className="w-64 h-[390px] sm:w-80 sm:h-[400px] bg-white rounded-lg border border-gray-200 shadow-lg p-5 sm:p-6 flex flex-col">
                     <div className="h-14 flex items-center justify-center mb-4 shrink-0">
                       {t.header}
                     </div>
                     <div className="flex-1 flex flex-col justify-center min-h-0">
                       <Stars />
                       {t.quote && (
-                        <blockquote className="text-gray-600 text-sm leading-relaxed line-clamp-5">
+                        <blockquote
+                          className={`text-gray-600 leading-relaxed ${
+                            t.quoteClassName ?? "text-sm line-clamp-5"
+                          }`}
+                        >
                           &ldquo;{t.quote}&rdquo;
                         </blockquote>
                       )}
                     </div>
                     <div className="mt-3 shrink-0">
                       <p className="text-blue-900 font-semibold text-sm">{t.name}</p>
+                      {t.businessLine && (
+                        <p className="text-gray-500 text-xs mt-0.5">{t.businessLine}</p>
+                      )}
                       <p className="text-gray-400 text-xs mt-0.5">{t.label}</p>
                     </div>
                   </div>

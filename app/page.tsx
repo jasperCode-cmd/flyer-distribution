@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Testimonials from "@/components/Testimonials";
 import StatsBar from "@/components/StatsBar";
-import AreaCarousel from "@/components/AreaCarousel";
+import BrandsBar from "@/components/BrandsBar";
 import TrustBar from "@/components/TrustBar";
 import TrustCards from "@/components/TrustCards";
 import StaggerGroup from "@/components/StaggerGroup";
@@ -257,7 +257,7 @@ export default function HomePage() {
 
       <TrustBar />
 
-      <AreaCarousel />
+      <BrandsBar />
 
       <Testimonials />
 
