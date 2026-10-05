@@ -45,9 +45,11 @@ function Logos({ groupId, hidden }: { groupId: string; hidden: boolean }) {
 export default function BrandsBar() {
   return (
     <section className="bg-white py-8">
-      <p className="text-center text-xs font-semibold uppercase tracking-widest text-gray-400 mb-6">
-        Brands We&apos;ve Worked With
-      </p>
+      <div className="flex justify-center mb-8">
+        <span className="inline-block bg-yellow-400 text-blue-900 text-sm font-bold uppercase tracking-wide px-4 py-1.5 rounded-full">
+          Brands We&apos;ve Worked With
+        </span>
+      </div>
 
       {/* Animated marquee — hidden under prefers-reduced-motion */}
       <div className="marquee-outer marquee-container overflow-hidden">
