@@ -162,10 +162,18 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-blue-900 mt-10 pt-6 text-xs text-blue-400 flex flex-col sm:flex-row justify-between gap-2">
-          <p>
-            &copy; {new Date().getFullYear()} Flyer Distribution Hampshire. All
-            rights reserved.
-          </p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <p>
+              &copy; {new Date().getFullYear()} Flyer Distribution Hampshire. All
+              rights reserved.
+            </p>
+            <Link
+              href="/privacy-policy"
+              className="text-blue-300 hover:text-white transition-colors"
+            >
+              Privacy Policy
+            </Link>
+          </div>
           <p>Hampshire, UK</p>
         </div>
       </div>

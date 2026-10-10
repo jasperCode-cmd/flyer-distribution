@@ -32,6 +32,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/areas/brockenhurst",
     "/services/hand-to-hand-distribution",
     "/services/b2b-distribution",
+    "/privacy-policy",
   ]; // /blog excluded — noindex
 
   return routes.map((route) => ({

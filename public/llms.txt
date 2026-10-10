@@ -47,3 +47,7 @@ Website: https://www.flyerdistributionhampshire.co.uk
 ## Contact
 
 - [Get a Quote](https://www.flyerdistributionhampshire.co.uk/quote): Request a free, no-obligation quote.
+
+## Legal
+
+- [Privacy Policy](https://www.flyerdistributionhampshire.co.uk/privacy-policy): How we collect, use and look after personal information, and your rights under UK data protection law.
