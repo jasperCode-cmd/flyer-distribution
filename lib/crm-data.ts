@@ -127,6 +127,24 @@ export async function getUpcomingSchedule(limit = 6): Promise<UpcomingEntry[]> {
   return entries.sort((a, b) => a.when.getTime() - b.when.getTime()).slice(0, limit);
 }
 
+// Shared "move to Awaiting Response" update data. Used by the Dialer's Warm
+// outcome and by the email-send flow, so a lead reaching this stage always
+// clears the same dialer fields the same way, from a single definition.
+export function awaitingResponseStageData() {
+  return {
+    stage: "AWAITING_RESPONSE" as const,
+    noAnswerStreak: 0,
+    nextCallableAt: null,
+  };
+}
+
+// A lead only auto-advances to Awaiting Response from Uncontacted. A lead
+// already past that point (including Won/Completed/Lost) never moves just
+// because an email was sent to it.
+export function shouldMoveToAwaitingResponse(stage: string): boolean {
+  return stage === "UNCONTACTED";
+}
+
 // Shared WHERE clause for the dialer's active queue — see crm-constants'
 // queue-ordering comment for the full algorithm this pairs with. Kept as a
 // plain object builder (not a query itself) so /next (take 1) and /queue

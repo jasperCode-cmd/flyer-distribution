@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import QuickLogModal from "./QuickLogModal";
 import LostReasonModal from "./LostReasonModal";
 import ScheduleFollowUpModal from "./ScheduleFollowUpModal";
 import DeleteLeadModal from "./DeleteLeadModal";
+import EmailComposeModal, { type ReplyContext } from "./EmailComposeModal";
+import EmailsSection, { type EmailsState, type ConversationMessage } from "./EmailsSection";
 import { usePaymentReviewEditor } from "./usePaymentReviewEditor";
 import {
   STAGE_LABELS,
@@ -166,9 +169,83 @@ export default function LeadDetail({
     });
   }
 
-  const [modalOpen, setModalOpen] = useState<"call" | "email" | null>(null);
+  const [modalOpen, setModalOpen] = useState<"call" | null>(null);
   const [newNote, setNewNote] = useState("");
   const [addingNote, setAddingNote] = useState(false);
+
+  const { data: session } = useSession();
+  const userFirstName = (session?.user?.name ?? "").split(" ")[0] || "the team";
+
+  const [emailsState, setEmailsState] = useState<EmailsState>({
+    loaded: false,
+    loading: false,
+    configured: true,
+    messages: [],
+    error: null,
+  });
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [composeReplyTo, setComposeReplyTo] = useState<ReplyContext | null>(null);
+  const [toast, setToast] = useState<{ text: string; kind: "success" | "error" } | null>(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  async function loadEmails() {
+    setEmailsState((s) => ({ ...s, loading: true, error: null }));
+    try {
+      const res = await fetch(`/api/crm/leads/${lead.id}/emails`);
+      const data = await res.json();
+      if (!res.ok) {
+        setEmailsState((s) => ({
+          ...s,
+          loading: false,
+          loaded: true,
+          configured: data.configured ?? true,
+          error: data.error ?? "Could not load emails",
+        }));
+        return;
+      }
+      setEmailsState({
+        loaded: true,
+        loading: false,
+        configured: data.configured,
+        messages: data.messages ?? [],
+        error: null,
+      });
+    } catch {
+      setEmailsState((s) => ({ ...s, loading: false, loaded: true, error: "Could not load emails" }));
+    }
+  }
+
+  function openCompose(replyTo?: ReplyContext) {
+    setComposeReplyTo(replyTo ?? null);
+    setComposeOpen(true);
+    if (!emailsState.loaded && !emailsState.loading) loadEmails();
+  }
+
+  function handleEmailReply(message: ConversationMessage) {
+    openCompose({
+      subject: message.subject,
+      threadId: message.threadId,
+      lastMessageId: message.messageIdHeader ?? "",
+    });
+  }
+
+  function handleEmailSent(result: { movedToAwaitingResponse: boolean }) {
+    setToast({ text: "Email sent", kind: "success" });
+    if (result.movedToAwaitingResponse) {
+      setStage("AWAITING_RESPONSE");
+      router.refresh();
+    }
+    loadEmails();
+  }
+
+  function handleEmailError(message: string) {
+    setToast({ text: message, kind: "error" });
+  }
 
   const [allTags, setAllTags] = useState<Tag[]>([]);
   const [tags, setTags] = useState(lead.tags);
@@ -573,18 +650,22 @@ export default function LeadDetail({
           >
             Call
           </a>
-          <a
-            href={lead.email ? `mailto:${lead.email}` : undefined}
-            onClick={() => lead.email && setModalOpen("email")}
+          <button
+            type="button"
+            disabled={!lead.email}
+            onClick={() => lead.email && openCompose()}
             className={`flex-1 text-center text-sm font-bold py-2.5 rounded-md transition-colors ${
               lead.email
                 ? "bg-yellow-400 hover:bg-yellow-300 text-blue-900"
-                : "bg-gray-100 text-gray-400 pointer-events-none"
+                : "bg-gray-100 text-gray-400 cursor-not-allowed"
             }`}
           >
             Email
-          </a>
+          </button>
         </div>
+        {!lead.email && (
+          <p className="text-xs text-gray-400 mt-1">Add an email address to send an email.</p>
+        )}
       </div>
 
       {/* Editable details */}
@@ -810,6 +891,14 @@ export default function LeadDetail({
         )}
       </div>
 
+      <EmailsSection
+        leadEmail={lead.email}
+        state={emailsState}
+        onExpand={loadEmails}
+        onRefresh={loadEmails}
+        onReply={handleEmailReply}
+      />
+
       {/* Danger zone — kept visually distinct and separated from every other
           section so it can't be reached by an accidental click. */}
       <div className="border border-red-200 rounded-lg p-4 sm:p-5">
@@ -833,12 +922,20 @@ export default function LeadDetail({
         defaultText={`Called ${lead.name}`}
         onSave={(detail) => logActivity("CALL", detail)}
       />
-      <QuickLogModal
-        open={modalOpen === "email"}
-        onClose={() => setModalOpen(null)}
-        defaultText={`Emailed ${lead.name}`}
-        onSave={(detail) => logActivity("EMAIL", detail)}
-      />
+      {lead.email && (
+        <EmailComposeModal
+          open={composeOpen}
+          onClose={() => setComposeOpen(false)}
+          leadId={lead.id}
+          leadEmail={lead.email}
+          configured={emailsState.configured}
+          configuredKnown={emailsState.loaded}
+          userFirstName={userFirstName}
+          replyTo={composeReplyTo}
+          onSent={handleEmailSent}
+          onError={handleEmailError}
+        />
+      )}
       <LostReasonModal
         open={lostPromptOpen}
         onCancel={() => setLostPromptOpen(false)}
@@ -858,6 +955,16 @@ export default function LeadDetail({
         onCancel={() => setDeleteModalOpen(false)}
         onConfirm={deleteLead}
       />
+
+      {toast && (
+        <div
+          className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] text-white text-sm font-medium rounded-full shadow-lg px-4 py-2 ${
+            toast.kind === "success" ? "bg-gray-900" : "bg-red-600"
+          }`}
+        >
+          {toast.text}
+        </div>
+      )}
     </div>
   );
 }

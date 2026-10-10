@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { SCRAP_REASON_LABELS } from "@/lib/crm-constants";
+import { awaitingResponseStageData } from "@/lib/crm-data";
 
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
@@ -97,9 +98,7 @@ export async function POST(
         where: { id },
         data: {
           ...quickData,
-          stage: "AWAITING_RESPONSE",
-          noAnswerStreak: 0,
-          nextCallableAt: null,
+          ...awaitingResponseStageData(),
         },
       }),
       ...activityOps,
