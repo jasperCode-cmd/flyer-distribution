@@ -12,16 +12,21 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import LeadCard, { type KanbanLead } from "./LeadCard";
 import LostReasonModal from "./LostReasonModal";
+import EmailComposeModal, { type ReplyContext } from "./EmailComposeModal";
+import type { ConversationMessage } from "./EmailsSection";
 import { STAGES, STAGE_LABELS } from "@/lib/crm-constants";
 
 function DraggableCard({
   lead,
   onAdvance,
+  onEmail,
 }: {
   lead: KanbanLead;
   onAdvance: (leadId: string) => void;
+  onEmail: (lead: KanbanLead) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: lead.id,
@@ -51,7 +56,7 @@ function DraggableCard({
         isDragging ? "touch-none opacity-50" : "touch-auto"
       }`}
     >
-      <LeadCard lead={lead} onAdvance={onAdvance} />
+      <LeadCard lead={lead} onAdvance={onAdvance} onEmail={onEmail} />
     </div>
   );
 }
@@ -60,10 +65,12 @@ function Column({
   stage,
   leads,
   onAdvance,
+  onEmail,
 }: {
   stage: string;
   leads: KanbanLead[];
   onAdvance: (leadId: string) => void;
+  onEmail: (lead: KanbanLead) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: stage });
 
@@ -104,7 +111,7 @@ function Column({
       </div>
       <div className="flex-1 p-1.5 sm:p-2 space-y-1.5 sm:space-y-2 min-h-[120px] max-h-[calc(100vh-260px)] sm:max-h-[calc(100vh-220px)] overflow-y-auto">
         {leads.map((lead) => (
-          <DraggableCard key={lead.id} lead={lead} onAdvance={onAdvance} />
+          <DraggableCard key={lead.id} lead={lead} onAdvance={onAdvance} onEmail={onEmail} />
         ))}
         {leads.length === 0 && (
           <p className="text-xs text-gray-400 text-center py-6">No leads</p>
@@ -121,6 +128,56 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
   const [lostPrompt, setLostPrompt] = useState<{ leadId: string; previousStage: string } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [activeStage, setActiveStage] = useState(0);
+
+  // Quick email from a card, without leaving the board. Same modal and send
+  // route as the lead page, so the Activity and the Uncontacted to Awaiting
+  // Response move come from the shared server logic.
+  const { data: session } = useSession();
+  const userFirstName = (session?.user?.name ?? "").split(" ")[0] || "the team";
+  const [compose, setCompose] = useState<{
+    lead: KanbanLead;
+    replyTo: ReplyContext | null;
+    configured: boolean;
+    configuredKnown: boolean;
+  } | null>(null);
+  const composeLeadRef = useRef<string | null>(null);
+  const [toast, setToast] = useState<{ text: string; kind: "success" | "error" } | null>(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  // Opens straight away in its "Checking Gmail connection..." state, then
+  // threads onto the latest message of the lead's conversation if there is
+  // one (exactly as the lead page's Reply does), else a fresh email. Not
+  // connected shows the modal's own not-connected state.
+  async function openEmail(lead: KanbanLead) {
+    composeLeadRef.current = lead.id;
+    setCompose({ lead, replyTo: null, configured: true, configuredKnown: false });
+    let configured = true;
+    let replyTo: ReplyContext | null = null;
+    try {
+      const res = await fetch(`/api/crm/leads/${lead.id}/emails`);
+      const data = await res.json();
+      configured = data.configured ?? true;
+      const messages: ConversationMessage[] = res.ok ? data.messages ?? [] : [];
+      const last = messages[messages.length - 1];
+      if (last) {
+        replyTo = { subject: last.subject, threadId: last.threadId, lastMessageId: last.messageIdHeader ?? "" };
+      }
+    } catch {
+      // Falls back to a fresh email; the send itself reports any Gmail problem.
+    }
+    if (composeLeadRef.current !== lead.id) return;
+    setCompose({ lead, replyTo, configured, configuredKnown: true });
+  }
+
+  function closeEmail() {
+    composeLeadRef.current = null;
+    setCompose(null);
+  }
 
   // Every card is a <Link>, so after a touch drag ends the browser still
   // synthesises a click on the anchor under the finger and navigates — which
@@ -315,6 +372,7 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
             stage={stage}
             leads={leads.filter((l) => l.stage === stage)}
             onAdvance={handleAdvance}
+            onEmail={openEmail}
           />
         ))}
       </div>
@@ -341,6 +399,38 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
           setLostPrompt(null);
         }}
       />
+      {compose?.lead.email && (
+        <EmailComposeModal
+          open
+          onClose={closeEmail}
+          leadId={compose.lead.id}
+          toAddress={compose.lead.email}
+          configured={compose.configured}
+          configuredKnown={compose.configuredKnown}
+          userFirstName={userFirstName}
+          replyTo={compose.replyTo}
+          onSent={(result) => {
+            const leadId = compose.lead.id;
+            setToast({ text: "Email sent", kind: "success" });
+            // The server already moved the lead (and logged it), so this only
+            // mirrors it on screen; no second stage PATCH.
+            if (result.movedToAwaitingResponse) {
+              setLeads((prev) => prev.map((l) => (l.id === leadId ? { ...l, stage: "AWAITING_RESPONSE" } : l)));
+            }
+          }}
+          onError={(message) => setToast({ text: message, kind: "error" })}
+        />
+      )}
+      {toast && (
+        <div
+          role="status"
+          className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] text-white text-sm font-medium rounded-full shadow-lg px-4 py-2 ${
+            toast.kind === "success" ? "bg-gray-900" : "bg-red-600"
+          }`}
+        >
+          {toast.text}
+        </div>
+      )}
     </DndContext>
   );
 }
