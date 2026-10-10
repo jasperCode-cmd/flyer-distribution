@@ -7,12 +7,20 @@ import { SOURCE_LABELS, PRIORITIES, PRIORITY_LABELS } from "@/lib/crm-constants"
 
 type Duplicate = { id: string; name: string; email: string | null; phone: string | null };
 
-export default function AddLeadForm({ users }: { users: { id: string; name: string }[] }) {
+export default function AddLeadForm({
+  users,
+  initial,
+}: {
+  users: { id: string; name: string }[];
+  // Prefill from the inbox's "Create lead from this sender". Nothing is
+  // saved until staff submit, and duplicate detection runs as usual.
+  initial?: { name?: string; email?: string; source?: string };
+}) {
   const router = useRouter();
   const [form, setForm] = useState({
-    name: "",
+    name: initial?.name ?? "",
     phone: "",
-    email: "",
+    email: initial?.email ?? "",
     postcode: "",
     businessName: "",
     addressArea: "",
@@ -21,7 +29,7 @@ export default function AddLeadForm({ users }: { users: { id: string; name: stri
     targetAreas: "",
     printingIncluded: false,
     designIncluded: false,
-    source: "INSTAGRAM_DM",
+    source: initial?.source ?? "INSTAGRAM_DM",
     priority: "MEDIUM",
     assignedToId: "",
   });

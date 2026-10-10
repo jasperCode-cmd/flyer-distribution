@@ -16,7 +16,9 @@ export default function EmailComposeModal({
   open,
   onClose,
   leadId,
-  leadEmail,
+  sendUrl,
+  toAddress,
+  showReplyingTo = false,
   configured,
   configuredKnown,
   userFirstName,
@@ -26,8 +28,14 @@ export default function EmailComposeModal({
 }: {
   open: boolean;
   onClose: () => void;
-  leadId: string;
-  leadEmail: string;
+  // Either a lead (the lead's own send route) or an explicit sendUrl, which
+  // the inbox uses so its server route can decide lead vs non-lead itself.
+  leadId?: string;
+  sendUrl?: string;
+  toAddress: string;
+  // Inbox replies show "Replying to [address]" in place of the To field, so
+  // the recipient the server worked out is visible before sending.
+  showReplyingTo?: boolean;
   configured: boolean;
   configuredKnown: boolean;
   userFirstName: string;
@@ -65,7 +73,7 @@ export default function EmailComposeModal({
     if (!subject.trim() || !body.trim() || sending) return;
     setSending(true);
     try {
-      const res = await fetch(`/api/crm/leads/${leadId}/email`, {
+      const res = await fetch(sendUrl ?? `/api/crm/leads/${leadId}/email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -122,13 +130,21 @@ export default function EmailComposeModal({
           </div>
         ) : (
           <>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">To</label>
-            <input
-              type="text"
-              value={leadEmail}
-              readOnly
-              className="w-full border border-gray-200 bg-gray-50 rounded-md px-3 py-2 text-sm text-gray-600 mb-3"
-            />
+            {showReplyingTo ? (
+              <p className="text-sm text-gray-600 mb-3 wrap-break-word">
+                Replying to <span className="font-semibold text-gray-800">{toAddress}</span>
+              </p>
+            ) : (
+              <>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">To</label>
+                <input
+                  type="text"
+                  value={toAddress}
+                  readOnly
+                  className="w-full border border-gray-200 bg-gray-50 rounded-md px-3 py-2 text-sm text-gray-600 mb-3"
+                />
+              </>
+            )}
 
             <label className="block text-xs font-semibold text-gray-500 mb-1">Subject</label>
             <input

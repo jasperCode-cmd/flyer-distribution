@@ -927,7 +927,7 @@ export default function LeadDetail({
           open={composeOpen}
           onClose={() => setComposeOpen(false)}
           leadId={lead.id}
-          leadEmail={lead.email}
+          toAddress={lead.email}
           configured={emailsState.configured}
           configuredKnown={emailsState.loaded}
           userFirstName={userFirstName}

@@ -16,6 +16,7 @@ import NotificationBell from "./NotificationBell";
 const primaryLinks = [
   { href: "/admin/crm", label: "Dashboard" },
   { href: "/admin/crm/leads", label: "Leads" },
+  { href: "/admin/crm/inbox", label: "Inbox" },
   { href: "/admin/crm/dialer", label: "Dialer" },
   { href: "/admin/crm/calendar", label: "Calendar" },
   { href: "/admin/crm/distributors", label: "Distributors" },
@@ -34,13 +35,48 @@ function isActive(pathname: string, href: string): boolean {
   return href === "/admin/crm" ? pathname === "/admin/crm" : pathname.startsWith(href);
 }
 
+const INBOX_HREF = "/admin/crm/inbox";
+
+// Unread conversations in the Gmail inbox, shown beside the Inbox link.
+// Nothing when Gmail isn't connected, the count is zero, or it failed.
+function InboxCount({ count }: { count: { value: number; more: boolean } | null }) {
+  if (!count || count.value <= 0) return null;
+  const label = count.more || count.value > 99 ? "99+" : String(count.value);
+  return (
+    <span
+      className="ml-1.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-yellow-400 px-1.5 text-[11px] font-bold leading-5 text-blue-900"
+      aria-label={`${label} unread`}
+    >
+      {label}
+    </span>
+  );
+}
+
 export default function CrmShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
+  const [inboxCount, setInboxCount] = useState<{ value: number; more: boolean } | null>(null);
   const moreRef = useRef<HTMLDivElement>(null);
+
+  // Fetched once when the shell mounts (it persists across CRM navigation).
+  // No polling: the badge refreshes on the next full page load.
+  useEffect(() => {
+    if (pathname === "/admin/crm/login") return;
+    let cancelled = false;
+    fetch("/api/crm/inbox/unread-count")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.configured) setInboxCount({ value: data.count ?? 0, more: !!data.more });
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Dismiss the desktop dropdown on an outside click, the way a menu is
   // expected to behave.
@@ -94,13 +130,14 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
+                    className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
                       isActive(pathname, link.href)
                         ? "bg-blue-800 text-yellow-400"
                         : "text-blue-100 hover:bg-blue-800/60"
                     }`}
                   >
                     {link.label}
+                    {link.href === INBOX_HREF && <InboxCount count={inboxCount} />}
                   </Link>
                 ))}
 
@@ -216,9 +253,10 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
                     key={link.href}
                     href={link.href}
                     onClick={() => setMenuOpen(false)}
-                    className="block px-2 py-2.5 text-sm text-blue-100 hover:text-yellow-400"
+                    className="flex items-center px-2 py-2.5 text-sm text-blue-100 hover:text-yellow-400"
                   >
                     {link.label}
+                    {link.href === INBOX_HREF && <InboxCount count={inboxCount} />}
                   </Link>
                 ))}
 

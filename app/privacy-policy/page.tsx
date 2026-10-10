@@ -178,8 +178,8 @@ export default function PrivacyPolicyPage() {
               If you email us, or we email you, we keep those emails and notes
               about the conversation so we can answer you and keep track of
               where things are up to. Our private system connects to our own
-              business email account only to send emails from our records and
-              to show us our conversations with the people in them.
+              business email account so we can read our business inbox and
+              send emails in one place.
             </p>
 
             <h3 className={`${h3} mt-6`}>Tips and offers</h3>

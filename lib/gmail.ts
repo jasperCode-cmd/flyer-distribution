@@ -6,6 +6,30 @@ import { convert as htmlToText } from "html-to-text";
 const SCOPES = ["https://www.googleapis.com/auth/gmail.send", "https://www.googleapis.com/auth/gmail.readonly"];
 const MAX_MESSAGES = 30;
 
+// Inbox page. Metadata for a page of threads is fetched in parallel but
+// capped, so a page load stays quick without bursting Gmail's per-user
+// quota; full message bodies are only fetched when a thread is opened.
+const INBOX_PAGE_SIZE = 20;
+const METADATA_CONCURRENCY = 5;
+export const INBOX_SEARCH_MAX = 200;
+// Every header the exclusion rule reads, plus what a list row and a reply need.
+const THREAD_METADATA_HEADERS = [
+  "From",
+  "To",
+  "Cc",
+  "Delivered-To",
+  "Subject",
+  "Date",
+  "Content-Type",
+  "Message-ID",
+  "Reply-To",
+];
+// Unread badge: at most this many unread threads are checked against the
+// exclusion list, and the result is reused briefly so every CRM page load
+// isn't another round of Gmail calls.
+const UNREAD_SCAN_LIMIT = 100;
+const UNREAD_CACHE_MS = 60_000;
+
 export type GmailResult<T> =
   | { ok: true; data: T }
   | { ok: false; reason: "not_configured" | "reconnect" | "error"; message: string };
@@ -25,6 +49,54 @@ export type ConversationMessage = {
 export type ThreadContext = {
   threadId: string;
   lastMessageId: string;
+};
+
+export type InboxThreadSummary = {
+  id: string;
+  fromName: string;
+  fromAddress: string;
+  // A single valid Reply-To on the latest received message, if any. Used,
+  // with fromAddress, to match the thread to a lead.
+  replyToAddress: string | null;
+  subject: string;
+  snippet: string;
+  date: string;
+  unread: boolean;
+  hasAttachment: boolean;
+  messageCount: number;
+};
+
+// The other party on a thread: the latest sender who isn't us, or, if every
+// message is ours, whoever the latest one was sent to.
+export type Counterparty = { name: string; address: string };
+
+// Who a reply goes to. `from` is the latest received message's sender and
+// `replyTo` its single valid Reply-To, if it has one; `recipient` is the
+// Reply-To when present (a form service sending on a customer's behalf, for
+// example), otherwise the sender.
+export type ReplyTarget = {
+  from: Counterparty | null;
+  replyTo: Counterparty | null;
+  recipient: Counterparty | null;
+};
+
+export type InboxThread = {
+  id: string;
+  subject: string;
+  counterparty: Counterparty | null;
+  replyTo: Counterparty | null;
+  recipient: Counterparty | null;
+  lastMessageId: string | null;
+  messages: ConversationMessage[];
+};
+
+export type InboxReplyContext = {
+  threadId: string;
+  subject: string;
+  counterparty: Counterparty | null;
+  replyTo: Counterparty | null;
+  recipient: Counterparty | null;
+  lastMessageId: string | null;
 };
 
 function readEnv() {
@@ -171,6 +243,64 @@ function extractAddress(headerValue: string | null): string {
   return (match ? match[1] : headerValue).trim();
 }
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Splits an address-list header on commas that aren't inside a quoted name.
+function splitAddressList(headerValue: string): string[] {
+  return headerValue
+    .split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+}
+
+// Splits the first mailbox in a From/To header into a display name and a
+// bare address. The name falls back to the address when there isn't one.
+export function parseMailbox(headerValue: string | null): Counterparty {
+  if (!headerValue) return { name: "", address: "" };
+  const first = splitAddressList(headerValue)[0] ?? "";
+  const address = extractAddress(first);
+  const angle = first.indexOf("<");
+  const rawName = angle > 0 ? first.slice(0, angle) : "";
+  const name = rawName.trim().replace(/^"(.*)"$/, "$1").trim();
+  return { name: name || address, address };
+}
+
+// Gmail snippets are plain text with HTML entities escaped. Decoded here so
+// the UI can render them as text, never as markup.
+export function decodeHtmlEntities(text: string): string {
+  const named: Record<string, string> = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " " };
+  return text.replace(/&(#x[0-9a-f]+|#[0-9]+|[a-z]+);/gi, (whole, code: string) => {
+    if (code[0] === "#") {
+      const n = code[1] === "x" || code[1] === "X" ? parseInt(code.slice(2), 16) : parseInt(code.slice(1), 10);
+      return Number.isFinite(n) && n > 0 && n <= 0x10ffff ? String.fromCodePoint(n) : whole;
+    }
+    return named[code.toLowerCase()] ?? whole;
+  });
+}
+
+export function normalizeInboxSearch(raw: unknown): string {
+  if (typeof raw !== "string") return "";
+  return raw.trim().slice(0, INBOX_SEARCH_MAX).trim();
+}
+
+// Runs fn over items with at most `limit` calls in flight, keeping order.
+export async function mapWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T) => Promise<R>
+): Promise<R[]> {
+  const results = new Array<R>(items.length);
+  let next = 0;
+  async function worker() {
+    while (next < items.length) {
+      const i = next++;
+      results[i] = await fn(items[i]);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return results;
+}
+
 export function shouldExcludeMessage(
   headers: gmail_v1.Schema$MessagePartHeader[] | undefined,
   excluded: string[]
@@ -207,6 +337,108 @@ export function parseConversationMessage(
     bodyText: extractBody(message.payload),
     hasAttachment: hasAnyAttachment(message.payload),
   };
+}
+
+// A thread is dropped as a whole if any one of its messages touches an
+// excluded address, so an excluded conversation never shows partially.
+export function shouldExcludeThread(
+  messages: gmail_v1.Schema$Message[] | undefined,
+  excluded: string[]
+): boolean {
+  if (excluded.length === 0 || !messages) return false;
+  return messages.some((m) => shouldExcludeMessage(m.payload?.headers, excluded));
+}
+
+export function isThreadInInbox(messages: gmail_v1.Schema$Message[] | undefined): boolean {
+  return (messages ?? []).some((m) => m.labelIds?.includes("INBOX"));
+}
+
+function sortedOldestFirst(messages: gmail_v1.Schema$Message[] | undefined): gmail_v1.Schema$Message[] {
+  return [...(messages ?? [])].sort((a, b) => Number(a.internalDate ?? 0) - Number(b.internalDate ?? 0));
+}
+
+// A Reply-To is only honoured when it holds exactly one valid address that
+// isn't our own; anything else (several addresses, junk) is ignored.
+export function singleReplyTo(headerValue: string | null, senderAddress: string): Counterparty | null {
+  if (!headerValue) return null;
+  const parts = splitAddressList(headerValue);
+  if (parts.length !== 1) return null;
+  const box = parseMailbox(parts[0]);
+  if (!EMAIL_RE.test(box.address)) return null;
+  if (box.address.toLowerCase() === senderAddress.toLowerCase()) return null;
+  return box;
+}
+
+export function findReplyTarget(
+  messages: gmail_v1.Schema$Message[] | undefined,
+  senderAddress: string
+): ReplyTarget {
+  const own = senderAddress.toLowerCase();
+  const newestFirst = sortedOldestFirst(messages).reverse();
+  for (const m of newestFirst) {
+    const from = parseMailbox(getHeader(m.payload?.headers, "From"));
+    if (from.address && from.address.toLowerCase() !== own) {
+      const replyTo = singleReplyTo(getHeader(m.payload?.headers, "Reply-To"), senderAddress);
+      return { from, replyTo, recipient: replyTo ?? from };
+    }
+  }
+  const latest = newestFirst[0];
+  const to = parseMailbox(getHeader(latest?.payload?.headers, "To"));
+  return { from: null, replyTo: null, recipient: to.address ? to : null };
+}
+
+export function findCounterparty(
+  messages: gmail_v1.Schema$Message[] | undefined,
+  senderAddress: string
+): Counterparty | null {
+  const target = findReplyTarget(messages, senderAddress);
+  return target.from ?? target.recipient;
+}
+
+// Metadata-format messages carry headers but no MIME parts, so a list row
+// can only infer attachments from the top-level Content-Type. An opened
+// thread uses the exact part-based check instead.
+function looksLikeAttachment(message: gmail_v1.Schema$Message): boolean {
+  if (hasAnyAttachment(message.payload)) return true;
+  const contentType = getHeader(message.payload?.headers, "Content-Type") ?? message.payload?.mimeType ?? "";
+  return /^multipart\/mixed/i.test(contentType.trim());
+}
+
+export function summarizeThread(
+  thread: gmail_v1.Schema$Thread,
+  senderAddress: string
+): InboxThreadSummary | null {
+  const messages = sortedOldestFirst(thread.messages);
+  if (!thread.id || messages.length === 0) return null;
+  const latest = messages[messages.length - 1];
+  const target = findReplyTarget(messages, senderAddress);
+  const sender = target.from ?? target.recipient ?? { name: "", address: "" };
+  const subject = getHeader(messages[0].payload?.headers, "Subject")?.trim() || "(no subject)";
+  return {
+    id: thread.id,
+    fromName: sender.name,
+    fromAddress: sender.address,
+    replyToAddress: target.replyTo?.address ?? null,
+    subject,
+    snippet: decodeHtmlEntities(latest.snippet ?? thread.snippet ?? ""),
+    date: latest.internalDate
+      ? new Date(Number(latest.internalDate)).toISOString()
+      : new Date().toISOString(),
+    unread: messages.some((m) => m.labelIds?.includes("UNREAD")),
+    hasAttachment: messages.some(looksLikeAttachment),
+    messageCount: messages.length,
+  };
+}
+
+function lastMessageIdHeader(messages: gmail_v1.Schema$Message[] | undefined): string | null {
+  const ordered = sortedOldestFirst(messages);
+  return ordered.length ? getHeader(ordered[ordered.length - 1].payload?.headers, "Message-ID") : null;
+}
+
+function isNotFound(err: unknown): boolean {
+  const status = (err as { status?: number; code?: number | string } | null)?.status ??
+    (err as { code?: number | string } | null)?.code;
+  return status === 404 || status === "404";
 }
 
 // --- Network-calling functions -----------------------------------------
@@ -269,9 +501,30 @@ export async function getConversation(leadEmail: string): Promise<GmailResult<Co
     const full = await Promise.all(
       ids.map((id) => client.users.messages.get({ userId: "me", id, format: "full" }))
     );
+    const fetched = full.map((r) => r.data);
 
-    const parsed = full
-      .map((r) => r.data)
+    // Same thread-level rule as the inbox: a conversation that touches an
+    // excluded address anywhere is hidden whole, including through messages
+    // this lead search didn't return.
+    const excludedThreads = new Set<string>();
+    if (excluded.length > 0) {
+      const threadIds = [...new Set(fetched.map((m) => m.threadId).filter((id): id is string => !!id))];
+      const threads = await mapWithConcurrency(threadIds, METADATA_CONCURRENCY, async (id) => {
+        const res = await client.users.threads.get({
+          userId: "me",
+          id,
+          format: "metadata",
+          metadataHeaders: THREAD_METADATA_HEADERS,
+        });
+        return res.data;
+      });
+      threads.forEach((t, i) => {
+        if (shouldExcludeThread(t.messages, excluded)) excludedThreads.add(threadIds[i]);
+      });
+    }
+
+    const parsed = fetched
+      .filter((m) => !excludedThreads.has(m.threadId ?? ""))
       .filter((m) => !shouldExcludeMessage(m.payload?.headers, excluded))
       .map((m) => parseConversationMessage(m, env.senderAddress))
       .filter((m): m is ConversationMessage => m !== null)
@@ -281,6 +534,178 @@ export async function getConversation(leadEmail: string): Promise<GmailResult<Co
   } catch (err) {
     const { reason, message } = classifyError(err);
     console.error("Gmail conversation fetch failed:", reason);
+    return { ok: false, reason, message };
+  }
+}
+
+// --- Inbox page (read-only) ------------------------------------------------
+
+export async function listInboxThreads(params: {
+  pageToken?: string;
+  q?: string;
+}): Promise<GmailResult<{ threads: InboxThreadSummary[]; nextPageToken: string | null }>> {
+  const env = readEnv();
+  if (!env) return { ok: false, reason: "not_configured", message: "Gmail is not connected." };
+
+  try {
+    const client = buildClient(env);
+    const excluded = getExcludedAddresses();
+    const q = normalizeInboxSearch(params.q);
+
+    const list = await client.users.threads.list({
+      userId: "me",
+      labelIds: ["INBOX"],
+      maxResults: INBOX_PAGE_SIZE,
+      pageToken: params.pageToken || undefined,
+      q: q || undefined,
+    });
+
+    const ids = (list.data.threads ?? []).map((t) => t.id).filter((id): id is string => !!id);
+    const threads = await mapWithConcurrency(ids, METADATA_CONCURRENCY, async (id) => {
+      const res = await client.users.threads.get({
+        userId: "me",
+        id,
+        format: "metadata",
+        metadataHeaders: THREAD_METADATA_HEADERS,
+      });
+      return res.data;
+    });
+
+    const summaries = threads
+      .filter((t) => !shouldExcludeThread(t.messages, excluded))
+      .map((t) => summarizeThread(t, env.senderAddress))
+      .filter((t): t is InboxThreadSummary => t !== null);
+
+    return { ok: true, data: { threads: summaries, nextPageToken: list.data.nextPageToken ?? null } };
+  } catch (err) {
+    const { reason, message } = classifyError(err);
+    console.error("Gmail inbox list failed:", reason);
+    return { ok: false, reason, message };
+  }
+}
+
+// Full bodies, oldest first. Returns null (not an error) when the thread
+// doesn't exist, isn't in the inbox, or touches an excluded address, so the
+// route can answer 404 without saying which.
+export async function getInboxThread(threadId: string): Promise<GmailResult<InboxThread | null>> {
+  const env = readEnv();
+  if (!env) return { ok: false, reason: "not_configured", message: "Gmail is not connected." };
+
+  try {
+    const client = buildClient(env);
+    const res = await client.users.threads.get({ userId: "me", id: threadId, format: "full" });
+    const messages = res.data.messages ?? [];
+    if (!isThreadInInbox(messages) || shouldExcludeThread(messages, getExcludedAddresses())) {
+      return { ok: true, data: null };
+    }
+
+    const parsed = sortedOldestFirst(messages)
+      .map((m) => parseConversationMessage(m, env.senderAddress))
+      .filter((m): m is ConversationMessage => m !== null);
+    const target = findReplyTarget(messages, env.senderAddress);
+
+    return {
+      ok: true,
+      data: {
+        id: res.data.id ?? threadId,
+        subject: parsed[0]?.subject ?? "(no subject)",
+        counterparty: target.from ?? target.recipient,
+        replyTo: target.replyTo,
+        recipient: target.recipient,
+        lastMessageId: lastMessageIdHeader(messages),
+        messages: parsed,
+      },
+    };
+  } catch (err) {
+    if (isNotFound(err)) return { ok: true, data: null };
+    const { reason, message } = classifyError(err);
+    console.error("Gmail inbox thread fetch failed:", reason);
+    return { ok: false, reason, message };
+  }
+}
+
+// What a reply needs, from headers only. The recipient is always worked out
+// here from the thread itself, never taken from the request.
+export async function getInboxReplyContext(threadId: string): Promise<GmailResult<InboxReplyContext | null>> {
+  const env = readEnv();
+  if (!env) return { ok: false, reason: "not_configured", message: "Gmail is not connected." };
+
+  try {
+    const client = buildClient(env);
+    const res = await client.users.threads.get({
+      userId: "me",
+      id: threadId,
+      format: "metadata",
+      metadataHeaders: THREAD_METADATA_HEADERS,
+    });
+    const messages = res.data.messages ?? [];
+    if (!isThreadInInbox(messages) || shouldExcludeThread(messages, getExcludedAddresses())) {
+      return { ok: true, data: null };
+    }
+    const first = sortedOldestFirst(messages)[0];
+    const target = findReplyTarget(messages, env.senderAddress);
+    return {
+      ok: true,
+      data: {
+        threadId: res.data.id ?? threadId,
+        subject: getHeader(first?.payload?.headers, "Subject")?.trim() || "(no subject)",
+        counterparty: target.from ?? target.recipient,
+        replyTo: target.replyTo,
+        recipient: target.recipient,
+        lastMessageId: lastMessageIdHeader(messages),
+      },
+    };
+  } catch (err) {
+    if (isNotFound(err)) return { ok: true, data: null };
+    const { reason, message } = classifyError(err);
+    console.error("Gmail reply context fetch failed:", reason);
+    return { ok: false, reason, message };
+  }
+}
+
+let unreadCache: { value: { count: number; more: boolean }; expires: number } | null = null;
+
+// Unread conversations in INBOX. Without an exclusion list this is the INBOX
+// label's own count. With one, the unread threads are checked so excluded
+// conversations never inflate the badge; past UNREAD_SCAN_LIMIT it reports
+// `more` rather than a guess.
+export async function getInboxUnreadCount(): Promise<GmailResult<{ count: number; more: boolean }>> {
+  const env = readEnv();
+  if (!env) return { ok: false, reason: "not_configured", message: "Gmail is not connected." };
+  if (unreadCache && unreadCache.expires > Date.now()) return { ok: true, data: unreadCache.value };
+
+  try {
+    const client = buildClient(env);
+    const label = await client.users.labels.get({ userId: "me", id: "INBOX" });
+    const labelCount = label.data.threadsUnread ?? 0;
+    const excluded = getExcludedAddresses();
+
+    let value = { count: labelCount, more: false };
+    if (excluded.length > 0 && labelCount > 0) {
+      const list = await client.users.threads.list({
+        userId: "me",
+        labelIds: ["INBOX", "UNREAD"],
+        maxResults: UNREAD_SCAN_LIMIT,
+      });
+      const ids = (list.data.threads ?? []).map((t) => t.id).filter((id): id is string => !!id);
+      const threads = await mapWithConcurrency(ids, METADATA_CONCURRENCY, async (id) => {
+        const res = await client.users.threads.get({
+          userId: "me",
+          id,
+          format: "metadata",
+          metadataHeaders: THREAD_METADATA_HEADERS,
+        });
+        return res.data;
+      });
+      const kept = threads.filter((t) => !shouldExcludeThread(t.messages, excluded)).length;
+      value = { count: kept, more: !!list.data.nextPageToken };
+    }
+
+    unreadCache = { value, expires: Date.now() + UNREAD_CACHE_MS };
+    return { ok: true, data: value };
+  } catch (err) {
+    const { reason, message } = classifyError(err);
+    console.error("Gmail unread count failed:", reason);
     return { ok: false, reason, message };
   }
 }
