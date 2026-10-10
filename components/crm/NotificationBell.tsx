@@ -18,7 +18,9 @@ type Notifications = {
 // Also owns the live inbound-lead toast: a website lead whose id wasn't
 // present on this component's first successful poll, appearing in a later
 // one, is treated as "just arrived" for this browser tab and toasted once.
-export default function NotificationBell() {
+// menuAlign="left" opens the menu from the bell's left edge, for the side
+// navigation where there's no room to its left.
+export default function NotificationBell({ menuAlign = "right" }: { menuAlign?: "left" | "right" }) {
   const [data, setData] = useState<Notifications | null>(null);
   const [open, setOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -110,7 +112,7 @@ export default function NotificationBell() {
         {open && (
           <div
             role="menu"
-            className="absolute right-0 mt-1 w-80 max-h-[70vh] overflow-y-auto bg-white rounded-md border border-gray-200 shadow-lg py-1 z-50"
+            className={`absolute ${menuAlign === "left" ? "left-0" : "right-0"} mt-1 w-80 max-h-[70vh] overflow-y-auto bg-white rounded-md border border-gray-200 shadow-lg py-1 z-50`}
           >
             {count === 0 ? (
               <p className="px-3 py-4 text-sm text-gray-400 text-center">Nothing needs attention.</p>

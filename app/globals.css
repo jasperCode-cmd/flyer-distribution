@@ -12,6 +12,10 @@ html {
   --font-sans: var(--font-inter);
 }
 
+/* CRM side navigation: set on <html> by an inline script in the CRM layout
+   before first paint. Paired with lg: so it only ever acts from 1024px up. */
+@custom-variant crm-side (html[data-crm-nav="side"] &);
+
 body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }

@@ -7,6 +7,12 @@ import { useSession, signOut } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import SearchBar from "./SearchBar";
 import NotificationBell from "./NotificationBell";
+import {
+  CRM_NAV_ATTRIBUTE,
+  readStoredNavPosition,
+  storeNavPosition,
+  type CrmNavPosition,
+} from "@/lib/crm-nav";
 
 // "Add Lead" is deliberately not here — /admin/crm/leads/new is still a
 // live route, reached via the "+ Add Lead" button on the Leads page. The
@@ -61,6 +67,36 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
   const [inboxCount, setInboxCount] = useState<{ value: number; more: boolean } | null>(null);
   const moreRef = useRef<HTMLDivElement>(null);
 
+  // Desktop navigation position. Layout comes from the data attribute the
+  // CRM layout's inline script puts on <html> before first paint; this state
+  // only decides where the single NotificationBell lives (it polls, so it is
+  // never mounted twice) and which toggle label to show.
+  const [navPosition, setNavPosition] = useState<CrmNavPosition>("top");
+  const [isDesktop, setIsDesktop] = useState(false);
+  const sideActive = navPosition === "side" && isDesktop;
+
+  useEffect(() => {
+    const attr = document.documentElement.getAttribute(CRM_NAV_ATTRIBUTE);
+    // The inline script normally sets this; fall back to storage in case it
+    // didn't run (a client-side navigation into the CRM, say).
+    const position: CrmNavPosition = attr === "side" || attr === "top" ? attr : readStoredNavPosition();
+    document.documentElement.setAttribute(CRM_NAV_ATTRIBUTE, position);
+    setNavPosition(position);
+
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const update = () => setIsDesktop(desktop.matches);
+    update();
+    desktop.addEventListener("change", update);
+    return () => desktop.removeEventListener("change", update);
+  }, []);
+
+  function moveNav(position: CrmNavPosition) {
+    storeNavPosition(position);
+    document.documentElement.setAttribute(CRM_NAV_ATTRIBUTE, position);
+    setNavPosition(position);
+    setMoreOpen(false);
+  }
+
   // Fetched once when the shell mounts (it persists across CRM navigation).
   // No polling: the badge refreshes on the next full page load.
   useEffect(() => {
@@ -108,8 +144,101 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
   const forcedChange = session?.user?.mustChangePassword === true;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-100">
-      <header className="bg-blue-900 text-white sticky top-0 z-40">
+    <div className="min-h-screen flex flex-col bg-gray-100 lg:crm-side:pl-60">
+      {/* Side navigation: desktop only, and only when chosen. Holds every
+          item from the top bar, with the "More" items listed in full. */}
+      <aside
+        aria-label="CRM navigation"
+        className="hidden lg:crm-side:flex fixed inset-y-0 left-0 z-40 w-60 flex-col bg-blue-900 text-white"
+      >
+        <div className="flex h-20 shrink-0 items-center justify-between gap-2 border-b border-blue-800 px-4">
+          <Link href="/admin/crm" className="flex min-w-0 items-center gap-2">
+            <Image
+              src="/Flyer Distribution Logo White Cropped.webp"
+              width={270}
+              height={100}
+              alt="Flyer Distribution Hampshire"
+              className="h-11 w-auto"
+            />
+            <span className="font-bold text-sm tracking-wide">CRM</span>
+          </Link>
+          {!forcedChange && sideActive && <NotificationBell menuAlign="left" />}
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-3 py-4">
+          {!forcedChange && (
+            <>
+              <div className="mb-4 px-1">
+                <SearchBar />
+              </div>
+              <nav aria-label="Main" className="space-y-1">
+                {primaryLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
+                      isActive(pathname, link.href)
+                        ? "bg-blue-800 text-yellow-400"
+                        : "text-blue-100 hover:bg-blue-800/60"
+                    }`}
+                  >
+                    {link.label}
+                    {link.href === INBOX_HREF && <InboxCount count={inboxCount} />}
+                  </Link>
+                ))}
+              </nav>
+              <p className="mt-5 mb-1 px-3 text-[11px] font-semibold uppercase tracking-wide text-blue-200">
+                More
+              </p>
+              <nav aria-label="More" className="space-y-1">
+                {moreLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
+                      isActive(pathname, link.href)
+                        ? "bg-blue-800 text-yellow-400"
+                        : "text-blue-100 hover:bg-blue-800/60"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+            </>
+          )}
+        </div>
+
+        <div className="shrink-0 space-y-2 border-t border-blue-800 px-4 py-4">
+          {session?.user && <p className="truncate text-xs text-blue-200">{session.user.name}</p>}
+          {!forcedChange && (
+            <Link
+              href="/admin/crm/change-password"
+              className="block text-xs text-blue-100 hover:text-yellow-400"
+            >
+              Account Settings
+            </Link>
+          )}
+          {!forcedChange && (
+            <button
+              type="button"
+              onClick={() => moveNav("top")}
+              className="block text-left text-xs text-blue-100 hover:text-yellow-400"
+            >
+              Move menu to top
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: "/admin/crm/login" })}
+            className="w-full bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-xs font-bold px-3 py-1.5 rounded-md transition-colors duration-150"
+          >
+            Sign out
+          </button>
+        </div>
+      </aside>
+
+      <header className="bg-blue-900 text-white sticky top-0 z-40 lg:crm-side:hidden">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 flex items-center justify-between h-20">
           <div className="flex items-center gap-4 min-w-0">
             <Link href="/admin/crm" className="shrink-0 flex items-center gap-3">
@@ -188,6 +317,16 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
                           {link.label}
                         </Link>
                       ))}
+                      <div className="hidden lg:block mt-1 border-t border-gray-100 pt-1">
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => moveNav("side")}
+                          className="block w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          Move menu to side
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -197,7 +336,7 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-3">
             {!forcedChange && <div className="hidden lg:block"><SearchBar /></div>}
-            {!forcedChange && <NotificationBell />}
+            {!forcedChange && !sideActive && <NotificationBell />}
             {session?.user && (
               <span className="hidden sm:inline text-xs text-blue-200 truncate max-w-[160px]">
                 {session.user.name}
