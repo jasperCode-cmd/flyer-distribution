@@ -24,11 +24,12 @@ model User {
   mustChangePassword Boolean  @default(true)
   createdAt          DateTime @default(now())
 
-  assignedLeads    Lead[]            @relation("AssignedLeads")
-  activities       Activity[]
-  savedFilterViews SavedFilterView[]
-  calendarEvents   CalendarEvent[]
-  expenses         Expense[]
+  assignedLeads      Lead[]              @relation("AssignedLeads")
+  activities         Activity[]
+  savedFilterViews   SavedFilterView[]
+  calendarEvents     CalendarEvent[]
+  expenses           Expense[]
+  priorityDismissals PriorityDismissal[]
 }
 
 enum LeadSource {
@@ -209,18 +210,49 @@ model Activity {
 
 // Follow-up tasks for a lead, separate from the auto-detected "stale lead"
 // signal (which is based on last Activity, not a scheduled follow-up).
+enum PriorityLevel {
+  URGENT
+  HIGH
+  NORMAL
+  LOW
+}
+
 model Task {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   description String
   dueDate     DateTime
-  completed   Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  completed   Boolean       @default(false)
+  // Where the task sits on the Priorities list.
+  priority    PriorityLevel @default(NORMAL)
+  createdAt   DateTime      @default(now())
 
-  leadId String
-  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  // Optional, so a task added on the Priorities page needn't be about a lead.
+  leadId String?
+  lead   Lead?   @relation(fields: [leadId], references: [id], onDelete: Cascade)
 
   @@index([leadId])
   @@index([dueDate])
+}
+
+// Done and Snooze on the Priorities list. itemKey is the item's type and the
+// record it is about (for example "awaiting:<lead id>" or "task:<task id>").
+// fingerprint is the state that raised the item when it was dismissed: Done
+// holds only while the item's current fingerprint still matches, so a new
+// email or a changed payment status brings it back. snoozedUntil hides it
+// until then. One row per item; acting again replaces it.
+model PriorityDismissal {
+  id           String    @id @default(cuid())
+  itemKey      String    @unique
+  fingerprint  String
+  snoozedUntil DateTime?
+  dismissed    Boolean   @default(false)
+  note         String?
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Tag {

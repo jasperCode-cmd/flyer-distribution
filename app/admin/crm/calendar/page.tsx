@@ -80,7 +80,7 @@ export default async function CalendarPage() {
         id: `job-start-${j.id}`,
         kind: "JOB_START",
         type: "JOB_START",
-        title: `${label} — campaign start`,
+        title: `${label}: campaign start`,
         start: j.campaignStartDate.toISOString(),
       });
     }
@@ -90,7 +90,7 @@ export default async function CalendarPage() {
         id: `job-end-${j.id}`,
         kind: "JOB_COMPLETION",
         type: "JOB_COMPLETION",
-        title: `${label} — delivery/completion`,
+        title: `${label}: delivery/completion`,
         start: j.completionDate.toISOString(),
         completed: j.deliveryConfirmed,
       });
@@ -102,17 +102,17 @@ export default async function CalendarPage() {
       id: `task-${t.id}`,
       kind: "TASK_DUE",
       type: "TASK_DUE",
-      title: `${t.lead.name} — ${t.description}`,
+      title: t.lead ? `${t.lead.name}: ${t.description}` : t.description,
       start: t.dueDate.toISOString(),
       end: null,
       notes: null,
       completed: t.completed,
-      href: `/admin/crm/leads/${t.lead.id}`,
+      href: t.lead ? `/admin/crm/leads/${t.lead.id}` : null,
       assignedToUserId: null,
       assignedToName: null,
       distributorId: null,
       distributorName: null,
-      linkedLeadId: t.lead.id,
+      linkedLeadId: t.lead?.id ?? null,
       linkedJobId: null,
     });
   }
@@ -128,7 +128,7 @@ export default async function CalendarPage() {
         distributors={distributors}
         leads={leads.map((l) => ({
           id: l.id,
-          name: l.businessName ? `${l.name} — ${l.businessName}` : l.name,
+          name: l.businessName ? `${l.name}, ${l.businessName}` : l.name,
         }))}
         jobs={jobs.map((j) => ({
           id: j.id,

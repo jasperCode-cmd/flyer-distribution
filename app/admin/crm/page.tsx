@@ -80,11 +80,11 @@ export default async function CrmDashboardPage() {
               {overdue.map((t) => (
                 <li key={t.id}>
                   <Link
-                    href={`/admin/crm/leads/${t.lead.id}`}
+                    href={t.lead ? `/admin/crm/leads/${t.lead.id}` : "/admin/crm/calendar"}
                     className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 transition-colors"
                   >
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-blue-900 truncate">{t.lead.name}</p>
+                      <p className="text-sm font-semibold text-blue-900 truncate">{t.lead?.name ?? "General task"}</p>
                       <p className="text-xs text-gray-500 truncate">{t.description}</p>
                     </div>
                     <span className="text-xs text-red-600 font-medium shrink-0 ml-3">
@@ -108,11 +108,11 @@ export default async function CrmDashboardPage() {
               {today.map((t) => (
                 <li key={t.id}>
                   <Link
-                    href={`/admin/crm/leads/${t.lead.id}`}
+                    href={t.lead ? `/admin/crm/leads/${t.lead.id}` : "/admin/crm/calendar"}
                     className="flex items-center justify-between px-4 py-2.5 hover:bg-gray-50 transition-colors"
                   >
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-blue-900 truncate">{t.lead.name}</p>
+                      <p className="text-sm font-semibold text-blue-900 truncate">{t.lead?.name ?? "General task"}</p>
                       <p className="text-xs text-gray-500 truncate">{t.description}</p>
                     </div>
                   </Link>

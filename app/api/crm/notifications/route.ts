@@ -5,7 +5,7 @@ import { getFollowUpTasks } from "@/lib/crm-data";
 
 // Backs the shared notification badge (identical for both users, not
 // scoped to assignment) and the live inbound-lead popup, both driven by
-// simple polling from CrmShell — no websocket/real-time infra for a
+// simple polling from CrmShell, no websocket/real-time infra for a
 // two-person internal tool.
 export async function GET() {
   const session = await auth();
@@ -35,7 +35,9 @@ export async function GET() {
     getFollowUpTasks(),
   ]);
 
-  const followUps = [...overdue, ...today].map((t) => ({
+  // The bell's follow-ups each link to their lead, so a task with no lead
+  // (possible from the Priorities page) is left out of it.
+  const followUps = [...overdue, ...today].flatMap((t) => t.lead ? [{
     id: t.id,
     description: t.description,
     dueDate: t.dueDate,
@@ -46,7 +48,7 @@ export async function GET() {
       d.setHours(0, 0, 0, 0);
       return d;
     })(),
-  }));
+  }] : []);
 
   const count = websiteLeads.length + newApplications.length + dueCallbacks.length + followUps.length;
 
