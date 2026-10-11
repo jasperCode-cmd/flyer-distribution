@@ -127,6 +127,13 @@ model Lead {
   paymentStatus PaymentStatus @default(NOT_PAID)
   amountPaid    Decimal?      @db.Decimal(10, 2)
 
+  // When the lead was won, which decides the month its profit counts
+  // towards. Set through the one shared stage-change function whenever the
+  // lead moves into Won, whatever moved it; leaving Won never clears it and
+  // moving on to Completed keeps it. Null for leads won before this existed
+  // until backfilled from their stage history or set by hand.
+  wonAt DateTime?
+
   assignedToId String?
   assignedTo   User?   @relation("AssignedLeads", fields: [assignedToId], references: [id])
 
@@ -156,12 +163,14 @@ model Lead {
   tasks          Task[]
   tags           LeadTag[]
   calendarEvents CalendarEvent[]
+  costs          JobCost[]
 
   @@index([stage])
   @@index([assignedToId])
   @@index([priority])
   @@index([scrapped])
   @@index([nextCallableAt])
+  @@index([wonAt])
 }
 
 enum ActivityType {
@@ -305,8 +314,60 @@ model Distributor {
   jobs           Job[]
   calendarEvents CalendarEvent[]
   applications   DistributorApplication[]
+  costs          JobCost[]
 
   @@index([active])
+}
+
+enum JobCostCategory {
+  DISTRIBUTOR
+  FUEL
+  PRINTING
+  DESIGN
+  ADDITIONAL
+}
+
+enum DistributorPayType {
+  FLAT
+  PER_THOUSAND
+}
+
+// One cost line against a won job, for the Profit calculator. Attached to the
+// Lead rather than its Job: revenue (deal value, amount paid) and wonAt live
+// on the Lead, the Profit page reads leads directly, and a lead that leaves
+// Won or Completed keeps its cost lines. All money here is integer pence;
+// the Lead's existing Decimal pounds fields are unchanged.
+model JobCost {
+  id     String @id @default(cuid())
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  category JobCostCategory
+
+  // Who was paid, for distributor (and fuel) lines. Deleting a distributor
+  // keeps the cost line, just without the link.
+  distributorId String?
+  distributor   Distributor? @relation(fields: [distributorId], references: [id], onDelete: SetNull)
+
+  // Distributor lines only. PER_THOUSAND lines keep the rate and leaflet
+  // count they were worked out from.
+  payType      DistributorPayType?
+  ratePence    Int?
+  leafletCount Int?
+
+  // The line's final amount. For PER_THOUSAND it is always worked out on the
+  // server from ratePence and leafletCount, never taken from the browser.
+  amountPence Int
+
+  // Required for ADDITIONAL lines (checked by the API).
+  label String?
+  note  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([leadId])
+  @@index([distributorId])
 }
 
 enum DistributorApplicationStatus {
