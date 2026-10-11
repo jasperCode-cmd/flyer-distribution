@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { getInboxThread, isGmailConfigured } from "@/lib/gmail";
-import { findLeadsForAddresses, pickThreadLead } from "@/lib/inbox-leads";
+import { crmMatchesFor, lookupCrm } from "@/lib/inbox-crm";
 import { gmailFailureResponse, isValidThreadId } from "@/lib/inbox-api";
 
 export const runtime = "nodejs";
@@ -28,13 +28,15 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   }
 
   const addresses = { replyTo: result.data.replyTo?.address, from: result.data.counterparty?.address };
-  const leads = await findLeadsForAddresses(prisma, [addresses.replyTo ?? "", addresses.from ?? ""]);
-  const lead = pickThreadLead(leads, addresses);
+  const lookups = await lookupCrm(prisma, [addresses.replyTo ?? "", addresses.from ?? ""]);
+  const { lead, distributor, applicant } = crmMatchesFor(lookups, addresses);
 
   return NextResponse.json({
     configured: true,
     thread: result.data,
     lead,
+    distributor,
+    applicant,
     // Who a reply goes to, worked out from the thread exactly as the reply
     // route does, so the compose modal shows the real recipient.
     recipient: result.data.recipient?.address ?? "",

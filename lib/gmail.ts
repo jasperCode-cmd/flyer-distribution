@@ -848,9 +848,34 @@ export async function withGmailMessageReader<T>(
 
 // --- Inbox page (read-only) ------------------------------------------------
 
+// Which Gmail label and query a list or scan uses: the inbox (and Unread,
+// when that toggle is on) plus the search box and the category's own query.
+export function inboxListParams(params: { q?: unknown; unread?: boolean; categoryQuery?: string }): {
+  labelIds: string[];
+  q: string;
+} {
+  return {
+    labelIds: params.unread ? ["INBOX", "UNREAD"] : ["INBOX"],
+    q: [normalizeInboxSearch(params.q), params.categoryQuery ?? ""].filter(Boolean).join(" "),
+  };
+}
+
+// One page of threads as shown: anything touching an excluded address goes
+// first, then the category's own check, if it has one.
+export function filterInboxPage(
+  threads: gmail_v1.Schema$Thread[],
+  excluded: string[],
+  keep?: (thread: gmail_v1.Schema$Thread) => boolean
+): gmail_v1.Schema$Thread[] {
+  return threads.filter((t) => !shouldExcludeThread(t.messages, excluded) && (!keep || keep(t)));
+}
+
 export async function listInboxThreads(params: {
   pageToken?: string;
   q?: string;
+  unread?: boolean;
+  categoryQuery?: string;
+  keep?: (thread: gmail_v1.Schema$Thread) => boolean;
 }): Promise<GmailResult<{ threads: InboxThreadSummary[]; nextPageToken: string | null }>> {
   const env = readEnv();
   if (!env) return { ok: false, reason: "not_configured", message: "Gmail is not connected." };
@@ -858,11 +883,11 @@ export async function listInboxThreads(params: {
   try {
     const client = buildClient(env);
     const excluded = getExcludedAddresses();
-    const q = normalizeInboxSearch(params.q);
+    const { labelIds, q } = inboxListParams(params);
 
     const list = await client.users.threads.list({
       userId: "me",
-      labelIds: ["INBOX"],
+      labelIds,
       maxResults: INBOX_PAGE_SIZE,
       pageToken: params.pageToken || undefined,
       q: q || undefined,
@@ -879,8 +904,7 @@ export async function listInboxThreads(params: {
       return res.data;
     });
 
-    const summaries = threads
-      .filter((t) => !shouldExcludeThread(t.messages, excluded))
+    const summaries = filterInboxPage(threads, excluded, params.keep)
       .map((t) => summarizeThread(t, env.senderAddress))
       .filter((t): t is InboxThreadSummary => t !== null);
 
@@ -888,6 +912,61 @@ export async function listInboxThreads(params: {
   } catch (err) {
     const { reason, message } = classifyError(err);
     console.error("Gmail inbox list failed:", reason);
+    return { ok: false, reason, message };
+  }
+}
+
+// Hands fn a read-only reader for scanning the inbox (list and header-only
+// get, under the existing scopes), with the exclusion list and our address.
+export async function withInboxReader<T>(
+  fn: (
+    reader: {
+      listThreadIds(params: {
+        labelIds: string[];
+        q?: string;
+        pageToken?: string;
+        maxResults: number;
+      }): Promise<{ ids: string[]; nextPageToken: string | null }>;
+      getThreadMetadata(id: string): Promise<gmail_v1.Schema$Thread | null>;
+    },
+    context: GmailReadContext
+  ) => Promise<T>
+): Promise<GmailResult<T>> {
+  const env = readEnv();
+  if (!env) return { ok: false, reason: "not_configured", message: "Gmail is not connected." };
+
+  try {
+    const client = buildClient(env);
+    const data = await fn(
+      {
+        async listThreadIds({ labelIds, q, pageToken, maxResults }) {
+          const res = await client.users.threads.list({ userId: "me", labelIds, q, pageToken, maxResults });
+          return {
+            ids: (res.data.threads ?? []).map((t) => t.id).filter((id): id is string => !!id),
+            nextPageToken: res.data.nextPageToken ?? null,
+          };
+        },
+        async getThreadMetadata(id) {
+          try {
+            const res = await client.users.threads.get({
+              userId: "me",
+              id,
+              format: "metadata",
+              metadataHeaders: THREAD_METADATA_HEADERS,
+            });
+            return res.data;
+          } catch (err) {
+            if (isNotFound(err)) return null;
+            throw err;
+          }
+        },
+      },
+      { senderAddress: env.senderAddress, excluded: getExcludedAddresses() }
+    );
+    return { ok: true, data };
+  } catch (err) {
+    const { reason, message } = classifyError(err);
+    console.error("Gmail inbox scan failed:", reason);
     return { ok: false, reason, message };
   }
 }

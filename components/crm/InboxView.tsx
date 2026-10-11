@@ -6,10 +6,14 @@ import { useSession } from "next-auth/react";
 import EmailComposeModal, { sentLabel, type ReplyContext } from "./EmailComposeModal";
 import type { ConversationMessage } from "./EmailsSection";
 import { STAGE_LABELS } from "@/lib/crm-constants";
+import { appendUniqueThreads, inboxFilterUrl } from "@/lib/inbox-list";
 
 const SEARCH_MAX = 200;
 
 type InboxLead = { id: string; name: string; stage: string; email: string; scrapped: boolean };
+type InboxDistributor = { id: string; name: string };
+type InboxApplicant = { id: string; fullName: string };
+type CategoryOption = { id: string; label: string };
 
 type ThreadRow = {
   id: string;
@@ -22,11 +26,34 @@ type ThreadRow = {
   hasAttachment: boolean;
   messageCount: number;
   lead: InboxLead | null;
+  distributor?: InboxDistributor | null;
+  applicant?: InboxApplicant | null;
 };
 
 type LoadStatus = "loading" | "ready" | "not_configured" | "reconnect" | "error" | "not_found";
 
-type ListState = { status: LoadStatus; threads: ThreadRow[]; nextPageToken: string | null };
+// "pages": a Gmail-query filter, paged by Gmail with Previous and Next.
+// "scan": a CRM filter, read in batches and continued with Load more; there
+// is never a total, only what has been found so far.
+type ListState = {
+  status: LoadStatus;
+  threads: ThreadRow[];
+  mode: "pages" | "scan";
+  nextPageToken: string | null;
+  cursor: string | null;
+  loadingMore: boolean;
+  // The last Load more found nothing new in the emails it checked.
+  lastBatchEmpty: boolean;
+};
+
+const EMPTY_LIST: Omit<ListState, "status"> = {
+  threads: [],
+  mode: "pages",
+  nextPageToken: null,
+  cursor: null,
+  loadingMore: false,
+  lastBatchEmpty: false,
+};
 
 type OpenThread = {
   status: LoadStatus;
@@ -41,6 +68,8 @@ type OpenThread = {
     messages: ConversationMessage[];
   };
   lead?: InboxLead | null;
+  distributor?: InboxDistributor | null;
+  applicant?: InboxApplicant | null;
   // Who a reply goes to, as worked out by the server from the thread.
   recipient?: string;
 };
@@ -91,6 +120,34 @@ function LeadBadge({ lead }: { lead: InboxLead }) {
   );
 }
 
+// A Distributor outranks an application from the same address: once someone
+// is delivering for us, that's what matters about them.
+function PeopleBadge({ distributor, applicant }: { distributor?: InboxDistributor | null; applicant?: InboxApplicant | null }) {
+  if (distributor) {
+    return (
+      <Link
+        href="/admin/crm/distributors"
+        className="relative z-10 pointer-events-auto inline-flex max-w-full items-center gap-1 rounded-full border border-green-100 bg-green-50 px-2 py-0.5 text-[11px] font-semibold text-green-700 hover:bg-green-100"
+      >
+        <span className="shrink-0">Distributor</span>
+        <span className="truncate font-normal">· {distributor.name}</span>
+      </Link>
+    );
+  }
+  if (applicant) {
+    return (
+      <Link
+        href={`/admin/crm/applications/${applicant.id}`}
+        className="relative z-10 pointer-events-auto inline-flex max-w-full items-center gap-1 rounded-full border border-yellow-100 bg-yellow-50 px-2 py-0.5 text-[11px] font-semibold text-yellow-800 hover:bg-yellow-100"
+      >
+        <span className="shrink-0">Applicant</span>
+        <span className="truncate font-normal">· {applicant.fullName}</span>
+      </Link>
+    );
+  }
+  return null;
+}
+
 function PaperclipIcon() {
   return (
     <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-label="Has attachment" role="img">
@@ -139,7 +196,15 @@ function ConnectionState({ status, onRetry }: { status: LoadStatus; onRetry: () 
   );
 }
 
-export default function InboxView() {
+export default function InboxView({
+  categories,
+  initialCategory,
+  initialUnread,
+}: {
+  categories: CategoryOption[];
+  initialCategory: string;
+  initialUnread: boolean;
+}) {
   const { data: session } = useSession();
   const userFirstName = (session?.user?.name ?? "").split(" ")[0] || "the team";
 
@@ -148,8 +213,10 @@ export default function InboxView() {
   // Gmail only hands out forward page tokens, so Previous walks back
   // through the tokens already used. The last entry is the current page.
   const [pageTokens, setPageTokens] = useState<(string | null)[]>([null]);
-  const [list, setList] = useState<ListState>({ status: "loading", threads: [], nextPageToken: null });
+  const [list, setList] = useState<ListState>({ status: "loading", ...EMPTY_LIST });
   const [reloadKey, setReloadKey] = useState(0);
+  const [category, setCategory] = useState(initialCategory);
+  const [unreadOnly, setUnreadOnly] = useState(initialUnread);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [open, setOpen] = useState<OpenThread | null>(null);
@@ -158,29 +225,84 @@ export default function InboxView() {
 
   const currentToken = pageTokens[pageTokens.length - 1];
 
+  const listParams = useCallback(
+    (extra: Record<string, string> = {}) => {
+      const params = new URLSearchParams(extra);
+      if (category !== "all") params.set("category", category);
+      if (unreadOnly) params.set("unread", "1");
+      if (activeQuery) params.set("q", activeQuery);
+      return params.toString();
+    },
+    [category, unreadOnly, activeQuery]
+  );
+
   useEffect(() => {
     let cancelled = false;
     setList((l) => ({ ...l, status: "loading" }));
-    const params = new URLSearchParams();
-    if (currentToken) params.set("pageToken", currentToken);
-    if (activeQuery) params.set("q", activeQuery);
-    fetch(`/api/crm/inbox/threads?${params.toString()}`)
+    fetch(`/api/crm/inbox/threads?${listParams(currentToken ? { pageToken: currentToken } : {})}`)
       .then(async (res) => {
         const data = await res.json();
         if (cancelled) return;
         if (!res.ok || data.configured === false) {
-          setList({ status: failureStatus(res, data), threads: [], nextPageToken: null });
+          setList({ status: failureStatus(res, data), ...EMPTY_LIST });
           return;
         }
-        setList({ status: "ready", threads: data.threads ?? [], nextPageToken: data.nextPageToken ?? null });
+        setList({
+          ...EMPTY_LIST,
+          status: "ready",
+          threads: data.threads ?? [],
+          mode: data.mode === "scan" ? "scan" : "pages",
+          nextPageToken: data.nextPageToken ?? null,
+          cursor: data.cursor ?? null,
+        });
       })
       .catch(() => {
-        if (!cancelled) setList({ status: "error", threads: [], nextPageToken: null });
+        if (!cancelled) setList({ status: "error", ...EMPTY_LIST });
       });
     return () => {
       cancelled = true;
     };
-  }, [currentToken, activeQuery, reloadKey]);
+  }, [currentToken, listParams, reloadKey]);
+
+  // Carries a CRM filter's scan on from where it stopped, adding only
+  // conversations not already listed.
+  async function loadMore() {
+    if (!list.cursor || list.loadingMore) return;
+    setList((l) => ({ ...l, loadingMore: true }));
+    try {
+      const res = await fetch(`/api/crm/inbox/threads?${listParams({ cursor: list.cursor })}`);
+      const data = await res.json();
+      if (!res.ok || data.configured === false) {
+        setList((l) => ({ ...l, loadingMore: false }));
+        setToast({ text: "Couldn't load more conversations. Try again.", kind: "error" });
+        return;
+      }
+      setList((l) => {
+        const threads = appendUniqueThreads(l.threads, data.threads ?? []);
+        return {
+          ...l,
+          threads,
+          cursor: data.cursor ?? null,
+          loadingMore: false,
+          lastBatchEmpty: threads.length === l.threads.length,
+        };
+      });
+    } catch {
+      setList((l) => ({ ...l, loadingMore: false }));
+      setToast({ text: "Couldn't load more conversations. Try again.", kind: "error" });
+    }
+  }
+
+  // A new filter starts from the newest emails, and goes in the address so
+  // Refresh and the back button keep it.
+  function changeFilter(next: { category?: string; unread?: boolean }) {
+    const nextCategory = next.category ?? category;
+    const nextUnread = next.unread ?? unreadOnly;
+    setCategory(nextCategory);
+    setUnreadOnly(nextUnread);
+    setPageTokens([null]);
+    window.history.replaceState(null, "", inboxFilterUrl(nextCategory, nextUnread));
+  }
 
   const loadThread = useCallback(async (id: string) => {
     setOpen({ status: "loading" });
@@ -191,7 +313,14 @@ export default function InboxView() {
         setOpen({ status: failureStatus(res, data), message: res.status === 404 ? data.error : undefined });
         return;
       }
-      setOpen({ status: "ready", thread: data.thread, lead: data.lead, recipient: data.recipient });
+      setOpen({
+        status: "ready",
+        thread: data.thread,
+        lead: data.lead,
+        distributor: data.distributor,
+        applicant: data.applicant,
+        recipient: data.recipient,
+      });
     } catch {
       setOpen({ status: "error" });
     }
@@ -247,6 +376,18 @@ export default function InboxView() {
 
   // Gmail unusable: no search, list or reading pane, just what to do about it.
   const connectionProblem = list.status === "not_configured" || list.status === "reconnect";
+  const filtered = !!activeQuery || category !== "all" || unreadOnly;
+
+  const loadMoreButton = (
+    <button
+      type="button"
+      onClick={loadMore}
+      disabled={list.loadingMore}
+      className="border border-gray-300 bg-white text-gray-700 text-sm font-medium px-4 py-2 rounded-md hover:bg-gray-50 disabled:opacity-60"
+    >
+      {list.loadingMore ? "Checking older emails..." : "Load more"}
+    </button>
+  );
 
   return (
     <div>
@@ -266,7 +407,7 @@ export default function InboxView() {
               maxLength={SEARCH_MAX}
               placeholder="Search the inbox"
               aria-label="Search the inbox"
-              className="flex-1 sm:w-72 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="min-w-0 flex-1 sm:w-72 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <button type="submit" className="bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold px-4 py-2 rounded-md">
               Search
@@ -283,6 +424,28 @@ export default function InboxView() {
         <div className="lg:grid lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] lg:gap-4 lg:items-start">
           {/* List */}
           <section aria-label="Conversations" className={selectedId ? "hidden lg:block" : "block"}>
+            {/* One row; on a phone it scrolls sideways rather than wrapping. */}
+            <div
+              role="group"
+              aria-label="Filter conversations"
+              className="-mx-3 px-3 sm:mx-0 sm:px-0 mb-2 flex gap-1.5 overflow-x-auto whitespace-nowrap pb-1"
+            >
+              {categories.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  aria-pressed={category === c.id}
+                  onClick={() => category !== c.id && changeFilter({ category: c.id })}
+                  className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    category === c.id
+                      ? "bg-blue-700 border-blue-700 text-white"
+                      : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
             <div className="flex items-center justify-between gap-2 mb-2 text-xs text-gray-500">
               <span>
                 {activeQuery ? (
@@ -296,14 +459,25 @@ export default function InboxView() {
                   "Newest first"
                 )}
               </span>
-              <button
-                type="button"
-                onClick={() => setReloadKey((k) => k + 1)}
-                disabled={list.status === "loading"}
-                className="font-semibold text-blue-700 hover:underline disabled:opacity-60"
-              >
-                Refresh
-              </button>
+              <div className="flex shrink-0 items-center gap-3">
+                <label className="inline-flex cursor-pointer items-center gap-1.5 font-semibold text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={unreadOnly}
+                    onChange={(e) => changeFilter({ unread: e.target.checked })}
+                    className="h-3.5 w-3.5 rounded border-gray-300"
+                  />
+                  Unread only
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setReloadKey((k) => k + 1)}
+                  disabled={list.status === "loading"}
+                  className="font-semibold text-blue-700 hover:underline disabled:opacity-60"
+                >
+                  Refresh
+                </button>
+              </div>
             </div>
 
             {list.status === "loading" ? (
@@ -311,10 +485,24 @@ export default function InboxView() {
             ) : list.status !== "ready" ? (
               <ConnectionState status={list.status} onRetry={() => setReloadKey((k) => k + 1)} />
             ) : list.threads.length === 0 ? (
-              <StateCard
-                title={activeQuery ? "No matching emails" : "Your inbox is empty"}
-                body={activeQuery ? "Nothing in the inbox matches that search." : "New emails will appear here."}
-              />
+              list.mode === "scan" && list.cursor ? (
+                <StateCard
+                  title="No matches in the latest emails"
+                  body="Only the most recent emails have been checked so far."
+                  action={loadMoreButton}
+                />
+              ) : (
+                <StateCard
+                  title={filtered ? "No matching conversations" : "Your inbox is empty"}
+                  body={
+                    activeQuery
+                      ? "Nothing in the inbox matches that search."
+                      : filtered
+                        ? "Nothing in the inbox matches this filter."
+                        : "New emails will appear here."
+                  }
+                />
+              )
             ) : (
               <ul className="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100 overflow-hidden">
                 {list.threads.map((t) => (
@@ -350,9 +538,10 @@ export default function InboxView() {
                           {t.hasAttachment && <PaperclipIcon />}
                         </div>
                         <p className="truncate text-xs text-gray-500 mt-0.5">{t.snippet}</p>
-                        {t.lead && (
-                          <div className="mt-1.5">
-                            <LeadBadge lead={t.lead} />
+                        {(t.lead || t.distributor || t.applicant) && (
+                          <div className="mt-1.5 flex flex-wrap gap-1">
+                            {t.lead && <LeadBadge lead={t.lead} />}
+                            <PeopleBadge distributor={t.distributor} applicant={t.applicant} />
                           </div>
                         )}
                       </div>
@@ -362,7 +551,16 @@ export default function InboxView() {
               </ul>
             )}
 
-            {list.status === "ready" && (pageTokens.length > 1 || list.nextPageToken) && (
+            {list.status === "ready" && list.mode === "scan" && list.threads.length > 0 && (
+              <div className="mt-3 text-center">
+                {list.lastBatchEmpty && list.cursor && (
+                  <p className="mb-2 text-xs text-gray-500">No more matches in the next batch of emails.</p>
+                )}
+                {list.cursor ? loadMoreButton : <p className="text-xs text-gray-400">No more conversations to check.</p>}
+              </div>
+            )}
+
+            {list.status === "ready" && list.mode === "pages" && (pageTokens.length > 1 || list.nextPageToken) && (
               <div className="flex items-center justify-between mt-3">
                 <button
                   type="button"
@@ -436,10 +634,10 @@ export default function InboxView() {
                         Reply-To: {thread.replyTo.name !== thread.replyTo.address ? `${thread.replyTo.name} <${thread.replyTo.address}>` : thread.replyTo.address}
                       </p>
                     )}
-                    <div className="mt-2">
+                    <div className="mt-2 flex flex-wrap items-center gap-1.5">
                       {open.lead ? (
                         <LeadBadge lead={open.lead} />
-                      ) : leadCandidate?.address ? (
+                      ) : leadCandidate?.address && !open.distributor && !open.applicant ? (
                         <Link
                           href={`/admin/crm/leads/new?${new URLSearchParams({
                             name: leadCandidate.name !== leadCandidate.address ? leadCandidate.name : "",
@@ -451,6 +649,7 @@ export default function InboxView() {
                           Create lead from this sender
                         </Link>
                       ) : null}
+                      <PeopleBadge distributor={open.distributor} applicant={open.applicant} />
                     </div>
                   </div>
                   {lastMessage && open.recipient && (
