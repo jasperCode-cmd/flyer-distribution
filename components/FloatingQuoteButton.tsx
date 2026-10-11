@@ -47,6 +47,7 @@ export default function FloatingQuoteButton() {
   const [visible, setVisible] = useState(!isHomepage);
   const [open, setOpen] = useState(false);
   const [hasOpenedOnce, setHasOpenedOnce] = useState(false);
+  const [footerInView, setFooterInView] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const wiggleControls = useAnimation();
 
@@ -78,11 +79,28 @@ export default function FloatingQuoteButton() {
     };
   }, [skip, isHomepage]);
 
+  // Hidden while the site footer is on screen (or about to be, via the
+  // bottom rootMargin, so the exit animation finishes first), so the pill
+  // never sits on top of a footer link or the partner credit below it. The
+  // footer has its own Get a Quote link. Re-run per pathname so a footer
+  // remounted by a route change is the one being observed.
+  useEffect(() => {
+    if (skip) return;
+    const footerEl = document.getElementById("site-footer");
+    if (!footerEl) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setFooterInView(entry.isIntersecting),
+      { rootMargin: "0px 0px 120px 0px" }
+    );
+    observer.observe(footerEl);
+    return () => observer.disconnect();
+  }, [skip, pathname]);
+
   // Idle attention wiggle while resting and unopened; stops for good the
   // first time the panel is opened, per hasOpenedOnce rather than `open`
   // alone, so it doesn't resume after the user closes the panel again.
   useEffect(() => {
-    if (skip || !visible || open || hasOpenedOnce) return;
+    if (skip || !visible || open || hasOpenedOnce || footerInView) return;
     const interval = setInterval(() => {
       wiggleControls.start({
         rotate: [0, -8, 8, -5, 5, 0],
@@ -90,7 +108,7 @@ export default function FloatingQuoteButton() {
       });
     }, IDLE_WIGGLE_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [skip, visible, open, hasOpenedOnce, wiggleControls]);
+  }, [skip, visible, open, hasOpenedOnce, footerInView, wiggleControls]);
 
   useEffect(() => {
     if (!open) return;
@@ -120,7 +138,7 @@ export default function FloatingQuoteButton() {
   return (
     <div ref={containerRef} className="fixed bottom-6 right-6 z-50">
       <AnimatePresence>
-        {visible && !open && (
+        {visible && !open && !footerInView && (
           <motion.button
             key="pill"
             type="button"

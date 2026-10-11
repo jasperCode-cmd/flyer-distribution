@@ -4,21 +4,53 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 
-const footerLinks = [
-  { href: "/", label: "Home" },
+const serviceLinks = [
   { href: "/services", label: "Services" },
   { href: "/services/public-notice-leafleting", label: "Public Notice Leafleting" },
   { href: "/services/hand-to-hand-distribution", label: "Hand-to-Hand Leaflet Distribution" },
   { href: "/services/b2b-distribution", label: "B2B Leaflet Distribution" },
   { href: "/services/web-design-seo", label: "Web Design & SEO" },
   { href: "/services/screen-hire", label: "Screen Hire" },
+];
+
+const companyLinks = [
+  { href: "/", label: "Home" },
   { href: "/areas", label: "Areas" },
-  { href: "/quote", label: "Get a Quote" },
   { href: "/case-studies", label: "Case Studies" },
   { href: "/about", label: "About" },
   { href: "/faq", label: "FAQ" },
   { href: "/leaflet-distribution-jobs", label: "Work With Us" },
+  { href: "/quote", label: "Get a Quote" },
+  { href: "/privacy-policy", label: "Privacy Policy" },
 ];
+
+const headingClass = "text-white font-semibold text-sm mb-3 uppercase tracking-wide";
+const linkClass = "text-sm text-blue-300 hover:text-white transition-colors";
+
+function LinkColumn({
+  title,
+  links,
+  className,
+}: {
+  title: string;
+  links: { href: string; label: string }[];
+  className: string;
+}) {
+  return (
+    <div className={className}>
+      <h3 className={headingClass}>{title}</h3>
+      <ul className="space-y-2">
+        {links.map((link) => (
+          <li key={link.href}>
+            <Link href={link.href} className={linkClass}>
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export default function Footer() {
   const pathname = usePathname();
@@ -26,11 +58,13 @@ export default function Footer() {
 
   return (
     <>
-    <footer className="bg-blue-950 text-blue-200 mt-auto">
+    <footer id="site-footer" className="bg-blue-950 text-blue-200 mt-auto">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Two columns on small screens (brand and Contact span both, with
+            Services and Company side by side between them), four from lg. */}
+        <div className="grid grid-cols-2 lg:grid-cols-12 gap-x-6 gap-y-10 lg:gap-8">
           {/* Brand */}
-          <div>
+          <div className="col-span-2 lg:col-span-3">
             <div className="mb-3 flex justify-center">
               <Image
                 src="/Flyer Distribution Logo White Cropped.webp"
@@ -45,30 +79,12 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Nav */}
-          <div>
-            <h3 className="text-white font-semibold text-sm mb-3 uppercase tracking-wide">
-              Quick Links
-            </h3>
-            <ul className="space-y-2">
-              {footerLinks.map((link) => (
-                <li key={link.href}>
-                  <Link
-                    href={link.href}
-                    className="text-sm text-blue-300 hover:text-white transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <LinkColumn title="Services" links={serviceLinks} className="lg:col-span-3" />
+          <LinkColumn title="Company" links={companyLinks} className="lg:col-span-2" />
 
           {/* Contact */}
-          <div>
-            <h3 className="text-white font-semibold text-sm mb-3 uppercase tracking-wide">
-              Contact
-            </h3>
+          <div className="col-span-2 lg:col-span-4">
+            <h3 className={headingClass}>Contact</h3>
             <ul className="space-y-2 text-sm text-blue-300">
               <li>
                 <span className="block text-blue-400 text-xs uppercase tracking-wide mb-0.5">
