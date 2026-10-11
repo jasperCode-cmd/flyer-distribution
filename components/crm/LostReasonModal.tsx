@@ -1,19 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { LOST_REASONS, LOST_REASON_LABELS } from "@/lib/crm-constants";
 
+// Asks why a lead was lost. The Priorities page's bulk Mark as Lost passes a
+// title, a summary (how many and who) and its own button wording; everywhere
+// else it looks as it always has.
 export default function LostReasonModal({
   open,
   onCancel,
   onConfirm,
+  title = "Why was this lead lost?",
+  summary,
+  confirmLabel = "Confirm Lost",
+  busy = false,
 }: {
   open: boolean;
   onCancel: () => void;
   onConfirm: (reason: string, note: string) => void;
+  title?: string;
+  summary?: React.ReactNode;
+  confirmLabel?: string;
+  busy?: boolean;
 }) {
   const [reason, setReason] = useState("PRICE");
   const [note, setNote] = useState("");
+  const titleId = useId();
+
+  useEffect(() => {
+    if (!open) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onCancel();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onCancel]);
 
   if (!open) return null;
 
@@ -29,13 +50,22 @@ export default function LostReasonModal({
       onClick={onCancel}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
         onClick={(e) => e.stopPropagation()}
         className="bg-white w-full sm:max-w-md rounded-t-xl sm:rounded-xl p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]"
       >
-        <h3 className="text-sm font-bold text-blue-900 mb-1">Why was this lead lost?</h3>
+        <h3 id={titleId} className="text-sm font-bold text-blue-900 mb-1">{title}</h3>
+        {summary}
         <p className="text-xs text-gray-500 mb-3">This helps track patterns over time.</p>
 
+        <label htmlFor={`${titleId}-reason`} className="sr-only">
+          Lost reason
+        </label>
         <select
+          id={`${titleId}-reason`}
+          autoFocus
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm bg-white"
@@ -67,9 +97,10 @@ export default function LostReasonModal({
           <button
             type="button"
             onClick={handleConfirm}
-            className="flex-1 bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold py-2.5 rounded-md"
+            disabled={busy}
+            className="flex-1 bg-blue-700 hover:bg-blue-800 disabled:opacity-60 text-white text-sm font-bold py-2.5 rounded-md"
           >
-            Confirm Lost
+            {busy ? "Saving..." : confirmLabel}
           </button>
         </div>
       </div>

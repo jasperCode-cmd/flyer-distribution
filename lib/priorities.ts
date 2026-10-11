@@ -34,17 +34,22 @@ export const REASON_TYPES = [
   "task",
 ] as const;
 export type ReasonType = (typeof REASON_TYPES)[number];
+// What each reason says on a row, in plain English. A task shows its own
+// title instead.
 export const REASON_LABELS: Record<ReasonType, string> = {
-  new_enquiry: "New website enquiry",
-  unanswered_email: "Unanswered email",
-  awaiting: "Awaiting response",
-  unpaid: "Completed job not fully paid",
-  review: "Review not requested",
-  campaign: "Campaign starting with no distributor",
-  application: "New distributor application",
+  new_enquiry: "New enquiry",
+  unanswered_email: "They replied, needs an answer",
+  awaiting: "Waiting on them",
+  unpaid: "Not fully paid",
+  review: "Ask for a review",
+  campaign: "Campaign needs a distributor",
+  application: "New application",
   repeat: "Follow up for more work",
   task: "Task",
 };
+
+// The small headings rows are grouped under within each level.
+export const GROUP_LABELS: Record<ReasonType, string> = { ...REASON_LABELS, task: "Tasks" };
 
 // Fired in the browser after anything changes the list, so the count in the
 // navigation updates straight away.
@@ -424,6 +429,25 @@ export function allItems(inputs: PriorityInputs): PriorityItem[] {
   return [...automaticItems(inputs), ...taskItems(inputs)];
 }
 
+// One subject's reasons in order: most important first, except that an
+// unanswered email always comes straight ahead of Awaiting Response, so
+// when the lead has replied the headline is the reply waiting for an answer.
+export function orderRowItems(items: PriorityItem[]): PriorityItem[] {
+  const sorted = [...items].sort(compareItems);
+  const awaiting = sorted.findIndex((i) => i.type === "awaiting");
+  const email = sorted.findIndex((i) => i.type === "unanswered_email");
+  if (awaiting !== -1 && email > awaiting) {
+    const [reply] = sorted.splice(email, 1);
+    sorted.splice(awaiting, 0, reply);
+  }
+  return sorted;
+}
+
+function toRow(id: string, items: PriorityItem[]): PriorityRow {
+  const ordered = orderRowItems(items);
+  return { id, level: ordered[0].level, primary: ordered[0], others: ordered.slice(1) };
+}
+
 export function buildPriorities(inputs: PriorityInputs): PriorityRow[] {
   const dismissals = new Map(inputs.dismissals.map((d) => [d.itemKey, d]));
   const visible = allItems(inputs).filter((entry) => !isHidden(entry, dismissals.get(entry.key), inputs.now));
@@ -433,10 +457,7 @@ export function buildPriorities(inputs: PriorityInputs): PriorityRow[] {
     const key = subjectKey(entry);
     groups.set(key, [...(groups.get(key) ?? []), entry]);
   }
-  const rows: PriorityRow[] = [...groups.entries()].map(([id, entries]) => {
-    const sorted = [...entries].sort(compareItems);
-    return { id, level: sorted[0].level, primary: sorted[0], others: sorted.slice(1) };
-  });
+  const rows = [...groups.entries()].map(([id, entries]) => toRow(id, entries));
   return rows.sort((a, b) => compareItems(a.primary, b.primary));
 }
 
@@ -450,19 +471,82 @@ export function urgentHighCount(rows: PriorityRow[]): number {
 export function removeItem(rows: PriorityRow[], key: string): PriorityRow[] {
   const next: PriorityRow[] = [];
   for (const row of rows) {
-    const remaining = [row.primary, ...row.others].filter((i) => i.key !== key).sort(compareItems);
+    const remaining = [row.primary, ...row.others].filter((i) => i.key !== key);
     if (remaining.length === 0) continue;
-    next.push({ id: row.id, level: remaining[0].level, primary: remaining[0], others: remaining.slice(1) });
+    next.push(toRow(row.id, remaining));
   }
   return next.sort((a, b) => compareItems(a.primary, b.primary));
 }
 
-// The page's filters: a row's level is its most important reason's; a type
-// matches if any of the row's reasons is of that type.
+// The page's filters: a row's level and type are its headline reason's, the
+// same as the section and group it is listed under.
 export function filterRows(rows: PriorityRow[], level: PriorityLevel | "ALL", type: ReasonType | "ALL"): PriorityRow[] {
-  return rows.filter(
-    (r) => (level === "ALL" || r.level === level) && (type === "ALL" || [r.primary, ...r.others].some((i) => i.type === type))
-  );
+  return rows.filter((r) => (level === "ALL" || r.level === level) && (type === "ALL" || r.primary.type === type));
+}
+
+// --- Sections and groups on the page -------------------------------------------
+
+export const GROUP_PREVIEW = 5;
+
+export type PriorityGroup = {
+  // "URGENT:new_enquiry", for remembering which groups are opened up.
+  id: string;
+  type: ReasonType;
+  label: string;
+  rows: PriorityRow[];
+  // The first five, or every row once "Show all" is pressed.
+  shown: PriorityRow[];
+  hidden: number;
+};
+
+export type PrioritySection = { level: PriorityLevel; count: number; groups: PriorityGroup[] };
+
+// Urgent, High, Normal and Low, each split by the headline reason's type.
+// Rows keep their ranking; a group sits where its highest-ranked row would.
+export function groupRows(
+  rows: PriorityRow[],
+  expanded: ReadonlySet<string> = new Set(),
+  preview: number = GROUP_PREVIEW
+): PrioritySection[] {
+  return PRIORITY_LEVELS.map((level) => {
+    const inLevel = rows.filter((r) => r.level === level);
+    const byType = new Map<ReasonType, PriorityRow[]>();
+    for (const row of inLevel) byType.set(row.primary.type, [...(byType.get(row.primary.type) ?? []), row]);
+    const groups = [...byType.entries()].map(([type, list]) => {
+      const id = `${level}:${type}`;
+      const shown = expanded.has(id) ? list : list.slice(0, preview);
+      return { id, type, label: GROUP_LABELS[type], rows: list, shown, hidden: list.length - shown.length };
+    });
+    return { level, count: inLevel.length, groups };
+  }).filter((section) => section.count > 0);
+}
+
+// --- What a row offers --------------------------------------------------------------
+
+export type PrimaryAction = "reply" | "call" | "email" | "open" | null;
+
+// One main button per row: Reply to a reply waiting for an answer; Call
+// someone we're waiting on (Email when there's no phone); Open for the rest.
+// A task with no lead has nothing to open.
+export function primaryAction(row: PriorityRow): PrimaryAction {
+  const { primary, primary: { subject } } = row;
+  if (primary.type === "unanswered_email" && primary.reply && subject.kind === "lead") return "reply";
+  if (primary.type === "awaiting" && subject.kind === "lead") {
+    if (subject.phone?.trim()) return "call";
+    if (subject.email?.trim()) return "email";
+  }
+  return subject.kind === "none" ? null : "open";
+}
+
+// The row's Awaiting Response reason, wherever it sits, for Still in talks.
+export function awaitingItem(row: PriorityRow): PriorityItem | null {
+  return [row.primary, ...row.others].find((i) => i.type === "awaiting" && i.subject.kind === "lead") ?? null;
+}
+
+// Mark as Lost is for leads that aren't already Lost.
+export function canMarkLost(row: PriorityRow): boolean {
+  const subject = row.primary.subject;
+  return subject.kind === "lead" && subject.stage !== "LOST";
 }
 
 // "Waiting 3 days", "Due 9 Oct", "Starts in 2 days", "Completed 23 days ago".

@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { loadDatabaseFacts, scanUnansweredEmails } from "@/lib/priorities-data";
 import { allItems, planPriorityAction, type PriorityAction } from "@/lib/priorities";
+import { writePlannedAction } from "@/lib/priority-actions";
 
 export const runtime = "nodejs";
 
@@ -36,25 +37,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: plan.error }, { status: 400 });
   }
 
-  const userId = session.user.id ?? null;
   try {
-    if (plan.kind === "complete_task") {
-      await prisma.task.updateMany({ where: { id: plan.taskId, completed: false }, data: { completed: true } });
-    } else {
-      const data = {
-        fingerprint: plan.fingerprint,
-        dismissed: plan.dismissed,
-        snoozedUntil: plan.snoozedUntil,
-        note: plan.note,
-        userId,
-      };
-      await prisma.$transaction([
-        prisma.priorityDismissal.upsert({ where: { itemKey: plan.itemKey }, create: { itemKey: plan.itemKey, ...data }, update: data }),
-        ...(plan.activity
-          ? [prisma.activity.create({ data: { leadId: plan.activity.leadId, type: "NOTE" as const, detail: plan.activity.detail, userId } })]
-          : []),
-      ]);
-    }
+    await writePlannedAction(prisma, plan, session.user.id ?? null);
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error(`Failed to apply ${action} to priority ${key}:`, err);

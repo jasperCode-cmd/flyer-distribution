@@ -8,8 +8,12 @@ import { formatPence } from "@/lib/money";
 import { formatWonDate, monthLabel } from "@/lib/profit";
 import {
   automaticItems,
+  awaitingItem,
   buildPriorities,
+  canMarkLost,
   filterRows,
+  groupRows,
+  primaryAction,
   planPriorityAction,
   removeItem,
   taskItems,
@@ -393,8 +397,9 @@ test("every note the CRM writes for itself is worded so the follow-up rule ignor
     "app/api/quote-lead/route.ts": "Service type: ",
     "app/api/crm/profit/jobs/[leadId]/route.ts": "on the Profit page",
     "app/api/crm/profit/jobs/[leadId]/retainer/route.ts": "on the Profit page",
-    // Writes planPriorityAction's Still in talks note, checked above.
-    "app/api/crm/priorities/actions/route.ts": "plan.activity.detail",
+    // Writes planPriorityAction's Still in talks note, checked above; used
+    // by the single-row actions route and the bulk route.
+    "lib/priority-actions.ts": "plan.activity.detail",
   };
   assert.deepEqual(writers.sort(), [...typedByPerson, ...Object.keys(systemWording)].sort());
   for (const [file, wording] of Object.entries(systemWording)) {
@@ -617,8 +622,102 @@ test("the level and type filters", () => {
     })
   );
   assert.deepEqual(filterRows(rows, "HIGH", "ALL").map((r) => r.id), ["lead:L2"]);
-  // The email is underneath Alice's enquiry; the type filter still finds it.
-  assert.deepEqual(filterRows(rows, "ALL", "unanswered_email").map((r) => r.id), ["lead:L1"]);
+  // A type matches the headline, the same as the group a row sits in: the
+  // email is underneath Alice's new enquiry, so she is under New enquiry.
+  assert.deepEqual(filterRows(rows, "ALL", "new_enquiry").map((r) => r.id), ["lead:L1"]);
+  assert.deepEqual(filterRows(rows, "ALL", "unanswered_email"), []);
   assert.deepEqual(filterRows(rows, "ALL", "task").map((r) => r.id), ["task:T1"]);
   assert.deepEqual(filterRows(rows, "LOW", "task"), []);
+});
+
+// --- The page: headline, groups and the main button ------------------------------------
+
+const awaitingSince = (id: string, at: string, o: Partial<LeadFacts> = {}) =>
+  lead({ id, name: `Lead ${id}`, stage: "AWAITING_RESPONSE", activities: [stageChange("Warm / Awaiting Response", at, "Uncontacted")], ...o });
+const replyFrom = (id: string, receivedAt: string) =>
+  email({
+    lead: { id, name: `Lead ${id}`, businessName: null, email: `${id}@example.com`, phone: null, stage: "AWAITING_RESPONSE" },
+    threadId: `thread-${id}`,
+    messageId: `msg-${id}`,
+    receivedAt,
+  });
+
+test("a reply waiting for an answer is the headline over Awaiting Response", () => {
+  // Waiting on them since 1 October; they replied on 10 October.
+  const rows = buildPriorities(
+    inputs({ leads: [awaitingSince("L1", "2026-10-01T10:00:00.000Z")], emails: [replyFrom("L1", "2026-10-10T08:00:00.000Z")] })
+  );
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].primary.type, "unanswered_email", "the reply leads, though Awaiting Response is older");
+  assert.equal(rows[0].primary.title, "They replied, needs an answer");
+  assert.deepEqual(rows[0].others.map((o) => o.type), ["awaiting"]);
+  assert.equal(rows[0].level, "HIGH");
+  assert.equal(primaryAction(rows[0]), "reply");
+  // Still in talks still finds the Awaiting Response reason underneath.
+  assert.equal(awaitingItem(rows[0])?.key, "awaiting:L1");
+  // Once the reply is dealt with, Waiting on them is the headline again.
+  const after = removeItem(rows, "email:thread-L1");
+  assert.equal(after[0].primary.type, "awaiting");
+  assert.equal(after[0].primary.title, "Waiting on them");
+
+  // Only Awaiting Response is jumped: something more pressing on the same
+  // lead, here an overdue High task, stays the headline.
+  const withTask = buildPriorities(
+    inputs({
+      leads: [awaitingSince("L1", "2026-10-01T10:00:00.000Z")],
+      emails: [replyFrom("L1", "2026-10-10T08:00:00.000Z")],
+      tasks: [task({ id: "T1", priority: "HIGH", dueDate: "2026-10-05T12:00:00.000Z", lead: { id: "L1", name: "Lead L1", businessName: null, email: null, phone: null, stage: "AWAITING_RESPONSE" } })],
+    })
+  );
+  assert.deepEqual([withTask[0].primary, ...withTask[0].others].map((i) => i.type), ["task", "unanswered_email", "awaiting"]);
+});
+
+test("rows group by level, then by reason, five at a time with Show all", () => {
+  const leads = Array.from({ length: 12 }, (_, i) => awaitingSince(`A${i}`, `2026-09-${String(10 + i).padStart(2, "0")}T10:00:00.000Z`));
+  const rows = buildPriorities(
+    inputs({
+      leads: [
+        ...leads,
+        lead({ id: "N1", createdAt: "2026-10-10T09:00:00.000Z" }),
+        completedLead({ id: "P1", paymentStatus: "DEPOSIT_PAID", reviewStatus: "RECEIVED", job: job({ completionDate: "2026-09-01T00:00:00.000Z" }) }),
+      ],
+      tasks: [task({ id: "T1" }), task({ id: "T2", dueDate: "2026-10-12T12:00:00.000Z" })],
+    })
+  );
+  const sections = groupRows(rows);
+  // P1's follow-up for more work (Low) sits under its Not fully paid row,
+  // so there is no Low section.
+  assert.deepEqual(sections.map((s) => [s.level, s.count]), [["URGENT", 1], ["HIGH", 13], ["NORMAL", 2]]);
+  const high = sections.find((s) => s.level === "HIGH")!;
+  // Groups sit where their best row ranks: the unpaid job (since 1 Sep) first.
+  assert.deepEqual(high.groups.map((g) => [g.label, g.rows.length, g.shown.length, g.hidden]), [
+    ["Not fully paid", 1, 1, 0],
+    ["Waiting on them", 12, 5, 7],
+  ]);
+  // The first five in ranking order: the longest waiting.
+  assert.deepEqual(high.groups[1].shown.map((r) => r.id), ["lead:A0", "lead:A1", "lead:A2", "lead:A3", "lead:A4"]);
+  assert.equal(sections.find((s) => s.level === "NORMAL")!.groups[0].label, "Tasks");
+  // Show all opens just that group.
+  const open = groupRows(rows, new Set(["HIGH:awaiting"]));
+  const waiting = open.find((s) => s.level === "HIGH")!.groups[1];
+  assert.deepEqual([waiting.shown.length, waiting.hidden], [12, 0]);
+  assert.deepEqual(waiting.shown.map((r) => r.id), waiting.rows.map((r) => r.id));
+  assert.deepEqual(high.groups[0].rows[0].others.map((o) => o.title), ["Follow up for more work"]);
+});
+
+test("each row's main button: Reply, Call, Email or Open", () => {
+  const replyRow = buildPriorities(inputs({ leads: [awaitingSince("L1", "2026-10-01T10:00:00.000Z")], emails: [replyFrom("L1", "2026-10-10T08:00:00.000Z")] }))[0];
+  assert.equal(primaryAction(replyRow), "reply");
+  const withPhone = buildPriorities(inputs({ leads: [awaitingSince("L2", "2026-10-01T10:00:00.000Z")] }))[0];
+  assert.equal(primaryAction(withPhone), "call");
+  const noPhone = buildPriorities(inputs({ leads: [awaitingSince("L3", "2026-10-01T10:00:00.000Z", { phone: null })] }))[0];
+  assert.equal(primaryAction(noPhone), "email");
+  const nothing = buildPriorities(inputs({ leads: [awaitingSince("L4", "2026-10-01T10:00:00.000Z", { phone: null, email: null })] }))[0];
+  assert.equal(primaryAction(nothing), "open");
+  assert.equal(primaryAction(buildPriorities(inputs({ leads: [completedLead()] }))[0]), "open");
+  const loneTask = buildPriorities(inputs({ tasks: [task()] }))[0];
+  assert.equal(primaryAction(loneTask), null, "a task with no lead has nothing to open");
+  assert.equal(canMarkLost(loneTask), false);
+  assert.equal(canMarkLost(withPhone), true);
+  assert.equal(canMarkLost(buildPriorities(inputs({ leads: [lead({ stage: "LOST", source: "WEBSITE_QUOTE_FORM" })], tasks: [task({ lead: { id: "L1", name: "Alice Smith", businessName: null, email: null, phone: null, stage: "LOST" } })] }))[0]), false);
 });
