@@ -1,11 +1,12 @@
 import "server-only";
 import { sendLeadEmailAndRecord } from "./send-lead-email";
 import type { SendEmailFn, SendLeadEmailPrisma, SendLeadEmailResult } from "./send-lead-email";
+import type { SignatureOutcome } from "./gmail";
 import type { InboxLeadMatch } from "./inbox-leads";
 
 export type InboxReplyResult =
   | SendLeadEmailResult
-  | { ok: true; movedToAwaitingResponse: false; threadId: string };
+  | { ok: true; movedToAwaitingResponse: false; threadId: string; signature?: SignatureOutcome };
 
 // A reply from the inbox, always sent to the recipient the server worked out
 // from the thread (the Reply-To when there is a single valid one, otherwise
@@ -52,5 +53,5 @@ export async function sendInboxReply(params: {
   if (!result.ok) {
     return { ok: false, sent: false, reason: result.reason, message: result.message };
   }
-  return { ok: true, movedToAwaitingResponse: false, threadId: result.data.threadId };
+  return { ok: true, movedToAwaitingResponse: false, threadId: result.data.threadId, signature: result.data.signature };
 }

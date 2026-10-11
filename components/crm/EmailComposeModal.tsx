@@ -12,6 +12,24 @@ export type ReplyContext = {
   lastMessageId: string;
 };
 
+export type SendResult = {
+  movedToAwaitingResponse: boolean;
+  // "unavailable" means our Gmail signature couldn't be loaded, so the
+  // email went without it.
+  signature?: "added" | "none" | "unavailable";
+};
+
+// The confirmation text after a send, noting when the signature was left off.
+export function sentLabel(kind: "Email" | "Reply", result: SendResult): string {
+  return result.signature === "unavailable" ? `${kind} sent without the signature` : `${kind} sent`;
+}
+
+type SignaturePreview =
+  | { status: "loading" }
+  | { status: "found"; text: string; embeddedImages: number }
+  | { status: "none" }
+  | { status: "unavailable" };
+
 export default function EmailComposeModal({
   open,
   onClose,
@@ -40,14 +58,40 @@ export default function EmailComposeModal({
   configuredKnown: boolean;
   userFirstName: string;
   replyTo: ReplyContext | null;
-  onSent: (result: { movedToAwaitingResponse: boolean }) => void;
+  onSent: (result: SendResult) => void;
   onError: (message: string) => void;
 }) {
   const defaultBody = `\nKind regards,\n${userFirstName}`;
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState(defaultBody);
   const [sending, setSending] = useState(false);
+  const [signature, setSignature] = useState<SignaturePreview>({ status: "loading" });
   const bodyRef = useRef<HTMLTextAreaElement>(null);
+
+  // Our Gmail signature, as plain text, to show what will be added.
+  useEffect(() => {
+    if (!open || !configuredKnown || !configured) return;
+    let cancelled = false;
+    setSignature({ status: "loading" });
+    fetch("/api/crm/gmail/signature")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled) return;
+        if (data?.status === "found" && typeof data.text === "string") {
+          setSignature({ status: "found", text: data.text, embeddedImages: data.images?.embedded ?? 0 });
+        } else if (data?.status === "none") {
+          setSignature({ status: "none" });
+        } else {
+          setSignature({ status: "unavailable" });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setSignature({ status: "unavailable" });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, configured, configuredKnown]);
 
   useEffect(() => {
     if (!open) return;
@@ -89,7 +133,7 @@ export default function EmailComposeModal({
         setSending(false);
         return;
       }
-      onSent({ movedToAwaitingResponse: !!data.movedToAwaitingResponse });
+      onSent({ movedToAwaitingResponse: !!data.movedToAwaitingResponse, signature: data.signature });
       setSending(false);
       onClose();
     } catch {
@@ -164,6 +208,35 @@ export default function EmailComposeModal({
               rows={10}
               className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
+
+            <div className="mt-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2">
+              {signature.status === "loading" && (
+                <p className="text-[11px] text-gray-400">Loading our Gmail signature...</p>
+              )}
+              {signature.status === "found" && (
+                <>
+                  <p className="text-[11px] font-semibold text-gray-500">
+                    Our Gmail signature will be added below your message
+                  </p>
+                  <p className="mt-1 max-h-28 overflow-y-auto text-xs text-gray-500 whitespace-pre-line wrap-break-word">
+                    {signature.text}
+                  </p>
+                  {signature.embeddedImages > 0 && (
+                    <p className="mt-1 text-[11px] text-amber-700">
+                      Some images in the signature are embedded rather than linked, so they may not show.
+                    </p>
+                  )}
+                </>
+              )}
+              {signature.status === "none" && (
+                <p className="text-[11px] text-gray-500">No Gmail signature is set up, so none will be added.</p>
+              )}
+              {signature.status === "unavailable" && (
+                <p className="text-[11px] text-amber-700">
+                  Couldn&apos;t load our Gmail signature. The email will be sent without it.
+                </p>
+              )}
+            </div>
 
             <p className="text-[11px] text-gray-400 mt-2">{SENDER_LABEL}</p>
 

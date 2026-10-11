@@ -7,7 +7,7 @@ import QuickLogModal from "./QuickLogModal";
 import LostReasonModal from "./LostReasonModal";
 import ScheduleFollowUpModal from "./ScheduleFollowUpModal";
 import DeleteLeadModal from "./DeleteLeadModal";
-import EmailComposeModal, { type ReplyContext } from "./EmailComposeModal";
+import EmailComposeModal, { sentLabel, type ReplyContext, type SendResult } from "./EmailComposeModal";
 import EmailsSection, { type EmailsState, type ConversationMessage } from "./EmailsSection";
 import { usePaymentReviewEditor } from "./usePaymentReviewEditor";
 import {
@@ -234,8 +234,8 @@ export default function LeadDetail({
     });
   }
 
-  function handleEmailSent(result: { movedToAwaitingResponse: boolean }) {
-    setToast({ text: "Email sent", kind: "success" });
+  function handleEmailSent(result: SendResult) {
+    setToast({ text: sentLabel("Email", result), kind: "success" });
     if (result.movedToAwaitingResponse) {
       setStage("AWAITING_RESPONSE");
       router.refresh();

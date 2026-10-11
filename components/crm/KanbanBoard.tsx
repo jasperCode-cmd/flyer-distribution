@@ -15,7 +15,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import LeadCard, { type KanbanLead } from "./LeadCard";
 import LostReasonModal from "./LostReasonModal";
-import EmailComposeModal, { type ReplyContext } from "./EmailComposeModal";
+import EmailComposeModal, { sentLabel, type ReplyContext } from "./EmailComposeModal";
 import type { ConversationMessage } from "./EmailsSection";
 import { STAGES, STAGE_LABELS } from "@/lib/crm-constants";
 
@@ -411,7 +411,7 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
           replyTo={compose.replyTo}
           onSent={(result) => {
             const leadId = compose.lead.id;
-            setToast({ text: "Email sent", kind: "success" });
+            setToast({ text: sentLabel("Email", result), kind: "success" });
             // The server already moved the lead (and logged it), so this only
             // mirrors it on screen; no second stage PATCH.
             if (result.movedToAwaitingResponse) {

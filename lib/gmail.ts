@@ -2,6 +2,7 @@ import "server-only";
 import { OAuth2Client } from "google-auth-library";
 import { gmail as gmailClient, gmail_v1 } from "@googleapis/gmail";
 import { convert as htmlToText } from "html-to-text";
+import { randomBytes } from "node:crypto";
 
 const SCOPES = ["https://www.googleapis.com/auth/gmail.send", "https://www.googleapis.com/auth/gmail.readonly"];
 const MAX_MESSAGES = 30;
@@ -161,26 +162,145 @@ function base64UrlDecode(input: string): string {
   return Buffer.from(padded, "base64").toString("utf-8");
 }
 
+// Quoted-printable (RFC 2045) for a UTF-8 text part: readable in the raw
+// message, safe for any character, and no encoded line over 76 characters.
+export function encodeQuotedPrintable(text: string): string {
+  return text
+    .replace(/\r\n|\r|\n/g, "\n")
+    .split("\n")
+    .map((line) => {
+      const bytes = Buffer.from(line, "utf-8");
+      const tokens: string[] = [];
+      bytes.forEach((b, i) => {
+        const trailingSpace = (b === 32 || b === 9) && i === bytes.length - 1;
+        const literal = b >= 33 && b <= 126 && b !== 61;
+        tokens.push(literal || ((b === 32 || b === 9) && !trailingSpace)
+          ? String.fromCharCode(b)
+          : `=${b.toString(16).toUpperCase().padStart(2, "0")}`);
+      });
+      const out: string[] = [];
+      let current = "";
+      for (const token of tokens) {
+        if (current.length + token.length > 75) {
+          out.push(`${current}=`);
+          current = "";
+        }
+        current += token;
+      }
+      out.push(current);
+      return out.join("\r\n");
+    })
+    .join("\r\n");
+}
+
+export function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// Our own Gmail signature as plain text, for the text/plain part and the
+// compose preview. Images are left out; a link keeps its address only when
+// the text doesn't already show it.
+const SIGNATURE_HTML_TO_TEXT = {
+  wordwrap: false as const,
+  selectors: [
+    { selector: "a", options: { hideLinkHrefIfSameAsText: true } },
+    { selector: "img", format: "skip" },
+  ],
+};
+
+// A link whose text is already its address (ignoring https://, mailto:, tel:
+// and spacing) is shown once, not as "07700 900999 [tel:07700900999]".
+function sameLink(text: string, href: string): boolean {
+  const tidy = (v: string) =>
+    v.trim().toLowerCase().replace(/^(https?:\/\/|mailto:|tel:)/, "").replace(/\/$/, "").replace(/[\s().-]/g, "");
+  return tidy(text) !== "" && tidy(text) === tidy(href);
+}
+
+export function signatureToText(html: string): string {
+  const withoutRepeatedLinks = html.replace(
+    /<a\b([^>]*?)\bhref\s*=\s*(["'])(.*?)\2([^>]*)>([^<]*)<\/a>/gi,
+    (whole, before: string, _q: string, href: string, after: string, text: string) =>
+      sameLink(text, href) ? `<a${before}${after}>${text}</a>` : whole
+  );
+  return htmlToText(withoutRepeatedLinks, SIGNATURE_HTML_TO_TEXT).trim();
+}
+
+// Images in a signature only show for the recipient when they're linked by
+// URL. Embedded ones (data: or cid:) can't be sent from here.
+export function describeSignatureImages(html: string): { linked: number; embedded: number } {
+  let linked = 0;
+  let embedded = 0;
+  for (const match of html.matchAll(/<img\b[^>]*?\bsrc\s*=\s*["']?([^"'\s>]+)/gi)) {
+    if (/^https?:\/\//i.test(match[1])) linked++;
+    else embedded++;
+  }
+  return { linked, embedded };
+}
+
+function newBoundary(): string {
+  return `fdh_${randomBytes(12).toString("hex")}`;
+}
+
+// Every email goes out as multipart/alternative: a text/plain part (the
+// body, then the signature as plain text) and a text/html part (the body
+// HTML-escaped with line breaks as <br>, then our signature inside a
+// gmail_signature div, the way Gmail itself sends it). The body is always
+// escaped, so nothing typed can become HTML. Threading headers are exactly
+// as before.
 export function buildRawMessage(params: {
   from: string;
   to: string;
   subject: string;
   body: string;
   inReplyTo?: string | null;
+  signatureHtml?: string | null;
+  boundary?: string;
 }): string {
+  const boundary = params.boundary ?? newBoundary();
+  const signatureHtml = params.signatureHtml?.trim() || null;
+  const body = params.body.replace(/\r\n|\r/g, "\n");
+
+  const plain = signatureHtml ? `${body}\n\n-- \n${signatureToText(signatureHtml)}` : body;
+  const htmlBody = escapeHtml(body).replace(/\n/g, "<br>\n");
+  const html =
+    `<div dir="ltr">${htmlBody}` +
+    (signatureHtml
+      ? `<br clear="all"><br>\n<span class="gmail_signature_prefix">-- </span><br>\n` +
+        `<div dir="ltr" class="gmail_signature" data-smartmail="gmail_signature">${signatureHtml}</div>`
+      : "") +
+    `</div>`;
+
   const lines = [
     `From: ${params.from}`,
     `To: ${params.to}`,
     `Subject: ${encodeMimeHeader(params.subject)}`,
     "MIME-Version: 1.0",
-    'Content-Type: text/plain; charset="UTF-8"',
-    "Content-Transfer-Encoding: 8bit",
+    `Content-Type: multipart/alternative; boundary="${boundary}"`,
   ];
   if (params.inReplyTo) {
     lines.push(`In-Reply-To: ${params.inReplyTo}`);
     lines.push(`References: ${params.inReplyTo}`);
   }
-  lines.push("", params.body);
+  lines.push(
+    "",
+    `--${boundary}`,
+    'Content-Type: text/plain; charset="UTF-8"',
+    "Content-Transfer-Encoding: quoted-printable",
+    "",
+    encodeQuotedPrintable(plain),
+    `--${boundary}`,
+    'Content-Type: text/html; charset="UTF-8"',
+    "Content-Transfer-Encoding: quoted-printable",
+    "",
+    encodeQuotedPrintable(html),
+    `--${boundary}--`,
+    ""
+  );
   return base64UrlEncode(lines.join("\r\n"));
 }
 
@@ -476,37 +596,140 @@ function isNotFound(err: unknown): boolean {
 
 // --- Network-calling functions -----------------------------------------
 
-export async function sendEmail(params: {
+// --- Our Gmail signature -------------------------------------------------------
+
+// Read from Gmail's own settings for GMAIL_SENDER_ADDRESS (a read-only call
+// the existing gmail.readonly scope allows), kept in server memory only for
+// 10 minutes. Never stored in the database and never logged.
+const SIGNATURE_CACHE_MS = 10 * 60 * 1000;
+
+export type SignatureState = { status: "found"; html: string } | { status: "none" } | { status: "unavailable" };
+export type SignatureOutcome = "added" | "none" | "unavailable";
+export type SendAsEntry = { sendAsEmail?: string | null; signature?: string | null };
+
+let signatureCache: { sender: string; value: SignatureState; expires: number } | null = null;
+
+export function clearSignatureCache() {
+  signatureCache = null;
+}
+
+export async function loadSignature(
+  listSendAs: () => Promise<SendAsEntry[]>,
+  senderAddress: string,
+  now: number = Date.now()
+): Promise<SignatureState> {
+  const sender = senderAddress.toLowerCase();
+  if (signatureCache && signatureCache.sender === sender && signatureCache.expires > now) {
+    return signatureCache.value;
+  }
+  try {
+    const entries = await listSendAs();
+    const match = entries.find((e) => (e.sendAsEmail ?? "").toLowerCase() === sender);
+    if (!match) {
+      console.error("Gmail signature not loaded:", "sender address not found");
+      return { status: "unavailable" };
+    }
+    const html = (match.signature ?? "").trim();
+    const value: SignatureState = html ? { status: "found", html } : { status: "none" };
+    signatureCache = { sender, value, expires: now + SIGNATURE_CACHE_MS };
+    return value;
+  } catch (err) {
+    console.error("Gmail signature not loaded:", classifyError(err).reason);
+    return { status: "unavailable" };
+  }
+}
+
+function sendAsLister(client: gmail_v1.Gmail): () => Promise<SendAsEntry[]> {
+  return async () => (await client.users.settings.sendAs.list({ userId: "me" })).data.sendAs ?? [];
+}
+
+// For the compose window: our signature as plain text, never HTML.
+export async function getSignaturePreview(): Promise<
+  GmailResult<
+    | { status: "found"; text: string; images: { linked: number; embedded: number } }
+    | { status: "none" }
+    | { status: "unavailable" }
+  >
+> {
+  const env = readEnv();
+  if (!env) return { ok: false, reason: "not_configured", message: "Gmail is not connected." };
+  const state = await loadSignature(sendAsLister(buildClient(env)), env.senderAddress);
+  if (state.status !== "found") return { ok: true, data: state };
+  return {
+    ok: true,
+    data: { status: "found", text: signatureToText(state.html), images: describeSignatureImages(state.html) },
+  };
+}
+
+// --- Sending -------------------------------------------------------------------
+
+export type GmailSendApi = {
+  send(requestBody: { raw: string; threadId?: string }): Promise<{ id: string; threadId: string }>;
+  listSendAs(): Promise<SendAsEntry[]>;
+};
+
+export type SendEmailParams = {
   to: string;
   subject: string;
   body: string;
   threadContext?: ThreadContext | null;
-}): Promise<GmailResult<{ messageId: string; threadId: string }>> {
+};
+
+// The send itself, given the two Gmail calls it needs, so a test can drive
+// it with a fake. A signature that can't be loaded never stops the email:
+// it goes without one and the result says so.
+export async function sendEmailVia(
+  api: GmailSendApi,
+  senderAddress: string,
+  params: SendEmailParams,
+  now: number = Date.now()
+): Promise<GmailResult<{ messageId: string; threadId: string; signature: SignatureOutcome }>> {
+  const signature = await loadSignature(() => api.listSendAs(), senderAddress, now);
+  const raw = buildRawMessage({
+    from: senderAddress,
+    to: params.to,
+    subject: params.subject,
+    body: params.body,
+    inReplyTo: params.threadContext?.lastMessageId ?? null,
+    signatureHtml: signature.status === "found" ? signature.html : null,
+  });
+
+  try {
+    const res = await api.send({ raw, threadId: params.threadContext?.threadId });
+    return {
+      ok: true,
+      data: {
+        messageId: res.id,
+        threadId: res.threadId,
+        signature: signature.status === "found" ? "added" : signature.status,
+      },
+    };
+  } catch (err) {
+    const { reason, message } = classifyError(err);
+    console.error("Gmail send failed:", reason);
+    return { ok: false, reason, message };
+  }
+}
+
+export async function sendEmail(
+  params: SendEmailParams
+): Promise<GmailResult<{ messageId: string; threadId: string; signature: SignatureOutcome }>> {
   const env = readEnv();
   if (!env) return { ok: false, reason: "not_configured", message: "Gmail is not connected." };
 
   try {
     const client = buildClient(env);
-    const raw = buildRawMessage({
-      from: env.senderAddress,
-      to: params.to,
-      subject: params.subject,
-      body: params.body,
-      inReplyTo: params.threadContext?.lastMessageId ?? null,
-    });
-
-    const res = await client.users.messages.send({
-      userId: "me",
-      requestBody: {
-        raw,
-        threadId: params.threadContext?.threadId,
+    return await sendEmailVia(
+      {
+        async send(requestBody) {
+          const res = await client.users.messages.send({ userId: "me", requestBody });
+          return { id: res.data.id ?? "", threadId: res.data.threadId ?? "" };
+        },
+        listSendAs: sendAsLister(client),
       },
-    });
-
-    return {
-      ok: true,
-      data: { messageId: res.data.id ?? "", threadId: res.data.threadId ?? "" },
-    };
+      env.senderAddress,
+      params
+    );
   } catch (err) {
     const { reason, message } = classifyError(err);
     console.error("Gmail send failed:", reason);

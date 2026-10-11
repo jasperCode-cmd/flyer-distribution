@@ -87,5 +87,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     recordedOnLead: !!(lead && !lead.scrapped),
     movedToAwaitingResponse: outcome.movedToAwaitingResponse,
     threadId: outcome.threadId,
+    signature: outcome.signature ?? "none",
   });
 }

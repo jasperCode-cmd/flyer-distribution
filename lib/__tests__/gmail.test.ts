@@ -25,7 +25,7 @@ test("encodeMimeHeader RFC2047-encodes non-ASCII text", () => {
   assert.match(encoded, /^=\?UTF-8\?B\?.*\?=$/);
 });
 
-test("buildRawMessage produces a plain text message with the expected headers", () => {
+test("buildRawMessage produces a message with the expected headers and a plain text part", () => {
   const raw = buildRawMessage({
     from: "flyerdistributionhampshire@gmail.com",
     to: "lead@example.com",
@@ -36,8 +36,8 @@ test("buildRawMessage produces a plain text message with the expected headers", 
   assert.match(decoded, /^From: flyerdistributionhampshire@gmail\.com\r\n/);
   assert.match(decoded, /To: lead@example\.com\r\n/);
   assert.match(decoded, /Subject: Your quote\r\n/);
-  assert.match(decoded, /Content-Type: text\/plain; charset="UTF-8"\r\n/);
-  assert.match(decoded, /\r\n\r\nHello there$/);
+  assert.match(decoded, /Content-Type: multipart\/alternative; boundary="fdh_[0-9a-f]{24}"\r\n/);
+  assert.match(decoded, /Content-Type: text\/plain; charset="UTF-8"\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\nHello there\r\n/);
   assert.ok(!decoded.includes("In-Reply-To"), "no threading headers on a fresh send");
 });
 

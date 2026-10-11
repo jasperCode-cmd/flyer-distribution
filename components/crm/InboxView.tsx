@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import EmailComposeModal, { type ReplyContext } from "./EmailComposeModal";
+import EmailComposeModal, { sentLabel, type ReplyContext } from "./EmailComposeModal";
 import type { ConversationMessage } from "./EmailsSection";
 import { STAGE_LABELS } from "@/lib/crm-constants";
 
@@ -507,7 +507,7 @@ export default function InboxView() {
           replyTo={replyContext}
           onSent={(result) => {
             setToast({
-              text: result.movedToAwaitingResponse ? "Reply sent. Lead moved to Awaiting Response." : "Reply sent",
+              text: `${sentLabel("Reply", result)}${result.movedToAwaitingResponse ? ". Lead moved to Awaiting Response." : ""}`,
               kind: "success",
             });
             loadThread(thread.id);

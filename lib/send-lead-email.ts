@@ -1,7 +1,7 @@
 import "server-only";
 import { awaitingResponseStageData, shouldMoveToAwaitingResponse } from "./crm-data";
 import { STAGE_LABELS } from "./crm-constants";
-import type { GmailResult, ThreadContext } from "./gmail";
+import type { GmailResult, SignatureOutcome, ThreadContext } from "./gmail";
 
 // Minimal shapes of the Prisma calls this needs, so a test can pass a plain
 // mock object instead of a real PrismaClient. The real route passes the
@@ -20,10 +20,10 @@ export type SendEmailFn = (params: {
   subject: string;
   body: string;
   threadContext?: ThreadContext | null;
-}) => Promise<GmailResult<{ messageId: string; threadId: string }>>;
+}) => Promise<GmailResult<{ messageId: string; threadId: string; signature?: SignatureOutcome }>>;
 
 export type SendLeadEmailResult =
-  | { ok: true; movedToAwaitingResponse: boolean; threadId: string }
+  | { ok: true; movedToAwaitingResponse: boolean; threadId: string; signature?: SignatureOutcome }
   | { ok: false; sent: false; reason: "not_configured" | "reconnect" | "error"; message: string }
   | { ok: false; sent: true; message: string };
 
@@ -96,5 +96,5 @@ export async function sendLeadEmailAndRecord(params: {
     };
   }
 
-  return { ok: true, movedToAwaitingResponse, threadId: result.data.threadId };
+  return { ok: true, movedToAwaitingResponse, threadId: result.data.threadId, signature: result.data.signature };
 }
