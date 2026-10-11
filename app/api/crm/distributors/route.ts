@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { buildDistributorData } from "@/lib/distributors";
 
 export async function GET() {
   const session = await auth();
@@ -21,17 +22,11 @@ export async function POST(req: Request) {
   }
 
   const { name, phone, email, notes } = await req.json();
-  if (!name || typeof name !== "string" || !name.trim()) {
-    return NextResponse.json({ error: "Distributor name is required" }, { status: 400 });
+  const built = buildDistributorData({ name, phone, email, notes });
+  if (!built.ok) {
+    return NextResponse.json({ error: built.error }, { status: 400 });
   }
 
-  const distributor = await prisma.distributor.create({
-    data: {
-      name: name.trim(),
-      phone: typeof phone === "string" && phone.trim() ? phone.trim() : null,
-      email: typeof email === "string" && email.trim() ? email.trim() : null,
-      notes: typeof notes === "string" && notes.trim() ? notes.trim() : null,
-    },
-  });
+  const distributor = await prisma.distributor.create({ data: built.data });
   return NextResponse.json({ distributor }, { status: 201 });
 }

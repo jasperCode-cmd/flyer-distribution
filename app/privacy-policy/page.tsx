@@ -161,10 +161,13 @@ export default function PrivacyPolicyPage() {
               <li>when you&apos;re available</li>
             </ul>
             <p className={`${p} mt-3`}>
-              We use this to look at your application and get back to you about
-              it, most likely by message using the phone number you gave us. If
-              you start delivering for us, we keep your name, contact details
-              and notes in our records so we can organise your rounds.
+              Your application is emailed to us and also saved in our own
+              private records system, so we can keep track of applications,
+              spot duplicates and organise them. We use this to look at your
+              application and get back to you about it, most likely by message
+              using the phone number you gave us. If you start delivering for
+              us, we keep your name, contact details and notes in our records
+              so we can organise your rounds.
             </p>
             <p className={`${p} mt-3`}>
               <strong className="font-semibold text-gray-800">Young people.</strong>{" "}

@@ -222,6 +222,39 @@ function extractBody(part: gmail_v1.Schema$MessagePart | undefined): string {
   return "";
 }
 
+// For reading form notification emails: both text versions of a message,
+// never its HTML. The HTML version is converted with every table cell on
+// its own line, because the default conversion runs a table's cells
+// together ("NameSam Example") and the fields could not be told apart.
+const FORM_HTML_TO_TEXT = {
+  wordwrap: false as const,
+  selectors: [
+    ...["table", "tbody", "thead", "tfoot", "tr", "td", "th"].map((selector) => ({ selector, format: "block" })),
+    ...["h1", "h2", "h3", "h4"].map((selector) => ({ selector, options: { uppercase: false } })),
+    { selector: "a", options: { ignoreHref: true } },
+    { selector: "img", format: "skip" },
+  ],
+};
+
+export function extractTextVariants(part: gmail_v1.Schema$MessagePart | undefined): {
+  plain: string | null;
+  fromHtml: string | null;
+} {
+  let plain: string | null = null;
+  let html: string | null = null;
+  function walk(p: gmail_v1.Schema$MessagePart) {
+    const mimeType = p.mimeType ?? "";
+    if (mimeType === "text/plain" && p.body?.data && plain === null && !p.filename) {
+      plain = base64UrlDecode(p.body.data);
+    } else if (mimeType === "text/html" && p.body?.data && html === null && !p.filename) {
+      html = base64UrlDecode(p.body.data);
+    }
+    p.parts?.forEach(walk);
+  }
+  if (part) walk(part);
+  return { plain, fromHtml: html === null ? null : htmlToText(html, FORM_HTML_TO_TEXT) };
+}
+
 function hasAnyAttachment(part: gmail_v1.Schema$MessagePart | undefined): boolean {
   if (!part) return false;
   if (part.filename && part.filename.length > 0) return true;
@@ -534,6 +567,58 @@ export async function getConversation(leadEmail: string): Promise<GmailResult<Co
   } catch (err) {
     const { reason, message } = classifyError(err);
     console.error("Gmail conversation fetch failed:", reason);
+    return { ok: false, reason, message };
+  }
+}
+
+// --- Reading application notification emails (read-only) -------------------
+
+export type GmailMessageReader = {
+  listMessageIds(q: string, pageToken?: string): Promise<{
+    messages: { id: string; threadId: string }[];
+    nextPageToken: string | null;
+  }>;
+  // Full thread, or null when it doesn't exist.
+  getThread(threadId: string): Promise<gmail_v1.Schema$Thread | null>;
+};
+
+export type GmailReadContext = { senderAddress: string; excluded: string[] };
+
+// Hands fn a reader backed by the real Gmail client, with the exclusion list
+// and our own address. Only list and get calls, under the existing scopes.
+export async function withGmailMessageReader<T>(
+  fn: (reader: GmailMessageReader, context: GmailReadContext) => Promise<T>
+): Promise<GmailResult<T>> {
+  const env = readEnv();
+  if (!env) return { ok: false, reason: "not_configured", message: "Gmail is not connected." };
+
+  try {
+    const client = buildClient(env);
+    const reader: GmailMessageReader = {
+      async listMessageIds(q, pageToken) {
+        const res = await client.users.messages.list({ userId: "me", q, maxResults: 100, pageToken });
+        return {
+          messages: (res.data.messages ?? [])
+            .filter((m) => m.id && m.threadId)
+            .map((m) => ({ id: m.id as string, threadId: m.threadId as string })),
+          nextPageToken: res.data.nextPageToken ?? null,
+        };
+      },
+      async getThread(threadId) {
+        try {
+          const res = await client.users.threads.get({ userId: "me", id: threadId, format: "full" });
+          return res.data;
+        } catch (err) {
+          if (isNotFound(err)) return null;
+          throw err;
+        }
+      },
+    };
+    const data = await fn(reader, { senderAddress: env.senderAddress, excluded: getExcludedAddresses() });
+    return { ok: true, data };
+  } catch (err) {
+    const { reason, message } = classifyError(err);
+    console.error("Gmail application email read failed:", reason);
     return { ok: false, reason, message };
   }
 }

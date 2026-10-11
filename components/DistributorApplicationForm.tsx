@@ -1,6 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import {
+  APPLICATION_HONEYPOT_FIELD,
+  DISTRIBUTOR_APPLICATION_SUBJECT,
+  submitDistributorApplication,
+} from "@/lib/distributor-application-form";
 
 export default function DistributorApplicationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,16 +34,9 @@ export default function DistributorApplicationForm() {
     const data = Object.fromEntries(formData);
 
     try {
-      const res = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-      const json = await res.json();
-      if (json.success) {
+      // Sends Web3Forms exactly what it got before; once it succeeds, a copy
+      // goes to the CRM in the background without affecting this outcome.
+      if (await submitDistributorApplication(data)) {
         setSubmitted(true);
         formRef.current?.reset();
         setArea("");
@@ -73,8 +71,22 @@ export default function DistributorApplicationForm() {
         <input
           type="hidden"
           name="subject"
-          value="New Distributor Application - Flyer Distribution Hampshire"
+          value={DISTRIBUTOR_APPLICATION_SUBJECT}
         />
+
+        {/* Left empty by people; filled only by bots. Kept out of sight and
+            out of the tab order, and never sent to Web3Forms. */}
+        <div aria-hidden="true" className="absolute -left-[10000px] top-auto h-px w-px overflow-hidden">
+          <label htmlFor="dist-extra-details">Leave this empty</label>
+          <input
+            type="text"
+            id="dist-extra-details"
+            name={APPLICATION_HONEYPOT_FIELD}
+            tabIndex={-1}
+            autoComplete="off"
+            defaultValue=""
+          />
+        </div>
 
         {/* Name */}
         <div>

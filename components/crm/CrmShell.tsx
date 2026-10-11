@@ -13,6 +13,7 @@ import {
   storeNavPosition,
   type CrmNavPosition,
 } from "@/lib/crm-nav";
+import { APPLICATIONS_CHANGED_EVENT } from "@/lib/distributor-applications";
 
 // "Add Lead" is deliberately not here — /admin/crm/leads/new is still a
 // live route, reached via the "+ Add Lead" button on the Leads page. The
@@ -26,6 +27,7 @@ const primaryLinks = [
   { href: "/admin/crm/dialer", label: "Dialer" },
   { href: "/admin/crm/calendar", label: "Calendar" },
   { href: "/admin/crm/distributors", label: "Distributors" },
+  { href: "/admin/crm/applications", label: "Applications" },
 ];
 
 // Secondary destinations, grouped under "More" to keep the primary bar short.
@@ -58,6 +60,22 @@ function InboxCount({ count }: { count: { value: number; more: boolean } | null 
   );
 }
 
+const APPLICATIONS_HREF = "/admin/crm/applications";
+
+// Applications still marked New, shown beside the Applications link.
+function ApplicationsCount({ count }: { count: number | null }) {
+  if (!count || count <= 0) return null;
+  const label = count > 99 ? "99+" : String(count);
+  return (
+    <span
+      className="ml-1.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-yellow-400 px-1.5 text-[11px] font-bold leading-5 text-blue-900"
+      aria-label={`${label} new`}
+    >
+      {label}
+    </span>
+  );
+}
+
 export default function CrmShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -65,6 +83,7 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
   const [inboxCount, setInboxCount] = useState<{ value: number; more: boolean } | null>(null);
+  const [applicationsCount, setApplicationsCount] = useState<number | null>(null);
   const moreRef = useRef<HTMLDivElement>(null);
 
   // Desktop navigation position. Layout comes from the data attribute the
@@ -113,6 +132,27 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // A plain database count, so it is refreshed on every CRM navigation and
+  // goes down as soon as an application is moved on from New.
+  useEffect(() => {
+    if (pathname === "/admin/crm/login") return;
+    let cancelled = false;
+    function refresh() {
+      fetch("/api/crm/applications/count")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (!cancelled && typeof data?.count === "number") setApplicationsCount(data.count);
+        })
+        .catch(() => {});
+    }
+    refresh();
+    window.addEventListener(APPLICATIONS_CHANGED_EVENT, refresh);
+    return () => {
+      cancelled = true;
+      window.removeEventListener(APPLICATIONS_CHANGED_EVENT, refresh);
+    };
+  }, [pathname]);
 
   // Dismiss the desktop dropdown on an outside click, the way a menu is
   // expected to behave.
@@ -184,6 +224,7 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
                   >
                     {link.label}
                     {link.href === INBOX_HREF && <InboxCount count={inboxCount} />}
+                    {link.href === APPLICATIONS_HREF && <ApplicationsCount count={applicationsCount} />}
                   </Link>
                 ))}
               </nav>
@@ -267,6 +308,7 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
                   >
                     {link.label}
                     {link.href === INBOX_HREF && <InboxCount count={inboxCount} />}
+                    {link.href === APPLICATIONS_HREF && <ApplicationsCount count={applicationsCount} />}
                   </Link>
                 ))}
 
@@ -396,6 +438,7 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
                   >
                     {link.label}
                     {link.href === INBOX_HREF && <InboxCount count={inboxCount} />}
+                    {link.href === APPLICATIONS_HREF && <ApplicationsCount count={applicationsCount} />}
                   </Link>
                 ))}
 

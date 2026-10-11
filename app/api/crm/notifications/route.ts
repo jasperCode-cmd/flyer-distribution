@@ -13,11 +13,19 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const [websiteLeads, dueCallbacks, { overdue, today }] = await Promise.all([
+  const [websiteLeads, newApplications, dueCallbacks, { overdue, today }] = await Promise.all([
     prisma.lead.findMany({
       where: { scrapped: false, stage: "UNCONTACTED", source: "WEBSITE_QUOTE_FORM" },
       select: { id: true, name: true, createdAt: true },
       orderBy: { createdAt: "desc" },
+    }),
+    // Same idea as website leads: applications that just came in through
+    // the form and haven't been looked at. Imported past applications are
+    // left out, so an import never floods the bell.
+    prisma.distributorApplication.findMany({
+      where: { status: "NEW", source: "WEBSITE_FORM" },
+      select: { id: true, fullName: true, receivedAt: true },
+      orderBy: { receivedAt: "desc" },
     }),
     prisma.lead.findMany({
       where: { scrapped: false, stage: "UNCONTACTED", nextCallableAt: { lte: new Date() } },
@@ -40,7 +48,7 @@ export async function GET() {
     })(),
   }));
 
-  const count = websiteLeads.length + dueCallbacks.length + followUps.length;
+  const count = websiteLeads.length + newApplications.length + dueCallbacks.length + followUps.length;
 
-  return NextResponse.json({ count, websiteLeads, dueCallbacks, followUps });
+  return NextResponse.json({ count, websiteLeads, newApplications, dueCallbacks, followUps });
 }

@@ -8,6 +8,8 @@ const POLL_MS = 45000;
 type Notifications = {
   count: number;
   websiteLeads: { id: string; name: string; createdAt: string }[];
+  // Older responses (a deploy mid-session) may not have this yet.
+  newApplications?: { id: string; fullName: string; receivedAt: string }[];
   dueCallbacks: { id: string; name: string; nextCallableAt: string }[];
   followUps: { id: string; description: string; leadId: string; leadName: string; overdue: boolean }[];
 };
@@ -18,6 +20,7 @@ type Notifications = {
 // Also owns the live inbound-lead toast: a website lead whose id wasn't
 // present on this component's first successful poll, appearing in a later
 // one, is treated as "just arrived" for this browser tab and toasted once.
+// New distributor applications from the website form work the same way.
 // menuAlign="left" opens the menu from the bell's left edge, for the side
 // navigation where there's no room to its left.
 export default function NotificationBell({ menuAlign = "right" }: { menuAlign?: "left" | "right" }) {
@@ -26,6 +29,7 @@ export default function NotificationBell({ menuAlign = "right" }: { menuAlign?: 
   const [toast, setToast] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const knownWebsiteIdsRef = useRef<Set<string> | null>(null);
+  const knownApplicationIdsRef = useRef<Set<string> | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -37,21 +41,35 @@ export default function NotificationBell({ menuAlign = "right" }: { menuAlign?: 
         const next: Notifications = await res.json();
 
         const incomingIds = new Set(next.websiteLeads.map((l) => l.id));
-        if (knownWebsiteIdsRef.current === null) {
+        const applications = next.newApplications ?? [];
+        const incomingApplicationIds = new Set(applications.map((a) => a.id));
+        if (knownWebsiteIdsRef.current === null || knownApplicationIdsRef.current === null) {
           // First poll this tab has ever done — establishes the baseline,
           // deliberately not toasted, or every pre-existing website lead
           // would pop up the moment the CRM is opened.
           knownWebsiteIdsRef.current = incomingIds;
+          knownApplicationIdsRef.current = incomingApplicationIds;
         } else {
           const newOnes = next.websiteLeads.filter((l) => !knownWebsiteIdsRef.current!.has(l.id));
+          const newApplications = applications.filter((a) => !knownApplicationIdsRef.current!.has(a.id));
+          const messages: string[] = [];
           if (newOnes.length > 0) {
-            setToast(
+            messages.push(
               newOnes.length === 1
                 ? `New website enquiry: ${newOnes[0].name}`
                 : `${newOnes.length} new website enquiries just came in`
             );
           }
+          if (newApplications.length > 0) {
+            messages.push(
+              newApplications.length === 1
+                ? `New distributor application: ${newApplications[0].fullName}`
+                : `${newApplications.length} new distributor applications just came in`
+            );
+          }
+          if (messages.length > 0) setToast(messages.join("\n"));
           knownWebsiteIdsRef.current = incomingIds;
+          knownApplicationIdsRef.current = incomingApplicationIds;
         }
 
         if (!cancelled) setData(next);
@@ -135,6 +153,23 @@ export default function NotificationBell({ menuAlign = "right" }: { menuAlign?: 
                     ))}
                   </div>
                 )}
+                {(data!.newApplications ?? []).length > 0 && (
+                  <div>
+                    <p className="px-3 pt-2 pb-1 text-[11px] font-semibold text-gray-400 uppercase tracking-wide">
+                      New Applications
+                    </p>
+                    {data!.newApplications!.map((a) => (
+                      <Link
+                        key={a.id}
+                        href={`/admin/crm/applications/${a.id}`}
+                        onClick={() => setOpen(false)}
+                        className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      >
+                        {a.fullName}
+                      </Link>
+                    ))}
+                  </div>
+                )}
                 {data!.dueCallbacks.length > 0 && (
                   <div>
                     <p className="px-3 pt-2 pb-1 text-[11px] font-semibold text-gray-400 uppercase tracking-wide">
@@ -178,7 +213,7 @@ export default function NotificationBell({ menuAlign = "right" }: { menuAlign?: 
 
       {toast && (
         <div className="fixed top-20 right-4 z-[60] bg-blue-900 text-white text-sm rounded-lg shadow-xl px-4 py-3 flex items-center gap-3 max-w-xs animate-in fade-in">
-          <span className="flex-1">{toast}</span>
+          <span className="flex-1 whitespace-pre-line">{toast}</span>
           <button
             type="button"
             onClick={() => setToast(null)}
