@@ -4,68 +4,30 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import SearchBar from "./SearchBar";
 import NotificationBell from "./NotificationBell";
 import AccountMenu from "./AccountMenu";
+import NavMenu from "./NavMenu";
 import {
   CRM_NAV_ATTRIBUTE,
+  CRM_NAV_GROUPS,
+  isNavItemActive,
   readStoredNavPosition,
   storeNavPosition,
+  type CrmNavItem,
   type CrmNavPosition,
 } from "@/lib/crm-nav";
 import { APPLICATIONS_CHANGED_EVENT } from "@/lib/distributor-applications";
 
-// "Add Lead" is deliberately not here, /admin/crm/leads/new is still a
-// live route, reached via the "+ Add Lead" button on the Leads page. The
-// Leads entry stays highlighted while on it, since the check is a prefix.
-// Dialer sits at the same visual weight as the rest, it's a primary daily
-// workflow, not a secondary destination.
-// The desktop top bar starts at 1024px; narrower screens use the menu
-// button. Links with collapseBelow only sit in the top bar from that width;
-// narrower, they move to the top of the More menu so the bar never runs into
-// the search box. The side and phone menus always list every link in place.
-type NavLink = { href: string; label: string; collapseBelow?: "xl" | "1400" | "2xl" };
+// The links and their groups come from CRM_NAV_GROUPS in lib/crm-nav.ts.
+// The desktop top bar starts at 1024px (narrower screens use the menu
+// button): Dashboard, Leads, Inbox and Dialer are direct links there and
+// Jobs, Team and Tools are dropdowns. The side navigation and phone menu
+// list every group under its own heading.
 
-// Whole class names (not built from parts) so Tailwind generates them.
-const IN_BAR = {
-  xl: "hidden xl:inline-flex",
-  "1400": "hidden min-[1400px]:inline-flex",
-  "2xl": "hidden 2xl:inline-flex",
-};
-const IN_MORE = { xl: "block xl:hidden", "1400": "block min-[1400px]:hidden", "2xl": "block 2xl:hidden" };
-const MORE_HIGHLIGHT = {
-  xl: "max-xl:bg-blue-800 max-xl:text-yellow-400",
-  "1400": "max-[1399px]:bg-blue-800 max-[1399px]:text-yellow-400",
-  "2xl": "max-2xl:bg-blue-800 max-2xl:text-yellow-400",
-};
-
-const primaryLinks: NavLink[] = [
-  { href: "/admin/crm", label: "Dashboard" },
-  { href: "/admin/crm/leads", label: "Leads" },
-  { href: "/admin/crm/inbox", label: "Inbox" },
-  { href: "/admin/crm/dialer", label: "Dialer" },
-  { href: "/admin/crm/calendar", label: "Calendar", collapseBelow: "1400" },
-  { href: "/admin/crm/distributors", label: "Distributors", collapseBelow: "1400" },
-  { href: "/admin/crm/applications", label: "Applications", collapseBelow: "xl" },
-  { href: "/admin/crm/profit", label: "Profit", collapseBelow: "2xl" },
-];
-const collapsibleLinks = primaryLinks.filter((l) => l.collapseBelow);
-
-// Secondary destinations, grouped under "More" to keep the primary bar short.
-const moreLinks: NavLink[] = [
-  { href: "/admin/crm/jobs-by-area", label: "Jobs by Area" },
-  { href: "/admin/crm/map", label: "Map" },
-  { href: "/admin/crm/tags", label: "Tags" },
-  { href: "/admin/crm/import", label: "Import" },
-  { href: "/admin/crm/scrapped-leads", label: "Scrapped Leads" },
-];
-
-function isActive(pathname: string, href: string): boolean {
-  return href === "/admin/crm" ? pathname === "/admin/crm" : pathname.startsWith(href);
-}
-
-const INBOX_HREF = "/admin/crm/inbox";
+// Same style as the old "More" heading in the side navigation.
+const GROUP_HEADING = "text-[11px] font-semibold uppercase tracking-wide text-blue-200";
 
 // Unread conversations in the Gmail inbox, shown beside the Inbox link.
 // Nothing when Gmail isn't connected, the count is zero, or it failed.
@@ -81,8 +43,6 @@ function InboxCount({ count }: { count: { value: number; more: boolean } | null 
     </span>
   );
 }
-
-const APPLICATIONS_HREF = "/admin/crm/applications";
 
 // Applications still marked New, shown beside the Applications link.
 function ApplicationsCount({ count, className = "" }: { count: number | null; className?: string }) {
@@ -102,11 +62,10 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
-  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
+  // Which top bar dropdown is open, if any: only one at a time.
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [inboxCount, setInboxCount] = useState<{ value: number; more: boolean } | null>(null);
   const [applicationsCount, setApplicationsCount] = useState<number | null>(null);
-  const moreRef = useRef<HTMLDivElement>(null);
 
   // Desktop navigation position. Layout comes from the data attribute the
   // CRM layout's inline script puts on <html> before first paint; this state
@@ -135,7 +94,7 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
     storeNavPosition(position);
     document.documentElement.setAttribute(CRM_NAV_ATTRIBUTE, position);
     setNavPosition(position);
-    setMoreOpen(false);
+    setOpenMenu(null);
   }
 
   // Fetched once when the shell mounts (it persists across CRM navigation).
@@ -176,24 +135,20 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
     };
   }, [pathname]);
 
-  // Dismiss the desktop dropdown on an outside click, the way a menu is
-  // expected to behave.
-  useEffect(() => {
-    if (!moreOpen) return;
-    function onDocClick(e: MouseEvent) {
-      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
-        setMoreOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
-  }, [moreOpen]);
-
   // Navigating away should never leave a menu hanging open.
   useEffect(() => {
-    setMoreOpen(false);
-    setMobileMoreOpen(false);
+    setOpenMenu(null);
   }, [pathname]);
+
+  const renderCount = useCallback(
+    (item: CrmNavItem) =>
+      item.count === "inbox" ? (
+        <InboxCount count={inboxCount} />
+      ) : item.count === "applications" ? (
+        <ApplicationsCount count={applicationsCount} />
+      ) : null,
+    [inboxCount, applicationsCount]
+  );
 
   // The login page renders standalone, without the authenticated shell.
   if (pathname === "/admin/crm/login") {
@@ -233,39 +188,36 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
               <div className="mb-4 px-1">
                 <SearchBar />
               </div>
-              <nav aria-label="Main" className="space-y-1">
-                {primaryLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
-                      isActive(pathname, link.href)
-                        ? "bg-blue-800 text-yellow-400"
-                        : "text-blue-100 hover:bg-blue-800/60"
-                    }`}
+              <nav aria-label="Main">
+                {CRM_NAV_GROUPS.map((group) => (
+                  <div
+                    key={group.id}
+                    role="group"
+                    aria-labelledby={group.label ? `side-nav-${group.id}` : undefined}
+                    aria-label={group.label ? undefined : "Dashboard"}
+                    className="space-y-1"
                   >
-                    {link.label}
-                    {link.href === INBOX_HREF && <InboxCount count={inboxCount} />}
-                    {link.href === APPLICATIONS_HREF && <ApplicationsCount count={applicationsCount} />}
-                  </Link>
-                ))}
-              </nav>
-              <p className="mt-5 mb-1 px-3 text-[11px] font-semibold uppercase tracking-wide text-blue-200">
-                More
-              </p>
-              <nav aria-label="More" className="space-y-1">
-                {moreLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
-                      isActive(pathname, link.href)
-                        ? "bg-blue-800 text-yellow-400"
-                        : "text-blue-100 hover:bg-blue-800/60"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
+                    {group.label && (
+                      <p id={`side-nav-${group.id}`} className={`mt-5 mb-1 px-3 ${GROUP_HEADING}`}>
+                        {group.label}
+                      </p>
+                    )}
+                    {group.items.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        aria-current={isNavItemActive(pathname, item.href) ? "page" : undefined}
+                        className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
+                          isNavItemActive(pathname, item.href)
+                            ? "bg-blue-800 text-yellow-400"
+                            : "text-blue-100 hover:bg-blue-800/60"
+                        }`}
+                      >
+                        {item.label}
+                        {renderCount(item)}
+                      </Link>
+                    ))}
+                  </div>
                 ))}
               </nav>
             </>
@@ -302,7 +254,9 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <header className="bg-blue-900 text-white sticky top-0 z-40 lg:crm-side:hidden">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 flex items-center justify-between h-20">
+        {/* From 1024 to 1279px the bar is tight, so the side padding, the
+            "CRM" label and the search box give way to the navigation. */}
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-4 xl:px-6 flex items-center justify-between h-20">
           <div className="flex items-center gap-4 min-w-0">
             <Link href="/admin/crm" className="shrink-0 flex items-center gap-3">
               <Image
@@ -312,100 +266,63 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
                 alt="Flyer Distribution Hampshire"
                 className="h-14 w-auto lg:h-11 xl:h-14"
               />
-              <span className="font-bold text-sm tracking-wide hidden sm:inline">
+              <span className="font-bold text-sm tracking-wide hidden sm:inline lg:hidden xl:inline">
                 CRM
               </span>
             </Link>
             {!forcedChange && (
-              <nav className="hidden lg:flex items-center gap-1 ml-3 xl:ml-6">
-                {primaryLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={`${link.collapseBelow ? IN_BAR[link.collapseBelow] : "inline-flex"} items-center px-2.5 xl:px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
-                      isActive(pathname, link.href)
-                        ? "bg-blue-800 text-yellow-400"
-                        : "text-blue-100 hover:bg-blue-800/60"
-                    }`}
-                  >
-                    {link.label}
-                    {link.href === INBOX_HREF && <InboxCount count={inboxCount} />}
-                    {link.href === APPLICATIONS_HREF && <ApplicationsCount count={applicationsCount} />}
-                  </Link>
-                ))}
-
-                <div className="relative" ref={moreRef}>
-                  <button
-                    type="button"
-                    onClick={() => setMoreOpen((o) => !o)}
-                    aria-expanded={moreOpen}
-                    aria-haspopup="menu"
-                    className={`inline-flex items-center gap-1 px-2.5 xl:px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
-                      moreLinks.some((l) => isActive(pathname, l.href)) || moreOpen
-                        ? "bg-blue-800 text-yellow-400"
-                        : `text-blue-100 hover:bg-blue-800/60 ${collapsibleLinks
-                            .filter((l) => isActive(pathname, l.href))
-                            .map((l) => MORE_HIGHLIGHT[l.collapseBelow!])
-                            .join(" ")}`
-                    }`}
-                  >
-                    More
-                    {/* While Applications is inside More, its count shows here. */}
-                    <ApplicationsCount count={applicationsCount} className="xl:hidden" />
-                    <svg
-                      className={`w-3 h-3 transition-transform duration-150 ${
-                        moreOpen ? "rotate-180" : ""
-                      }`}
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M6 9l6 6 6-6" />
-                    </svg>
-                  </button>
-                  {moreOpen && (
-                    <div
-                      role="menu"
-                      className="absolute left-0 mt-1 w-44 bg-white rounded-md border border-gray-200 shadow-lg py-1 z-50"
-                    >
-                      {[...collapsibleLinks, ...moreLinks].map((link) => (
-                        <Link
-                          key={link.href}
-                          href={link.href}
-                          role="menuitem"
-                          onClick={() => setMoreOpen(false)}
-                          className={`${link.collapseBelow ? IN_MORE[link.collapseBelow] : "block"} px-3 py-2 text-sm transition-colors ${
-                            isActive(pathname, link.href)
-                              ? "bg-blue-50 text-blue-700 font-semibold"
-                              : "text-gray-700 hover:bg-gray-50"
-                          }`}
-                        >
-                          {link.label}
-                          {link.href === APPLICATIONS_HREF && <ApplicationsCount count={applicationsCount} />}
-                        </Link>
-                      ))}
-                      <div className="hidden lg:block mt-1 border-t border-gray-100 pt-1">
-                        <button
-                          type="button"
-                          role="menuitem"
-                          onClick={() => moveNav("side")}
-                          className="block w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
-                        >
-                          Move menu to side
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
+              <nav aria-label="Main" className="hidden lg:flex items-center gap-0.5 xl:gap-1 ml-3 xl:ml-6">
+                {CRM_NAV_GROUPS.map((group) =>
+                  group.topBar === "links" ? (
+                    group.items.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        aria-current={isNavItemActive(pathname, item.href) ? "page" : undefined}
+                        className={`inline-flex items-center px-2 xl:px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
+                          isNavItemActive(pathname, item.href)
+                            ? "bg-blue-800 text-yellow-400"
+                            : "text-blue-100 hover:bg-blue-800/60"
+                        }`}
+                      >
+                        {item.label}
+                        {renderCount(item)}
+                      </Link>
+                    ))
+                  ) : (
+                    <NavMenu
+                      key={group.id}
+                      group={group}
+                      pathname={pathname}
+                      open={openMenu === group.id}
+                      onOpenChange={(open) => setOpenMenu(open ? group.id : null)}
+                      renderCount={renderCount}
+                      footer={
+                        group.id === "tools"
+                          ? (close) => (
+                              <button
+                                type="button"
+                                role="menuitem"
+                                onClick={() => {
+                                  close();
+                                  moveNav("side");
+                                }}
+                                className="block w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:bg-gray-100"
+                              >
+                                Move menu to side
+                              </button>
+                            )
+                          : undefined
+                      }
+                    />
+                  )
+                )}
               </nav>
             )}
           </div>
 
           <div className="flex items-center gap-3">
-            {!forcedChange && <div className="hidden lg:block"><SearchBar /></div>}
+            {!forcedChange && <div className="hidden lg:block lg:w-36 xl:w-auto"><SearchBar /></div>}
             {!forcedChange && !sideActive && <NotificationBell />}
             {session?.user && (
               <span className="hidden sm:inline lg:hidden text-xs text-blue-200 truncate max-w-[160px]">
@@ -441,56 +358,38 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
                 <SearchBar />
               </div>
             )}
-            {!forcedChange && (
-              <>
-                {primaryLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center px-2 py-2.5 text-sm text-blue-100 hover:text-yellow-400"
-                  >
-                    {link.label}
-                    {link.href === INBOX_HREF && <InboxCount count={inboxCount} />}
-                    {link.href === APPLICATIONS_HREF && <ApplicationsCount count={applicationsCount} />}
-                  </Link>
-                ))}
-
-                {/* Same grouping as desktop, collapsed so the menu stays short. */}
-                <button
-                  type="button"
-                  onClick={() => setMobileMoreOpen((o) => !o)}
-                  aria-expanded={mobileMoreOpen}
-                  className="flex w-full items-center justify-between px-2 py-2.5 text-sm text-blue-100 hover:text-yellow-400"
+            {!forcedChange &&
+              CRM_NAV_GROUPS.map((group) => (
+                <div
+                  key={group.id}
+                  role="group"
+                  aria-labelledby={group.label ? `phone-nav-${group.id}` : undefined}
+                  aria-label={group.label ? undefined : "Dashboard"}
                 >
-                  More
-                  <svg
-                    className={`w-3.5 h-3.5 transition-transform duration-150 ${
-                      mobileMoreOpen ? "rotate-180" : ""
-                    }`}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M6 9l6 6 6-6" />
-                  </svg>
-                </button>
-                {mobileMoreOpen &&
-                  moreLinks.map((link) => (
+                  {group.label && (
+                    <p id={`phone-nav-${group.id}`} className={`mt-3 mb-0.5 px-2 ${GROUP_HEADING}`}>
+                      {group.label}
+                    </p>
+                  )}
+                  {group.items.map((item) => (
                     <Link
-                      key={link.href}
-                      href={link.href}
+                      key={item.href}
+                      href={item.href}
                       onClick={() => setMenuOpen(false)}
-                      className="block pl-5 pr-2 py-2.5 text-sm text-blue-200 hover:text-yellow-400"
+                      aria-current={isNavItemActive(pathname, item.href) ? "page" : undefined}
+                      className={`flex items-center px-2 py-2.5 rounded-md text-sm ${
+                        isNavItemActive(pathname, item.href)
+                          ? "bg-blue-800 text-yellow-400 font-semibold"
+                          : "text-blue-100 hover:text-yellow-400"
+                      }`}
                     >
-                      {link.label}
+                      {item.label}
+                      {renderCount(item)}
                     </Link>
                   ))}
-              </>
-            )}
+                </div>
+              ))}
+            {!forcedChange && <div className="mt-2 border-t border-blue-800" />}
             {!forcedChange && (
               <Link
                 href="/admin/crm/change-password"

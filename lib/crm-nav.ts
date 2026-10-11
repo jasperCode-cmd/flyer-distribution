@@ -28,3 +28,75 @@ export function storeNavPosition(position: CrmNavPosition) {
 export const CRM_NAV_INIT_SCRIPT = `(function(){var p="top";try{if(localStorage.getItem(${JSON.stringify(
   CRM_NAV_STORAGE_KEY
 )})==="side")p="side"}catch(e){}document.documentElement.setAttribute(${JSON.stringify(CRM_NAV_ATTRIBUTE)},p)})();`;
+
+// --- What the navigation lists ----------------------------------------------
+
+// Defined once here and read by the top bar, the side navigation and the
+// phone menu. Groups with topBar "links" sit in the top bar as plain links
+// (Dashboard, Leads, Inbox, Dialer); "menu" groups become a dropdown there.
+// The side navigation and phone menu list every group under its heading.
+// count marks the links that carry a live number beside them.
+export type CrmNavCount = "inbox" | "applications";
+export type CrmNavItem = { href: string; label: string; count?: CrmNavCount };
+export type CrmNavGroup = {
+  id: "dashboard" | "sales" | "jobs" | "team" | "tools";
+  // Null for Dashboard, which stands on its own without a heading.
+  label: string | null;
+  topBar: "links" | "menu";
+  items: CrmNavItem[];
+};
+
+export const CRM_NAV_GROUPS: CrmNavGroup[] = [
+  { id: "dashboard", label: null, topBar: "links", items: [{ href: "/admin/crm", label: "Dashboard" }] },
+  {
+    id: "sales",
+    label: "Sales",
+    topBar: "links",
+    items: [
+      { href: "/admin/crm/leads", label: "Leads" },
+      { href: "/admin/crm/inbox", label: "Inbox", count: "inbox" },
+      { href: "/admin/crm/dialer", label: "Dialer" },
+    ],
+  },
+  {
+    id: "jobs",
+    label: "Jobs",
+    topBar: "menu",
+    items: [
+      { href: "/admin/crm/calendar", label: "Calendar" },
+      { href: "/admin/crm/profit", label: "Profit" },
+      { href: "/admin/crm/jobs-by-area", label: "Jobs by Area" },
+      { href: "/admin/crm/map", label: "Map" },
+    ],
+  },
+  {
+    id: "team",
+    label: "Team",
+    topBar: "menu",
+    items: [
+      { href: "/admin/crm/distributors", label: "Distributors" },
+      { href: "/admin/crm/applications", label: "Applications", count: "applications" },
+    ],
+  },
+  {
+    id: "tools",
+    label: "Tools",
+    topBar: "menu",
+    items: [
+      { href: "/admin/crm/tags", label: "Tags" },
+      { href: "/admin/crm/import", label: "Import" },
+      { href: "/admin/crm/scrapped-leads", label: "Scrapped Leads" },
+    ],
+  },
+];
+
+// "Add Lead" is deliberately not listed: /admin/crm/leads/new is reached from
+// the Leads page, and Leads stays highlighted there because this is a prefix
+// check.
+export function isNavItemActive(pathname: string, href: string): boolean {
+  return href === "/admin/crm" ? pathname === "/admin/crm" : pathname === href || pathname.startsWith(`${href}/`);
+}
+
+export function isNavGroupActive(pathname: string, group: CrmNavGroup): boolean {
+  return group.items.some((item) => isNavItemActive(pathname, item.href));
+}

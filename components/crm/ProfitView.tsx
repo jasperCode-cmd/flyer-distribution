@@ -75,7 +75,8 @@ export default function ProfitView({
   function chooseMonth(next: string) {
     setMonth(next);
     const url = new URL(window.location.href);
-    if (next === currentMonth) url.searchParams.delete("month");
+    // All time is the default, so it needs nothing in the address.
+    if (next === ALL_TIME) url.searchParams.delete("month");
     else url.searchParams.set("month", next);
     window.history.replaceState(null, "", url);
   }
@@ -226,13 +227,13 @@ export default function ProfitView({
               onChange={(e) => chooseMonth(e.target.value)}
               className="border border-gray-300 rounded-md px-3 py-2 text-sm bg-white min-w-44"
             >
+              <option value={ALL_TIME}>All time</option>
               {months.map((m) => (
                 <option key={m} value={m}>
                   {monthLabel(m)}
                   {m === currentMonth ? " (this month)" : ""}
                 </option>
               ))}
-              <option value={ALL_TIME}>All time</option>
             </select>
           </div>
         </div>

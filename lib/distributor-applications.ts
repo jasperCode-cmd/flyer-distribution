@@ -423,7 +423,7 @@ export function formatNoteDate(date: Date): string {
   }).format(date);
 }
 
-type StoredApplication = ApplicationFields & {
+export type StoredApplication = ApplicationFields & {
   id: string;
   notes: string | null;
   receivedAt: Date;
@@ -512,6 +512,18 @@ export function distributorNotesFromApplication(app: StoredApplication): string 
   return lines.join("\n");
 }
 
+// The Distributor an approved application becomes: the same shared rules as
+// adding one by hand, with the application's details in the notes. Used by
+// the single Approve button and by the bulk move, so both create alike.
+export function distributorDataFromApplication(app: StoredApplication) {
+  return buildDistributorData({
+    name: app.fullName,
+    phone: app.phone,
+    email: app.email,
+    notes: distributorNotesFromApplication(app),
+  });
+}
+
 type ApproveTx = {
   distributorApplication: {
     findUnique(args: { where: { id: string } }): Promise<(StoredApplication & { distributorId: string | null }) | null>;
@@ -548,12 +560,7 @@ export async function approveApplicationAsDistributor(db: ApproveDb, id: string)
       if (!app) return { ok: false, reason: "not_found" } as const;
       if (app.distributorId) return { ok: false, reason: "already_linked" } as const;
 
-      const built = buildDistributorData({
-        name: app.fullName,
-        phone: app.phone,
-        email: app.email,
-        notes: distributorNotesFromApplication(app),
-      });
+      const built = distributorDataFromApplication(app);
       if (!built.ok) return { ok: false, reason: "invalid" } as const;
 
       const distributor = await tx.distributor.create({ data: built.data, select: { id: true, name: true } });

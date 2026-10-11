@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { APPLICATIONS_CHANGED_EVENT } from "@/lib/distributor-applications";
 
 const POLL_MS = 45000;
 
@@ -14,7 +15,7 @@ type Notifications = {
   followUps: { id: string; description: string; leadId: string; leadName: string; overdue: boolean }[];
 };
 
-// Shared identically for both users — not scoped to assignment — and
+// Shared identically for both users, not scoped to assignment, and
 // backed by plain polling rather than any real-time infrastructure, which
 // is the appropriate amount of complexity for a two-person internal tool.
 // Also owns the live inbound-lead toast: a website lead whose id wasn't
@@ -44,7 +45,7 @@ export default function NotificationBell({ menuAlign = "right" }: { menuAlign?: 
         const applications = next.newApplications ?? [];
         const incomingApplicationIds = new Set(applications.map((a) => a.id));
         if (knownWebsiteIdsRef.current === null || knownApplicationIdsRef.current === null) {
-          // First poll this tab has ever done — establishes the baseline,
+          // First poll this tab has ever done, establishes the baseline,
           // deliberately not toasted, or every pre-existing website lead
           // would pop up the moment the CRM is opened.
           knownWebsiteIdsRef.current = incomingIds;
@@ -74,15 +75,19 @@ export default function NotificationBell({ menuAlign = "right" }: { menuAlign?: 
 
         if (!cancelled) setData(next);
       } catch {
-        // A missed poll just tries again next interval — nothing to show.
+        // A missed poll just tries again next interval, nothing to show.
       }
     }
 
     poll();
     const interval = setInterval(poll, POLL_MS);
+    // An application approved or moved on from New (one at a time or in
+    // bulk) leaves the bell straight away rather than at the next poll.
+    window.addEventListener(APPLICATIONS_CHANGED_EVENT, poll);
     return () => {
       cancelled = true;
       clearInterval(interval);
+      window.removeEventListener(APPLICATIONS_CHANGED_EVENT, poll);
     };
   }, []);
 

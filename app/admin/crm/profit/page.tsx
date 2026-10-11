@@ -6,8 +6,8 @@ import { PROFIT_LEAD_ORDER, PROFIT_LEAD_SELECT, PROFIT_LEAD_WHERE, toProfitJob }
 export const dynamic = "force-dynamic";
 
 // Every lead in Won or Completed, read straight from the leads table. The
-// month comes from the address so Refresh and the back button keep it; it
-// defaults to the current UK month.
+// month comes from the address so Refresh and the back button keep it; with
+// none given the page opens on All time.
 export default async function ProfitPage({
   searchParams,
 }: {
@@ -16,7 +16,7 @@ export default async function ProfitPage({
   const params = await searchParams;
   const currentMonth = monthKeyLondon(new Date());
   const requested = typeof params.month === "string" ? params.month : "";
-  const month = requested === ALL_TIME || isMonthKey(requested) ? requested : currentMonth;
+  const month = isMonthKey(requested) ? requested : ALL_TIME;
 
   const [leads, distributors] = await Promise.all([
     prisma.lead.findMany({ where: PROFIT_LEAD_WHERE, select: PROFIT_LEAD_SELECT, orderBy: PROFIT_LEAD_ORDER }),
