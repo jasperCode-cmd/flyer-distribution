@@ -7,6 +7,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import SearchBar from "./SearchBar";
 import NotificationBell from "./NotificationBell";
+import AccountMenu from "./AccountMenu";
 import {
   CRM_NAV_ATTRIBUTE,
   readStoredNavPosition,
@@ -20,18 +21,33 @@ import { APPLICATIONS_CHANGED_EVENT } from "@/lib/distributor-applications";
 // Leads entry stays highlighted while on it, since the check is a prefix.
 // Dialer sits at the same visual weight as the rest — it's a primary daily
 // workflow, not a secondary destination.
-const primaryLinks = [
+// The desktop top bar starts at 1024px; narrower screens use the menu
+// button. Links with collapseBelow only sit in the top bar from that width;
+// narrower, they move to the top of the More menu so the bar never runs into
+// the search box. The side and phone menus always list every link in place.
+type NavLink = { href: string; label: string; collapseBelow?: "xl" | "1400" };
+
+// Whole class names (not built from parts) so Tailwind generates them.
+const IN_BAR = { xl: "hidden xl:inline-flex", "1400": "hidden min-[1400px]:inline-flex" };
+const IN_MORE = { xl: "block xl:hidden", "1400": "block min-[1400px]:hidden" };
+const MORE_HIGHLIGHT = {
+  xl: "max-xl:bg-blue-800 max-xl:text-yellow-400",
+  "1400": "max-[1399px]:bg-blue-800 max-[1399px]:text-yellow-400",
+};
+
+const primaryLinks: NavLink[] = [
   { href: "/admin/crm", label: "Dashboard" },
   { href: "/admin/crm/leads", label: "Leads" },
   { href: "/admin/crm/inbox", label: "Inbox" },
   { href: "/admin/crm/dialer", label: "Dialer" },
-  { href: "/admin/crm/calendar", label: "Calendar" },
-  { href: "/admin/crm/distributors", label: "Distributors" },
-  { href: "/admin/crm/applications", label: "Applications" },
+  { href: "/admin/crm/calendar", label: "Calendar", collapseBelow: "1400" },
+  { href: "/admin/crm/distributors", label: "Distributors", collapseBelow: "1400" },
+  { href: "/admin/crm/applications", label: "Applications", collapseBelow: "xl" },
 ];
+const collapsibleLinks = primaryLinks.filter((l) => l.collapseBelow);
 
 // Secondary destinations, grouped under "More" to keep the primary bar short.
-const moreLinks = [
+const moreLinks: NavLink[] = [
   { href: "/admin/crm/jobs-by-area", label: "Jobs by Area" },
   { href: "/admin/crm/map", label: "Map" },
   { href: "/admin/crm/tags", label: "Tags" },
@@ -63,13 +79,13 @@ function InboxCount({ count }: { count: { value: number; more: boolean } | null 
 const APPLICATIONS_HREF = "/admin/crm/applications";
 
 // Applications still marked New, shown beside the Applications link.
-function ApplicationsCount({ count }: { count: number | null }) {
+function ApplicationsCount({ count, className = "" }: { count: number | null; className?: string }) {
   if (!count || count <= 0) return null;
   const label = count > 99 ? "99+" : String(count);
   return (
     <span
-      className="ml-1.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-yellow-400 px-1.5 text-[11px] font-bold leading-5 text-blue-900"
-      aria-label={`${label} new`}
+      className={`ml-1.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-yellow-400 px-1.5 text-[11px] font-bold leading-5 text-blue-900 ${className}`}
+      aria-label={`${label} new applications`}
     >
       {label}
     </span>
@@ -288,19 +304,19 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
                 width={270}
                 height={100}
                 alt="Flyer Distribution Hampshire"
-                className="h-14 w-auto"
+                className="h-14 w-auto lg:h-11 xl:h-14"
               />
               <span className="font-bold text-sm tracking-wide hidden sm:inline">
                 CRM
               </span>
             </Link>
             {!forcedChange && (
-              <nav className="hidden md:flex items-center gap-1 ml-6">
+              <nav className="hidden lg:flex items-center gap-1 ml-3 xl:ml-6">
                 {primaryLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`inline-flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
+                    className={`${link.collapseBelow ? IN_BAR[link.collapseBelow] : "inline-flex"} items-center px-2.5 xl:px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
                       isActive(pathname, link.href)
                         ? "bg-blue-800 text-yellow-400"
                         : "text-blue-100 hover:bg-blue-800/60"
@@ -318,13 +334,18 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
                     onClick={() => setMoreOpen((o) => !o)}
                     aria-expanded={moreOpen}
                     aria-haspopup="menu"
-                    className={`inline-flex items-center gap-1 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
+                    className={`inline-flex items-center gap-1 px-2.5 xl:px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
                       moreLinks.some((l) => isActive(pathname, l.href)) || moreOpen
                         ? "bg-blue-800 text-yellow-400"
-                        : "text-blue-100 hover:bg-blue-800/60"
+                        : `text-blue-100 hover:bg-blue-800/60 ${collapsibleLinks
+                            .filter((l) => isActive(pathname, l.href))
+                            .map((l) => MORE_HIGHLIGHT[l.collapseBelow!])
+                            .join(" ")}`
                     }`}
                   >
                     More
+                    {/* While Applications is inside More, its count shows here. */}
+                    <ApplicationsCount count={applicationsCount} className="xl:hidden" />
                     <svg
                       className={`w-3 h-3 transition-transform duration-150 ${
                         moreOpen ? "rotate-180" : ""
@@ -344,19 +365,20 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
                       role="menu"
                       className="absolute left-0 mt-1 w-44 bg-white rounded-md border border-gray-200 shadow-lg py-1 z-50"
                     >
-                      {moreLinks.map((link) => (
+                      {[...collapsibleLinks, ...moreLinks].map((link) => (
                         <Link
                           key={link.href}
                           href={link.href}
                           role="menuitem"
                           onClick={() => setMoreOpen(false)}
-                          className={`block px-3 py-2 text-sm transition-colors ${
+                          className={`${link.collapseBelow ? IN_MORE[link.collapseBelow] : "block"} px-3 py-2 text-sm transition-colors ${
                             isActive(pathname, link.href)
                               ? "bg-blue-50 text-blue-700 font-semibold"
                               : "text-gray-700 hover:bg-gray-50"
                           }`}
                         >
                           {link.label}
+                          {link.href === APPLICATIONS_HREF && <ApplicationsCount count={applicationsCount} />}
                         </Link>
                       ))}
                       <div className="hidden lg:block mt-1 border-t border-gray-100 pt-1">
@@ -380,30 +402,16 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
             {!forcedChange && <div className="hidden lg:block"><SearchBar /></div>}
             {!forcedChange && !sideActive && <NotificationBell />}
             {session?.user && (
-              <span className="hidden sm:inline text-xs text-blue-200 truncate max-w-[160px]">
+              <span className="hidden sm:inline lg:hidden text-xs text-blue-200 truncate max-w-[160px]">
                 {session.user.name}
               </span>
             )}
-            {!forcedChange && (
-              <Link
-                href="/admin/crm/change-password"
-                className="hidden md:inline-block text-xs text-blue-100 hover:text-yellow-400 px-2"
-              >
-                Account Settings
-              </Link>
-            )}
-            <button
-              type="button"
-              onClick={() => signOut({ callbackUrl: "/admin/crm/login" })}
-              className="hidden md:inline-block bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-xs font-bold px-3 py-1.5 rounded-md transition-colors duration-150"
-            >
-              Sign out
-            </button>
+            <AccountMenu className="hidden lg:block" name={session?.user?.name} showSettings={!forcedChange} />
             <button
               type="button"
               aria-label="Toggle menu"
               onClick={() => setMenuOpen((o) => !o)}
-              className="md:hidden p-2 -mr-2"
+              className="lg:hidden p-2 -mr-2"
             >
               <svg
                 className="w-6 h-6"
@@ -421,7 +429,7 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
         </div>
 
         {menuOpen && (
-          <nav className="md:hidden border-t border-blue-800 bg-blue-900 px-4 py-2">
+          <nav className="lg:hidden border-t border-blue-800 bg-blue-900 px-4 py-2">
             {!forcedChange && (
               <div className="py-2">
                 <SearchBar />

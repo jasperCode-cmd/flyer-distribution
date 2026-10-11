@@ -163,7 +163,7 @@ export default function LeadCard({
       )}
       <div className="flex items-center justify-between mt-1.5 sm:mt-2">
         <span className="text-[11px] sm:text-xs font-medium text-gray-700">
-          {lead.dealValue ? formatCurrency(Number(lead.dealValue)) : "—"}
+          {lead.dealValue ? formatCurrency(Number(lead.dealValue)) : "-"}
         </span>
         <div className="flex items-center gap-1">
           {email && onEmail && (
