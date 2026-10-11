@@ -118,7 +118,7 @@ const localBusinessSchema = {
   "sameAs": [
     "https://share.google/RVxyPi4TzXAzkt1Am",
     "https://www.facebook.com/share/1EWf3WKLJZ/?mibextid=wwXIfr",
-    "https://instagram.com/aw.flyers",
+    "https://www.instagram.com/flyerdistributionhampshire/",
     "https://www.tiktok.com/@aw.flyers",
   ],
   "areaServed": [
