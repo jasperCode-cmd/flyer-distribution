@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { STAGE_LABELS, SOURCE_LABELS } from "@/lib/crm-constants";
+import type { Prisma } from "@/generated/prisma/client";
+import { SOURCE_LABELS } from "@/lib/crm-constants";
+import { isWonStage, stageChangeOps } from "@/lib/lead-stage";
 
 const VALID_STAGES = ["UNCONTACTED", "AWAITING_RESPONSE", "WON", "COMPLETED", "LOST"];
 // Derived from the label map rather than a second hand-written list, so a new
@@ -31,21 +33,20 @@ export async function PATCH(req: Request) {
 
   const leads = await prisma.lead.findMany({ where: { id: { in: ids } } });
 
-  const ops = [];
+  const ops: Prisma.PrismaPromise<unknown>[] = [];
 
   if (stage !== undefined) {
+    const now = new Date();
     for (const lead of leads) {
       if (lead.stage === stage) continue;
+      // Same shared function as the single-lead route, so wonAt is set the
+      // same way on a bulk move into Won or Completed.
       ops.push(
-        prisma.lead.update({ where: { id: lead.id }, data: { stage } }),
-        prisma.activity.create({
-          data: {
-            leadId: lead.id,
-            type: "STAGE_CHANGE",
-            detail: `Stage changed from ${STAGE_LABELS[lead.stage]} to ${STAGE_LABELS[stage]} (bulk action)`,
-            userId: session.user.id,
-          },
-        })
+        ...(stageChangeOps(prisma, lead, stage, {
+          userId: session.user.id ?? null,
+          now,
+          bulk: true,
+        }) as Prisma.PrismaPromise<unknown>[])
       );
     }
   }
@@ -92,7 +93,7 @@ export async function PATCH(req: Request) {
       await prisma.$transaction(ops);
     }
 
-    if (stage === "WON" || stage === "COMPLETED") {
+    if (stage !== undefined && isWonStage(stage)) {
       for (const lead of leads) {
         const job = await prisma.job.findUnique({ where: { leadId: lead.id } });
         if (!job) await prisma.job.create({ data: { leadId: lead.id } });
@@ -106,7 +107,7 @@ export async function PATCH(req: Request) {
   }
 }
 
-// Used by the Scrapped Leads bin's "Delete selected" and "Clear Bin" — same
+// Used by the Scrapped Leads bin's "Delete selected" and "Clear Bin", same
 // Job-block restriction as the single-lead delete route, applied per lead
 // rather than all-or-nothing, so one blocked lead doesn't stop the rest
 // from being removed.

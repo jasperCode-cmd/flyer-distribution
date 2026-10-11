@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { STAGE_LABELS } from "@/lib/crm-constants";
+import { isWonStage, stageChangeOps } from "@/lib/lead-stage";
 
 const VALID_STAGES = ["UNCONTACTED", "AWAITING_RESPONSE", "WON", "COMPLETED", "LOST"];
 
@@ -27,7 +27,7 @@ export async function PATCH(
   }
 
   // The board and this route both validate `stage` against their own
-  // in-code VALID_STAGES list — that's an application-level check, not a
+  // in-code VALID_STAGES list, that's an application-level check, not a
   // guarantee the database's PipelineStage enum actually has this value
   // yet (e.g. a migration adding a new stage reviewed but not yet applied
   // to this database). Without a try/catch that mismatch previously failed
@@ -36,30 +36,21 @@ export async function PATCH(
   // returning a real error here makes that failure mode diagnosable
   // instead of looking like a mysterious drag-and-drop bug.
   try {
-    const [lead] = await prisma.$transaction([
-      prisma.lead.update({
-        where: { id },
-        data: {
-          stage,
-          ...(stage === "LOST"
-            ? { lostReason: lostReason || null, lostReasonNote: lostReasonNote || null }
-            : {}),
-        },
-      }),
-      prisma.activity.create({
-        data: {
-          leadId: id,
-          type: "STAGE_CHANGE",
-          detail: `Stage changed from ${STAGE_LABELS[existing.stage]} to ${STAGE_LABELS[stage]}`,
-          userId: session.user.id,
-        },
-      }),
-    ]);
+    // The lead update (including wonAt the first time it is won) and the
+    // activity entry come from the shared stage-change function.
+    const [lead] = await prisma.$transaction(
+      stageChangeOps(prisma, existing, stage, {
+        userId: session.user.id ?? null,
+        now: new Date(),
+        extraData:
+          stage === "LOST" ? { lostReason: lostReason || null, lostReasonNote: lostReasonNote || null } : undefined,
+      }) as [ReturnType<typeof prisma.lead.update>, ReturnType<typeof prisma.activity.create>]
+    );
 
     // A Won or Completed lead gets a Job record created automatically if it
     // doesn't have one yet (normally already true by the time a lead reaches
     // Completed, but this covers a lead moved there directly).
-    if (stage === "WON" || stage === "COMPLETED") {
+    if (isWonStage(stage)) {
       const job = await prisma.job.findUnique({ where: { leadId: id } });
       if (!job) {
         await prisma.job.create({ data: { leadId: id } });

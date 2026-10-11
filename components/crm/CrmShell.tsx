@@ -16,23 +16,28 @@ import {
 } from "@/lib/crm-nav";
 import { APPLICATIONS_CHANGED_EVENT } from "@/lib/distributor-applications";
 
-// "Add Lead" is deliberately not here — /admin/crm/leads/new is still a
+// "Add Lead" is deliberately not here, /admin/crm/leads/new is still a
 // live route, reached via the "+ Add Lead" button on the Leads page. The
 // Leads entry stays highlighted while on it, since the check is a prefix.
-// Dialer sits at the same visual weight as the rest — it's a primary daily
+// Dialer sits at the same visual weight as the rest, it's a primary daily
 // workflow, not a secondary destination.
 // The desktop top bar starts at 1024px; narrower screens use the menu
 // button. Links with collapseBelow only sit in the top bar from that width;
 // narrower, they move to the top of the More menu so the bar never runs into
 // the search box. The side and phone menus always list every link in place.
-type NavLink = { href: string; label: string; collapseBelow?: "xl" | "1400" };
+type NavLink = { href: string; label: string; collapseBelow?: "xl" | "1400" | "2xl" };
 
 // Whole class names (not built from parts) so Tailwind generates them.
-const IN_BAR = { xl: "hidden xl:inline-flex", "1400": "hidden min-[1400px]:inline-flex" };
-const IN_MORE = { xl: "block xl:hidden", "1400": "block min-[1400px]:hidden" };
+const IN_BAR = {
+  xl: "hidden xl:inline-flex",
+  "1400": "hidden min-[1400px]:inline-flex",
+  "2xl": "hidden 2xl:inline-flex",
+};
+const IN_MORE = { xl: "block xl:hidden", "1400": "block min-[1400px]:hidden", "2xl": "block 2xl:hidden" };
 const MORE_HIGHLIGHT = {
   xl: "max-xl:bg-blue-800 max-xl:text-yellow-400",
   "1400": "max-[1399px]:bg-blue-800 max-[1399px]:text-yellow-400",
+  "2xl": "max-2xl:bg-blue-800 max-2xl:text-yellow-400",
 };
 
 const primaryLinks: NavLink[] = [
@@ -43,6 +48,7 @@ const primaryLinks: NavLink[] = [
   { href: "/admin/crm/calendar", label: "Calendar", collapseBelow: "1400" },
   { href: "/admin/crm/distributors", label: "Distributors", collapseBelow: "1400" },
   { href: "/admin/crm/applications", label: "Applications", collapseBelow: "xl" },
+  { href: "/admin/crm/profit", label: "Profit", collapseBelow: "2xl" },
 ];
 const collapsibleLinks = primaryLinks.filter((l) => l.collapseBelow);
 
