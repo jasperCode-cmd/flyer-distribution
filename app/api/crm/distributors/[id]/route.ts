@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { buildDistributorUpdate } from "@/lib/distributors";
 
 // Edit, and deactivate/reactivate via the active flag. There is deliberately
-// no DELETE — past Jobs and CalendarEvents reference distributors, so they
-// are retired rather than removed.
+// no DELETE: past Jobs, cost lines and CalendarEvents reference
+// distributors, so they are retired rather than removed.
 export async function PATCH(
   req: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -15,35 +16,19 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const body = await req.json();
-
-  const data: {
-    name?: string;
-    phone?: string | null;
-    email?: string | null;
-    notes?: string | null;
-    active?: boolean;
-  } = {};
-
-  if (typeof body.name === "string") {
-    if (!body.name.trim()) {
-      return NextResponse.json({ error: "Distributor name is required" }, { status: 400 });
-    }
-    data.name = body.name.trim();
+  const body = await req.json().catch(() => null);
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
-  if ("phone" in body) {
-    data.phone = typeof body.phone === "string" && body.phone.trim() ? body.phone.trim() : null;
-  }
-  if ("email" in body) {
-    data.email = typeof body.email === "string" && body.email.trim() ? body.email.trim() : null;
-  }
-  if ("notes" in body) {
-    data.notes = typeof body.notes === "string" && body.notes.trim() ? body.notes.trim() : null;
-  }
-  if (typeof body.active === "boolean") {
-    data.active = body.active;
+  const built = buildDistributorUpdate(body);
+  if (!built.ok) {
+    return NextResponse.json({ error: built.error }, { status: 400 });
   }
 
-  const distributor = await prisma.distributor.update({ where: { id }, data });
+  const updated = await prisma.distributor.updateMany({ where: { id }, data: built.data });
+  if (updated.count === 0) {
+    return NextResponse.json({ error: "That distributor no longer exists." }, { status: 404 });
+  }
+  const distributor = await prisma.distributor.findUnique({ where: { id } });
   return NextResponse.json({ distributor });
 }

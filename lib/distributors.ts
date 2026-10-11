@@ -35,3 +35,29 @@ export function buildDistributorData(
     },
   };
 }
+
+export type DistributorUpdateData = Partial<DistributorCreateData> & { active?: boolean };
+
+// Edit, deactivate and reactivate: only the fields sent change, tidied by
+// the same rules as creating one. Deactivating only turns the flag off, so
+// every job, payment and shift stays linked to them.
+export function buildDistributorUpdate(
+  body: Record<string, unknown>
+): { ok: true; data: DistributorUpdateData } | { ok: false; error: string } {
+  const data: DistributorUpdateData = {};
+  if ("name" in body) {
+    if (typeof body.name !== "string" || !body.name.trim()) {
+      return { ok: false, error: "Distributor name is required" };
+    }
+    data.name = body.name.trim();
+  }
+  if ("phone" in body) data.phone = optionalText(body.phone);
+  if ("email" in body) data.email = optionalText(body.email);
+  if ("notes" in body) data.notes = optionalText(body.notes);
+  if ("active" in body) {
+    if (typeof body.active !== "boolean") return { ok: false, error: "Active must be true or false" };
+    data.active = body.active;
+  }
+  if (Object.keys(data).length === 0) return { ok: false, error: "Nothing to change" };
+  return { ok: true, data };
+}
