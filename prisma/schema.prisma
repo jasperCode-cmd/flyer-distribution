@@ -28,6 +28,7 @@ model User {
   activities       Activity[]
   savedFilterViews SavedFilterView[]
   calendarEvents   CalendarEvent[]
+  expenses         Expense[]
 }
 
 enum LeadSource {
@@ -133,6 +134,15 @@ model Lead {
   // moving on to Completed keeps it. Null for leads won before this existed
   // until backfilled from their stage history or set by hand.
   wonAt DateTime?
+
+  // A retainer: a monthly amount that counts as revenue in every month from
+  // retainerStart to retainerEnd (both calendar months, stored as the 1st of
+  // the month; no end means it carries on). Any one-off deal value or amount
+  // paid on the same lead still counts in its won month as before.
+  isRetainer           Boolean   @default(false)
+  retainerMonthlyPence Int?
+  retainerStart        DateTime? @db.Date
+  retainerEnd          DateTime? @db.Date
 
   assignedToId String?
   assignedTo   User?   @relation("AssignedLeads", fields: [assignedToId], references: [id])
@@ -368,6 +378,45 @@ model JobCost {
 
   @@index([leadId])
   @@index([distributorId])
+}
+
+enum ExpenseCategory {
+  OFFICE
+  SOFTWARE
+  VEHICLE
+  MARKETING
+  EQUIPMENT
+  OTHER
+}
+
+enum ExpenseKind {
+  ONE_OFF
+  MONTHLY
+}
+
+// A business-wide cost, not tied to any job. A one-off has a date (a UK
+// calendar day). A monthly one runs from startMonth to endMonth (both stored
+// as the 1st of the month); no endMonth means it carries on every month.
+// Ending a monthly expense sets endMonth, so its past months stay counted.
+model Expense {
+  id          String          @id @default(cuid())
+  label       String
+  category    ExpenseCategory
+  amountPence Int
+  kind        ExpenseKind
+  date        DateTime?       @db.Date
+  startMonth  DateTime?       @db.Date
+  endMonth    DateTime?       @db.Date
+  note        String?
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([date])
+  @@index([startMonth])
 }
 
 enum DistributorApplicationStatus {
