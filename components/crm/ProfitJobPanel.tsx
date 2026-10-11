@@ -3,12 +3,14 @@
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { formatPence, formatPercent } from "@/lib/money";
+import { formatPence, formatPercent, penceToInput } from "@/lib/money";
 import {
   COST_GROUPS,
   distributorPayments,
   formatWonDate,
   jobFigures,
+  monthKeyLondon,
+  monthLabel,
   wonDateInput,
   type CostCategory,
   type CostGroupId,
@@ -21,6 +23,7 @@ import {
   costLineTitle,
   GROUP_COLORS,
   IncludedBadges,
+  RetainerBadge,
   StageBadge,
   trapTab,
   useIsNarrow,
@@ -41,6 +44,7 @@ export default function ProfitJobPanel({
   onEditCost,
   onDeleteCost,
   onSaveWonDate,
+  onSaveRetainer,
 }: {
   job: ProfitJob;
   distributors: DistributorOption[];
@@ -51,6 +55,7 @@ export default function ProfitJobPanel({
   onEditCost: (line: CostLine) => void;
   onDeleteCost: (line: CostLine) => Promise<string | null>;
   onSaveWonDate: (date: string) => Promise<string | null>;
+  onSaveRetainer: (payload: RetainerPayload) => Promise<string | null>;
 }) {
   const id = useId();
   const reduce = useReducedMotion();
@@ -143,6 +148,8 @@ export default function ProfitJobPanel({
                   </p>
                 </div>
               </section>
+
+              <RetainerSection job={job} today={today} onSave={onSaveRetainer} />
 
               <section aria-labelledby={`${id}-paid`}>
                 <h3 id={`${id}-paid`} className="text-sm font-bold text-blue-900 mb-2">
@@ -241,6 +248,7 @@ function Header({
         <p className="text-sm text-gray-500 truncate">{job.businessName || "-"}</p>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <StageBadge stage={job.stage} />
+          {job.isRetainer && <RetainerBadge />}
           <IncludedBadges printing={job.printingIncluded} design={job.designIncluded} />
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-2 text-sm">
@@ -694,5 +702,219 @@ function CostLineRow({
         )}
       </div>
     </li>
+  );
+}
+
+export type RetainerPayload =
+  | { isRetainer: true; monthly: string; startMonth: string; endMonth: string }
+  | { isRetainer: false };
+
+// A retainer's monthly amount counts as revenue paid in every month from its
+// start to its end (or ongoing), on top of any one-off amount paid on the
+// job, which still counts in the month it was won.
+function RetainerSection({
+  job,
+  today,
+  onSave,
+}: {
+  job: ProfitJob;
+  today: string;
+  onSave: (payload: RetainerPayload) => Promise<string | null>;
+}) {
+  const id = useId();
+  const [editing, setEditing] = useState(false);
+  const [confirmOff, setConfirmOff] = useState(false);
+  const [form, setForm] = useState({ monthly: "", startMonth: "", endMonth: "" });
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const wonMonth = job.wonAt ? monthKeyLondon(job.wonAt) : today.slice(0, 7);
+
+  function startEditing() {
+    setForm({
+      monthly: job.retainerMonthlyPence ? penceToInput(job.retainerMonthlyPence) : "",
+      startMonth: job.retainerStart ?? wonMonth,
+      endMonth: job.retainerEnd ?? "",
+    });
+    setError("");
+    setConfirmOff(false);
+    setEditing(true);
+  }
+
+  async function save(payload: RetainerPayload) {
+    setSaving(true);
+    setError("");
+    const problem = await onSave(payload);
+    setSaving(false);
+    if (problem) {
+      setError(problem);
+      return;
+    }
+    setEditing(false);
+    setConfirmOff(false);
+  }
+
+  const on = job.isRetainer;
+  const inputCls =
+    "w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500";
+
+  return (
+    <section aria-labelledby={`${id}-title`} className="rounded-lg border border-violet-200 bg-violet-50/40 p-4">
+      <div className="flex items-center justify-between gap-3">
+        <h3 id={`${id}-title`} className="text-sm font-bold text-blue-900">
+          Retainer
+        </h3>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={on || editing}
+          aria-label="Retainer"
+          disabled={saving}
+          onClick={() => {
+            if (editing && !on) setEditing(false);
+            else if (on) setConfirmOff(true);
+            else startEditing();
+          }}
+          className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
+            on || editing ? "bg-violet-600" : "bg-gray-300"
+          }`}
+        >
+          <span
+            aria-hidden="true"
+            className={`inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${
+              on || editing ? "translate-x-5" : "translate-x-0.5"
+            }`}
+          />
+        </button>
+      </div>
+
+      {!on && !editing && (
+        <p className="mt-1 text-sm text-gray-600">
+          Not a retainer. Turn it on to count a monthly amount as revenue in every month it runs.
+        </p>
+      )}
+
+      {on && !editing && (
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+          <p className="text-sm text-gray-800">
+            <span className="font-semibold tabular-nums">{formatPence(job.retainerMonthlyPence)}</span> a month from{" "}
+            {job.retainerStart ? monthLabel(job.retainerStart) : "-"}
+            {job.retainerEnd ? ` to ${monthLabel(job.retainerEnd)}` : ", ongoing"}
+          </p>
+          {!confirmOff && (
+            <button type="button" onClick={startEditing} className="text-xs font-semibold text-blue-700 hover:underline">
+              Edit
+            </button>
+          )}
+        </div>
+      )}
+
+      {confirmOff && (
+        <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+          <p>
+            Turn the retainer off? None of its months will count any more. To stop it from a month on and keep the
+            months before, set an end month instead.
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => save({ isRetainer: false })}
+              disabled={saving}
+              className="rounded-md bg-amber-700 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-800 disabled:opacity-60"
+            >
+              {saving ? "Saving..." : "Turn off"}
+            </button>
+            <button
+              type="button"
+              onClick={startEditing}
+              className="rounded-md border border-amber-400 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900"
+            >
+              Set an end month
+            </button>
+            <button type="button" onClick={() => setConfirmOff(false)} className="px-2 text-xs font-semibold text-amber-900">
+              Keep it
+            </button>
+          </div>
+        </div>
+      )}
+
+      {editing && (
+        <form
+          className="mt-3 grid gap-3 sm:grid-cols-3"
+          onSubmit={(e) => {
+            e.preventDefault();
+            save({ isRetainer: true, ...form });
+          }}
+        >
+          <div>
+            <label htmlFor={`${id}-monthly`} className="mb-1 block text-xs font-medium text-gray-700">
+              Monthly amount (£)
+            </label>
+            <input
+              id={`${id}-monthly`}
+              inputMode="decimal"
+              value={form.monthly}
+              onChange={(e) => setForm((f) => ({ ...f, monthly: e.target.value }))}
+              placeholder="250.00"
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label htmlFor={`${id}-start`} className="mb-1 block text-xs font-medium text-gray-700">
+              Starts
+            </label>
+            <input
+              id={`${id}-start`}
+              type="month"
+              value={form.startMonth}
+              onChange={(e) => setForm((f) => ({ ...f, startMonth: e.target.value }))}
+              className={inputCls}
+            />
+          </div>
+          <div>
+            <label htmlFor={`${id}-end`} className="mb-1 block text-xs font-medium text-gray-700">
+              Ends (optional)
+            </label>
+            <input
+              id={`${id}-end`}
+              type="month"
+              value={form.endMonth}
+              min={form.startMonth || undefined}
+              onChange={(e) => setForm((f) => ({ ...f, endMonth: e.target.value }))}
+              className={inputCls}
+            />
+          </div>
+          <p className="text-xs text-gray-500 sm:col-span-3">
+            Starts on the won month unless you change it. Leave the end empty while it is ongoing; set it when the
+            retainer stops, and the months before stay counted.
+          </p>
+          {error && (
+            <p role="alert" className="text-sm text-red-700 sm:col-span-3">
+              {error}
+            </p>
+          )}
+          <div className="flex gap-2 sm:col-span-3">
+            <button
+              type="submit"
+              disabled={saving}
+              className="rounded-md bg-blue-700 px-4 py-2 text-sm font-bold text-white hover:bg-blue-800 disabled:opacity-60"
+            >
+              {saving ? "Saving..." : "Save retainer"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditing(false)}
+              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
+      {error && !editing && (
+        <p role="alert" className="mt-2 text-sm text-red-700">
+          {error}
+        </p>
+      )}
+    </section>
   );
 }

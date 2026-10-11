@@ -1,36 +1,48 @@
 import { prisma } from "@/lib/prisma";
-import ProfitView from "@/components/crm/ProfitView";
+import ProfitTabs, { type ProfitTab } from "@/components/crm/ProfitTabs";
 import { ALL_TIME, isMonthKey, monthKeyLondon } from "@/lib/profit";
-import { PROFIT_LEAD_ORDER, PROFIT_LEAD_SELECT, PROFIT_LEAD_WHERE, toProfitJob } from "@/lib/profit-data";
+import {
+  EXPENSE_ORDER,
+  PROFIT_LEAD_ORDER,
+  PROFIT_LEAD_SELECT,
+  PROFIT_LEAD_WHERE,
+  toExpenseRecord,
+  toProfitJob,
+} from "@/lib/profit-data";
 
 export const dynamic = "force-dynamic";
 
-// Every lead in Won or Completed, read straight from the leads table. The
-// month comes from the address so Refresh and the back button keep it; with
-// none given the page opens on All time.
+// Every lead in Won or Completed, read straight from the leads table, and
+// every business expense. The tab and month come from the address so Refresh
+// and the back button keep them; with none given the page opens on the
+// Overview for All time. A future month is never shown.
 export default async function ProfitPage({
   searchParams,
 }: {
-  searchParams: Promise<{ month?: string | string[] }>;
+  searchParams: Promise<{ month?: string | string[]; tab?: string | string[] }>;
 }) {
   const params = await searchParams;
   const currentMonth = monthKeyLondon(new Date());
   const requested = typeof params.month === "string" ? params.month : "";
-  const month = isMonthKey(requested) ? requested : ALL_TIME;
+  const month = isMonthKey(requested) && requested <= currentMonth ? requested : ALL_TIME;
+  const tab: ProfitTab = params.tab === "jobs" || params.tab === "expenses" ? params.tab : "overview";
 
-  const [leads, distributors] = await Promise.all([
+  const [leads, distributors, expenses] = await Promise.all([
     prisma.lead.findMany({ where: PROFIT_LEAD_WHERE, select: PROFIT_LEAD_SELECT, orderBy: PROFIT_LEAD_ORDER }),
     prisma.distributor.findMany({
       orderBy: [{ active: "desc" }, { name: "asc" }],
       select: { id: true, name: true, active: true },
     }),
+    prisma.expense.findMany({ orderBy: EXPENSE_ORDER }),
   ]);
 
   return (
-    <ProfitView
+    <ProfitTabs
       jobs={leads.map(toProfitJob)}
+      expenses={expenses.map(toExpenseRecord)}
       distributors={distributors}
       initialMonth={month}
+      initialTab={tab}
       currentMonth={currentMonth}
     />
   );

@@ -35,6 +35,12 @@ export type ProfitJob = {
   printingIncluded: boolean;
   designIncluded: boolean;
   costs: CostLine[];
+  // A retainer's monthly amount counts as revenue paid in every month from
+  // retainerStart to retainerEnd ("YYYY-MM"; no end means it carries on).
+  isRetainer: boolean;
+  retainerMonthlyPence: number | null;
+  retainerStart: string | null;
+  retainerEnd: string | null;
 };
 
 export type CostGroupId = "distributors" | "printing" | "design" | "additional";

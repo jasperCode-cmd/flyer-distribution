@@ -228,6 +228,10 @@ function job(overrides: Partial<ProfitJob> = {}): ProfitJob {
     printingIncluded: false,
     designIncluded: false,
     costs: [],
+    isRetainer: false,
+    retainerMonthlyPence: null,
+    retainerStart: null,
+    retainerEnd: null,
     ...overrides,
   };
 }

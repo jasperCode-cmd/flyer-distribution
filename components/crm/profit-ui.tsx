@@ -50,6 +50,14 @@ export function IncludedBadges({ printing, design }: { printing: boolean; design
   );
 }
 
+export function RetainerBadge() {
+  return (
+    <span className="inline-flex items-center rounded-full border border-violet-200 bg-violet-50 px-2 py-0.5 text-[11px] font-semibold text-violet-800">
+      Retainer
+    </span>
+  );
+}
+
 export function costLineTitle(line: CostLine): string {
   switch (line.category) {
     case "DISTRIBUTOR":

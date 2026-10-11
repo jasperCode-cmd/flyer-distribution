@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import Link from "next/link";
 import {
   DndContext,
@@ -22,7 +22,6 @@ import {
   jobFigures,
   jobsForMonth,
   monthLabel,
-  monthOptions,
   monthKeyLondon,
   summarize,
   wonDateInput,
@@ -32,27 +31,29 @@ import {
 } from "@/lib/profit";
 import ProfitJobPanel, { AddDistributorSelect } from "./ProfitJobPanel";
 import ProfitCostForm, { type CostFormTarget, type CostPayload } from "./ProfitCostForm";
-import { IncludedBadges, StageBadge, type DistributorOption } from "./profit-ui";
+import { IncludedBadges, RetainerBadge, StageBadge, type DistributorOption } from "./profit-ui";
+import type { RetainerPayload } from "./ProfitJobPanel";
 
-// The Profit page: every Won or Completed lead as a job card, for the
-// chosen month (by won date) or all time. Distributors are dragged from the
-// panel onto a card to add what they were paid; each card also has an
-// "Add distributor" select for keyboards and phones.
+// The Profit page's Jobs tab: every Won or Completed lead as a job card, for
+// the chosen month (by won date) or all time. Distributors are dragged from
+// the panel onto a card to add what they were paid; each card also has an
+// "Add distributor" select for keyboards and phones. The jobs and the month
+// belong to the page around it, which the Overview tab shares.
 
 export default function ProfitView({
-  jobs: initialJobs,
+  jobs,
+  setJobs,
   distributors,
-  initialMonth,
-  currentMonth,
+  month,
+  onMonthChange: chooseMonth,
 }: {
   jobs: ProfitJob[];
+  setJobs: Dispatch<SetStateAction<ProfitJob[]>>;
   distributors: DistributorOption[];
-  initialMonth: string;
-  currentMonth: string;
+  month: string;
+  onMonthChange: (month: string) => void;
 }) {
   const reduce = useReducedMotion();
-  const [jobs, setJobs] = useState(initialJobs);
-  const [month, setMonth] = useState(initialMonth);
   const [openId, setOpenId] = useState<string | null>(null);
   const [form, setForm] = useState<CostFormTarget | null>(null);
   const [dragging, setDragging] = useState<DistributorOption | null>(null);
@@ -61,7 +62,6 @@ export default function ProfitView({
   const activeDistributors = distributors.filter((d) => d.active);
   const visible = useMemo(() => jobsForMonth(jobs, month), [jobs, month]);
   const summary = useMemo(() => summarize(visible), [visible]);
-  const months = useMemo(() => monthOptions(jobs, currentMonth, month), [jobs, currentMonth, month]);
   const undatedCount = jobs.filter((j) => !j.wonAt).length;
   const openJob = jobs.find((j) => j.leadId === openId) ?? null;
   const today = wonDateInput(new Date().toISOString());
@@ -71,15 +71,6 @@ export default function ProfitView({
     const t = setTimeout(() => setToast(null), 4000);
     return () => clearTimeout(t);
   }, [toast]);
-
-  function chooseMonth(next: string) {
-    setMonth(next);
-    const url = new URL(window.location.href);
-    // All time is the default, so it needs nothing in the address.
-    if (next === ALL_TIME) url.searchParams.delete("month");
-    else url.searchParams.set("month", next);
-    window.history.replaceState(null, "", url);
-  }
 
   const closePanel = useCallback(() => {
     const leadId = openId;
@@ -165,6 +156,17 @@ export default function ProfitView({
     return null;
   }
 
+  async function saveRetainer(job: ProfitJob, payload: RetainerPayload): Promise<string | null> {
+    const result = await request(`/api/crm/profit/jobs/${job.leadId}/retainer`, "PATCH", payload);
+    if (result.error) {
+      if (result.job === null) applyJob(job.leadId, null);
+      return result.error;
+    }
+    applyJob(job.leadId, result.job ?? null);
+    setToast({ text: payload.isRetainer ? "Retainer saved." : "Retainer turned off.", kind: "success" });
+    return null;
+  }
+
   function addCost(job: ProfitJob, category: CostCategory, distributorId?: string) {
     setForm({
       leadId: job.leadId,
@@ -210,33 +212,9 @@ export default function ProfitView({
   return (
     <MotionConfig reducedMotion="user" transition={reduce ? { duration: 0 } : { type: "spring", bounce: 0.12, duration: 0.45 }}>
       <div>
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="text-xl font-bold text-blue-900">Profit</h1>
-            <p className="text-sm text-gray-500">
-              Won and Completed jobs, by the month they were won. Profit and margin are on the amount paid.
-            </p>
-          </div>
-          <div>
-            <label htmlFor="profit-month" className="block text-xs font-medium text-gray-600 mb-1">
-              Month
-            </label>
-            <select
-              id="profit-month"
-              value={month}
-              onChange={(e) => chooseMonth(e.target.value)}
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm bg-white min-w-44"
-            >
-              <option value={ALL_TIME}>All time</option>
-              {months.map((m) => (
-                <option key={m} value={m}>
-                  {monthLabel(m)}
-                  {m === currentMonth ? " (this month)" : ""}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+        <p className="mb-3 text-sm text-gray-500">
+          Won and Completed jobs, by the month they were won. Profit and margin are on the amount paid.
+        </p>
 
         <Summary summary={summary} />
 
@@ -299,6 +277,7 @@ export default function ProfitView({
               onEditCost={(line) => editCost(openJob, line)}
               onDeleteCost={(line) => deleteCost(openJob, line)}
               onSaveWonDate={(date) => saveWonDate(openJob, date)}
+              onSaveRetainer={(payload) => saveRetainer(openJob, payload)}
             />
           )}
         </AnimatePresence>
@@ -480,8 +459,9 @@ function JobCard({
         <span className={`mt-1 block text-xs ${job.wonAt ? "text-gray-500" : "font-medium text-amber-800"}`}>
           {job.wonAt ? `Won ${formatWonDate(job.wonAt)}` : "Won date unknown"}
         </span>
-        {(job.printingIncluded || job.designIncluded) && (
+        {(job.printingIncluded || job.designIncluded || job.isRetainer) && (
           <span className="mt-2 flex flex-wrap gap-1.5">
+            {job.isRetainer && <RetainerBadge />}
             <IncludedBadges printing={job.printingIncluded} design={job.designIncluded} />
           </span>
         )}

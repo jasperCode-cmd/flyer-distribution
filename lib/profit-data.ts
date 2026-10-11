@@ -2,6 +2,7 @@ import type { Prisma, PrismaClient } from "@/generated/prisma/client";
 import { decimalToPence } from "./money";
 import { WON_STAGES } from "./lead-stage";
 import type { CostCategory, PayType, ProfitJob } from "./profit";
+import { dbDateToInput, dbMonthToInput, type ExpenseRecord } from "./expenses";
 
 // The Profit page reads leads directly: whatever is in Won or Completed
 // right now is a job, however it got there, with nothing copied or synced.
@@ -24,6 +25,10 @@ export const PROFIT_LEAD_SELECT = {
   leafletQuantity: true,
   printingIncluded: true,
   designIncluded: true,
+  isRetainer: true,
+  retainerMonthlyPence: true,
+  retainerStart: true,
+  retainerEnd: true,
   costs: {
     orderBy: { createdAt: "asc" },
     include: { distributor: { select: { name: true } } },
@@ -50,6 +55,10 @@ export function toProfitJob(lead: ProfitLeadRow): ProfitJob {
     leafletQuantity: lead.leafletQuantity,
     printingIncluded: lead.printingIncluded,
     designIncluded: lead.designIncluded,
+    isRetainer: lead.isRetainer,
+    retainerMonthlyPence: lead.retainerMonthlyPence,
+    retainerStart: dbMonthToInput(lead.retainerStart),
+    retainerEnd: dbMonthToInput(lead.retainerEnd),
     costs: lead.costs.map((c) => ({
       id: c.id,
       category: c.category as CostCategory,
@@ -73,4 +82,21 @@ type ProfitDb = Pick<PrismaClient, "lead">;
 export async function loadProfitJob(db: ProfitDb, leadId: string): Promise<ProfitJob | null> {
   const lead = await db.lead.findFirst({ where: { id: leadId, ...PROFIT_LEAD_WHERE }, select: PROFIT_LEAD_SELECT });
   return lead ? toProfitJob(lead) : null;
+}
+
+export const EXPENSE_ORDER = [{ createdAt: "desc" }] satisfies Prisma.ExpenseOrderByWithRelationInput[];
+
+export function toExpenseRecord(row: Prisma.ExpenseGetPayload<object>): ExpenseRecord {
+  return {
+    id: row.id,
+    label: row.label,
+    category: row.category,
+    amountPence: row.amountPence,
+    kind: row.kind,
+    date: dbDateToInput(row.date),
+    startMonth: dbMonthToInput(row.startMonth),
+    endMonth: dbMonthToInput(row.endMonth),
+    note: row.note,
+    createdAt: row.createdAt.toISOString(),
+  };
 }
