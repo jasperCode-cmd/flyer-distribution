@@ -415,6 +415,8 @@ test("every note the CRM writes for itself is worded so the follow-up rule ignor
     "app/api/crm/dialer/leads/[id]/outcome/route.ts",
     // Reads only: counting today's calls.
     "lib/crm-data.ts",
+    // Reads only: cold leads called in the last 7 days, for the Dashboard.
+    "lib/dashboard-data.ts",
     // Records an email someone sent.
     "lib/send-lead-email.ts",
   ]);
