@@ -113,7 +113,8 @@ export function isGmailConfigured(): boolean {
   return readEnv() !== null;
 }
 
-function getExcludedAddresses(): string[] {
+// Addresses the CRM never shows or emails (GMAIL_EXCLUDE_ADDRESSES).
+export function getExcludedAddresses(): string[] {
   const raw = process.env.GMAIL_EXCLUDE_ADDRESSES;
   if (!raw) return [];
   return raw

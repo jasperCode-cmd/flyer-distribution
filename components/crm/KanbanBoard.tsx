@@ -136,7 +136,7 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
   const userFirstName = (session?.user?.name ?? "").split(" ")[0] || "the team";
   const [compose, setCompose] = useState<{
     lead: KanbanLead;
-    replyTo: ReplyContext | null;
+    latestReply: ReplyContext | null;
     configured: boolean;
     configuredKnown: boolean;
   } | null>(null);
@@ -149,15 +149,16 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
     return () => clearTimeout(t);
   }, [toast]);
 
-  // Opens straight away in its "Checking Gmail connection..." state, then
-  // threads onto the latest message of the lead's conversation if there is
-  // one (exactly as the lead page's Reply does), else a fresh email. Not
-  // connected shows the modal's own not-connected state.
+  // Opens straight away in its "Checking Gmail connection..." state. With a
+  // conversation, the modal offers "Reply to latest" (threaded onto the
+  // latest message, exactly as the lead page's Reply does) or "New email";
+  // without one it is a fresh email. Not connected shows the modal's own
+  // not-connected state.
   async function openEmail(lead: KanbanLead) {
     composeLeadRef.current = lead.id;
-    setCompose({ lead, replyTo: null, configured: true, configuredKnown: false });
+    setCompose({ lead, latestReply: null, configured: true, configuredKnown: false });
     let configured = true;
-    let replyTo: ReplyContext | null = null;
+    let latestReply: ReplyContext | null = null;
     try {
       const res = await fetch(`/api/crm/leads/${lead.id}/emails`);
       const data = await res.json();
@@ -165,13 +166,13 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
       const messages: ConversationMessage[] = res.ok ? data.messages ?? [] : [];
       const last = messages[messages.length - 1];
       if (last) {
-        replyTo = { subject: last.subject, threadId: last.threadId, lastMessageId: last.messageIdHeader ?? "" };
+        latestReply = { subject: last.subject, threadId: last.threadId, lastMessageId: last.messageIdHeader ?? "" };
       }
     } catch {
       // Falls back to a fresh email; the send itself reports any Gmail problem.
     }
     if (composeLeadRef.current !== lead.id) return;
-    setCompose({ lead, replyTo, configured, configuredKnown: true });
+    setCompose({ lead, latestReply, configured, configuredKnown: true });
   }
 
   function closeEmail() {
@@ -180,7 +181,7 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
   }
 
   // Every card is a <Link>, so after a touch drag ends the browser still
-  // synthesises a click on the anchor under the finger and navigates — which
+  // synthesises a click on the anchor under the finger and navigates, which
   // is why a long-press was opening the lead instead of picking the card up.
   // dnd-kit does not suppress that click itself. Latch on drag activation and
   // swallow the single click that follows; a tap that never reaches the 250ms
@@ -243,13 +244,13 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
   // Split deliberately: one PointerSensor would apply the same constraint to
   // both input types. Mouse keeps the original 8px threshold. Touch instead
   // requires a stationary long-press, so a swipe across the column strip
-  // scrolls rather than picking a card up — moving more than `tolerance`
+  // scrolls rather than picking a card up; moving more than `tolerance`
   // before `delay` elapses cancels the activation.
   //
   // (This was briefly raised to 16px, paired with letting mousedown reach
   // this sensor from inside the pills, to support dragging a card by
   // grabbing a pill directly. That combination broke both pills in Firefox
-  // — see InlinePaymentReview.tsx — so both changes were reverted together;
+  // (see InlinePaymentReview.tsx), so both changes were reverted together;
   // pills are back to being fully outside dnd-kit's reach, same as before.)
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
@@ -273,7 +274,7 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
         body: JSON.stringify({ stage: newStage, ...extra }),
       });
       if (!res.ok) {
-        // Surfaced instead of just reverting silently — a card moving then
+        // Surfaced instead of just reverting silently: a card moving then
         // snapping back with no visible reason is nearly undiagnosable
         // remotely; the server's actual error (e.g. a database rejecting a
         // stage value it doesn't actually have yet) is worth showing.
@@ -311,7 +312,7 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
   }
 
   // Same underlying action as dragging a card from Uncontacted to Awaiting
-  // Response — same commitStageChange call, so the same PATCH request and
+  // Response: same commitStageChange call, so the same PATCH request and
   // the same server-side Stage Change activity log either way.
   function handleAdvance(leadId: string) {
     commitStageChange(leadId, "AWAITING_RESPONSE", "UNCONTACTED");
@@ -324,11 +325,11 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
       onDragEnd={handleDragEnd}
       // Default acceleration (10) combined with the 5ms tick interval covers
       // a full column's width (~330px) in well under 200ms once the pointer
-      // sits near the board's edge — confirmed directly: holding at the
+      // sits near the board's edge, confirmed directly: holding at the
       // edge for 150ms+ scrolls straight past the intended column (e.g.
       // Won -> Completed) onto the next one (Lost) before the drop lands,
       // rather than stopping at Completed. A real user pausing briefly at
-      // the edge — completely ordinary — reproduces this. Lowering
+      // the edge (completely ordinary) reproduces this. Lowering
       // acceleration slows the scroll enough that a normal pause lands on
       // the intended column instead of sailing past it.
       autoScroll={{ acceleration: 1 }}
@@ -381,7 +382,7 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
       )}
       {stageError && (
         <p className="text-xs text-red-600 mt-2">
-          {stageError} — the card was moved back.{" "}
+          {stageError}. The card was moved back.{" "}
           <button type="button" onClick={() => setStageError(null)} className="underline">
             Dismiss
           </button>
@@ -408,7 +409,8 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
           configured={compose.configured}
           configuredKnown={compose.configuredKnown}
           userFirstName={userFirstName}
-          replyTo={compose.replyTo}
+          replyTo={null}
+          latestReply={compose.latestReply}
           onSent={(result) => {
             const leadId = compose.lead.id;
             setToast({ text: sentLabel("Email", result), kind: "success" });

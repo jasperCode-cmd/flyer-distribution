@@ -220,6 +220,13 @@ export default function LeadDetail({
     }
   }
 
+  // The latest message of the conversation: the Email button then offers
+  // "Reply to latest" or "New email".
+  const latestMessage = emailsState.messages[emailsState.messages.length - 1];
+  const latestReply: ReplyContext | null = latestMessage
+    ? { subject: latestMessage.subject, threadId: latestMessage.threadId, lastMessageId: latestMessage.messageIdHeader ?? "" }
+    : null;
+
   function openCompose(replyTo?: ReplyContext) {
     setComposeReplyTo(replyTo ?? null);
     setComposeOpen(true);
@@ -391,7 +398,7 @@ export default function LeadDetail({
     });
   }
 
-  // Returns an error message on failure, or null on success — the modal
+  // Returns an error message on failure, or null on success. The modal
   // stays open and shows the message rather than the page navigating away
   // out from under a failed delete (e.g. blocked by an existing Job).
   async function deleteLead(): Promise<string | null> {
@@ -540,7 +547,7 @@ export default function LeadDetail({
           </div>
         )}
 
-        {/* Only meaningful once the lead is Won or Completed — same
+        {/* Only meaningful once the lead is Won or Completed, same
             conditional pattern as the Lost Reason block above. */}
         {(CLOSED_WON_STAGES as readonly string[]).includes(stage) && (
           <div className="mt-3 bg-gray-50 border border-gray-200 rounded-md px-3 py-2.5">
@@ -899,7 +906,7 @@ export default function LeadDetail({
         onReply={handleEmailReply}
       />
 
-      {/* Danger zone — kept visually distinct and separated from every other
+      {/* Danger zone, kept visually distinct and separated from every other
           section so it can't be reached by an accidental click. */}
       <div className="border border-red-200 rounded-lg p-4 sm:p-5">
         <h2 className="text-sm font-bold text-red-700 mb-1">Danger Zone</h2>
@@ -932,6 +939,7 @@ export default function LeadDetail({
           configuredKnown={emailsState.loaded}
           userFirstName={userFirstName}
           replyTo={composeReplyTo}
+          latestReply={latestReply}
           onSent={handleEmailSent}
           onError={handleEmailError}
         />

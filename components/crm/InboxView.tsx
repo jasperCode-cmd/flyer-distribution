@@ -221,6 +221,7 @@ export default function InboxView({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [open, setOpen] = useState<OpenThread | null>(null);
   const [composeOpen, setComposeOpen] = useState(false);
+  const [newEmailOpen, setNewEmailOpen] = useState(false);
   const [toast, setToast] = useState<{ text: string; kind: "success" | "error" } | null>(null);
 
   const currentToken = pageTokens[pageTokens.length - 1];
@@ -399,20 +400,29 @@ export default function InboxView({
           </p>
         </div>
         {!connectionProblem && (
-          <form onSubmit={submitSearch} className="flex w-full sm:w-auto gap-2" role="search">
-            <input
-              type="search"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              maxLength={SEARCH_MAX}
-              placeholder="Search the inbox"
-              aria-label="Search the inbox"
-              className="min-w-0 flex-1 sm:w-72 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <button type="submit" className="bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold px-4 py-2 rounded-md">
-              Search
+          <div className="flex w-full sm:w-auto flex-col-reverse sm:flex-row gap-2">
+            <form onSubmit={submitSearch} className="flex w-full sm:w-auto gap-2" role="search">
+              <input
+                type="search"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                maxLength={SEARCH_MAX}
+                placeholder="Search the inbox"
+                aria-label="Search the inbox"
+                className="min-w-0 flex-1 sm:w-72 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <button type="submit" className="bg-blue-700 hover:bg-blue-800 text-white text-sm font-bold px-4 py-2 rounded-md">
+                Search
+              </button>
+            </form>
+            <button
+              type="button"
+              onClick={() => setNewEmailOpen(true)}
+              className="bg-yellow-400 hover:bg-yellow-300 text-blue-900 text-sm font-bold px-4 py-2 rounded-md whitespace-nowrap"
+            >
+              New email
             </button>
-          </form>
+          </div>
         )}
       </div>
 
@@ -714,6 +724,29 @@ export default function InboxView({
           onError={(message) => setToast({ text: message, kind: "error" })}
         />
       )}
+
+      {/* A new email to a typed address. The server decides whether it is a
+          lead's (recorded on the lead) or anyone else's (nothing recorded). */}
+      <EmailComposeModal
+        open={newEmailOpen}
+        onClose={() => setNewEmailOpen(false)}
+        sendUrl="/api/crm/inbox/new-email"
+        lookupUrl="/api/crm/inbox/new-email"
+        toEditable
+        toAddress=""
+        configured
+        configuredKnown
+        userFirstName={userFirstName}
+        replyTo={null}
+        onSent={(result) => {
+          const recorded = result.recordedOnLead && result.leadName ? ` and recorded on ${result.leadName}` : "";
+          setToast({
+            text: `${sentLabel("Email", result)}${recorded}.${result.movedToAwaitingResponse ? " Lead moved to Awaiting Response." : ""}`,
+            kind: "success",
+          });
+        }}
+        onError={(message) => setToast({ text: message, kind: "error" })}
+      />
 
       {toast && (
         <div
