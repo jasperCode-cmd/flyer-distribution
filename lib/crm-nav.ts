@@ -36,18 +36,27 @@ export const CRM_NAV_INIT_SCRIPT = `(function(){var p="top";try{if(localStorage.
 // (Dashboard, Leads, Inbox, Dialer); "menu" groups become a dropdown there.
 // The side navigation and phone menu list every group under its heading.
 // count marks the links that carry a live number beside them.
-export type CrmNavCount = "inbox" | "applications";
+export type CrmNavCount = "inbox" | "applications" | "priorities";
 export type CrmNavItem = { href: string; label: string; count?: CrmNavCount };
 export type CrmNavGroup = {
   id: "dashboard" | "sales" | "jobs" | "team" | "tools";
-  // Null for Dashboard, which stands on its own without a heading.
+  // Null for Dashboard and Priorities, which stand on their own without a
+  // heading.
   label: string | null;
   topBar: "links" | "menu";
   items: CrmNavItem[];
 };
 
 export const CRM_NAV_GROUPS: CrmNavGroup[] = [
-  { id: "dashboard", label: null, topBar: "links", items: [{ href: "/admin/crm", label: "Dashboard" }] },
+  {
+    id: "dashboard",
+    label: null,
+    topBar: "links",
+    items: [
+      { href: "/admin/crm", label: "Dashboard" },
+      { href: "/admin/crm/priorities", label: "Priorities", count: "priorities" },
+    ],
+  },
   {
     id: "sales",
     label: "Sales",

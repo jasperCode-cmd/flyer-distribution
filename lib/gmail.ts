@@ -549,6 +549,42 @@ export function findCounterparty(
   return target.from ?? target.recipient;
 }
 
+// For the Priorities list: a thread whose latest message is from someone
+// else, with nothing sent by us after it, or null if we wrote last. The
+// addresses are the ones the inbox matches a lead on (the sender and a single
+// Reply-To), from that latest message.
+export type UnansweredMessage = {
+  threadId: string;
+  messageId: string;
+  receivedAt: string;
+  fromAddress: string;
+  replyToAddress: string | null;
+  subject: string;
+  // The latest message's Message-ID header, so a reply can thread onto it.
+  messageIdHeader: string | null;
+};
+
+export function latestUnanswered(
+  thread: gmail_v1.Schema$Thread,
+  senderAddress: string
+): UnansweredMessage | null {
+  const messages = sortedOldestFirst(thread.messages);
+  const latest = messages[messages.length - 1];
+  if (!thread.id || !latest?.id) return null;
+  const from = parseMailbox(getHeader(latest.payload?.headers, "From"));
+  if (!from.address || from.address.toLowerCase() === senderAddress.toLowerCase()) return null;
+  if (latest.labelIds?.includes("SENT")) return null;
+  return {
+    threadId: thread.id,
+    messageId: latest.id,
+    receivedAt: latest.internalDate ? new Date(Number(latest.internalDate)).toISOString() : new Date(0).toISOString(),
+    fromAddress: from.address,
+    replyToAddress: singleReplyTo(getHeader(latest.payload?.headers, "Reply-To"), senderAddress)?.address ?? null,
+    subject: getHeader(messages[0].payload?.headers, "Subject")?.trim() || "(no subject)",
+    messageIdHeader: getHeader(latest.payload?.headers, "Message-ID"),
+  };
+}
+
 // Metadata-format messages carry headers but no MIME parts, so a list row
 // can only infer attachments from the top-level Content-Type. An opened
 // thread uses the exact part-based check instead.

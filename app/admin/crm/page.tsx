@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { getLeadsWithLastActivity, getFollowUpTasks, getUpcomingSchedule } from "@/lib/crm-data";
 import { computeDashboardStats, getLastInteracted, STAGE_LABELS } from "@/lib/crm-constants";
+import { loadPriorityList } from "@/lib/priorities-data";
+import TopPriorities from "@/components/crm/TopPriorities";
 
 export const dynamic = "force-dynamic";
 
@@ -32,10 +34,13 @@ export default async function CrmDashboardPage() {
   const stats = computeDashboardStats(leads);
   const { overdue, today } = await getFollowUpTasks();
   const upcoming = await getUpcomingSchedule(7);
+  const priorities = await loadPriorityList({ withEmail: false });
 
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-bold text-blue-900">Dashboard</h1>
+
+      <TopPriorities initial={priorities} />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div className="bg-white rounded-lg border border-gray-200 p-4">

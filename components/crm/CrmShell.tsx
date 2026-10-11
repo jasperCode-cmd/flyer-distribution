@@ -19,6 +19,7 @@ import {
   type CrmNavPosition,
 } from "@/lib/crm-nav";
 import { APPLICATIONS_CHANGED_EVENT } from "@/lib/distributor-applications";
+import { PRIORITIES_CHANGED_EVENT } from "@/lib/priorities";
 
 // The links and their groups come from CRM_NAV_GROUPS in lib/crm-nav.ts.
 // The desktop top bar starts at 1024px (narrower screens use the menu
@@ -58,6 +59,20 @@ function ApplicationsCount({ count, className = "" }: { count: number | null; cl
   );
 }
 
+// Urgent and High items waiting on the Priorities list.
+function PrioritiesCount({ count }: { count: number | null }) {
+  if (!count || count <= 0) return null;
+  const label = count > 99 ? "99+" : String(count);
+  return (
+    <span
+      className="ml-1.5 inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1.5 text-[11px] font-bold leading-5 text-white"
+      aria-label={`${label} urgent or high priorities`}
+    >
+      {label}
+    </span>
+  );
+}
+
 export default function CrmShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -66,6 +81,7 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [inboxCount, setInboxCount] = useState<{ value: number; more: boolean } | null>(null);
   const [applicationsCount, setApplicationsCount] = useState<number | null>(null);
+  const [prioritiesCount, setPrioritiesCount] = useState<number | null>(null);
 
   // Desktop navigation position. Layout comes from the data attribute the
   // CRM layout's inline script puts on <html> before first paint; this state
@@ -135,6 +151,29 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
     };
   }, [pathname]);
 
+  // Urgent and High items on the Priorities list, refreshed on every CRM
+  // navigation and whenever the list changes.
+  useEffect(() => {
+    if (pathname === "/admin/crm/login") return;
+    let cancelled = false;
+    function refresh() {
+      fetch("/api/crm/priorities/count")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (!cancelled && typeof data?.count === "number") setPrioritiesCount(data.count);
+        })
+        .catch(() => {});
+    }
+    refresh();
+    window.addEventListener(PRIORITIES_CHANGED_EVENT, refresh);
+    window.addEventListener(APPLICATIONS_CHANGED_EVENT, refresh);
+    return () => {
+      cancelled = true;
+      window.removeEventListener(PRIORITIES_CHANGED_EVENT, refresh);
+      window.removeEventListener(APPLICATIONS_CHANGED_EVENT, refresh);
+    };
+  }, [pathname]);
+
   // Navigating away should never leave a menu hanging open.
   useEffect(() => {
     setOpenMenu(null);
@@ -146,8 +185,10 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
         <InboxCount count={inboxCount} />
       ) : item.count === "applications" ? (
         <ApplicationsCount count={applicationsCount} />
+      ) : item.count === "priorities" ? (
+        <PrioritiesCount count={prioritiesCount} />
       ) : null,
-    [inboxCount, applicationsCount]
+    [inboxCount, applicationsCount, prioritiesCount]
   );
 
   // The login page renders standalone, without the authenticated shell.
@@ -254,8 +295,9 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <header className="bg-blue-900 text-white sticky top-0 z-40 lg:crm-side:hidden">
-        {/* From 1024 to 1279px the bar is tight, so the side padding, the
-            "CRM" label and the search box give way to the navigation. */}
+        {/* From 1024 to 1279px the bar is tight, so the side padding and the
+            "CRM" label give way to the navigation; below 1366px the search
+            box is a search button that opens the box over the bar. */}
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-4 xl:px-6 flex items-center justify-between h-20">
           <div className="flex items-center gap-4 min-w-0">
             <Link href="/admin/crm" className="shrink-0 flex items-center gap-3">
@@ -322,7 +364,7 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center gap-3">
-            {!forcedChange && <div className="hidden lg:block lg:w-36 xl:w-auto"><SearchBar /></div>}
+            {!forcedChange && <div className="hidden lg:block"><SearchBar collapsible /></div>}
             {!forcedChange && !sideActive && <NotificationBell />}
             {session?.user && (
               <span className="hidden sm:inline lg:hidden text-xs text-blue-200 truncate max-w-[160px]">
