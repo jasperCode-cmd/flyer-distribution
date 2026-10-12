@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import {
   APPLICATION_HONEYPOT_FIELD,
   DISTRIBUTOR_APPLICATION_SUBJECT,
@@ -58,6 +59,32 @@ export default function DistributorApplicationForm() {
         <p className="text-gray-600">
           Thanks for applying. We&apos;ll be in touch soon, most likely on WhatsApp.
         </p>
+
+        <div className="mt-6 pt-6 border-t border-gray-100">
+          <p className="font-bold text-blue-900 mb-2">While you wait, take a look around.</p>
+          <p className="text-gray-600 text-sm leading-relaxed max-w-md mx-auto">
+            Our services page shows the kind of work you could be doing with us, from door-to-door rounds
+            to handing out leaflets at shopping centres and events. It&apos;s a good way to get a feel for
+            the role before we chat.
+          </p>
+          <Link
+            href="/services"
+            className="inline-block mt-5 bg-blue-700 hover:bg-blue-800 text-white font-bold px-8 py-4 rounded-md transition duration-200 ease-out hover:scale-105"
+          >
+            Explore our services
+          </Link>
+          <div className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm">
+            <Link href="/case-studies" className="inline-block py-1 text-blue-700 hover:underline font-medium">
+              See our recent campaigns
+            </Link>
+            <Link
+              href="/services/hand-to-hand-distribution"
+              className="inline-block py-1 text-blue-700 hover:underline font-medium"
+            >
+              Hand-to-hand distribution
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
@@ -130,7 +157,7 @@ export default function DistributorApplicationForm() {
           />
         </div>
 
-        {/* Where do you live — last of the initial fields; answering it reveals the rest */}
+        {/* Where do you live? Last of the initial fields; answering it reveals the rest */}
         <div>
           <label htmlFor="dist-area" className="block text-sm font-medium text-gray-700 mb-1">
             Where do you live? <span className="text-red-500">*</span>
