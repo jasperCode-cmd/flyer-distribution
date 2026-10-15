@@ -62,8 +62,8 @@ const a = "text-blue-700 hover:text-blue-900 underline underline-offset-2 transi
 const card = "bg-white border border-gray-200 rounded-lg p-6 sm:p-8";
 const h2 = "text-xl font-bold text-blue-900 mb-4";
 const h3 = "text-base font-semibold text-gray-800 mb-2";
-const p = "text-gray-600 leading-relaxed";
-const ul = "list-disc pl-5 text-gray-600 leading-relaxed";
+const p = "text-gray-600 text-lg leading-relaxed";
+const ul = "list-disc pl-5 text-gray-600 text-lg leading-relaxed";
 
 function EmailLink() {
   return (
@@ -91,7 +91,7 @@ export default function PrivacyPolicyPage() {
             ]}
           />
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">Privacy Policy</h1>
-          <p className="text-blue-200 text-lg max-w-2xl leading-relaxed">
+          <p className="text-blue-200 text-xl max-w-2xl leading-relaxed">
             Your privacy matters to us. This page explains what personal
             information Flyer Distribution Hampshire collects through this
             website, why we collect it, and what we do with it. We&apos;ve kept
@@ -425,7 +425,7 @@ export default function PrivacyPolicyPage() {
                 Leonards, Ringwood, BH24 2NR
               </li>
             </ul>
-            <p className={`${p} mt-4 text-sm`}>
+            <p className="text-gray-600 text-base leading-relaxed mt-4">
               This policy was written on 10 October 2026. If we change how we
               use personal information, we&apos;ll update this page.
             </p>

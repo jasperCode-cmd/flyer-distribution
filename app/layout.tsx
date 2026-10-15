@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Atkinson_Hyperlegible_Next, Schibsted_Grotesk } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -7,15 +7,27 @@ import AnnouncementBar from "@/components/AnnouncementBar";
 import SlotPopup from "@/components/SlotPopup";
 import FloatingQuoteButton from "@/components/FloatingQuoteButton";
 
-const inter = Inter({
+// Both are variable fonts, so every weight comes from one file each,
+// self-hosted at build time (no request to Google from the browser).
+// Headings use Schibsted Grotesk, everything else Atkinson Hyperlegible
+// Next; the CRM keeps Inter, loaded in its own layout.
+const schibsted = Schibsted_Grotesk({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-schibsted",
   display: "swap",
+  fallback: ["Arial", "Helvetica", "sans-serif"],
+});
+
+const atkinson = Atkinson_Hyperlegible_Next({
+  subsets: ["latin"],
+  variable: "--font-atkinson",
+  display: "swap",
+  fallback: ["Arial", "Helvetica", "sans-serif"],
 });
 
 // Declared explicitly rather than relying on the framework default, so the
 // zoom guarantee is visible in code: no maximumScale and no
-// userScalable:false — pinch-to-zoom must always stay available as an
+// userScalable:false; pinch-to-zoom must always stay available as an
 // accessibility fallback, whatever the responsive layout does.
 export const viewport: Viewport = {
   width: "device-width",
@@ -79,7 +91,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en-GB" className={`${inter.variable} h-full`}>
+    <html lang="en-GB" className={`${schibsted.variable} ${atkinson.variable} h-full`}>
       <body className="min-h-full flex flex-col font-sans antialiased bg-slate-50 text-gray-800">
         <script
           type="application/ld+json"

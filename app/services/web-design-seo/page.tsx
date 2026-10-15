@@ -134,7 +134,7 @@ export default function WebDesignSeoPage() {
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
                 Web Design &amp; SEO
               </h1>
-              <p className="text-blue-200 text-lg sm:text-xl max-w-xl leading-relaxed mb-8">
+              <p className="text-blue-200 text-xl sm:text-2xl max-w-xl leading-relaxed mb-8">
                 Fast, professional websites and search engine optimisation for
                 businesses across Hampshire and Dorset.
               </p>
@@ -209,7 +209,7 @@ export default function WebDesignSeoPage() {
                 <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-5">
                   Websites Built to Bring in Enquiries
                 </h2>
-                <p className="text-gray-600 text-xl leading-relaxed">
+                <p className="text-gray-600 text-2xl leading-relaxed">
                   We design and build{" "}
                   <strong className="font-semibold text-gray-800">
                     bespoke websites
@@ -272,7 +272,7 @@ export default function WebDesignSeoPage() {
                 <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-3">
                   Built With a Trusted Partner
                 </h2>
-                <p className="text-gray-600 leading-relaxed max-w-xl mx-auto">
+                <p className="text-gray-600 leading-relaxed max-w-xl mx-auto text-lg">
                   We partner with{" "}
                   <a
                     href="https://anglerdigital.co.uk"
@@ -292,14 +292,14 @@ export default function WebDesignSeoPage() {
         </div>
       </section>
 
-      {/* Why choose us — icon-led benefit cards */}
+      {/* Why choose us: icon-led benefit cards */}
       <section className="bg-slate-50 border-y border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <ScrollReveal>
             <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 text-center mb-4">
               Why Choose Us
             </h2>
-            <p className="text-gray-600 text-center max-w-2xl mx-auto mb-12">
+            <p className="text-gray-600 text-center max-w-2xl mx-auto mb-12 text-lg">
               Every website we build comes with the same standards, built in
               from day one.
             </p>
@@ -308,7 +308,7 @@ export default function WebDesignSeoPage() {
         </div>
       </section>
 
-      {/* Get Online for Less — contained offer box */}
+      {/* Get Online for Less: contained offer box */}
       <section id="offer" className="bg-white py-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-blue-900 rounded-xl px-8 py-10 sm:px-12 md:py-8 shadow-[0_0_30px_rgba(250,204,21,0.2)] md:flex md:items-center md:justify-between md:gap-10">
@@ -316,7 +316,7 @@ export default function WebDesignSeoPage() {
               <h2 className="text-3xl font-bold text-white mb-3">
                 Get Online for Less
               </h2>
-              <p className="text-xl text-blue-100 leading-relaxed md:mb-0 mb-6">
+              <p className="text-2xl text-blue-100 leading-relaxed md:mb-0 mb-6">
                 Professional websites from{" "}
                 <span className="text-yellow-400 font-bold">£60 a month</span>
                 , no big upfront cost.
@@ -345,7 +345,7 @@ export default function WebDesignSeoPage() {
           <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-4">
             Ready to Grow Online?
           </h2>
-          <p className="text-gray-600 max-w-lg mx-auto mb-8 leading-relaxed">
+          <p className="text-gray-600 max-w-lg mx-auto mb-8 leading-relaxed text-lg">
             Tell us about your business and what you&apos;re looking to achieve.
             We&apos;ll come back to you with a clear proposal and no obligation.
           </p>
@@ -364,7 +364,7 @@ export default function WebDesignSeoPage() {
           <h2 className="text-2xl font-bold text-blue-900 mb-8">
             Leaflet Services
           </h2>
-          <p className="text-gray-600 mb-8 max-w-2xl leading-relaxed">
+          <p className="text-gray-600 mb-8 max-w-2xl leading-relaxed text-lg">
             We also run door-to-door leaflet distribution across our full{" "}
             <Link href="/areas" className="text-blue-700 hover:underline font-medium">
               coverage area
@@ -391,7 +391,7 @@ export default function WebDesignSeoPage() {
                 <h3 className="text-base font-semibold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors">
                   Design, Print and Deliver
                 </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <p className="text-gray-600 text-base leading-relaxed">
                   Our full end-to-end service. We handle design, printing in A6, A5, A4 or DL, and full distribution across your chosen areas.
                 </p>
               </div>
@@ -411,7 +411,7 @@ export default function WebDesignSeoPage() {
                 <h3 className="text-base font-semibold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors">
                   Print and Deliver
                 </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <p className="text-gray-600 text-base leading-relaxed">
                   Already have your design ready? We handle printing in A6, A5, A4 or DL and deliver your leaflets directly through letterboxes.
                 </p>
               </div>
@@ -431,7 +431,7 @@ export default function WebDesignSeoPage() {
                 <h3 className="text-base font-semibold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors">
                   Leaflet Distribution
                 </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <p className="text-gray-600 text-base leading-relaxed">
                   Door-to-door delivery to households across your chosen areas in Hampshire and Dorset. Your materials posted directly through letterboxes.
                 </p>
               </div>

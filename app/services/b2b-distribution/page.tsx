@@ -150,7 +150,7 @@ export default function B2BDistributionPage() {
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 max-w-2xl">
             B2B Leaflet Distribution
           </h1>
-          <p className="text-blue-200 text-lg max-w-2xl leading-relaxed">
+          <p className="text-blue-200 text-xl max-w-2xl leading-relaxed">
             Putting your message directly into the hands of local business
             owners and decision-makers, delivered to offices, business parks
             and commercial areas across Hampshire and Dorset.
@@ -175,7 +175,7 @@ export default function B2BDistributionPage() {
             </div>
           </ScrollReveal>
           <div className="space-y-4 text-gray-600 leading-relaxed">
-            <p>
+            <p className="text-lg">
               B2B leaflet distribution puts your marketing directly in front
               of business owners and decision-makers, rather than relying on
               broad advertising that may never reach the right person. We
@@ -183,7 +183,7 @@ export default function B2BDistributionPage() {
               other commercial areas, focusing on the specific industries
               and sectors most relevant to what you offer.
             </p>
-            <p>
+            <p className="text-lg">
               It&apos;s well suited to trades, professional services,
               recruitment agencies, commercial suppliers, and B2B events,
               helping you build brand awareness across your local commercial
@@ -195,7 +195,7 @@ export default function B2BDistributionPage() {
               </Link>{" "}
               covers the basics.
             </p>
-            <p>
+            <p className="text-lg">
               It complements your existing marketing well, sitting alongside
               digital campaigns, email marketing and sales outreach rather
               than replacing any of it, and scales from a single business
@@ -216,7 +216,7 @@ export default function B2BDistributionPage() {
             <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-3">
               Why Choose B2B Distribution
             </h2>
-            <p className="text-gray-600 max-w-2xl mb-10">
+            <p className="text-gray-600 max-w-2xl mb-10 text-lg">
               A direct way to put your business in front of other local
               businesses, targeted by industry and location.
             </p>
@@ -232,7 +232,7 @@ export default function B2BDistributionPage() {
                   {item.icon}
                 </svg>
                 <h3 className="text-sm font-semibold text-blue-900 mb-2">{item.title}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{item.body}</p>
+                <p className="text-gray-600 text-base leading-relaxed">{item.body}</p>
               </div>
             ))}
           </StaggerGroup>
@@ -245,7 +245,7 @@ export default function B2BDistributionPage() {
           <h2 className="text-2xl sm:text-3xl font-bold mb-3">
             Ready to Reach Other Businesses?
           </h2>
-          <p className="text-blue-200 mb-8 max-w-xl">
+          <p className="text-blue-200 mb-8 max-w-xl text-lg">
             Whether you&apos;re targeting a single business park or a wider
             commercial area across Hampshire and Dorset, we handle the
             distribution so you can focus on running your business.

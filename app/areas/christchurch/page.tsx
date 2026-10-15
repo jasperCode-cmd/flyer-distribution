@@ -89,7 +89,7 @@ export default function ChristchurchPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Leaflet Distribution Christchurch
           </h1>
-          <p className="text-blue-200 text-lg max-w-xl">
+          <p className="text-blue-200 text-xl max-w-xl">
             Door-to-door leaflet delivery across Christchurch and BH23
             postcodes, reaching households in this coastal Dorset market town.
           </p>
@@ -107,7 +107,7 @@ export default function ChristchurchPage() {
               label={areaData.populationLabel}
               className="mb-4"
             />
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               Christchurch sits on the Dorset coast between{" "}
               <Link href="/areas/bournemouth" className="text-blue-700 hover:underline font-medium">
                 Bournemouth
@@ -117,7 +117,7 @@ export default function ChristchurchPage() {
               postcodes, delivering to households across the town and into
               nearby villages including Burton, Walkford, and Highcliffe.
             </p>
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               The town&apos;s homeowner-heavy demographic makes it particularly
               effective for home improvement, trades, and professional services
               campaigns. Its position between Bournemouth and the New Forest
@@ -132,7 +132,7 @@ export default function ChristchurchPage() {
               </Link>
               .
             </p>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed text-lg">
               Christchurch&apos;s harbourside and town centre retail areas are
               also available for{" "}
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
@@ -191,7 +191,7 @@ export default function ChristchurchPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Bournemouth</h3>
-              <p className="text-gray-600 text-xs mb-3">Major Dorset resort town with strong consumer footfall.</p>
+              <p className="text-gray-600 text-sm mb-3">Major Dorset resort town with strong consumer footfall.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -199,7 +199,7 @@ export default function ChristchurchPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Poole</h3>
-              <p className="text-gray-600 text-xs mb-3">Affluent harbour town with excellent residential distribution routes.</p>
+              <p className="text-gray-600 text-sm mb-3">Affluent harbour town with excellent residential distribution routes.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -207,7 +207,7 @@ export default function ChristchurchPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Dorset</h3>
-              <p className="text-gray-600 text-xs mb-3">County-wide coverage across Bournemouth, Poole and surrounding towns.</p>
+              <p className="text-gray-600 text-sm mb-3">County-wide coverage across Bournemouth, Poole and surrounding towns.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

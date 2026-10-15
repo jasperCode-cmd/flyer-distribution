@@ -147,7 +147,7 @@ export default function HandToHandDistributionPage() {
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 max-w-2xl">
             Hand-to-Hand Leaflet Distribution
           </h1>
-          <p className="text-blue-200 text-lg max-w-2xl leading-relaxed">
+          <p className="text-blue-200 text-xl max-w-2xl leading-relaxed">
             Putting your leaflets directly into people&apos;s hands at the
             moments they&apos;re most likely to take notice, from shopping
             centres to local events across Hampshire and Dorset.
@@ -173,7 +173,7 @@ export default function HandToHandDistributionPage() {
             </div>
           </ScrollReveal>
           <div className="space-y-4 text-gray-600 leading-relaxed">
-            <p>
+            <p className="text-lg">
               Hand-to-hand distribution puts your leaflets directly into
               people&apos;s hands instead of through a letterbox. One of our
               team stands in a busy spot, whether that&apos;s a shopping
@@ -182,7 +182,7 @@ export default function HandToHandDistributionPage() {
               direct, personal way to reach people at the exact moment
               they&apos;re out and about.
             </p>
-            <p>
+            <p className="text-lg">
               We&apos;ve run hand-to-hand campaigns at Westquay Shopping
               Centre in{" "}
               <Link href="/areas/southampton" className="text-blue-700 hover:underline font-medium">
@@ -199,7 +199,7 @@ export default function HandToHandDistributionPage() {
               </Link>
               .
             </p>
-            <p>
+            <p className="text-lg">
               It complements our regular{" "}
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
                 door-to-door rounds
@@ -222,7 +222,7 @@ export default function HandToHandDistributionPage() {
             <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-3">
               Why Choose Hand-to-Hand Distribution
             </h2>
-            <p className="text-gray-600 max-w-2xl mb-10">
+            <p className="text-gray-600 max-w-2xl mb-10 text-lg">
               A direct, personal way to put your message in front of the
               right people, at the right time and place.
             </p>
@@ -238,7 +238,7 @@ export default function HandToHandDistributionPage() {
                   {item.icon}
                 </svg>
                 <h3 className="text-sm font-semibold text-blue-900 mb-2">{item.title}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{item.body}</p>
+                <p className="text-gray-600 text-base leading-relaxed">{item.body}</p>
               </div>
             ))}
           </StaggerGroup>
@@ -251,7 +251,7 @@ export default function HandToHandDistributionPage() {
           <h2 className="text-2xl sm:text-3xl font-bold mb-3">
             Planning a Campaign?
           </h2>
-          <p className="text-blue-200 mb-8 max-w-xl">
+          <p className="text-blue-200 mb-8 max-w-xl text-lg">
             Our distributors are briefed on your campaign before every
             hand-to-hand round, so they can talk to people naturally rather
             than just pushing paper into hands.

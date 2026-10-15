@@ -44,7 +44,7 @@ export default function AboutPage() {
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">About Us</h1>
-          <p className="text-blue-200 text-lg max-w-xl">
+          <p className="text-blue-200 text-xl max-w-xl">
             An independent marketing and leaflet distribution company based in
             Hampshire, helping businesses connect with their ideal customers
             through both traditional and digital marketing.
@@ -52,11 +52,11 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Intro — two-column with image */}
+      {/* Intro: two-column with image */}
       <section className="bg-slate-50 pt-16 pb-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div>
-            <p className="text-gray-600 text-lg mb-7 leading-relaxed">
+            <p className="text-gray-600 text-xl mb-7 leading-relaxed">
               Flyer Distribution Hampshire is an independent marketing and leaflet
               distribution company based in Hampshire. We help local businesses,
               national brands, charities, and community organisations connect with
@@ -66,7 +66,7 @@ export default function AboutPage() {
               </strong>
               .
             </p>
-            <p className="text-gray-600 text-lg mb-7 leading-relaxed">
+            <p className="text-gray-600 text-xl mb-7 leading-relaxed">
               Leaflet distribution is at the heart of what we do, with services
               extending to{" "}
               <Link href="/services/web-design-seo" className="font-semibold text-blue-700 hover:underline">
@@ -75,7 +75,7 @@ export default function AboutPage() {
               for businesses looking to grow their presence online as well as
               offline.
             </p>
-            <p className="text-gray-600 text-lg leading-relaxed mb-7">
+            <p className="text-gray-600 text-xl leading-relaxed mb-7">
               We&apos;re small enough to offer a genuinely personal service, with
               distributors who are{" "}
               <strong className="font-semibold text-gray-800">
@@ -84,7 +84,7 @@ export default function AboutPage() {
               , and know their routes inside out, covering Hampshire and into
               Dorset including Bournemouth and Poole.
             </p>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed text-lg">
               Want to see examples of our work?{" "}
               <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
                 Take a look at our case studies
@@ -112,15 +112,15 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Who We Are — full width */}
+      {/* Who We Are: full width */}
       <section className="bg-slate-50 pb-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-2xl font-bold text-blue-900 mb-4">
             Who We Are
           </h2>
 
-          {/* Intro — standalone above the founder cards */}
-          <p className="text-gray-600 mb-10 leading-relaxed">
+          {/* Intro: standalone above the founder cards */}
+          <p className="text-gray-600 mb-10 leading-relaxed text-lg">
             Flyer Distribution Hampshire was co-founded by Jasper and Daniel,
             who both graduated in 2025, Jasper from the University of
             Southampton and Daniel from Bournemouth University. Together they
@@ -128,7 +128,7 @@ export default function AboutPage() {
             advertising methods to give businesses a complete marketing solution.
           </p>
 
-          {/* Founder cards — side by side on desktop */}
+          {/* Founder cards: side by side on desktop */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
 
             {/* Jasper */}
@@ -139,11 +139,11 @@ export default function AboutPage() {
                   J
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">Jasper</p>
+                  <p className="font-heading text-2xl font-bold text-gray-900">Jasper</p>
                   <p className="text-sm font-semibold text-blue-700 mt-0.5">Co-Founder &amp; Operations Director</p>
                 </div>
               </div>
-              <p className="text-gray-600 text-sm leading-[1.8]">
+              <p className="text-gray-600 text-base leading-[1.8]">
                 Jasper brings extensive expertise in website design and development,
                 search engine optimisation (SEO), organic digital marketing, and
                 social media growth. His passion for helping businesses improve their
@@ -160,11 +160,11 @@ export default function AboutPage() {
                   D
                 </div>
                 <div>
-                  <p className="text-2xl font-bold text-gray-900">Daniel</p>
+                  <p className="font-heading text-2xl font-bold text-gray-900">Daniel</p>
                   <p className="text-sm font-semibold text-blue-700 mt-0.5">Co-Founder &amp; Sales Director</p>
                 </div>
               </div>
-              <p className="text-gray-600 text-sm leading-[1.8]">
+              <p className="text-gray-600 text-base leading-[1.8]">
                 Daniel has a strong background in sales, media, marketing, and
                 business development. His experience in building client
                 relationships, developing advertising strategies, and growing brands
@@ -175,9 +175,9 @@ export default function AboutPage() {
 
           </div>
 
-          {/* Closing — centered below both cards */}
+          {/* Closing: centered below both cards */}
           <div className="text-center">
-            <p className="text-gray-600 mb-8 leading-relaxed max-w-lg mx-auto">
+            <p className="text-gray-600 mb-8 leading-relaxed max-w-lg mx-auto text-lg">
               If you have a campaign in mind, we&apos;d be delighted to discuss
               how Flyer Distribution Hampshire can help your business reach more
               customers and achieve measurable growth.
@@ -188,7 +188,7 @@ export default function AboutPage() {
             >
               Get a Free Quote
             </Link>
-            <p className="text-gray-500 text-sm mt-6">
+            <p className="text-gray-500 text-base mt-6">
               Prefer to be part of the team instead?{" "}
               <Link href="/leaflet-distribution-jobs" className="text-blue-700 hover:underline font-medium">
                 See our distributor jobs
@@ -231,7 +231,7 @@ export default function AboutPage() {
                 <h3 className="text-base font-semibold text-blue-900 mb-2">
                   {v.title}
                 </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{v.body}</p>
+                <p className="text-gray-600 text-base leading-relaxed">{v.body}</p>
               </div>
             ))}
           </div>
@@ -242,7 +242,7 @@ export default function AboutPage() {
           <h2 className="text-2xl font-bold text-blue-900 mb-3">
             Our Services
           </h2>
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-600 mb-8 text-lg">
             From leaflet distribution to web design and mobile screen hire, we offer a range of marketing solutions for local businesses.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -271,7 +271,7 @@ export default function AboutPage() {
                 <h3 className="text-base font-semibold text-blue-900 mb-2">
                   {svc.title}
                 </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{svc.desc}</p>
+                <p className="text-gray-600 text-base leading-relaxed">{svc.desc}</p>
                 <span className="mt-3 inline-block text-blue-600 text-xs font-semibold">
                   View service →
                 </span>

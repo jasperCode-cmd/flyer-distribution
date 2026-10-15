@@ -75,7 +75,7 @@ export default function DistributorBenefits() {
           <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-lg bg-blue-200 group-hover:bg-blue-500 transition-colors duration-300" aria-hidden="true" />
           <div className="flex justify-center mb-4 mt-1">{item.icon}</div>
           <h3 className="text-base font-semibold text-blue-900 mb-2">{item.title}</h3>
-          <p className="text-gray-600 text-sm leading-relaxed">{item.body}</p>
+          <p className="text-gray-600 text-base leading-relaxed">{item.body}</p>
         </div>
       ))}
     </StaggerGroup>

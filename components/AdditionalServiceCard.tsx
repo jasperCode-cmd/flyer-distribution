@@ -76,7 +76,7 @@ export default function AdditionalServiceCard({
         <h3 className="text-base font-semibold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors">
           {title}
         </h3>
-        <p className="text-gray-600 text-sm leading-relaxed mb-4">
+        <p className="text-gray-600 text-base leading-relaxed mb-4">
           {description}
         </p>
         <div className="flex flex-wrap gap-2 mb-5">

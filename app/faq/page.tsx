@@ -54,7 +54,7 @@ const questions = [
   "How long does a campaign take?",
 ];
 
-/* Plain-text versions for FAQPage schema — no markdown, no link syntax */
+/* Plain-text versions for FAQPage schema: no markdown, no link syntax */
 const schemaAnswers = [
   "We cover the Hampshire and Dorset corridor, offering flyer distribution and leaflet distribution across Southampton, Bournemouth, Poole, Winchester, Eastleigh, the New Forest, Romsey, Ringwood, Christchurch, and Dorset more widely, along with Hythe, Totton, Hedge End, Chandler's Ford, and Brockenhurst. See our full coverage areas for details, and if your target area isn't listed, get in touch, as we can often accommodate additional postcodes on request.",
   "Once we have your printed leaflets, we take care of getting them delivered. Our door-to-door leaflet distribution service posts them directly through letterboxes across your chosen postcode areas in Hampshire and Dorset. Once your materials are received, our team carries out the rounds and confirms completion. Take a look at examples of our work to see it in action.",
@@ -93,7 +93,7 @@ export default function FaqPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Frequently Asked Questions
           </h1>
-          <p className="text-blue-200 text-lg max-w-xl">
+          <p className="text-blue-200 text-xl max-w-xl">
             Everything you need to know about leaflet distribution in Hampshire
             and Dorset.
           </p>
@@ -107,7 +107,7 @@ export default function FaqPage() {
             {/* Q1 */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <h2 className="text-base font-semibold text-blue-900 mb-2">{questions[0]}</h2>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p className="text-gray-600 text-base leading-relaxed">
                 We cover the Hampshire and Dorset corridor, offering flyer distribution and leaflet
                 distribution across{" "}
                 <Link href="/areas/southampton" className={a}>Southampton</Link>,{" "}
@@ -135,7 +135,7 @@ export default function FaqPage() {
             {/* Q2 */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <h2 className="text-base font-semibold text-blue-900 mb-2">{questions[1]}</h2>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p className="text-gray-600 text-base leading-relaxed">
                 Once we have your printed leaflets, we take care of getting them delivered. Our{" "}
                 <Link href="/services" className={a}>door-to-door leaflet distribution service</Link>{" "}
                 posts them directly through letterboxes across your chosen postcode areas in Hampshire
@@ -149,7 +149,7 @@ export default function FaqPage() {
             {/* Q3 */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <h2 className="text-base font-semibold text-blue-900 mb-2">{questions[2]}</h2>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p className="text-gray-600 text-base leading-relaxed">
                 Yes. Our{" "}
                 <Link href="/services" className={a}>Design, Print and Deliver package</Link>{" "}
                 is a complete end-to-end service where we handle everything from initial artwork
@@ -164,7 +164,7 @@ export default function FaqPage() {
             {/* Q4 */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <h2 className="text-base font-semibold text-blue-900 mb-2">{questions[3]}</h2>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p className="text-gray-600 text-base leading-relaxed">
                 Yes. Postcode-level targeting is central to how we work. You choose the postcode
                 areas you want to reach, and we focus your flyer distribution campaign there. Our{" "}
                 <Link href="/services" className={a}>Campaign Planning service</Link> can help
@@ -176,7 +176,7 @@ export default function FaqPage() {
             {/* Q5 */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <h2 className="text-base font-semibold text-blue-900 mb-2">{questions[4]}</h2>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p className="text-gray-600 text-base leading-relaxed">
                 Not necessarily. You can supply your own printed materials, or choose our{" "}
                 <Link href="/services" className={a}>Print and Deliver service</Link> and
                 we&apos;ll handle the printing for you. We have established relationships with print
@@ -190,7 +190,7 @@ export default function FaqPage() {
             {/* Q6 */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <h2 className="text-base font-semibold text-blue-900 mb-2">{questions[5]}</h2>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p className="text-gray-600 text-base leading-relaxed">
                 Use our{" "}
                 <Link href="/quote" className={a}>Get a Quote page</Link> and tell us your
                 target postcode areas and approximate quantity. We&apos;ll come back to you within
@@ -201,7 +201,7 @@ export default function FaqPage() {
             {/* Q7 */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <h2 className="text-base font-semibold text-blue-900 mb-2">{questions[6]}</h2>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p className="text-gray-600 text-base leading-relaxed">
                 That depends on the postcode areas you want to cover across Hampshire and Dorset and
                 how many households are within them. We generally recommend 5,000 or more, as this
                 gives your campaign enough reach to generate a meaningful response, and we offer
@@ -215,7 +215,7 @@ export default function FaqPage() {
             {/* Q8 */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <h2 className="text-base font-semibold text-blue-900 mb-2">{questions[7]}</h2>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p className="text-gray-600 text-base leading-relaxed">
                 We deliver most standard leaflet sizes including A6, A5, A4, and DL. If you&apos;re
                 unsure whether your format is suitable, just ask when you{" "}
                 <Link href="/quote" className={a}>get a quote</Link>.
@@ -225,7 +225,7 @@ export default function FaqPage() {
             {/* Q9 */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <h2 className="text-base font-semibold text-blue-900 mb-2">{questions[8]}</h2>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p className="text-gray-600 text-base leading-relaxed">
                 Vehicle leaflet distribution involves placing your leaflets on parked cars in car
                 parks, retail areas, and high-footfall locations across Hampshire and Dorset.
                 It&apos;s an effective way to reach people who are already out and spending locally,
@@ -237,7 +237,7 @@ export default function FaqPage() {
             {/* Q10 */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <h2 className="text-base font-semibold text-blue-900 mb-2">{questions[9]}</h2>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p className="text-gray-600 text-base leading-relaxed">
                 Most flyer distribution campaigns across Hampshire and Dorset are completed within
                 two weeks of us receiving your materials, with smaller campaigns often turning around
                 faster. We&apos;ll agree a clear timeline with you before the campaign begins, so
@@ -251,7 +251,7 @@ export default function FaqPage() {
             <h2 className="text-lg font-bold text-blue-900 mb-2">
               Still have questions?
             </h2>
-            <p className="text-gray-600 text-sm mb-6">
+            <p className="text-gray-600 text-base mb-6">
               Get in touch and we&apos;ll be happy to help. Want to know more
               about who we are first? Read{" "}
               <Link href="/about" className={a}>our story</Link>.
@@ -262,7 +262,7 @@ export default function FaqPage() {
             >
               Get a Free Quote
             </Link>
-            <p className="text-gray-500 text-xs mt-4">
+            <p className="text-gray-500 text-sm mt-4">
               Interested in delivering leaflets for us instead?{" "}
               <Link href="/leaflet-distribution-jobs" className="text-blue-700 hover:underline font-medium">
                 See our distributor jobs

@@ -89,7 +89,7 @@ export default function BrockenhurstPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Leaflet Distribution Brockenhurst
           </h1>
-          <p className="text-blue-200 text-lg max-w-xl">
+          <p className="text-blue-200 text-xl max-w-xl">
             Door-to-door leaflet delivery across Brockenhurst and SO42
             postcodes, reaching households across this New Forest village.
           </p>
@@ -107,7 +107,7 @@ export default function BrockenhurstPage() {
               label={areaData.populationLabel}
               className="mb-4"
             />
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               Brockenhurst is one of the New Forest&apos;s best-known
               villages, with New Forest ponies wandering along Brookley
               Road and a mainline railway station at its centre. We cover
@@ -115,7 +115,7 @@ export default function BrockenhurstPage() {
               the village and into the smaller hamlets and residential
               roads nearby.
             </p>
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               Brookley Road mixes independent shops, tearooms and pubs
               with a steady flow of visitors alongside its residents, so
               campaigns here can reach a genuinely wide audience. Local
@@ -127,7 +127,7 @@ export default function BrockenhurstPage() {
               </Link>
               .
             </p>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed text-lg">
               Vehicle campaigns are also available around Brockenhurst&apos;s
               Brookley Road and station car parks, part of{" "}
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
@@ -186,7 +186,7 @@ export default function BrockenhurstPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">New Forest</h3>
-              <p className="text-gray-600 text-xs mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
+              <p className="text-gray-600 text-sm mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -194,7 +194,7 @@ export default function BrockenhurstPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Southampton</h3>
-              <p className="text-gray-600 text-xs mb-3">Hampshire&apos;s largest city, a short train ride from Brockenhurst.</p>
+              <p className="text-gray-600 text-sm mb-3">Hampshire&apos;s largest city, a short train ride from Brockenhurst.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -202,7 +202,7 @@ export default function BrockenhurstPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Hythe</h3>
-              <p className="text-gray-600 text-xs mb-3">Waterside village on the eastern edge of the New Forest.</p>
+              <p className="text-gray-600 text-sm mb-3">Waterside village on the eastern edge of the New Forest.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

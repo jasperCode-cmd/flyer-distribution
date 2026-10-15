@@ -89,7 +89,7 @@ export default function HedgeEndPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Leaflet Distribution Hedge End
           </h1>
-          <p className="text-blue-200 text-lg max-w-xl">
+          <p className="text-blue-200 text-xl max-w-xl">
             Door-to-door leaflet delivery across Hedge End and SO30
             postcodes, reaching households across this Hampshire town.
           </p>
@@ -107,7 +107,7 @@ export default function HedgeEndPage() {
               label={areaData.populationLabel}
               className="mb-4"
             />
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               Hedge End sits just east of Southampton, a residential town
               that&apos;s grown up alongside the retail park that now draws
               shoppers from across the area. We cover SO30 and the
@@ -119,7 +119,7 @@ export default function HedgeEndPage() {
               </Link>
               .
             </p>
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               Most homes here are owner-occupied family houses, built up
               over several decades, which makes for a stable, responsive
               audience for local trades, home improvement, and professional
@@ -135,7 +135,7 @@ export default function HedgeEndPage() {
               </Link>{" "}
               campaigns too.
             </p>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed text-lg">
               Vehicle campaigns are available around Hedge End Retail Park
               and the surrounding car parks too, part of{" "}
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
@@ -194,7 +194,7 @@ export default function HedgeEndPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Eastleigh</h3>
-              <p className="text-gray-600 text-xs mb-3">One of Hampshire&apos;s largest towns, bordering Hedge End.</p>
+              <p className="text-gray-600 text-sm mb-3">One of Hampshire&apos;s largest towns, bordering Hedge End.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -202,7 +202,7 @@ export default function HedgeEndPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Southampton</h3>
-              <p className="text-gray-600 text-xs mb-3">Hampshire&apos;s largest city, just west of Hedge End.</p>
+              <p className="text-gray-600 text-sm mb-3">Hampshire&apos;s largest city, just west of Hedge End.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -210,7 +210,7 @@ export default function HedgeEndPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Chandler&apos;s Ford</h3>
-              <p className="text-gray-600 text-xs mb-3">Residential Eastleigh borough community north of Hedge End.</p>
+              <p className="text-gray-600 text-sm mb-3">Residential Eastleigh borough community north of Hedge End.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

@@ -89,7 +89,7 @@ export default function PooléPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Leaflet Distribution Poole
           </h1>
-          <p className="text-blue-200 text-lg max-w-xl">
+          <p className="text-blue-200 text-xl max-w-xl">
             Door-to-door leaflet delivery across Poole, covering affluent
             residential areas and harbour-side communities in Dorset.
           </p>
@@ -107,7 +107,7 @@ export default function PooléPage() {
               label={areaData.populationLabel}
               className="mb-4"
             />
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               Poole is one of the most affluent towns in Dorset, with
               prestigious areas like Sandbanks, Canford Cliffs, and Branksome
               Park attracting high-income households. Our distributors cover
@@ -117,7 +117,7 @@ export default function PooléPage() {
               </Link>{" "}
               across the wider area.
             </p>
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               For businesses targeting higher-income demographics, Poole&apos;s
               waterfront and marina postcodes offer some of the highest-value
               residential distribution in Dorset, particularly for luxury
@@ -128,7 +128,7 @@ export default function PooléPage() {
               </Link>{" "}
               for businesses wanting broader reach.
             </p>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed text-lg">
               We also cover Parkstone, Upton, Hamworthy, and the wider
               residential areas around the harbour. Many campaigns here
               extend naturally into neighbouring{" "}
@@ -191,7 +191,7 @@ export default function PooléPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Bournemouth</h3>
-              <p className="text-gray-600 text-xs mb-3">Major Dorset resort town with strong consumer footfall.</p>
+              <p className="text-gray-600 text-sm mb-3">Major Dorset resort town with strong consumer footfall.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -199,7 +199,7 @@ export default function PooléPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Dorset</h3>
-              <p className="text-gray-600 text-xs mb-3">County-wide coverage across Bournemouth, Poole and surrounding towns.</p>
+              <p className="text-gray-600 text-sm mb-3">County-wide coverage across Bournemouth, Poole and surrounding towns.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -207,7 +207,7 @@ export default function PooléPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Ringwood</h3>
-              <p className="text-gray-600 text-xs mb-3">Market town on the New Forest edge, close to the Dorset border.</p>
+              <p className="text-gray-600 text-sm mb-3">Market town on the New Forest edge, close to the Dorset border.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

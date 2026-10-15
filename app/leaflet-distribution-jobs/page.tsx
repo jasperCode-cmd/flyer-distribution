@@ -115,7 +115,7 @@ export default function LeafletDistributionJobsPage() {
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 max-w-2xl">
             Work as a Leaflet Distributor
           </h1>
-          <p className="text-blue-200 text-lg max-w-xl mb-8 leading-relaxed">
+          <p className="text-blue-200 text-xl max-w-xl mb-8 leading-relaxed">
             Earn flexible, self-employed income delivering leaflets in your
             local area. Work when it suits you, around a job, studying, or
             anything else on your plate.
@@ -129,7 +129,7 @@ export default function LeafletDistributionJobsPage() {
         </div>
       </section>
 
-      {/* Application form — moved up to sit right under the hero, since
+      {/* Application form, moved up to sit right under the hero, since
           that's the whole point of the page. */}
       <section id="apply" className="bg-slate-50 scroll-mt-4">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -137,7 +137,7 @@ export default function LeafletDistributionJobsPage() {
             <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-3">
               Apply to Join the Team
             </h2>
-            <p className="text-gray-600 max-w-xl mb-10">
+            <p className="text-gray-600 max-w-xl mb-10 text-lg">
               Fill in your details below and we&apos;ll be in touch to get you started.
             </p>
           </ScrollReveal>
@@ -148,19 +148,19 @@ export default function LeafletDistributionJobsPage() {
             <StaggerGroup className="space-y-5">
               <div className="bg-white rounded-lg border border-gray-200 p-6 hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-out">
                 <h3 className="text-sm font-semibold text-blue-900 mb-1">Quick Payment</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <p className="text-gray-600 text-base leading-relaxed">
                   Often same day, always agreed with you before each job.
                 </p>
               </div>
               <div className="bg-white rounded-lg border border-gray-200 p-6 hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-out">
                 <h3 className="text-sm font-semibold text-blue-900 mb-1">No Experience Needed</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <p className="text-gray-600 text-base leading-relaxed">
                   We&apos;ll talk you through everything once you apply.
                 </p>
               </div>
               <div className="bg-white rounded-lg border border-gray-200 p-6 hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-out">
                 <h3 className="text-sm font-semibold text-blue-900 mb-1">Serving Hampshire &amp; Dorset</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <p className="text-gray-600 text-base leading-relaxed">
                   Rounds are available right across our{" "}
                   <Link href="/areas" className="text-blue-700 hover:underline">
                     coverage area
@@ -180,7 +180,7 @@ export default function LeafletDistributionJobsPage() {
             <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 text-center mb-3">
               Why Distribute With Us
             </h2>
-            <p className="text-gray-600 text-center max-w-xl mx-auto mb-12">
+            <p className="text-gray-600 text-center max-w-xl mx-auto mb-12 text-lg">
               A genuinely easy way to earn extra income, on your own terms.
             </p>
           </ScrollReveal>
@@ -223,7 +223,7 @@ export default function LeafletDistributionJobsPage() {
                   {item.step}
                 </div>
                 <h3 className="text-base font-semibold text-blue-900 mb-2">{item.title}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{item.body}</p>
+                <p className="text-gray-600 text-base leading-relaxed">{item.body}</p>
               </div>
             ))}
           </StaggerGroup>
@@ -233,7 +233,7 @@ export default function LeafletDistributionJobsPage() {
       {/* Further reading */}
       <section className="bg-slate-50 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-          <p className="text-gray-600 text-sm">
+          <p className="text-gray-600 text-base">
             Want to know more about us first? Read{" "}
             <Link href="/about" className="text-blue-700 hover:underline font-medium">
               our story

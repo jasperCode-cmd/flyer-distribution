@@ -89,7 +89,7 @@ export default function SouthamptonPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Leaflet Distribution Southampton
           </h1>
-          <p className="text-blue-200 text-lg max-w-xl">
+          <p className="text-blue-200 text-xl max-w-xl">
             Reach households and businesses across Hampshire&apos;s largest city
             with targeted door-to-door leaflet delivery.
           </p>
@@ -107,13 +107,13 @@ export default function SouthamptonPage() {
               label={areaData.populationLabel}
               className="mb-4"
             />
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               Southampton is Hampshire&apos;s largest city, home to over 250,000
               residents across diverse neighbourhoods. Our distribution teams
               cover all major postcodes including SO14, SO15, SO16, SO17, SO18,
               SO19, and surrounding areas.
             </p>
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               Whether you&apos;re targeting the city centre, Shirley, Portswood,
               Bitterne, or the waterfront areas, we deliver your flyers reliably
               and efficiently to the right letterboxes. Campaigns here often
@@ -123,7 +123,7 @@ export default function SouthamptonPage() {
               </Link>{" "}
               too.
             </p>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed text-lg">
               We work with restaurants, tradespeople, estate agents, gyms,
               retailers, and many other local businesses to help them grow
               their customer base through our full range of{" "}
@@ -145,7 +145,7 @@ export default function SouthamptonPage() {
                 Get a Southampton Quote
               </Link>
             </div>
-            <p className="text-gray-500 text-sm mt-4">
+            <p className="text-gray-500 text-base mt-4">
               Live locally and want to deliver for us instead?{" "}
               <Link href="/leaflet-distribution-jobs" className="text-blue-700 hover:underline font-medium">
                 See our distributor jobs
@@ -196,7 +196,7 @@ export default function SouthamptonPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Eastleigh</h3>
-              <p className="text-gray-600 text-xs mb-3">One of Hampshire&apos;s largest towns, covering SO50 postcodes.</p>
+              <p className="text-gray-600 text-sm mb-3">One of Hampshire&apos;s largest towns, covering SO50 postcodes.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -204,7 +204,7 @@ export default function SouthamptonPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Winchester</h3>
-              <p className="text-gray-600 text-xs mb-3">Historic cathedral city and prosperous Hampshire county town.</p>
+              <p className="text-gray-600 text-sm mb-3">Historic cathedral city and prosperous Hampshire county town.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -212,7 +212,7 @@ export default function SouthamptonPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">New Forest</h3>
-              <p className="text-gray-600 text-xs mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
+              <p className="text-gray-600 text-sm mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -220,7 +220,7 @@ export default function SouthamptonPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Totton</h3>
-              <p className="text-gray-600 text-xs mb-3">New Forest edge town bordering Southampton to the west.</p>
+              <p className="text-gray-600 text-sm mb-3">New Forest edge town bordering Southampton to the west.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -228,7 +228,7 @@ export default function SouthamptonPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Hedge End</h3>
-              <p className="text-gray-600 text-xs mb-3">Residential town just east of Southampton.</p>
+              <p className="text-gray-600 text-sm mb-3">Residential town just east of Southampton.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -236,7 +236,7 @@ export default function SouthamptonPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Romsey</h3>
-              <p className="text-gray-600 text-xs mb-3">Historic market town a short drive northwest of Southampton.</p>
+              <p className="text-gray-600 text-sm mb-3">Historic market town a short drive northwest of Southampton.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

@@ -89,7 +89,7 @@ export default function DorsetPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Leaflet Distribution Dorset
           </h1>
-          <p className="text-blue-200 text-lg max-w-xl">
+          <p className="text-blue-200 text-xl max-w-xl">
             County-wide leaflet delivery across Dorset, from Bournemouth and
             Poole in the east to Weymouth and beyond.
           </p>
@@ -107,7 +107,7 @@ export default function DorsetPage() {
               label={areaData.populationLabel}
               className="mb-4"
             />
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               Dorset is one of the most varied counties for leaflet distribution,
               covering everything from the busy urban centres of Bournemouth and
               Poole through to the quieter market towns and coastal villages
@@ -115,7 +115,7 @@ export default function DorsetPage() {
               audiences across the county rather than a single town, a
               Dorset-wide campaign is the most effective way to do it.
             </p>
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               We cover all major Dorset postcode areas including BH1 through
               BH25, DT1 and surrounding Dorchester postcodes, and the coastal
               and rural areas in between. This makes us the right partner for
@@ -124,7 +124,7 @@ export default function DorsetPage() {
               covering the county, and event promoters reaching across multiple
               towns at once.
             </p>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed text-lg">
               Where you need coverage in a specific town such as{" "}
               <Link href="/areas/poole" className="text-blue-700 hover:underline font-medium">
                 Poole
@@ -146,7 +146,7 @@ export default function DorsetPage() {
                 Get a Dorset Quote
               </Link>
             </div>
-            <p className="text-gray-500 text-sm mt-4">
+            <p className="text-gray-500 text-base mt-4">
               Live in Dorset and want to deliver for us instead?{" "}
               <Link href="/leaflet-distribution-jobs" className="text-blue-700 hover:underline font-medium">
                 See our distributor jobs
@@ -200,7 +200,7 @@ export default function DorsetPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Bournemouth</h3>
-              <p className="text-gray-600 text-xs mb-3">Major Dorset resort town with strong consumer footfall.</p>
+              <p className="text-gray-600 text-sm mb-3">Major Dorset resort town with strong consumer footfall.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -208,7 +208,7 @@ export default function DorsetPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Poole</h3>
-              <p className="text-gray-600 text-xs mb-3">Affluent harbour town with excellent residential distribution routes.</p>
+              <p className="text-gray-600 text-sm mb-3">Affluent harbour town with excellent residential distribution routes.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -216,7 +216,7 @@ export default function DorsetPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Christchurch</h3>
-              <p className="text-gray-600 text-xs mb-3">Coastal market town covering BH23 postcodes on the Dorset border.</p>
+              <p className="text-gray-600 text-sm mb-3">Coastal market town covering BH23 postcodes on the Dorset border.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

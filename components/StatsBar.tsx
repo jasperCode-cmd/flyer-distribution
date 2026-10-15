@@ -69,7 +69,7 @@ export default function StatsBar() {
             <p className="text-5xl sm:text-6xl font-bold mb-3 leading-none">
               {stat92}%
             </p>
-            <p className="text-blue-200 text-sm leading-relaxed max-w-[13rem]">
+            <p className="text-blue-200 text-base leading-relaxed max-w-[13rem]">
               of people who receive a door drop read it
             </p>
           </div>
@@ -89,7 +89,7 @@ export default function StatsBar() {
             <p className="text-5xl sm:text-6xl font-bold mb-3 leading-none">
               {stat74}%
             </p>
-            <p className="text-blue-200 text-sm leading-relaxed max-w-[13rem]">
+            <p className="text-blue-200 text-base leading-relaxed max-w-[13rem]">
               of door drops are opened, read, filed or set aside for later
             </p>
           </div>
@@ -117,7 +117,7 @@ export default function StatsBar() {
             <p className="text-5xl sm:text-6xl font-bold mb-3 leading-none">
               {stat4}/5
             </p>
-            <p className="text-blue-200 text-sm leading-relaxed max-w-[13rem]">
+            <p className="text-blue-200 text-base leading-relaxed max-w-[13rem]">
               of door drop items are engaged with
             </p>
           </div>

@@ -89,7 +89,7 @@ export default function TottonPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Leaflet Distribution Totton
           </h1>
-          <p className="text-blue-200 text-lg max-w-xl">
+          <p className="text-blue-200 text-xl max-w-xl">
             Door-to-door leaflet delivery across Totton and SO40 postcodes,
             reaching households across this New Forest edge town.
           </p>
@@ -107,7 +107,7 @@ export default function TottonPage() {
               label={areaData.populationLabel}
               className="mb-4"
             />
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               Totton grew from a cluster of smaller villages, Testwood,
               Calmore and Hammonds Green among them, into one of the largest
               towns on the edge of the New Forest. We cover SO40 and the
@@ -115,7 +115,7 @@ export default function TottonPage() {
               centre, its residential estates, and the villages that now
               form part of it.
             </p>
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               With the River Test on one side and the New Forest on the
               other, Totton has a genuinely mixed audience, from young
               families in newer developments to long-established residents
@@ -135,7 +135,7 @@ export default function TottonPage() {
               </Link>{" "}
               campaigns for businesses covering the wider area.
             </p>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed text-lg">
               We also offer vehicle campaigns around Totton&apos;s retail
               areas and car parks, part of{" "}
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
@@ -199,7 +199,7 @@ export default function TottonPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">New Forest</h3>
-              <p className="text-gray-600 text-xs mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
+              <p className="text-gray-600 text-sm mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -207,7 +207,7 @@ export default function TottonPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Southampton</h3>
-              <p className="text-gray-600 text-xs mb-3">Hampshire&apos;s largest city, bordering Totton to the east.</p>
+              <p className="text-gray-600 text-sm mb-3">Hampshire&apos;s largest city, bordering Totton to the east.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -215,7 +215,7 @@ export default function TottonPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Romsey</h3>
-              <p className="text-gray-600 text-xs mb-3">Historic market town a short drive north of Totton.</p>
+              <p className="text-gray-600 text-sm mb-3">Historic market town a short drive north of Totton.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

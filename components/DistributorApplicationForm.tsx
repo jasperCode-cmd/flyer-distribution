@@ -56,13 +56,13 @@ export default function DistributorApplicationForm() {
       <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
         <div className="text-green-500 text-5xl mb-4">✓</div>
         <h2 className="text-xl font-bold text-blue-900 mb-2">Application Received</h2>
-        <p className="text-gray-600">
+        <p className="text-gray-600 text-lg">
           Thanks for applying. We&apos;ll be in touch soon, most likely on WhatsApp.
         </p>
 
         <div className="mt-6 pt-6 border-t border-gray-100">
-          <p className="font-bold text-blue-900 mb-2">While you wait, take a look around.</p>
-          <p className="text-gray-600 text-sm leading-relaxed max-w-md mx-auto">
+          <p className="font-bold text-blue-900 mb-2 text-lg">While you wait, take a look around.</p>
+          <p className="text-gray-600 text-base leading-relaxed max-w-md mx-auto">
             Our services page shows the kind of work you could be doing with us, from door-to-door rounds
             to handing out leaflets at shopping centres and events. It&apos;s a good way to get a feel for
             the role before we chat.

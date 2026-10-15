@@ -76,7 +76,7 @@ export default function HeroCaseStudyTeaser() {
                 },
               ]}
             />
-            <p className="text-gray-600 text-sm mt-4 mb-5">
+            <p className="text-gray-600 text-base mt-4 mb-5">
               Every round we run is tracked and confirmed this way, so you
               know exactly what was delivered, where, and when.
             </p>

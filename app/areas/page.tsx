@@ -68,7 +68,7 @@ export default function AreasPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Areas We Cover
           </h1>
-          <p className="text-blue-200 text-lg max-w-xl">
+          <p className="text-blue-200 text-xl max-w-xl">
             We distribute flyers and leaflets across Hampshire and into
             Dorset, covering hundreds of postcodes and thousands of homes as
             part of our full{" "}
@@ -101,7 +101,7 @@ export default function AreasPage() {
                       <h3 className="text-base font-semibold text-blue-900 mb-1">
                         {area.name}
                       </h3>
-                      <p className="text-gray-600 text-sm">{area.desc}</p>
+                      <p className="text-gray-600 text-base">{area.desc}</p>
                       <span className="mt-3 inline-block text-blue-600 text-xs font-semibold">
                         View area →
                       </span>
@@ -111,7 +111,7 @@ export default function AreasPage() {
               </div>
             );
           })}
-          <p className="mt-6 text-gray-500 text-sm">
+          <p className="mt-6 text-gray-500 text-base">
             Don&apos;t see your area listed?{" "}
             <Link href="/quote" className="text-blue-700 hover:underline font-medium">
               Get in touch
@@ -126,7 +126,7 @@ export default function AreasPage() {
           <h2 className="text-2xl font-bold text-blue-900 mb-3">
             Our Leaflet Distribution Services
           </h2>
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-600 mb-8 text-lg">
             From design and print through to targeted postcode campaigns, we have a service to suit every budget.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -160,7 +160,7 @@ export default function AreasPage() {
           <h2 className="text-2xl font-bold text-blue-900 mb-4">
             Ready to Get Started?
           </h2>
-          <p className="text-gray-600 mb-8 max-w-md mx-auto">
+          <p className="text-gray-600 mb-8 max-w-md mx-auto text-lg">
             Tell us your target postcodes and we&apos;ll put together a quote
             within 24 hours.
           </p>

@@ -100,7 +100,7 @@ export default function TrustCards() {
         >
           {/* Inner card handles hover interactivity independently (no delay) */}
           <div className="group relative text-center p-6 rounded-lg bg-blue-50 border border-blue-100 shadow-sm hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-out">
-            {/* Top accent bar — subtle at rest, brighter on hover */}
+            {/* Top accent bar: subtle at rest, brighter on hover */}
             <div
               className="absolute top-0 left-0 right-0 h-[3px] rounded-t-lg bg-blue-200 group-hover:bg-blue-500 transition-colors duration-300"
               aria-hidden="true"
@@ -111,7 +111,7 @@ export default function TrustCards() {
             <h3 className="text-lg font-semibold text-blue-900 mb-2">
               {item.title}
             </h3>
-            <p className="text-gray-600 text-sm leading-relaxed">{item.body}</p>
+            <p className="text-gray-600 text-base leading-relaxed">{item.body}</p>
           </div>
         </div>
       ))}

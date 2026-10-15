@@ -62,7 +62,7 @@ export default function QuoteForm() {
       <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
         <div className="text-green-500 text-5xl mb-4">✓</div>
         <h2 className="text-xl font-bold text-blue-900 mb-2">Request Received</h2>
-        <p className="text-gray-600">
+        <p className="text-gray-600 text-lg">
           Thank you, we will be in touch within 24 hours.
         </p>
       </div>

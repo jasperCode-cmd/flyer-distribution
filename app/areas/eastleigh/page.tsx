@@ -89,7 +89,7 @@ export default function EastleighPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Leaflet Distribution Eastleigh
           </h1>
-          <p className="text-blue-200 text-lg max-w-xl">
+          <p className="text-blue-200 text-xl max-w-xl">
             Targeted door-to-door leaflet delivery across Eastleigh and
             surrounding SO50 postcodes.
           </p>
@@ -107,13 +107,13 @@ export default function EastleighPage() {
               label={areaData.populationLabel}
               className="mb-4"
             />
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               Eastleigh is one of Hampshire&apos;s largest towns, home to around
               50,000 residents across a mix of residential neighbourhoods and
               commercial areas. We cover SO50 and surrounding postcodes,
               delivering directly through letterboxes across the town.
             </p>
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               Whether you&apos;re targeting the town centre or nearby{" "}
               <Link href="/areas/chandlers-ford" className="text-blue-700 hover:underline font-medium">
                 Chandler&apos;s Ford
@@ -130,7 +130,7 @@ export default function EastleighPage() {
               </Link>
               .
             </p>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed text-lg">
               Eastleigh&apos;s proximity to Southampton Airport and strong
               commuter population also makes it well suited to targeted
               postcode campaigns for local service businesses. We&apos;ve also
@@ -191,7 +191,7 @@ export default function EastleighPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Southampton</h3>
-              <p className="text-gray-600 text-xs mb-3">Hampshire&apos;s largest city with residential coverage across all major postcodes.</p>
+              <p className="text-gray-600 text-sm mb-3">Hampshire&apos;s largest city with residential coverage across all major postcodes.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -199,7 +199,7 @@ export default function EastleighPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Winchester</h3>
-              <p className="text-gray-600 text-xs mb-3">Historic cathedral city and prosperous Hampshire county town.</p>
+              <p className="text-gray-600 text-sm mb-3">Historic cathedral city and prosperous Hampshire county town.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -207,7 +207,7 @@ export default function EastleighPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">New Forest</h3>
-              <p className="text-gray-600 text-xs mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
+              <p className="text-gray-600 text-sm mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -215,7 +215,7 @@ export default function EastleighPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Hedge End</h3>
-              <p className="text-gray-600 text-xs mb-3">Residential town on the eastern side of Eastleigh borough.</p>
+              <p className="text-gray-600 text-sm mb-3">Residential town on the eastern side of Eastleigh borough.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -223,7 +223,7 @@ export default function EastleighPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Chandler&apos;s Ford</h3>
-              <p className="text-gray-600 text-xs mb-3">Residential community forming most of Eastleigh&apos;s urban area.</p>
+              <p className="text-gray-600 text-sm mb-3">Residential community forming most of Eastleigh&apos;s urban area.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

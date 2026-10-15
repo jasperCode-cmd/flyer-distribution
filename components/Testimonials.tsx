@@ -100,7 +100,7 @@ const testimonials: Testimonial[] = [
     businessLine: "The Relocation Specialists, The Healing Hub and Elisha's Pampered Paws",
     quote:
       "Really pleased with the service! Everything was handled efficiently, and the flyers were distributed exactly within the area I wanted to target. Communication was great throughout, and the pricing was very reasonable compared with other distributors I contacted. The whole process was straightforward and reliable, and I'd definitely use the service again. Highly recommend!",
-    quoteClassName: "text-[10px] sm:text-xs leading-snug",
+    quoteClassName: "text-xs sm:text-sm leading-snug",
     header: (
       <div className="flex items-center justify-center gap-1.5">
         <Image
@@ -265,7 +265,7 @@ export default function Testimonials() {
           onMouseLeave={() => setPaused(false)}
         >
           <div
-            className="relative mx-auto max-w-2xl h-[410px] sm:h-[420px]"
+            className="relative mx-auto max-w-2xl h-[442px] sm:h-[452px]"
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
@@ -288,7 +288,7 @@ export default function Testimonials() {
                     pointerEvents: isCenter ? "auto" : "none",
                   }}
                 >
-                  <div className="w-64 h-[390px] sm:w-80 sm:h-[400px] bg-white rounded-lg border border-gray-200 shadow-lg p-5 sm:p-6 flex flex-col">
+                  <div className="w-64 h-[422px] sm:w-80 sm:h-[432px] bg-white rounded-lg border border-gray-200 shadow-lg p-5 sm:p-6 flex flex-col">
                     <div className="h-14 flex items-center justify-center mb-4 shrink-0">
                       {t.header}
                     </div>
@@ -297,7 +297,7 @@ export default function Testimonials() {
                       {t.quote && (
                         <blockquote
                           className={`text-gray-600 leading-relaxed ${
-                            t.quoteClassName ?? "text-sm line-clamp-5"
+                            t.quoteClassName ?? "text-base line-clamp-5"
                           }`}
                         >
                           &ldquo;{t.quote}&rdquo;

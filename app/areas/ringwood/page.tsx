@@ -89,7 +89,7 @@ export default function RingwoodPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Leaflet Distribution Ringwood
           </h1>
-          <p className="text-blue-200 text-lg max-w-xl">
+          <p className="text-blue-200 text-xl max-w-xl">
             Professional leaflet delivery across Ringwood and the surrounding
             Hampshire countryside, reaching local households effectively.
           </p>
@@ -107,7 +107,7 @@ export default function RingwoodPage() {
               label={areaData.populationLabel}
               className="mb-4"
             />
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               Ringwood is a busy market town on the edge of the New Forest, well
               positioned between Bournemouth and Salisbury and serving a broad
               mix of residential roads, rural properties, and a strong town
@@ -115,14 +115,14 @@ export default function RingwoodPage() {
               directly through letterboxes across the town and into the
               surrounding villages.
             </p>
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               The town has a loyal local customer base that engages well with
               print marketing, particularly for home services, food and drink,
               and community events. Its rural-residential mix also means a
               single campaign can reach both village households and town centre
               addresses in one round.
             </p>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed text-lg">
               Vehicle{" "}
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
                 leaflet distribution
@@ -186,7 +186,7 @@ export default function RingwoodPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">New Forest</h3>
-              <p className="text-gray-600 text-xs mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
+              <p className="text-gray-600 text-sm mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -194,7 +194,7 @@ export default function RingwoodPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Bournemouth</h3>
-              <p className="text-gray-600 text-xs mb-3">Major Dorset resort town with strong consumer footfall.</p>
+              <p className="text-gray-600 text-sm mb-3">Major Dorset resort town with strong consumer footfall.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -202,7 +202,7 @@ export default function RingwoodPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Poole</h3>
-              <p className="text-gray-600 text-xs mb-3">Affluent harbour town with excellent residential distribution routes.</p>
+              <p className="text-gray-600 text-sm mb-3">Affluent harbour town with excellent residential distribution routes.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

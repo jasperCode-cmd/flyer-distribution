@@ -98,7 +98,7 @@ export default function PublicNoticeLeafletingPage() {
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 max-w-2xl">
             Public Notice Leafleting for NSIPs
           </h1>
-          <p className="text-blue-200 text-lg max-w-2xl leading-relaxed">
+          <p className="text-blue-200 text-xl max-w-2xl leading-relaxed">
             Door-to-door distribution supporting Section 47 and Section 48
             Planning Act 2008 obligations for Nationally Significant
             Infrastructure Projects across Hampshire.
@@ -125,7 +125,7 @@ export default function PublicNoticeLeafletingPage() {
           </ScrollReveal>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             <div className="space-y-4 text-gray-600 leading-relaxed">
-              <p>
+              <p className="text-lg">
                 Nationally Significant Infrastructure Projects carry specific
                 public consultation obligations under the Planning Act 2008.
                 Before an applicant can submit a Development Consent Order
@@ -133,7 +133,7 @@ export default function PublicNoticeLeafletingPage() {
                 project affects, and be able to show that consultation was
                 carried out properly.
               </p>
-              <p>
+              <p className="text-lg">
                 Flyer Distribution Hampshire handles the physical side of that
                 obligation. We deliver consultation leaflets, notices, and
                 supporting materials door to door across the area your
@@ -150,7 +150,7 @@ export default function PublicNoticeLeafletingPage() {
                 </Link>
                 .
               </p>
-              <p>
+              <p className="text-lg">
                 The distribution geography for a statutory notice comes from
                 your Statement of Community Consultation, not from our usual
                 postcode boundaries, so we work to the exact area your project
@@ -177,7 +177,7 @@ export default function PublicNoticeLeafletingPage() {
                   />
                 </div>
               </ScrollReveal>
-              <p className="text-xs text-gray-500 mt-3 text-center lg:text-left">
+              <p className="text-sm text-gray-500 mt-3 text-center lg:text-left">
                 A road closure notice we distributed on behalf of Hampshire
                 County Council.
               </p>
@@ -198,7 +198,7 @@ export default function PublicNoticeLeafletingPage() {
               <h3 className="text-base font-semibold text-blue-900 mb-2">
                 Section 47: Duty to Consult
               </h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p className="text-gray-600 text-base leading-relaxed">
                 Section 47 of the Planning Act 2008 requires applicants for
                 major infrastructure projects to consult local communities
                 before submitting a Development Consent Order application.
@@ -215,7 +215,7 @@ export default function PublicNoticeLeafletingPage() {
               <h3 className="text-base font-semibold text-blue-900 mb-2">
                 Section 48: Duty to Publicise
               </h3>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p className="text-gray-600 text-base leading-relaxed">
                 Section 48 requires applicants to publicise the application
                 once it has been accepted, so people know it exists and how
                 to respond to it. This typically reaches a wider audience
@@ -235,7 +235,7 @@ export default function PublicNoticeLeafletingPage() {
           <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-3">
             Beyond the Statutory Requirements
           </h2>
-          <p className="text-gray-600 max-w-2xl mb-10">
+          <p className="text-gray-600 max-w-2xl mb-10 text-lg">
             The same door-to-door distribution set up for a statutory
             notice extends naturally to other notification work, whether or
             not it carries a legal consultation requirement.
@@ -248,7 +248,7 @@ export default function PublicNoticeLeafletingPage() {
               >
                 <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-lg bg-blue-200 group-hover:bg-blue-500 transition-colors duration-300" aria-hidden="true" />
                 <h3 className="text-sm font-semibold text-blue-900 mb-2">{item.title}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{item.body}</p>
+                <p className="text-gray-600 text-base leading-relaxed">{item.body}</p>
               </div>
             ))}
           </div>
@@ -270,7 +270,7 @@ export default function PublicNoticeLeafletingPage() {
                 How Confirmation Works
               </h2>
             </div>
-            <p className="text-gray-600 leading-relaxed max-w-3xl mb-8">
+            <p className="text-gray-600 leading-relaxed max-w-3xl mb-8 text-lg">
               Statutory consultation work is deadline-driven, so we
               schedule distribution rounds around your project&apos;s
               timetable rather than our own.
@@ -311,7 +311,7 @@ export default function PublicNoticeLeafletingPage() {
                 <svg className="w-6 h-6 text-blue-600 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   {item.icon}
                 </svg>
-                <p className="text-gray-700 text-sm leading-relaxed">{item.body}</p>
+                <p className="text-gray-700 text-base leading-relaxed">{item.body}</p>
               </div>
             ))}
           </StaggerGroup>
@@ -334,7 +334,7 @@ export default function PublicNoticeLeafletingPage() {
                 Post-Distribution Documentation
               </h2>
             </div>
-            <p className="text-gray-600 leading-relaxed max-w-3xl mb-8">
+            <p className="text-gray-600 leading-relaxed max-w-3xl mb-8 text-lg">
               For each round, we provide documentation your records can
               rely on:
             </p>
@@ -378,12 +378,12 @@ export default function PublicNoticeLeafletingPage() {
                 <svg className="w-6 h-6 text-blue-600 mb-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   {item.icon}
                 </svg>
-                <p className="text-gray-700 text-sm leading-relaxed">{item.body}</p>
+                <p className="text-gray-700 text-base leading-relaxed">{item.body}</p>
               </div>
             ))}
           </StaggerGroup>
           <ScrollReveal>
-            <p className="text-gray-600 leading-relaxed max-w-3xl">
+            <p className="text-gray-600 leading-relaxed max-w-3xl text-lg">
               This documentation is designed to support your application
               file. It is not a substitute for your own consultant&apos;s
               record-keeping.
@@ -407,7 +407,7 @@ export default function PublicNoticeLeafletingPage() {
                   Scope of This Service
                 </h2>
               </div>
-              <p className="text-amber-900/90 text-sm leading-relaxed">
+              <p className="text-amber-900/90 text-base leading-relaxed">
                 Flyer Distribution Hampshire provides physical leaflet and
                 notice distribution only. We are not a planning consultancy
                 and do not provide legal advice. This page is a general guide
@@ -437,7 +437,7 @@ export default function PublicNoticeLeafletingPage() {
                 From a Handful of Roads to a Whole Project Area
               </h2>
             </div>
-            <p className="text-gray-600 max-w-3xl leading-relaxed">
+            <p className="text-gray-600 max-w-3xl leading-relaxed text-lg">
               Our teams scale to the job, whether that means a handful of
               roads around a single substation upgrade or a much larger
               area spanning several parishes for a major infrastructure
@@ -454,7 +454,7 @@ export default function PublicNoticeLeafletingPage() {
           <h2 className="text-2xl sm:text-3xl font-bold mb-3">
             Working on an NSIP in Hampshire?
           </h2>
-          <p className="text-blue-200 mb-8 max-w-xl">
+          <p className="text-blue-200 mb-8 max-w-xl text-lg">
             Get in touch to talk through your project&apos;s consultation
             area and timeline. We also cover general leaflet distribution
             across:

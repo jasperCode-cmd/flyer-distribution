@@ -89,7 +89,7 @@ export default function NewForestPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Leaflet Distribution New Forest
           </h1>
-          <p className="text-blue-200 text-lg max-w-xl">
+          <p className="text-blue-200 text-xl max-w-xl">
             Professional leaflet delivery across New Forest towns and villages,
             reaching households throughout one of Hampshire&apos;s most
             distinctive areas.
@@ -108,7 +108,7 @@ export default function NewForestPage() {
               label={areaData.populationLabel}
               className="mb-4"
             />
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               The New Forest is a unique area covering a wide spread of market
               towns, villages, and residential communities across southern
               Hampshire. Key towns include Lyndhurst,{" "}
@@ -122,14 +122,14 @@ export default function NewForestPage() {
               , alongside a network of smaller villages with loyal,
               locally-minded residents.
             </p>
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               We cover SO40, SO41, SO42, SO43, and surrounding postcode areas,
               delivering to households across the district. The New Forest
               demographic tends to be established and community-focused, making it
               well suited to local services, home improvement businesses, and
               independent retailers.
             </p>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed text-lg">
               Vehicle{" "}
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
                 leaflet distribution
@@ -194,7 +194,7 @@ export default function NewForestPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Ringwood</h3>
-              <p className="text-gray-600 text-xs mb-3">Market town on the New Forest edge, close to the Dorset border.</p>
+              <p className="text-gray-600 text-sm mb-3">Market town on the New Forest edge, close to the Dorset border.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -202,7 +202,7 @@ export default function NewForestPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Southampton</h3>
-              <p className="text-gray-600 text-xs mb-3">Hampshire&apos;s largest city with residential coverage across all major postcodes.</p>
+              <p className="text-gray-600 text-sm mb-3">Hampshire&apos;s largest city with residential coverage across all major postcodes.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -210,7 +210,7 @@ export default function NewForestPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Bournemouth</h3>
-              <p className="text-gray-600 text-xs mb-3">Major Dorset resort town with strong consumer footfall.</p>
+              <p className="text-gray-600 text-sm mb-3">Major Dorset resort town with strong consumer footfall.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -218,7 +218,7 @@ export default function NewForestPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Brockenhurst</h3>
-              <p className="text-gray-600 text-xs mb-3">One of the New Forest&apos;s best-known villages.</p>
+              <p className="text-gray-600 text-sm mb-3">One of the New Forest&apos;s best-known villages.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -226,7 +226,7 @@ export default function NewForestPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Hythe</h3>
-              <p className="text-gray-600 text-xs mb-3">Waterside village looking out over Southampton Water.</p>
+              <p className="text-gray-600 text-sm mb-3">Waterside village looking out over Southampton Water.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -234,7 +234,7 @@ export default function NewForestPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Totton</h3>
-              <p className="text-gray-600 text-xs mb-3">Large town on the New Forest&apos;s eastern edge.</p>
+              <p className="text-gray-600 text-sm mb-3">Large town on the New Forest&apos;s eastern edge.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

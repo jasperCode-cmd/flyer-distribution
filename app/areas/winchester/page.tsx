@@ -89,7 +89,7 @@ export default function WinchesterPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Leaflet Distribution Winchester
           </h1>
-          <p className="text-blue-200 text-lg max-w-xl">
+          <p className="text-blue-200 text-xl max-w-xl">
             Professional leaflet delivery across Winchester city and surrounding
             Hampshire villages, reaching the affluent households of the county
             town.
@@ -108,13 +108,13 @@ export default function WinchesterPage() {
               label={areaData.populationLabel}
               className="mb-4"
             />
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               Winchester is Hampshire&apos;s historic county town, consistently
               ranked among the best places to live in the UK. With high average
               household incomes and a thriving independent business scene,
               leaflet distribution here reaches an engaged, local audience.
             </p>
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               We cover SO21, SO22, SO23, and surrounding postcode areas
               including the city centre, St Cross, Badger Farm, Harestock, and
               the outlying villages such as Colden Common and Bishopstoke.
@@ -124,7 +124,7 @@ export default function WinchesterPage() {
               </Link>
               .
             </p>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed text-lg">
               Winchester&apos;s county town professional base makes it
               particularly effective for premium services such as home
               improvements, fine dining, private schools, and specialist
@@ -189,7 +189,7 @@ export default function WinchesterPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Eastleigh</h3>
-              <p className="text-gray-600 text-xs mb-3">One of Hampshire&apos;s largest towns, covering SO50 postcodes.</p>
+              <p className="text-gray-600 text-sm mb-3">One of Hampshire&apos;s largest towns, covering SO50 postcodes.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -197,7 +197,7 @@ export default function WinchesterPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Southampton</h3>
-              <p className="text-gray-600 text-xs mb-3">Hampshire&apos;s largest city with residential coverage across all major postcodes.</p>
+              <p className="text-gray-600 text-sm mb-3">Hampshire&apos;s largest city with residential coverage across all major postcodes.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -205,7 +205,7 @@ export default function WinchesterPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">New Forest</h3>
-              <p className="text-gray-600 text-xs mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
+              <p className="text-gray-600 text-sm mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -213,7 +213,7 @@ export default function WinchesterPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Romsey</h3>
-              <p className="text-gray-600 text-xs mb-3">Historic market town a short drive southwest of Winchester.</p>
+              <p className="text-gray-600 text-sm mb-3">Historic market town a short drive southwest of Winchester.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

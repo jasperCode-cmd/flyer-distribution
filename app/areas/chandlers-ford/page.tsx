@@ -89,7 +89,7 @@ export default function ChandlersFordPage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Leaflet Distribution Chandler&apos;s Ford
           </h1>
-          <p className="text-blue-200 text-lg max-w-xl">
+          <p className="text-blue-200 text-xl max-w-xl">
             Door-to-door leaflet delivery across Chandler&apos;s Ford and
             SO53 postcodes, reaching households across this residential
             community.
@@ -108,7 +108,7 @@ export default function ChandlersFordPage() {
               label={areaData.populationLabel}
               className="mb-4"
             />
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               Chandler&apos;s Ford is a largely residential part of the
               Eastleigh borough, made up of established neighbourhoods like
               Hiltingbury and Valley Park around the shops at Fryern. We
@@ -120,7 +120,7 @@ export default function ChandlersFordPage() {
               </Link>
               .
             </p>
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               It&apos;s firmly a commuter area, with residents travelling
               into{" "}
               <Link href="/areas/southampton" className="text-blue-700 hover:underline font-medium">
@@ -136,7 +136,7 @@ export default function ChandlersFordPage() {
               </Link>{" "}
               itself.
             </p>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed text-lg">
               We can also run vehicle campaigns around the shops at Fryern
               and the wider Chandler&apos;s Ford area, part of{" "}
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
@@ -195,7 +195,7 @@ export default function ChandlersFordPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Eastleigh</h3>
-              <p className="text-gray-600 text-xs mb-3">One of Hampshire&apos;s largest towns, bordering Chandler&apos;s Ford.</p>
+              <p className="text-gray-600 text-sm mb-3">One of Hampshire&apos;s largest towns, bordering Chandler&apos;s Ford.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -203,7 +203,7 @@ export default function ChandlersFordPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Southampton</h3>
-              <p className="text-gray-600 text-xs mb-3">Hampshire&apos;s largest city, within easy reach of Chandler&apos;s Ford.</p>
+              <p className="text-gray-600 text-sm mb-3">Hampshire&apos;s largest city, within easy reach of Chandler&apos;s Ford.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -211,7 +211,7 @@ export default function ChandlersFordPage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Hedge End</h3>
-              <p className="text-gray-600 text-xs mb-3">Residential town on the other side of Eastleigh borough.</p>
+              <p className="text-gray-600 text-sm mb-3">Residential town on the other side of Eastleigh borough.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

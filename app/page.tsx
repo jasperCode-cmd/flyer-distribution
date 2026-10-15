@@ -171,7 +171,7 @@ export default function HomePage() {
       />
       {/* Hero */}
       <section id="hero" className="relative bg-blue-900 text-white overflow-hidden">
-        {/* Background photo — darkened to stay behind content */}
+        {/* Background photo, darkened to stay behind content */}
         <Image
           src="https://images.unsplash.com/photo-1464082354059-27db6ce50048?w=1920&q=80"
           alt=""
@@ -185,7 +185,7 @@ export default function HomePage() {
         {/* Dark overlay */}
         <div className="absolute inset-0 bg-blue-950/80" />
 
-        {/* Desktop-only full-bleed image panel — spans the right portion of
+        {/* Desktop-only full-bleed image panel: spans the right portion of
             the section edge to edge, independent of the centered text
             container below, so it isn't boxed in like an inset photo. The
             left edge is clipped on a diagonal (narrower at the top, full
@@ -209,15 +209,15 @@ export default function HomePage() {
         {/* Content */}
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-8">
           <div className="flex flex-col gap-10">
-            {/* Text — constrained to keep clear of the full-bleed image at desktop */}
+            {/* Text, constrained to keep clear of the full-bleed image at desktop */}
             <div className="lg:max-w-[52%]">
               <p className="text-blue-300 text-sm font-semibold uppercase tracking-widest mb-4">
                 Hampshire &amp; Dorset
               </p>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
                 <span className="text-yellow-400">#1</span> Tracked Flyer Distribution in Hampshire and Dorset
               </h1>
-              <p className="text-blue-100 text-lg sm:text-xl leading-relaxed mb-8">
+              <p className="text-blue-100 text-xl sm:text-2xl leading-relaxed mb-8">
                 We deliver and track your leaflets and flyers by GPS, directly
                 through letterboxes across Hampshire and Dorset, helping local
                 businesses reach real customers in the right postcodes.
@@ -288,7 +288,7 @@ export default function HomePage() {
             <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-3">
               Leaflet Services
             </h2>
-            <p className="text-gray-600 max-w-xl">
+            <p className="text-gray-600 max-w-xl text-lg">
               From door-to-door delivery to targeted postcode campaigns, we
               have a service to suit every budget and campaign goal. We also
               handle statutory{" "}
@@ -312,7 +312,7 @@ export default function HomePage() {
                 <h3 className="text-base font-semibold text-blue-900 mb-2">
                   {svc.title}
                 </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{svc.desc}</p>
+                <p className="text-gray-600 text-base leading-relaxed">{svc.desc}</p>
               </Link>
             ))}
           </StaggerGroup>
@@ -335,7 +335,7 @@ export default function HomePage() {
               <h2 className="text-2xl sm:text-3xl font-bold mb-3">
                 Areas We Cover
               </h2>
-              <p className="text-blue-200 max-w-xl mb-10">
+              <p className="text-blue-200 max-w-xl mb-10 text-lg">
                 We cover the Hampshire and Dorset corridor, from{" "}
                 <Link href="/areas/winchester" className="text-white underline underline-offset-2 hover:text-blue-200">
                   Winchester
@@ -401,7 +401,7 @@ export default function HomePage() {
             <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-3">
               Additional Services
             </h2>
-            <p className="text-gray-600 max-w-xl">
+            <p className="text-gray-600 max-w-xl text-lg">
               Beyond leaflet distribution, we also offer{" "}
               <Link href="/services/web-design-seo" className="text-blue-700 hover:underline font-medium">
                 web design and SEO
@@ -451,7 +451,7 @@ export default function HomePage() {
           <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-4">
             Ready to Reach More Customers?
           </h2>
-          <p className="text-gray-600 max-w-lg mx-auto mb-8 leading-relaxed">
+          <p className="text-gray-600 max-w-lg mx-auto mb-8 leading-relaxed text-lg">
             Get in touch today for a free, no-obligation quote. Tell us your
             target area and quantity, and we'll do the rest.
           </p>
@@ -470,7 +470,7 @@ export default function HomePage() {
           <h2 className="text-2xl sm:text-3xl font-bold mb-4">
             Want to Deliver Leaflets For Us?
           </h2>
-          <p className="text-blue-200 max-w-lg mx-auto mb-8 leading-relaxed">
+          <p className="text-blue-200 max-w-lg mx-auto mb-8 leading-relaxed text-lg">
             Earn flexible, self-employed income across Hampshire and Dorset.
             No experience needed, and quick payment agreed before every job.
           </p>

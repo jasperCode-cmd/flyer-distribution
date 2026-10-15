@@ -123,10 +123,10 @@ export default function WebDesignCards() {
                 ? // "Who We Work With": transitions height slowly so the blue section
                   // background grows to accommodate if content exceeds base height
                   `md:flex md:items-center md:justify-center transition-[height] ease-out duration-700 ${
-                    isOpen ? "md:h-[420px]" : "md:h-[360px]"
+                    isOpen ? "md:h-[452px]" : "md:h-[400px]"
                   }`
                 : // Web Design + SEO: fixed at SEO-card expanded height, no growth
-                  "md:h-[360px] md:flex md:items-center md:justify-center"
+                  "md:h-[400px] md:flex md:items-center md:justify-center"
             }
           >
             <div
@@ -147,11 +147,11 @@ export default function WebDesignCards() {
               {/* Description: always visible on mobile, expands on hover/click on desktop */}
               <div
                 className={`overflow-hidden transition-all duration-500 ease-out md:max-h-0 ${
-                  isOpen ? "md:max-h-[300px]" : ""
+                  isOpen ? "md:max-h-[360px]" : ""
                 }`}
               >
                 <p
-                  className="text-gray-600 text-sm leading-relaxed px-6 text-center pb-8"
+                  className="text-gray-600 text-base leading-relaxed px-6 text-center pb-8"
                 >
                   {card.description}
                 </p>

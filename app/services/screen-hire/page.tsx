@@ -74,7 +74,7 @@ export default function ScreenHirePage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Mobile Screen Trailer Hire
           </h1>
-          <p className="text-blue-200 text-lg max-w-xl">
+          <p className="text-blue-200 text-xl max-w-xl">
             A powerful, portable LED screen for events, advertising, and
             entertainment across Hampshire and Dorset.
           </p>
@@ -112,7 +112,7 @@ export default function ScreenHirePage() {
           <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-4">
             Interested in Screen Hire?
           </h2>
-          <p className="text-gray-600 max-w-lg mx-auto mb-8 leading-relaxed">
+          <p className="text-gray-600 max-w-lg mx-auto mb-8 leading-relaxed text-lg">
             Get in touch for availability, pricing, and to discuss your event or
             campaign. We cover Hampshire and Dorset and are happy to advise on
             the best setup for your needs, wherever you are across our{" "}
@@ -140,7 +140,7 @@ export default function ScreenHirePage() {
           <h2 className="text-xl font-bold text-blue-900 mb-2">
             Looking to Grow Online Too?
           </h2>
-          <p className="text-gray-600 mb-6 max-w-md mx-auto text-sm leading-relaxed">
+          <p className="text-gray-600 mb-6 max-w-md mx-auto text-base leading-relaxed">
             We also offer bespoke web design and SEO for local businesses across
             Hampshire and Dorset.
           </p>

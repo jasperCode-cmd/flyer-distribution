@@ -45,7 +45,7 @@ export default function QuotePage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Get a Free Quote
           </h1>
-          <p className="text-blue-200 text-lg max-w-xl">
+          <p className="text-blue-200 text-xl max-w-xl">
             Fill in the form below and we&apos;ll come back to you within 24
             hours with a tailored quote for your distribution campaign. Not
             ready yet? Have a look at our{" "}

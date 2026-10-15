@@ -117,7 +117,7 @@ export default function TrustBar() {
               <h3 className="text-base sm:text-lg font-bold text-blue-950 group-hover:text-black transition-all duration-300 ease-out mb-1">
                 {item.title}
               </h3>
-              <p className="text-sm text-gray-500">{item.subtitle}</p>
+              <p className="text-base text-gray-500">{item.subtitle}</p>
             </div>
           ))}
         </div>

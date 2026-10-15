@@ -251,7 +251,7 @@ export default function CaseStudiesPage() {
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">Case Studies - What Does GPS Tracked Leaflet Distribution Look Like?</h1>
-          <p className="text-blue-200 text-lg max-w-xl">
+          <p className="text-blue-200 text-xl max-w-xl">
             A look at real leaflet distribution campaigns we&apos;ve completed
             across Hampshire.
           </p>
@@ -279,7 +279,7 @@ export default function CaseStudiesPage() {
                   <span className="inline-block bg-blue-50 border border-blue-200 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full mb-3">
                     {study.stat}
                   </span>
-                  <p className="text-gray-600 text-sm leading-relaxed mb-4">{study.body}</p>
+                  <p className="text-gray-600 text-base leading-relaxed mb-4">{study.body}</p>
                   <Link
                     href={study.linkHref}
                     className="text-blue-700 hover:text-blue-900 font-semibold text-sm underline underline-offset-2"
@@ -298,7 +298,7 @@ export default function CaseStudiesPage() {
           <h2 className="text-2xl font-bold text-blue-900 mb-4">
             Have a Campaign in Mind?
           </h2>
-          <p className="text-gray-600 mb-8 max-w-md mx-auto">
+          <p className="text-gray-600 mb-8 max-w-md mx-auto text-lg">
             Get in touch for a free, no-obligation quote for your own
             leaflet distribution campaign. Or find out{" "}
             <Link href="/about" className="text-blue-700 hover:underline font-medium">

@@ -89,7 +89,7 @@ export default function HythePage() {
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Leaflet Distribution Hythe
           </h1>
-          <p className="text-blue-200 text-lg max-w-xl">
+          <p className="text-blue-200 text-xl max-w-xl">
             Door-to-door leaflet delivery across Hythe and SO45 postcodes,
             reaching households across this Waterside village.
           </p>
@@ -107,7 +107,7 @@ export default function HythePage() {
               label={areaData.populationLabel}
               className="mb-4"
             />
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               Hythe sits on the Waterside, looking out over Southampton
               Water with a small marina at its heart and a ferry crossing to
               Southampton itself. We cover SO45 and the wider Waterside
@@ -115,7 +115,7 @@ export default function HythePage() {
               centre, the marina, and the residential roads that spread
               out from the village centre.
             </p>
-            <p className="text-gray-600 mb-4 leading-relaxed">
+            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
               It&apos;s a close-knit community with a genuine village feel
               despite being minutes from Southampton by boat, and local
               shops, trades and hospitality businesses see real value in
@@ -134,7 +134,7 @@ export default function HythePage() {
               </Link>{" "}
               is another popular addition for wider New Forest campaigns.
             </p>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="text-gray-600 leading-relaxed text-lg">
               We can also run vehicle campaigns around Hythe&apos;s marina
               and shopping area, part of{" "}
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
@@ -193,7 +193,7 @@ export default function HythePage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">New Forest</h3>
-              <p className="text-gray-600 text-xs mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
+              <p className="text-gray-600 text-sm mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -201,7 +201,7 @@ export default function HythePage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Southampton</h3>
-              <p className="text-gray-600 text-xs mb-3">A short ferry crossing from Hythe across Southampton Water.</p>
+              <p className="text-gray-600 text-sm mb-3">A short ferry crossing from Hythe across Southampton Water.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
@@ -209,7 +209,7 @@ export default function HythePage() {
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Totton</h3>
-              <p className="text-gray-600 text-xs mb-3">Neighbouring New Forest edge town on the Waterside.</p>
+              <p className="text-gray-600 text-sm mb-3">Neighbouring New Forest edge town on the Waterside.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

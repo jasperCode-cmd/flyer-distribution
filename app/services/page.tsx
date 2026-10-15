@@ -230,7 +230,7 @@ export default function ServicesPage() {
       <section className="bg-blue-900 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">Leaflet Services</h1>
-          <p className="text-blue-200 max-w-xl text-lg">
+          <p className="text-blue-200 max-w-xl text-xl">
             Flexible flyer and leaflet distribution solutions for businesses of
             all sizes across Hampshire and Dorset.
           </p>
@@ -270,7 +270,7 @@ export default function ServicesPage() {
                   <h2 className="text-lg font-bold text-blue-900 mb-3">
                     {pkg.title}
                   </h2>
-                  <p className="text-gray-600 text-sm leading-relaxed mb-5">
+                  <p className="text-gray-600 text-base leading-relaxed mb-5">
                     {pkg.desc}
                   </p>
                   <Link
@@ -295,7 +295,7 @@ export default function ServicesPage() {
           <h2 className="text-2xl font-bold text-blue-900 mb-8">
             Distribution Services
           </h2>
-          <p className="text-gray-600 mb-8 max-w-2xl">
+          <p className="text-gray-600 mb-8 max-w-2xl text-lg">
             Growing online too? We also build{" "}
             <Link href="/services/web-design-seo" className="text-blue-700 hover:underline font-medium">
               fast, SEO-friendly websites
@@ -322,7 +322,7 @@ export default function ServicesPage() {
                     <h3 className="text-base font-semibold text-blue-900 mb-2 group-hover:text-blue-700 transition-colors">
                       {svc.title}
                     </h3>
-                    <p className="text-gray-600 text-sm leading-relaxed">{svc.desc}</p>
+                    <p className="text-gray-600 text-base leading-relaxed">{svc.desc}</p>
                     {svc.href && (
                       <span className="mt-3 inline-block text-blue-600 text-xs font-semibold">
                         Learn more →
@@ -351,7 +351,7 @@ export default function ServicesPage() {
           <h2 className="text-2xl sm:text-3xl font-bold mb-3">
             Areas We Cover
           </h2>
-          <p className="text-blue-200 mb-10 max-w-xl">
+          <p className="text-blue-200 mb-10 max-w-xl text-lg">
             We cover the Hampshire and Dorset corridor, from Winchester in
             the north to Poole in the west, and everywhere in between. See
             our full{" "}
@@ -396,7 +396,7 @@ export default function ServicesPage() {
           <h2 className="text-2xl font-bold text-blue-900 mb-4">
             Not Sure Which Service Is Right for You?
           </h2>
-          <p className="text-gray-600 mb-8 max-w-md mx-auto">
+          <p className="text-gray-600 mb-8 max-w-md mx-auto text-lg">
             Get in touch and we&apos;ll recommend the most effective
             distribution strategy for your business and budget. Curious what
             a completed round looks like? Take a look at our{" "}

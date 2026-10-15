@@ -73,7 +73,7 @@ export default function Footer() {
                 alt="Flyer Distribution Hampshire"
               />
             </div>
-            <p className="text-sm text-blue-300 leading-relaxed">
+            <p className="text-base text-blue-300 leading-relaxed">
               Professional flyer and leaflet distribution across Hampshire and
               Dorset. Reliable, targeted, and affordable.
             </p>

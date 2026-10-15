@@ -94,7 +94,7 @@ export default function SlotPopup() {
             <path d="M18 6L6 18M6 6l12 12" />
           </svg>
         </button>
-        <p className="text-blue-900 font-bold text-lg mb-2 pr-6">
+        <p className="font-heading text-blue-900 font-bold text-lg mb-2 pr-6">
           <SlotCountdown
             triggered={visible}
             label={(count) =>
@@ -102,7 +102,7 @@ export default function SlotPopup() {
             }
           />
         </p>
-        <p className="text-gray-600 text-sm mb-5">
+        <p className="text-gray-600 text-base mb-5">
           Get in touch before this month&apos;s slots are gone.
         </p>
         <Link
