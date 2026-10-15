@@ -18,7 +18,7 @@ export function prefersReducedMotion() {
 // of up. Self-observes via IntersectionObserver by default, which covers
 // both "already in view on page load" and "scrolls into view" in one
 // path (same as StatsBar). Pass `triggered` to control it externally
-// instead — used by the timed popup, which opens rather than scrolling
+// instead, as the timed popup does, since it opens rather than scrolling
 // into view.
 export default function SlotCountdown({
   triggered,
@@ -55,7 +55,7 @@ export default function SlotCountdown({
     const step = (timestamp: number) => {
       if (start === null) start = timestamp;
       const progress = Math.min((timestamp - start) / DURATION, 1);
-      // Linear rather than eased — each digit gets roughly equal screen
+      // Linear rather than eased: each digit gets roughly equal screen
       // time, so the count is actually readable rather than blurring
       // through the early numbers.
       setCount(Math.round(from - progress * (from - to)));

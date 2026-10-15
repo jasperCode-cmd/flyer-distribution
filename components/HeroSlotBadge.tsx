@@ -28,7 +28,7 @@ const NUMBER_SIZE: Record<Phase, string> = {
 
 // Pop is a quick transform-only bounce (font-size doesn't change between
 // counting and pop, so only scale needs to animate, fast). Settling back
-// down changes font-size too, so it needs its own longer transition-all —
+// down changes font-size too, so it needs its own longer transition-all;
 // without this the shrink snapped instantly instead of animating.
 const NUMBER_TRANSITION: Record<Phase, string> = {
   counting: "",
