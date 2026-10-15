@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { campaignSlots } from "@/lib/campaign-constants";
 
 const DURATION = 1050;
@@ -24,10 +24,14 @@ export default function SlotCountdown({
   triggered,
   className = "",
   onDone,
+  label,
 }: {
   triggered?: boolean;
   className?: string;
   onDone?: () => void;
+  // Wording after the number, given the number currently shown, so it reads
+  // "1 Slot" or "5 Slots" on every frame of the countdown.
+  label?: (count: number) => ReactNode;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const [count, setCount] = useState(campaignSlots.totalSlots);
@@ -88,8 +92,11 @@ export default function SlotCountdown({
   }, [triggered]);
 
   return (
-    <span ref={ref} className={`inline-block tabular-nums ${className}`}>
-      {count}
-    </span>
+    <>
+      <span ref={ref} className={`inline-block tabular-nums ${className}`}>
+        {count}
+      </span>
+      {label?.(count)}
+    </>
   );
 }

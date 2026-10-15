@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { campaignSlots } from "@/lib/campaign-constants";
+import { campaignSlots, slotNoun } from "@/lib/campaign-constants";
 import SlotCountReveal from "./SlotCountReveal";
 
 export default function AnnouncementBar() {
@@ -16,8 +16,8 @@ export default function AnnouncementBar() {
     >
       <p className="text-blue-900 text-[13px] sm:text-base leading-snug">
         <span className="font-bold">
-          <SlotCountReveal value={campaignSlots.slotsRemaining} /> Campaign
-          Slots Left for {campaignSlots.monthLabel}
+          <SlotCountReveal value={campaignSlots.slotsRemaining} />
+          {` Campaign ${slotNoun(campaignSlots.slotsRemaining)} Available for ${campaignSlots.monthLabel}`}
         </span>
         , secure your slot today
       </p>

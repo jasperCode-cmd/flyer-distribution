@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { campaignSlots } from "@/lib/campaign-constants";
+import { campaignSlots, slotNoun } from "@/lib/campaign-constants";
 import SlotCountdown, { prefersReducedMotion } from "./SlotCountdown";
 
 // Three phases: "counting" (large, catches the eye while the number ticks
@@ -56,11 +56,12 @@ export default function HeroSlotBadge() {
       <SlotCountdown
         onDone={handleDone}
         className={`${NUMBER_TRANSITION[phase]} ${NUMBER_SIZE[phase]}`}
+        label={(count) => (
+          <span>
+            {`Campaign ${slotNoun(count)} Available for ${campaignSlots.monthLabel}, secure your slot today`}
+          </span>
+        )}
       />
-      <span>
-        Campaign Slots Left for {campaignSlots.monthLabel}, secure your slot
-        today
-      </span>
     </Link>
   );
 }

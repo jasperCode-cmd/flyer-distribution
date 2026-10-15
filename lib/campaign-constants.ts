@@ -2,7 +2,12 @@
 // source of truth for slot availability copy, used in the top
 // announcement bar, the homepage hero badge, and the timed site-wide popup.
 export const campaignSlots = {
-  slotsRemaining: 3,
+  slotsRemaining: 5,
   totalSlots: 15,
-  monthLabel: "October",
+  monthLabel: "November",
 };
+
+// "1 Campaign Slot", "5 Campaign Slots".
+export function slotNoun(count: number) {
+  return count === 1 ? "Slot" : "Slots";
+}

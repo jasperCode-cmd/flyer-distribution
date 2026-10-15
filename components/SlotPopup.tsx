@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { campaignSlots } from "@/lib/campaign-constants";
+import { campaignSlots, slotNoun } from "@/lib/campaign-constants";
 import SlotCountdown from "./SlotCountdown";
 
 const DISMISS_KEY = "fdh-slot-popup-dismissed";
@@ -95,8 +95,12 @@ export default function SlotPopup() {
           </svg>
         </button>
         <p className="text-blue-900 font-bold text-lg mb-2 pr-6">
-          <SlotCountdown triggered={visible} /> Distribution Campaign Slots
-          Left for {campaignSlots.monthLabel}
+          <SlotCountdown
+            triggered={visible}
+            label={(count) =>
+              ` Distribution Campaign ${slotNoun(count)} Available for ${campaignSlots.monthLabel}`
+            }
+          />
         </p>
         <p className="text-gray-600 text-sm mb-5">
           Get in touch before this month&apos;s slots are gone.
