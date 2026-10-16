@@ -41,6 +41,7 @@ import {
 import { periodFigures } from "@/lib/profit-overview";
 import { ALL_TIME, type ProfitJob } from "@/lib/profit";
 import type { ExpenseRecord } from "@/lib/expenses";
+import { JAMES_LEAD, JAMES_NOTE, JAMES_PAYLOAD, SARAH_LEAD, SARAH_NOTE, SARAH_PAYLOAD } from "./ldb-website-payloads";
 import { applyLeadFilters } from "@/lib/crm-constants";
 import { buildPriorities, rowsForBusiness, type LeadFacts } from "@/lib/priorities";
 import { inboxFilterUrl } from "@/lib/inbox-list";
@@ -168,6 +169,68 @@ test("intake: every field is validated and length-limited", async () => {
   assert.ok(fdhNames.ok);
   assert.equal(fdhNames.ok && fdhNames.enquiry.name, "Ann Lee");
   assert.equal(fdhNames.ok && fdhNames.enquiry.areas, "Poole");
+});
+
+test("intake: the LDB website's own payloads are accepted and every field is saved", async () => {
+  for (const [raw, lead, note] of [
+    [SARAH_PAYLOAD, SARAH_LEAD, SARAH_NOTE],
+    [JAMES_PAYLOAD, JAMES_LEAD, JAMES_NOTE],
+  ] as const) {
+    const { res, json, created } = await intake(null, { raw });
+    assert.equal(res.status, 200, lead.name);
+    assert.deepEqual(json, { ok: true });
+    assert.equal(created.length, 1);
+    const { activities, ...saved } = created[0].data;
+    assert.deepEqual(saved, lead);
+    assert.deepEqual(activities, { create: { type: "NOTE", detail: note } });
+  }
+});
+
+test("intake: areas may be a list, joined and tidied, with the limit on the joined text", async () => {
+  const listed = (areas: unknown, extra: Record<string, unknown> = {}) =>
+    validateLdbEnquiry({ name: "Ann Lee", email: "ann@example.com", areas, ...extra });
+  const tidy = listed(["  Poole ", "", "Boscombe\u0007", "   "]);
+  assert.ok(tidy.ok);
+  assert.equal(tidy.ok && tidy.enquiry.areas, "Poole, Boscombe");
+  const empty = listed([]);
+  assert.equal(empty.ok && empty.enquiry.areas, null);
+  assert.deepEqual(listed(["x".repeat(75), "x".repeat(75), "x".repeat(75), "x".repeat(75)]), { ok: false, error: "areas is too long" });
+  assert.deepEqual(listed(["Poole", 3]), { ok: false, error: "Invalid areas" });
+  const asText = listed("Poole, Boscombe");
+  assert.equal(asText.ok && asText.enquiry.areas, "Poole, Boscombe", "a string still works");
+
+  // Areas win for Target Area(s); with none, the project location is used.
+  const both = await intake({ name: "Ann Lee", email: "ann@example.com", areas: ["Poole"], projectLocation: "Lansdowne Road" });
+  assert.equal(both.created[0].data.targetAreas, "Poole");
+  assert.match(both.created[0].data.activities.create.detail, /^Project location: Lansdowne Road$/m);
+  const none = await intake({ name: "Ann Lee", email: "ann@example.com", areas: [], projectLocation: "Lansdowne Road" });
+  assert.equal(none.created[0].data.targetAreas, "Lansdowne Road");
+});
+
+test("intake: includePrinting and includeDesign follow the yes rules; the new fields are length-limited; a first name alone is a name", async () => {
+  const base = { name: "Ann Lee", email: "ann@example.com" };
+  const flags = (extra: Record<string, unknown>) => {
+    const r = validateLdbEnquiry({ ...base, ...extra });
+    return r.ok ? [r.enquiry.printingIncluded, r.enquiry.designIncluded] : r.error;
+  };
+  assert.deepEqual(flags({ includePrinting: true, includeDesign: false }), [true, false]);
+  assert.deepEqual(flags({ includePrinting: "yes", includeDesign: "on" }), [true, true]);
+  assert.deepEqual(flags({ includePrinting: "true", includeDesign: "true" }), [true, true]);
+  assert.deepEqual(flags({ includePrinting: "no", includeDesign: 1 }), [false, false]);
+  assert.deepEqual(flags({ printingIncluded: true, "include-design": "yes" }), [true, true], "the older names still work");
+  assert.deepEqual(flags({}), [false, false]);
+
+  for (const [field, limit] of [["projectLocation", 200], ["deadline", 50], ["scale", 100]] as const) {
+    assert.deepEqual(validateLdbEnquiry({ ...base, [field]: "x".repeat(limit + 1) }), { ok: false, error: `${field} is too long` });
+    const fits = validateLdbEnquiry({ ...base, [field]: "x".repeat(limit) });
+    assert.equal(fits.ok && fits.enquiry[field], "x".repeat(limit));
+    assert.deepEqual(validateLdbEnquiry({ ...base, [field]: 5 }), { ok: false, error: `Invalid ${field}` });
+  }
+
+  const first = validateLdbEnquiry({ firstName: "James", email: "james@example.com" });
+  assert.equal(first.ok && first.enquiry.name, "James");
+  const firstDashed = validateLdbEnquiry({ "first-name": "James", email: "james@example.com" });
+  assert.equal(firstDashed.ok && firstDashed.enquiry.name, "James");
 });
 
 test("intake: a possible duplicate is noted on the new lead, like the FDH form", async () => {

@@ -6,6 +6,7 @@ import { handleLdbIntake, LDB_INTAKE_PER_CONTACT_PER_HOUR } from "@/lib/ldb-inta
 import { loadDashboard } from "@/lib/dashboard-data";
 import { ALL_PERIOD } from "@/lib/dashboard";
 import type { BusinessFilter } from "@/lib/business";
+import { JAMES_LEAD, JAMES_NOTE, JAMES_PAYLOAD, SARAH_LEAD, SARAH_NOTE, SARAH_PAYLOAD } from "./ldb-website-payloads";
 
 // Businesses against a real database, but only a throwaway local one: it
 // needs CRM_TEST_DATABASE_URL pointing at localhost and is skipped otherwise,
@@ -28,10 +29,22 @@ const TAG = "Business test";
 const SECRET = "local-test-secret";
 let prisma: PrismaClient;
 
+// The website payloads use their own addresses; only Bournemouth website
+// leads with them are removed.
+const PAYLOAD_EMAILS = [SARAH_LEAD.email, JAMES_LEAD.email];
+
 async function cleanUp() {
   await prisma.calendarEvent.deleteMany({ where: { title: { startsWith: TAG } } });
   await prisma.expense.deleteMany({ where: { label: { startsWith: TAG } } });
-  await prisma.lead.deleteMany({ where: { OR: [{ name: { startsWith: TAG } }, { email: { endsWith: "@business-test.example" } }] } });
+  await prisma.lead.deleteMany({
+    where: {
+      OR: [
+        { name: { startsWith: TAG } },
+        { email: { endsWith: "@business-test.example" } },
+        { email: { in: PAYLOAD_EMAILS }, business: "LDB", source: "WEBSITE_QUOTE_FORM" },
+      ],
+    },
+  });
 }
 
 before(async () => {
@@ -96,6 +109,35 @@ test("real database: the intake makes an LDB lead and the per-contact cap holds"
   // The second one onwards notes the first as a possible duplicate.
   const notes = await prisma.activity.findMany({ where: { lead: { email: { equals: "sam@business-test.example", mode: "insensitive" } } } });
   assert.ok(notes.some((n) => n.detail.includes("Possible duplicate of existing lead(s)")));
+  await cleanUp();
+});
+
+test("real database: the LDB website's own payloads are saved with every field", { skip }, async () => {
+  for (const [raw, expected, note] of [
+    [SARAH_PAYLOAD, SARAH_LEAD, SARAH_NOTE],
+    [JAMES_PAYLOAD, JAMES_LEAD, JAMES_NOTE],
+  ] as const) {
+    const res = await handleLdbIntake(
+      new Request("http://localhost/api/crm/intake/ldb", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-intake-secret": SECRET },
+        body: raw,
+      }),
+      { db: prisma, secret: SECRET, findDuplicates: async () => [] }
+    );
+    assert.equal(res.status, 200, expected.name);
+    assert.deepEqual(await res.json(), { ok: true });
+    const lead = await prisma.lead.findFirstOrThrow({
+      where: { email: expected.email, business: "LDB", source: "WEBSITE_QUOTE_FORM" },
+      include: { activities: true },
+    });
+    const saved = Object.fromEntries(Object.keys(expected).map((key) => [key, lead[key as keyof typeof lead]]));
+    assert.deepEqual(saved, expected);
+    assert.equal(lead.activities.length, 1);
+    assert.equal(lead.activities[0].type, "NOTE");
+    assert.equal(lead.activities[0].userId, null);
+    assert.equal(lead.activities[0].detail, note);
+  }
   await cleanUp();
 });
 

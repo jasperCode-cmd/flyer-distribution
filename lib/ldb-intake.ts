@@ -32,12 +32,16 @@ export const INTAKE_LIMITS = {
   budget: 50,
   startDate: 50,
   message: 2000,
+  projectLocation: 200,
+  deadline: 50,
+  scale: 100,
 } as const;
 
 type FieldName = keyof typeof INTAKE_LIMITS;
 
 // Each field and the names the LDB site may send it under (the FDH quote
-// form's names are accepted too, so the same form markup works).
+// form's names are accepted too, so the same form markup works). Areas may
+// also come as a list of strings.
 const FIELD_KEYS: Record<Exclude<FieldName, "name">, string[]> = {
   email: ["email"],
   phone: ["phone"],
@@ -49,7 +53,14 @@ const FIELD_KEYS: Record<Exclude<FieldName, "name">, string[]> = {
   budget: ["budget"],
   startDate: ["startDate", "campaign-start-date"],
   message: ["message"],
+  projectLocation: ["projectLocation"],
+  deadline: ["deadline"],
+  scale: ["scale"],
 };
+
+// Yes/no fields, under every name they may come as.
+const PRINTING_KEYS = ["printingIncluded", "printing-included", "includePrinting"];
+const DESIGN_KEYS = ["designIncluded", "include-design", "includeDesign"];
 
 const EMAIL_RE = /^[^\s@,;<>"]+@[^\s@,;<>"]+\.[^\s@,;<>"]+$/;
 const PHONE_RE = /^\+?[0-9 ()-]{7,30}$/;
@@ -66,6 +77,9 @@ export type LdbEnquiry = {
   budget: string | null;
   startDate: string | null;
   message: string | null;
+  projectLocation: string | null;
+  deadline: string | null;
+  scale: string | null;
   printingIncluded: boolean;
   designIncluded: boolean;
 };
@@ -92,12 +106,20 @@ export function validateLdbEnquiry(raw: unknown): { ok: true; enquiry: LdbEnquir
     if (typeof value !== "string") return undefined;
     return clean(value, multiline) || null;
   };
+  // A list of areas is joined with ", ", each one tidied and empty ones
+  // dropped; the length limit is on the joined text.
+  const areas = (key: string): string | null | undefined => {
+    const value = data[key];
+    if (!Array.isArray(value)) return text(key);
+    if (!value.every((item) => typeof item === "string")) return undefined;
+    return value.map((item) => clean(item, false)).filter(Boolean).join(", ") || null;
+  };
 
   const out: Partial<Record<FieldName, string | null>> = {};
   for (const [field, keys] of Object.entries(FIELD_KEYS) as [Exclude<FieldName, "name">, string[]][]) {
     let found: string | null = null;
     for (const key of keys) {
-      const value = text(key, field === "message");
+      const value = field === "areas" ? areas(key) : text(key, field === "message");
       if (value === undefined) return { ok: false, error: `Invalid ${field}` };
       if (value) {
         found = value;
@@ -136,8 +158,11 @@ export function validateLdbEnquiry(raw: unknown): { ok: true; enquiry: LdbEnquir
       budget: out.budget ?? null,
       startDate: out.startDate ?? null,
       message: out.message ?? null,
-      printingIncluded: yes(data["printingIncluded"]) || yes(data["printing-included"]),
-      designIncluded: yes(data["designIncluded"]) || yes(data["include-design"]),
+      projectLocation: out.projectLocation ?? null,
+      deadline: out.deadline ?? null,
+      scale: out.scale ?? null,
+      printingIncluded: PRINTING_KEYS.some((key) => yes(data[key])),
+      designIncluded: DESIGN_KEYS.some((key) => yes(data[key])),
     },
   };
 }
@@ -157,6 +182,9 @@ export function enquiryNote(enquiry: LdbEnquiry, duplicates: { id: string; name:
   const lines = [`Service type: ${enquiry.service || "Unspecified"}`, "From the Leaflet Distribution Bournemouth website"];
   if (enquiry.budget) lines.push(`Budget range: ${enquiry.budget}`);
   if (enquiry.startDate) lines.push(`Requested start date: ${enquiry.startDate}`);
+  if (enquiry.deadline) lines.push(`Deadline: ${enquiry.deadline}`);
+  if (enquiry.projectLocation) lines.push(`Project location: ${enquiry.projectLocation}`);
+  if (enquiry.scale) lines.push(`Scale: ${enquiry.scale}`);
   if (enquiry.postcode) lines.push(`Postcode: ${enquiry.postcode}`);
   if (enquiry.message) lines.push(`Message: ${enquiry.message}`);
   if (duplicates.length > 0) {
@@ -224,7 +252,8 @@ export async function handleLdbIntake(req: Request, deps: LdbIntakeDeps): Promis
         phone: enquiry.phone,
         businessName: enquiry.businessName,
         postcode: enquiry.postcode,
-        targetAreas: enquiry.areas,
+        // With no areas given, where the project is stands in for them.
+        targetAreas: enquiry.areas ?? enquiry.projectLocation,
         leafletQuantity: enquiry.quantity,
         printingIncluded: enquiry.printingIncluded,
         designIncluded: enquiry.designIncluded,
