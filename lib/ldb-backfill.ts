@@ -283,21 +283,25 @@ function addressesIn(message: gmail_v1.Schema$Message, headers: string[]): strin
     .filter(Boolean);
 }
 
+// What tells a notification apart. from is the notification sender, inbox
+// the Hampshire Gmail it is sent to, ours every address of ours.
+export type NotificationRules = { from: string; inbox: string; ours: string[] };
+
 // A notification itself: from the notification sender with one of the
-// notification subjects, sent to us with the enquirer as Reply-To, and not
-// something we sent or drafted. The CRM's own emails to a Bournemouth lead
-// come from the same address and can arrive here (their BCC to the LDB
-// address), but they go to the lead with Reply-To the LDB address, so they
-// are never notifications. ours is every address of ours.
-export function isNotification(message: gmail_v1.Schema$Message, from: string, ours: string[]): boolean {
-  const labels = message.labelIds ?? [];
-  if (labels.includes("SENT") || labels.includes("DRAFT")) return false;
-  if (parseMailbox(header(message, "From")).address.toLowerCase() !== from) return false;
+// notification subjects, sent to the Hampshire Gmail (and no one else), with
+// the enquirer, not us, as Reply-To. Not a draft. The SENT label means
+// nothing here: the sender is a send-as address of this Gmail, so Gmail puts
+// SENT on every notification as well as INBOX. The CRM's own emails to a
+// Bournemouth lead come from the same address, but they go to the lead with
+// Reply-To the LDB address, so they are never notifications.
+export function isNotification(message: gmail_v1.Schema$Message, rules: NotificationRules): boolean {
+  if ((message.labelIds ?? []).includes("DRAFT")) return false;
+  if (parseMailbox(header(message, "From")).address.toLowerCase() !== rules.from) return false;
   if (!isNotificationSubject(header(message, "Subject"))) return false;
   const to = addressesIn(message, ["To", "Cc"]);
-  if (to.length === 0 || to.some((a) => !ours.includes(a))) return false;
+  if (!to.includes(rules.inbox) || to.some((a) => !rules.ours.includes(a))) return false;
   const replyTo = addressesIn(message, ["Reply-To"]);
-  return !replyTo.some((a) => ours.includes(a));
+  return !replyTo.some((a) => rules.ours.includes(a));
 }
 
 export type ReadNotification =
@@ -348,15 +352,14 @@ export function hasLaterReply(
   thread: gmail_v1.Schema$Thread,
   notification: gmail_v1.Schema$Message,
   enquiryEmail: string | null,
-  from: string,
-  ours: string[]
+  rules: NotificationRules
 ): boolean {
   const after = receivedAt(notification).getTime();
   return (thread.messages ?? []).some((m) => {
     if (m.id === notification.id || (m.labelIds ?? []).includes("DRAFT")) return false;
     if (receivedAt(m).getTime() <= after) return false;
-    if (!ours.includes(parseMailbox(header(m, "From")).address.toLowerCase())) return false;
-    if (isNotification(m, from, ours)) return false;
+    if (!rules.ours.includes(parseMailbox(header(m, "From")).address.toLowerCase())) return false;
+    if (isNotification(m, rules)) return false;
     return !enquiryEmail || addressesIn(m, ["To", "Cc"]).includes(enquiryEmail.toLowerCase());
   });
 }
@@ -464,9 +467,11 @@ export async function planBackfill(params: {
   imported: Set<string>;
   contacts: Contact[];
   options: BackfillOptions;
+  // The Hampshire Gmail, which the notifications are sent to.
+  inbox: string;
   // Every address of ours: the Hampshire Gmail and the Bournemouth address.
-  // The notification sender is added. Replies from any of them count, and
-  // none is ever taken as the enquirer's Reply-To.
+  // The inbox and the notification sender are added. Replies from any of
+  // them count, and none is ever taken as the enquirer's Reply-To.
   ours: string[];
   // Threads touching any of these are left out, as in the inbox.
   excluded: string[];
@@ -493,11 +498,13 @@ export async function planBackfill(params: {
   const threads = (await mapWithConcurrency(threadIds, THREAD_CONCURRENCY, (id) => reader.getThread(id))).filter(
     (t): t is gmail_v1.Schema$Thread => !!t
   );
-  const ours = [...new Set([...params.ours, options.from].map((a) => a.toLowerCase()))];
+  const inbox = params.inbox.toLowerCase();
+  const ours = [...new Set([...params.ours, inbox, options.from].map((a) => a.toLowerCase()))];
+  const rules: NotificationRules = { from: options.from, inbox, ours };
   const found = threads
     .flatMap((thread) =>
       (thread.messages ?? [])
-        .filter((m) => m.id && wanted.has(m.id) && isNotification(m, options.from, ours))
+        .filter((m) => m.id && wanted.has(m.id) && isNotification(m, rules))
         .map((message) => ({ thread, message }))
     )
     .filter(({ message }) => !options.since || ukDay(receivedAt(message)) >= options.since)
@@ -511,7 +518,7 @@ export async function planBackfill(params: {
     const when = receivedAt(message);
     const read = readNotification(message, ours);
     const enquiry = read.ok ? read.enquiry : null;
-    const replied = hasLaterReply(thread, message, enquiry?.email ?? (read.ok ? null : read.email), options.from, ours);
+    const replied = hasLaterReply(thread, message, enquiry?.email ?? (read.ok ? null : read.email), rules);
     const suggestedStage = suggestStage({ replied, receivedAt: when, now });
     const row: PlanRow = {
       messageId,

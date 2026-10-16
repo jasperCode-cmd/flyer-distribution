@@ -72,7 +72,7 @@ function threads() {
 
 async function planFromDb() {
   const [imported, contacts] = await Promise.all([loadImportedIds(prisma), loadContacts(prisma)]);
-  return planBackfill({ reader: fakeReader(threads()), imported, contacts, options: OPTIONS, ours: [FDH], excluded: [], now });
+  return planBackfill({ reader: fakeReader(threads()), imported, contacts, options: OPTIONS, inbox: FDH, ours: [FDH], excluded: [], now });
 }
 
 test("real database: --apply writes dated LDB leads with their notes, and a second --apply creates nothing", { skip }, async () => {

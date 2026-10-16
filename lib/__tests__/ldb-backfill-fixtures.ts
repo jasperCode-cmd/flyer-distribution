@@ -1,6 +1,6 @@
 import type { gmail_v1 } from "@googleapis/gmail";
 import type { GmailMessageReader } from "@/lib/gmail";
-import type { BackfillOptions } from "@/lib/ldb-backfill";
+import type { BackfillOptions, NotificationRules } from "@/lib/ldb-backfill";
 
 // Bournemouth quote notifications for the backfill tests, in the LDB
 // website's layout: sent by Brevo straight to the Hampshire Gmail, from the
@@ -10,6 +10,7 @@ import type { BackfillOptions } from "@/lib/ldb-backfill";
 export const SENDER = "team@leafletdistributionbournemouth.co.uk";
 export const FDH = "flyerdistributionhampshire@gmail.com";
 export const OURS = [FDH, SENDER];
+export const RULES: NotificationRules = { from: SENDER, inbox: FDH, ours: OURS };
 export const NOW = new Date("2026-10-16T10:00:00.000Z");
 const DAY = 24 * 60 * 60 * 1000;
 export const daysAgo = (n: number) => new Date(NOW.getTime() - n * DAY);
@@ -62,11 +63,12 @@ export function notificationHtml(service: string, rows: Row[]): string {
 export const mailto = (address: string) => `<a href="mailto:${address}">${address}</a>`;
 
 // A notification as Gmail holds it: from "Leaflet Distribution Bournemouth"
-// <team@...>, to the Hampshire Gmail, Reply-To the enquirer.
+// <team@...>, to the Hampshire Gmail, Reply-To the enquirer. The sender is a
+// send-as address of the Gmail, so Gmail labels it SENT as well as INBOX.
 export function notification(
   id: string,
   at: Date,
-  o: { subject: string; html: string; replyTo?: string | null; text?: string }
+  o: { subject: string; html: string; replyTo?: string | null; text?: string; labels?: string[] }
 ): gmail_v1.Schema$Message {
   return msg(id, {
     from: `"Leaflet Distribution Bournemouth" <${SENDER}>`,
@@ -74,6 +76,7 @@ export function notification(
     at,
     html: o.html,
     text: o.text,
+    labels: o.labels ?? ["SENT", "INBOX"],
     ...(o.replyTo ? { replyTo: o.replyTo } : {}),
   });
 }
@@ -179,7 +182,7 @@ export const OWEN = {
 
 // The CRM's own email to a Bournemouth lead, as its BCC to the Bournemouth
 // address arrives here: from the same sender, to the lead, Reply-To the
-// Bournemouth address.
+// Bournemouth address, labelled SENT and INBOX like anything from it.
 export function crmCopy(id: string, at: Date, to: string, subject: string): gmail_v1.Schema$Message {
   return msg(id, {
     from: `"Leaflet Distribution Bournemouth" <${SENDER}>`,
@@ -187,6 +190,7 @@ export function crmCopy(id: string, at: Date, to: string, subject: string): gmai
     replyTo: SENDER,
     subject,
     at,
+    labels: ["SENT", "INBOX"],
     text: "Hi, thanks for your enquiry.\n\nKind regards,\nDan\n\n-- \nLeaflet Distribution Bournemouth",
     html: "<p>Hi, thanks for your enquiry.</p><p>Kind regards,<br>Dan</p>",
   });

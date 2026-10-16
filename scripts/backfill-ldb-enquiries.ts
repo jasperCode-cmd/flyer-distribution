@@ -14,10 +14,12 @@
 //   --include-duplicates     import enquiries matching an existing lead anyway,
 //                            with the usual "Possible duplicate" note
 //
-// A notification is an email from the sender, to us, Reply-To the enquirer,
-// whose subject starts "Leaflet Distribution enquiry from ", "Public Notice
-// Leafleting enquiry from " or "Quote enquiry from ". Replies, forwards, sent
-// mail, drafts and the CRM's own emails to Bournemouth leads never count.
+// A notification is an email from the sender, to the Hampshire Gmail,
+// Reply-To the enquirer, whose subject starts "Leaflet Distribution enquiry
+// from ", "Public Notice Leafleting enquiry from " or "Quote enquiry from ".
+// It may carry the SENT label (the sender is a send-as address of the Gmail).
+// Replies, forwards, drafts and the CRM's own emails to Bournemouth leads
+// never count.
 // Each is read into the intake endpoint's fields from its table and checked
 // by the same validation, and the lead is built and noted exactly as the
 // endpoint does it (lib/ldb-intake.ts), plus "Imported from Gmail" and the
@@ -95,6 +97,7 @@ async function main() {
         imported,
         contacts,
         options,
+        inbox: context.senderAddress,
         ours,
         // Our own addresses are what we're looking for, never a reason to leave a thread out.
         excluded: context.excluded.filter((a) => !ours.includes(a) && a !== options.from),

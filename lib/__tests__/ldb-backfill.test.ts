@@ -42,6 +42,7 @@ import {
   OPTIONS,
   OURS,
   OWEN,
+  RULES,
   PRIYA,
   SARAH,
   SENDER,
@@ -58,6 +59,7 @@ async function plan(
     imported: new Set(o.imported ?? []),
     contacts: o.contacts ?? [],
     options: { ...OPTIONS, ...o.options },
+    inbox: FDH,
     ours: [FDH],
     excluded: [],
     now: NOW,
@@ -193,19 +195,43 @@ test("backfill: the three subject forms are notifications; replies, forwards and
     assert.equal(isNotificationSubject(s), false, String(s));
   }
   const n = notification("n", daysAgo(3), SARAH);
-  assert.equal(isNotification(n, SENDER, OURS), true);
-  assert.equal(isNotification({ ...n, labelIds: ["SENT"] }, SENDER, OURS), false, "sent mail");
-  assert.equal(isNotification({ ...n, labelIds: ["DRAFT"] }, SENDER, OURS), false, "a draft");
+  assert.deepEqual(n.labelIds, ["SENT", "INBOX"], "as Gmail labels a notification from its send-as address");
+  assert.equal(isNotification(n, RULES), true);
+  assert.equal(isNotification({ ...n, labelIds: ["INBOX"] }, RULES), true, "with INBOX alone too");
+  assert.equal(isNotification({ ...n, labelIds: ["DRAFT"] }, RULES), false, "a draft");
+  const withHeaders = (headers: Record<string, string>) => ({
+    ...n,
+    payload: { ...n.payload, headers: n.payload!.headers!.map((h) => (h.name! in headers ? { ...h, value: headers[h.name!] } : h)) },
+  });
+  assert.equal(isNotification(withHeaders({ To: "someone@example.org" }), RULES), false, "not to the Hampshire Gmail");
+  assert.equal(isNotification(withHeaders({ To: `${FDH}, someone@example.org` }), RULES), false, "to someone else as well");
+  assert.equal(isNotification(withHeaders({ To: SENDER }), RULES), false, "to the Bournemouth address, not the Hampshire Gmail");
+  assert.equal(isNotification(withHeaders({ "Reply-To": SENDER }), RULES), false, "Reply-To one of ours");
+  assert.equal(isNotification(withHeaders({ "Reply-To": FDH }), RULES), false, "Reply-To the Hampshire Gmail");
   assert.equal(
-    isNotification(msg("x", { from: "someone@example.org", subject: SARAH.subject, at: daysAgo(3), replyTo: SARAH.replyTo, html: SARAH.html }), SENDER, OURS),
+    isNotification(msg("x", { from: "someone@example.org", subject: SARAH.subject, at: daysAgo(3), replyTo: SARAH.replyTo, html: SARAH.html }), RULES),
     false,
     "another sender"
   );
 });
 
+test("backfill: a real-shaped notification labelled SENT and INBOX is still found and imported", async () => {
+  const sent = notification("send-as", daysAgo(4), SARAH);
+  assert.deepEqual(sent.labelIds, ["SENT", "INBOX"]);
+  const { rows } = await plan([thread("t1", [sent])]);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].skip, null);
+  assert.equal(rows[0].name, "Sarah Mitchell");
+  assert.equal(rows[0].stage, "UNCONTACTED", "a notification is not our reply to itself");
+  const db = fakeApplyDb();
+  assert.deepEqual(await applyBackfill(db, rows), { created: 1, alreadyImported: 0 });
+  assert.equal(db.created[0].name, "Sarah Mitchell");
+  assert.equal(db.created[0].createdAt.toISOString(), daysAgo(4).toISOString());
+});
+
 test("backfill: the CRM's own emails to a Bournemouth lead are never notifications, whatever their subject", () => {
-  assert.equal(isNotification(crmCopy("c1", daysAgo(2), "sarah@example.com", `Re: ${SARAH.subject}`), SENDER, OURS), false);
-  assert.equal(isNotification(crmCopy("c2", daysAgo(2), "sarah@example.com", SARAH.subject), SENDER, OURS), false, "to the lead, Reply-To us");
+  assert.equal(isNotification(crmCopy("c1", daysAgo(2), "sarah@example.com", `Re: ${SARAH.subject}`), RULES), false);
+  assert.equal(isNotification(crmCopy("c2", daysAgo(2), "sarah@example.com", SARAH.subject), RULES), false, "to the lead, Reply-To us");
 });
 
 // --- Stage --------------------------------------------------------------------
@@ -221,7 +247,7 @@ test("backfill: a reply is a later message to the enquirer from the Bournemouth 
   const n = notification("n1", daysAgo(40), SARAH);
   const reply = (id: string, o: { at: Date; from?: string; to?: string; labels?: string[] }) =>
     msg(id, { from: o.from ?? FDH, to: o.to ?? "sarah@example.com", subject: `Re: ${SARAH.subject}`, at: o.at, labels: o.labels ?? ["SENT"], text: "Hi" });
-  const has = (...others: ReturnType<typeof msg>[]) => hasLaterReply(thread("t", [n, ...others]), n, "sarah@example.com", SENDER, OURS);
+  const has = (...others: ReturnType<typeof msg>[]) => hasLaterReply(thread("t", [n, ...others]), n, "sarah@example.com", RULES);
 
   assert.equal(has(reply("r1", { at: daysAgo(39) })), true, "from the Hampshire Gmail");
   assert.equal(has(reply("r2", { at: daysAgo(39), from: `"Leaflet Distribution Bournemouth" <${SENDER}>`, labels: ["INBOX"] })), true, "from the Bournemouth address");
@@ -233,7 +259,7 @@ test("backfill: a reply is a later message to the enquirer from the Bournemouth 
   assert.equal(has(reply("r8", { at: daysAgo(39), from: "other@example.org" })), false, "not one of our addresses");
   // A later notification in the same thread is another enquiry, not a reply.
   const second = notification("n2", daysAgo(10), SARAH);
-  assert.equal(hasLaterReply(thread("t2", [n, second]), n, "sarah@example.com", SENDER, OURS), false);
+  assert.equal(hasLaterReply(thread("t2", [n, second]), n, "sarah@example.com", RULES), false);
 });
 
 // --- The plan --------------------------------------------------------------------
