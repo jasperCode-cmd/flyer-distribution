@@ -2,33 +2,38 @@
 // into the CRM from the shared Gmail, as LDB leads from the Website Quote
 // Form, dated when each enquiry arrived.
 //
-//   npx tsx --conditions=react-server scripts/backfill-ldb-enquiries.ts \
-//     --from=<notification sender address> --subject="<exact notification subject>"
+//   npx tsx --conditions=react-server scripts/backfill-ldb-enquiries.ts
 //
 // That is a preview: it reads Gmail and the database, prints what it would
 // import, and writes nothing. Add --apply to write the previewed rows.
 //
-//   --ldb-address=<address>  the Bournemouth address (default LDB_SENDER_ADDRESS)
+//   --from=<address>         the notifications' sender
+//                            (default team@leafletdistributionbournemouth.co.uk)
 //   --since=YYYY-MM-DD       only enquiries from that UK day on
 //   --stage=UNCONTACTED|AWAITING_RESPONSE|LOST   use this stage for every row
 //   --include-duplicates     import enquiries matching an existing lead anyway,
 //                            with the usual "Possible duplicate" note
 //
-// Each notification is read into the intake endpoint's fields and checked by
-// the same validation, and the lead is built and noted exactly as the endpoint
-// does it (lib/ldb-intake.ts), plus "Imported from Gmail" and the Gmail
-// message ID. The suggested stage is Awaiting Response when the thread has a
-// later message from the Bournemouth address (we replied), Lost (reason Other)
-// when there is no reply and it is more than 30 days old, and Uncontacted
-// otherwise. Skipped, and listed: anything matching an existing lead of either
-// business by email or phone, anything that can't be read, and anything whose
-// message ID is already in a lead's note, so running --apply twice creates
-// nothing twice. Each lead and its note are written in one transaction.
+// A notification is an email from the sender, to us, Reply-To the enquirer,
+// whose subject starts "Leaflet Distribution enquiry from ", "Public Notice
+// Leafleting enquiry from " or "Quote enquiry from ". Replies, forwards, sent
+// mail, drafts and the CRM's own emails to Bournemouth leads never count.
+// Each is read into the intake endpoint's fields from its table and checked
+// by the same validation, and the lead is built and noted exactly as the
+// endpoint does it (lib/ldb-intake.ts), plus "Imported from Gmail" and the
+// Gmail message ID. The suggested stage is Awaiting Response when the thread
+// has a later message to the enquirer from the Bournemouth address or the
+// Hampshire Gmail (we replied), Lost (reason Other) when there is no reply and
+// it is more than 30 days old, and Uncontacted otherwise. Skipped, and
+// listed: anything matching an existing lead of either business by email or
+// phone, anything that can't be read, and anything whose message ID is
+// already in a lead's note, so running --apply twice creates nothing twice.
+// Each lead and its note are written in one transaction.
 //
 // Gmail is only searched and read, under the CRM's existing scopes. The
 // settings come from .env.local, .env or the environment (GOOGLE_CLIENT_ID,
 // GOOGLE_CLIENT_SECRET, GMAIL_REFRESH_TOKEN, GMAIL_SENDER_ADDRESS,
-// DATABASE_URL). Nothing here ever prints them.
+// DATABASE_URL, and LDB_SENDER_ADDRESS if set). Nothing here ever prints them.
 import { config } from "dotenv";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../generated/prisma/client";
@@ -62,7 +67,7 @@ async function main() {
     process.exitCode = 1;
     return;
   }
-  const args = parseBackfillArgs(process.argv.slice(2), { ldbAddress: getLdbSenderAddress() });
+  const args = parseBackfillArgs(process.argv.slice(2));
   if (!args.ok) {
     console.error(args.error);
     process.exitCode = 1;
@@ -82,18 +87,20 @@ async function main() {
       return;
     }
 
-    const result = await withGmailMessageReader((reader, context) =>
-      planBackfill({
+    const result = await withGmailMessageReader((reader, context) => {
+      // The Hampshire Gmail and the Bournemouth address (the sender is added).
+      const ours = [context.senderAddress, getLdbSenderAddress() ?? ""].filter(Boolean).map((a) => a.toLowerCase());
+      return planBackfill({
         reader,
         imported,
         contacts,
         options,
-        own: context.own ?? [context.senderAddress],
-        // The Bournemouth address is what we're looking for, never a reason to leave a thread out.
-        excluded: context.excluded.filter((a) => a !== options.ldbAddress),
+        ours,
+        // Our own addresses are what we're looking for, never a reason to leave a thread out.
+        excluded: context.excluded.filter((a) => !ours.includes(a) && a !== options.from),
         now: new Date(),
-      })
-    );
+      });
+    });
     if (!result.ok) {
       console.error(result.message);
       process.exitCode = 1;
@@ -107,7 +114,7 @@ async function main() {
         : "Bournemouth enquiry backfill preview (nothing has been written)\n"
     );
     if (rows.length === 0) {
-      console.log("No notifications found from that sender with that exact subject.");
+      console.log(`No enquiry notifications found from ${options.from}.`);
     } else {
       for (const line of previewTable(rows)) console.log(line);
     }

@@ -2,38 +2,36 @@ import type { gmail_v1 } from "@googleapis/gmail";
 import type { GmailMessageReader } from "@/lib/gmail";
 import type { BackfillOptions } from "@/lib/ldb-backfill";
 
-// Made-up Bournemouth quote notifications for the backfill tests, shaped as
-// Gmail returns them. The real sender, subject and layout come from the
-// options when the script is run.
+// Bournemouth quote notifications for the backfill tests, in the LDB
+// website's layout: sent by Brevo straight to the Hampshire Gmail, from the
+// Bournemouth address, Reply-To the enquirer, an h2 then a two-column table
+// of label and value rows. The enquirers are made up.
 
-export const SENDER = "no-reply@bournemouth-leaflets.example";
-export const LDB = "hello@bournemouth-leaflets.example";
+export const SENDER = "team@leafletdistributionbournemouth.co.uk";
 export const FDH = "flyerdistributionhampshire@gmail.com";
-export const SUBJECT = "New quote request - Leaflet Distribution Bournemouth";
+export const OURS = [FDH, SENDER];
 export const NOW = new Date("2026-10-16T10:00:00.000Z");
 const DAY = 24 * 60 * 60 * 1000;
 export const daysAgo = (n: number) => new Date(NOW.getTime() - n * DAY);
 
 export const OPTIONS: BackfillOptions = {
   from: SENDER,
-  subject: SUBJECT,
-  ldbAddress: LDB,
   since: null,
   stage: null,
   includeDuplicates: false,
   apply: false,
 };
 
-const b64 = (s: string) => Buffer.from(s, "utf-8").toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const b64 = (s: string) => Buffer.from(s, "utf-8").toString("base64url");
 
 export function msg(
   id: string,
-  o: { from: string; to?: string; subject?: string; at: Date; labels?: string[]; text?: string; html?: string; replyTo?: string }
+  o: { from: string; to?: string; subject: string; at: Date; labels?: string[]; text?: string; html?: string; replyTo?: string }
 ): gmail_v1.Schema$Message {
   const headers = [
     { name: "From", value: o.from },
-    { name: "To", value: o.to ?? LDB },
-    { name: "Subject", value: o.subject ?? SUBJECT },
+    { name: "To", value: o.to ?? FDH },
+    { name: "Subject", value: o.subject },
     { name: "Date", value: o.at.toUTCString() },
     ...(o.replyTo ? [{ name: "Reply-To", value: o.replyTo }] : []),
   ];
@@ -49,8 +47,35 @@ export function msg(
   };
 }
 
-export function notification(id: string, at: Date, text: string, extra: { replyTo?: string; html?: string } = {}) {
-  return msg(id, { from: `Leaflet Distribution Bournemouth <${SENDER}>`, at, text, ...extra });
+export type Row = [label: string, valueHtml: string];
+
+// The notification body: "New Quote Enquiry: <service>", then the table.
+export function notificationHtml(service: string, rows: Row[]): string {
+  return [
+    `<h2>New Quote Enquiry: ${service}</h2>`,
+    "<table>",
+    ...rows.map(([label, value]) => `  <tr><td>${label}</td><td>${value}</td></tr>`),
+    "</table>",
+  ].join("\n");
+}
+
+export const mailto = (address: string) => `<a href="mailto:${address}">${address}</a>`;
+
+// A notification as Gmail holds it: from "Leaflet Distribution Bournemouth"
+// <team@...>, to the Hampshire Gmail, Reply-To the enquirer.
+export function notification(
+  id: string,
+  at: Date,
+  o: { subject: string; html: string; replyTo?: string | null; text?: string }
+): gmail_v1.Schema$Message {
+  return msg(id, {
+    from: `"Leaflet Distribution Bournemouth" <${SENDER}>`,
+    subject: o.subject,
+    at,
+    html: o.html,
+    text: o.text,
+    ...(o.replyTo ? { replyTo: o.replyTo } : {}),
+  });
 }
 
 export function thread(id: string, messages: gmail_v1.Schema$Message[]): gmail_v1.Schema$Thread {
@@ -76,44 +101,93 @@ export function fakeReader(threads: gmail_v1.Schema$Thread[]): GmailMessageReade
   };
 }
 
-export const SARAH_TEXT = `New quote request from the Leaflet Distribution Bournemouth website
+// --- The samples --------------------------------------------------------------------
 
-First name: Sarah
-Last name: Mitchell
-Email: sarah@example.com
-Phone: 07700900123
-Company: Mitchell Interiors
-Service: leaflet-distribution
-Budget: 500-1000
-Areas: Bournemouth, Poole, Westbourne
-Quantity: 5000
-Start date: 2026-11-01
-Include printing: Yes
-Include design: No
-Message: Looking to target residential areas only.
-Thank you.
+export const SARAH = {
+  subject: "Leaflet Distribution enquiry from Sarah Mitchell",
+  replyTo: '"Sarah Mitchell" <sarah@example.com>',
+  html: notificationHtml("Leaflet Distribution", [
+    ["Name", "Sarah Mitchell"],
+    ["Email", mailto("sarah@example.com")],
+    ["Phone", "07700900123"],
+    ["Company / Organisation", "Mitchell Interiors"],
+    ["Service", "Leaflet Distribution"],
+    ["Areas", "Bournemouth, Poole, Westbourne"],
+    ["Approximate quantity", "5000"],
+    ["Campaign start date", "2026-11-01"],
+    ["Include printing", "Yes"],
+    ["Include design", "No"],
+    ["Approximate budget", "&pound;500 - &pound;1,000"],
+    ["Additional details", "Looking to target residential areas only.<br>Ideally before half term."],
+  ]),
+};
 
---
-Sent by Brevo`;
+export const JAMES = {
+  subject: "Public Notice Leafleting enquiry from James Hart",
+  replyTo: '"James Hart" <james@example.com>',
+  html: notificationHtml("Public Notice Leafleting", [
+    ["Name", "James Hart"],
+    ["Email", mailto("james@example.com")],
+    ["Phone", "01202 555000"],
+    ["Service", "Public Notice Leafleting"],
+    ["Project / site location", "Lansdowne Road, Bournemouth"],
+    ["Consultation / publicity deadline", "2026-12-15"],
+    ["Approximate scale of distribution", "2000 households"],
+    ["Approximate budget", "&pound;1,000 - &pound;2,000"],
+    ["Additional details", "Planning consultation for proposed development."],
+  ]),
+};
 
-export const JAMES_HTML = `<h2>New quote request</h2>
-<table>
-<tr><td>First name</td><td>James</td></tr>
-<tr><td>Email</td><td>james@example.com</td></tr>
-<tr><td>Phone</td><td>01202 555000</td></tr>
-<tr><td>Service</td><td>public-notice-leafleting</td></tr>
-<tr><td>Budget</td><td>1000-2000</td></tr>
-<tr><td>Project location</td><td>Lansdowne Road, Bournemouth</td></tr>
-<tr><td>Deadline</td><td>2026-12-15</td></tr>
-<tr><td>Scale</td><td>2000 households</td></tr>
-<tr><td>Message</td><td>Planning consultation for proposed development.</td></tr>
-</table>`;
+// Areas "None selected", and the optional rows (Phone, Company) left out.
+export const PRIYA = {
+  subject: "Leaflet Distribution enquiry from Priya Shah",
+  replyTo: '"Priya Shah" <priya.shah@example.net>',
+  html: notificationHtml("Leaflet Distribution", [
+    ["Name", "Priya Shah"],
+    ["Email", mailto("priya.shah@example.net")],
+    ["Service", "Leaflet Distribution"],
+    ["Areas", "None selected"],
+    ["Approximate quantity", "2000"],
+    ["Include printing", "No"],
+    ["Include design", "Yes"],
+  ]),
+};
 
-// Name and email only: every other field is missing.
-export const SPARSE_TEXT = `Name: Priya Shah
-Email: priya.shah@example.net`;
+// The original subject, used briefly on 2026-07-29.
+export const KIM = {
+  subject: "Quote enquiry from Kim Ward",
+  replyTo: '"Kim Ward" <kim.ward@example.org>',
+  html: notificationHtml("Leaflet Distribution", [
+    ["Name", "Kim Ward"],
+    ["Email", mailto("kim.ward@example.org")],
+    ["Phone", "07700 900777"],
+    ["Service", "Leaflet Distribution"],
+    ["Areas", "Christchurch"],
+  ]),
+};
+export const KIM_AT = new Date("2026-07-29T14:05:00.000Z");
 
-// No email or phone anywhere in the body.
-export const NO_CONTACT_TEXT = `Name: Owen Hale
-Service: leaflet-distribution
-Message: Please call me back.`;
+// Name only: no email, no phone and no Reply-To.
+export const OWEN = {
+  subject: "Leaflet Distribution enquiry from Owen Hale",
+  replyTo: null,
+  html: notificationHtml("Leaflet Distribution", [
+    ["Name", "Owen Hale"],
+    ["Service", "Leaflet Distribution"],
+  ]),
+};
+
+// The CRM's own email to a Bournemouth lead, as its BCC to the Bournemouth
+// address arrives here: from the same sender, to the lead, Reply-To the
+// Bournemouth address.
+export function crmCopy(id: string, at: Date, to: string, subject: string): gmail_v1.Schema$Message {
+  return msg(id, {
+    from: `"Leaflet Distribution Bournemouth" <${SENDER}>`,
+    to,
+    replyTo: SENDER,
+    subject,
+    at,
+    text: "Hi, thanks for your enquiry.\n\nKind regards,\nDan\n\n-- \nLeaflet Distribution Bournemouth",
+    html: "<p>Hi, thanks for your enquiry.</p><p>Kind regards,<br>Dan</p>",
+  });
+}

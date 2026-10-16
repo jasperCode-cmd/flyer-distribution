@@ -5,7 +5,7 @@ import { PrismaClient } from "@/generated/prisma/client";
 import { applyBackfill, loadContacts, loadImportedIds, planBackfill, type ApplyDb } from "@/lib/ldb-backfill";
 import { loadDashboard } from "@/lib/dashboard-data";
 import { ukDay } from "@/lib/dashboard";
-import { FDH, fakeReader, LDB, msg, notification, OPTIONS, SUBJECT, thread } from "./ldb-backfill-fixtures";
+import { FDH, fakeReader, mailto, msg, notification, notificationHtml, OPTIONS, thread } from "./ldb-backfill-fixtures";
 
 // The Bournemouth backfill against a real database, but only a throwaway
 // local one: it needs CRM_TEST_DATABASE_URL pointing at localhost and is
@@ -44,24 +44,35 @@ after(async () => {
 
 const now = new Date();
 const daysAgo = (n: number) => new Date(now.getTime() - n * 24 * 60 * 60 * 1000);
-const enquiry = (name: string, local: string, extra = "") => `Name: ${name}\nEmail: ${local}${DOMAIN}\nService: leaflet-distribution${extra}`;
+// A Leaflet Distribution notification in the website's layout.
+const enquiry = (name: string, local: string | null, rows: [string, string][] = []) => ({
+  subject: `Leaflet Distribution enquiry from ${name}`,
+  replyTo: local ? `"${name}" <${local}${DOMAIN}>` : null,
+  html: notificationHtml("Leaflet Distribution", [
+    ["Name", name],
+    ...(local ? ([["Email", mailto(`${local}${DOMAIN}`)]] as [string, string][]) : []),
+    ["Service", "Leaflet Distribution"],
+    ...rows,
+  ]),
+});
 
 function threads() {
   return [
     thread("bt1", [
-      notification("bf-ann", daysAgo(45), enquiry("Ann Reid", "ann", "\nAreas: Poole")),
-      msg("bf-ann-reply", { from: LDB, to: `ann${DOMAIN}`, subject: `Re: ${SUBJECT}`, at: daysAgo(44), labels: ["SENT"], text: "Hi Ann" }),
+      notification("bf-ann", daysAgo(45), enquiry("Ann Reid", "ann", [["Areas", "Poole"]])),
+      // We replied from the Hampshire Gmail.
+      msg("bf-ann-reply", { from: FDH, to: `ann${DOMAIN}`, subject: "Re: Leaflet Distribution enquiry from Ann Reid", at: daysAgo(44), labels: ["SENT"], text: "Hi Ann" }),
     ]),
     thread("bt2", [notification("bf-ben", daysAgo(90), enquiry("Ben Ross", "ben"))]),
-    thread("bt3", [notification("bf-cat", daysAgo(3), enquiry("Cat Moss", "cat"))]),
+    thread("bt3", [notification("bf-cat", daysAgo(3), enquiry("Cat Moss", "cat", [["Areas", "None selected"]]))]),
     thread("bt4", [notification("bf-dup", daysAgo(5), enquiry("Dee Upton", "dup"))]),
-    thread("bt5", [notification("bf-none", daysAgo(6), "Name: No Contact\nService: leaflet-distribution")]),
+    thread("bt5", [notification("bf-none", daysAgo(6), enquiry("No Contact", null))]),
   ];
 }
 
 async function planFromDb() {
   const [imported, contacts] = await Promise.all([loadImportedIds(prisma), loadContacts(prisma)]);
-  return planBackfill({ reader: fakeReader(threads()), imported, contacts, options: OPTIONS, own: [FDH, LDB], excluded: [], now });
+  return planBackfill({ reader: fakeReader(threads()), imported, contacts, options: OPTIONS, ours: [FDH], excluded: [], now });
 }
 
 test("real database: --apply writes dated LDB leads with their notes, and a second --apply creates nothing", { skip }, async () => {
@@ -107,6 +118,7 @@ test("real database: --apply writes dated LDB leads with their notes, and a seco
   assert.equal(ben.lostReason, "OTHER");
   assert.equal(ben.lostReasonNote, "Imported old enquiry, no reply on record");
   assert.equal(leads.find((l) => l.name === "Ann Reid")!.targetAreas, "Poole");
+  assert.equal(leads.find((l) => l.name === "Cat Moss")!.targetAreas, null, '"None selected" means no areas');
   // The Dashboard counts Cat's enquiry on the day it came in, not today.
   assert.equal((await loadDashboard(prisma, period, now, "LDB")).pipeline.newEnquiries - before, 1);
 
