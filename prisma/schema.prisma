@@ -37,7 +37,7 @@ enum LeadSource {
   INSTAGRAM_DM
   REFERRAL
   COLD_OUTREACH
-  // Gathered face-to-face — canvassing, events, trade shows. Distinct from
+  // Gathered face-to-face: canvassing, events, trade shows. Distinct from
   // a scraped cold-outreach list and from a referral.
   MET_IN_PERSON
   OTHER
@@ -90,19 +90,29 @@ enum PaymentStatus {
   PAID_IN_FULL
 }
 
+// Which business a lead belongs to: Flyer Distribution Hampshire, or
+// Leaflet Distribution Bournemouth, whose leads arrive through their own
+// intake and are emailed from their own address. Every lead from before
+// this existed is FDH.
+enum Business {
+  FDH
+  LDB
+}
+
 model Lead {
-  id           String  @id @default(cuid())
+  id           String   @id @default(cuid())
   name         String
   phone        String?
   email        String?
   // Required going forward for leads entered manually in the CRM. Nullable
   // here because leads auto-captured from the public /quote form have no
   // postcode field to source it from (removed from that form deliberately;
-  // see project notes) — enforced as required in the manual Add Lead form
+  // see project notes); enforced as required in the manual Add Lead form
   // instead of at the database level.
   postcode     String?
   businessName String?
   addressArea  String?
+  business     Business @default(FDH)
 
   dealValue        Decimal? @db.Decimal(10, 2)
   leafletQuantity  String?
@@ -150,7 +160,7 @@ model Lead {
 
   // Dialer fields. noAnswerStreak counts consecutive no-answer outcomes and
   // resets to 0 the moment a call is actually answered; nextCallableAt is
-  // when the lead becomes eligible for the dialer's active queue again —
+  // when the lead becomes eligible for the dialer's active queue again;
   // null means never called, immediately eligible. assignedTo (above) is
   // reused as the dialer's callback-locking mechanism: it's set to the
   // calling user only on a Call Back outcome, so a lead someone was asked
@@ -159,7 +169,7 @@ model Lead {
   nextCallableAt DateTime?
 
   // Leads scrapped from the dialer (or elsewhere) never show in the Kanban
-  // board, main Leads list, filters, or search — only in the Scrapped
+  // board, main Leads list, filters, or search, only in the Scrapped
   // Leads bin. scrapNote is only populated when scrapReason is OTHER.
   scrapped    Boolean      @default(false)
   scrapReason ScrapReason?
@@ -182,6 +192,7 @@ model Lead {
   @@index([scrapped])
   @@index([nextCallableAt])
   @@index([wonAt])
+  @@index([business])
 }
 
 enum ActivityType {
@@ -311,7 +322,7 @@ model Job {
   // reference it later without reshaping this field.
   distributorName String?
   // Structured link to a real Distributor. Deliberately kept alongside
-  // distributorName rather than replacing it — existing free-text values
+  // distributorName rather than replacing it; existing free-text values
   // are NOT auto-matched to Distributor rows; that stays a manual step.
   distributorId   String?
   distributor     Distributor? @relation(fields: [distributorId], references: [id], onDelete: SetNull)
@@ -319,7 +330,7 @@ model Job {
   campaignStartDate DateTime?
   completionDate    DateTime?
 
-  // Nullable foundation for a future real map integration — not populated
+  // Nullable foundation for a future real map integration, not populated
   // or read by any external mapping API today.
   latitude  Float?
   longitude Float?
@@ -426,6 +437,14 @@ enum ExpenseKind {
   MONTHLY
 }
 
+// Which business an expense is for: one of the two, or both. Every expense
+// from before this existed is shared.
+enum ExpenseBusiness {
+  FDH
+  LDB
+  SHARED
+}
+
 // A business-wide cost, not tied to any job. A one-off has a date (a UK
 // calendar day). A monthly one runs from startMonth to endMonth (both stored
 // as the 1st of the month); no endMonth means it carries on every month.
@@ -440,6 +459,7 @@ model Expense {
   startMonth  DateTime?       @db.Date
   endMonth    DateTime?       @db.Date
   note        String?
+  business    ExpenseBusiness @default(SHARED)
 
   createdById String?
   createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
