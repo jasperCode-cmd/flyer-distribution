@@ -848,12 +848,10 @@ export async function sendEmail(
   }
 }
 
-// A lead's conversation. An FDH lead's never includes Bournemouth mail; an
-// LDB lead's does, and messages from the LDB address count as sent.
-// A lead's conversation: from or to them, plus their address anywhere, which
-// finds a notification sent as our address with them only as Reply-To (Gmail
-// can't search Reply-To). inLeadConversation then keeps only what they're
-// really part of.
+// The search for a lead's conversation: from or to them, plus their address
+// anywhere, which finds a notification sent as our address with them only as
+// Reply-To (Gmail can't search Reply-To). inLeadConversation then keeps only
+// what they're really part of.
 export function conversationQuery(leadEmail: string): string {
   return `(from:"${leadEmail}" OR to:"${leadEmail}" OR "${leadEmail}")`;
 }
@@ -871,6 +869,10 @@ export function inLeadConversation(message: gmail_v1.Schema$Message, leadEmail: 
   );
 }
 
+// A lead's conversation. An FDH lead's never includes Bournemouth mail; an
+// LDB lead's does. A message from one of our addresses counts as sent, except
+// a send-as notification (a single Reply-To outside our addresses), which is
+// received from its Reply-To person (messageSender).
 export async function getConversation(
   leadEmail: string,
   business: Business = "FDH"
