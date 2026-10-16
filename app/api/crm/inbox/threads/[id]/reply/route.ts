@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { getInboxReplyContext, isGmailConfigured, sendEmail } from "@/lib/gmail";
+import { getInboxReplyContext, isGmailConfigured } from "@/lib/gmail";
 import { findLeadsForAddresses, pickThreadLead } from "@/lib/inbox-leads";
 import { sendInboxReply } from "@/lib/inbox-reply";
+import { replyBusiness, senderFor } from "@/lib/email-channel";
 import { gmailFailureResponse, isValidThreadId } from "@/lib/inbox-api";
 
 export const runtime = "nodejs";
@@ -61,9 +62,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   }
 
   const addresses = { replyTo: context.data.replyTo?.address, from: context.data.counterparty?.address };
-  const leads = await findLeadsForAddresses(prisma, [addresses.replyTo ?? "", addresses.from ?? ""]);
+  // A Bournemouth conversation only ever matches an LDB lead.
+  const ldbThread = context.data.ldbThread;
+  const leads = await findLeadsForAddresses(
+    prisma,
+    [addresses.replyTo ?? "", addresses.from ?? ""],
+    ldbThread ? { only: "LDB" } : { prefer: "FDH" }
+  );
   const match = pickThreadLead(leads, addresses);
   const lead = match && EMAIL_RE.test(match.email) ? match : null;
+  // A reply in a Bournemouth conversation, or to an LDB lead, always goes
+  // through Brevo.
+  const business = replyBusiness(ldbThread, lead);
 
   const outcome = await sendInboxReply({
     threadId: context.data.threadId,
@@ -73,7 +83,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     subject,
     body: text,
     userId: session.user.id,
-    sendEmailFn: sendEmail,
+    sendEmailFn: senderFor(business),
     prismaClient: prisma,
   });
 
@@ -88,5 +98,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     movedToAwaitingResponse: outcome.movedToAwaitingResponse,
     threadId: outcome.threadId,
     signature: outcome.signature ?? "none",
+    business,
   });
 }

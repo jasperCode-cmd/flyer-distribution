@@ -45,7 +45,7 @@ function fakePrisma() {
   return { prisma, writes, touched: () => touched };
 }
 
-const LEAD = { id: "lead1", name: "Hannah Cole", stage: "UNCONTACTED", email: "hannah@example.com", scrapped: false };
+const LEAD = { id: "lead1", name: "Hannah Cole", stage: "UNCONTACTED", email: "hannah@example.com", scrapped: false, business: "FDH" as const, businesses: ["FDH" as const] };
 
 // --- The address ------------------------------------------------------------
 

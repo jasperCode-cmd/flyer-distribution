@@ -14,6 +14,7 @@ import {
   type DashboardPeriod,
 } from "@/lib/dashboard";
 import type { DashboardData } from "@/lib/dashboard-data";
+import type { BusinessFilter } from "@/lib/business";
 
 const BAR_COLOR = "#2a78d6";
 const LOSS_COLOR = "#d03b3b";
@@ -35,10 +36,12 @@ function shortMonth(key: string): string {
 export default function DashboardMoney({
   data,
   period,
+  business = "ALL",
   className = "",
 }: {
   data: Pick<DashboardData, "money" | "change" | "owed" | "coldJobsInMoney" | "chart" | "currentMonth">;
   period: DashboardPeriod;
+  business?: BusinessFilter;
   className?: string;
 }) {
   const [series, setSeries] = useState<ChartSeries>("revenue");
@@ -56,7 +59,10 @@ export default function DashboardMoney({
         <h2 id="dash-money" className="text-sm font-bold text-blue-900">
           Money <span className="font-normal text-gray-500">· {periodLabel(period)}</span>
         </h2>
-        <Link href="/admin/crm/profit" className="text-xs text-blue-700 hover:underline">
+        <Link
+          href={business === "ALL" ? "/admin/crm/profit" : `/admin/crm/profit?business=${business}`}
+          className="text-xs text-blue-700 hover:underline"
+        >
           Profit page
         </Link>
       </div>

@@ -1,4 +1,4 @@
-import { findLeadsForAddresses, normalizeEmail, type InboxLeadMatch, type InboxLeadsPrisma } from "./inbox-leads";
+import { findLeadCandidates, matchLeadsByEmail, normalizeEmail, type InboxLeadMatch, type InboxLeadsPrisma } from "./inbox-leads";
 import type { CrmRecordMatches } from "./inbox-categories";
 
 // Matches inbox addresses to CRM records: leads (the existing rules),
@@ -24,18 +24,21 @@ export type InboxCrmPrisma = InboxLeadsPrisma & {
 };
 
 export type CrmLookups = {
+  // Any lead, FDH preferred; and LDB leads only, for Bournemouth
+  // conversations, which never match an FDH lead.
   leads: Map<string, InboxLeadMatch>;
+  ldbLeads?: Map<string, InboxLeadMatch>;
   distributors: Map<string, { id: string; name: string }>;
   applicants: Map<string, { id: string; fullName: string }>;
 };
 
 export async function lookupCrm(prismaClient: InboxCrmPrisma, addresses: string[]): Promise<CrmLookups> {
   const unique = [...new Set(addresses.map(normalizeEmail).filter(Boolean))];
-  if (unique.length === 0) return { leads: new Map(), distributors: new Map(), applicants: new Map() };
+  if (unique.length === 0) return { leads: new Map(), ldbLeads: new Map(), distributors: new Map(), applicants: new Map() };
   const where = { OR: unique.map((email) => ({ email: { equals: email, mode: "insensitive" as const } })) };
 
-  const [leads, distributorRows, applicationRows] = await Promise.all([
-    findLeadsForAddresses(prismaClient, unique),
+  const [leadRows, distributorRows, applicationRows] = await Promise.all([
+    findLeadCandidates(prismaClient, unique),
     prismaClient.distributor.findMany({ where, select: { id: true, name: true, email: true, active: true } }),
     prismaClient.distributorApplication.findMany({
       where,
@@ -56,16 +59,23 @@ export async function lookupCrm(prismaClient: InboxCrmPrisma, addresses: string[
     const key = normalizeEmail(a.email);
     if (key && !applicants.has(key)) applicants.set(key, { id: a.id, fullName: a.fullName });
   }
-  return { leads, distributors, applicants };
+  return {
+    leads: matchLeadsByEmail(unique, leadRows.leads, { prefer: "FDH" }),
+    ldbLeads: matchLeadsByEmail(unique, leadRows.leads, { only: "LDB" }),
+    distributors,
+    applicants,
+  };
 }
 
 // Reply-To first (a form notification's Reply-To is the person who filled
 // the form in), then From, for each kind of record.
 export function crmMatchesFor(
   lookups: CrmLookups,
-  addresses: { replyTo: string | null | undefined; from: string | null | undefined }
+  addresses: { replyTo: string | null | undefined; from: string | null | undefined },
+  options: { ldbThread?: boolean } = {}
 ): CrmRecordMatches {
   const keys = [normalizeEmail(addresses.replyTo), normalizeEmail(addresses.from)].filter(Boolean);
   const first = <T>(map: Map<string, T>) => keys.map((k) => map.get(k)).find((v) => v !== undefined) ?? null;
-  return { lead: first(lookups.leads), distributor: first(lookups.distributors), applicant: first(lookups.applicants) };
+  const leads = options.ldbThread ? lookups.ldbLeads ?? new Map<string, InboxLeadMatch>() : lookups.leads;
+  return { lead: first(leads), distributor: first(lookups.distributors), applicant: first(lookups.applicants) };
 }

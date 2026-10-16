@@ -24,7 +24,7 @@ export async function GET(req: Request) {
         { businessName: { contains: q, mode: "insensitive" } },
       ],
     },
-    select: { id: true, name: true, businessName: true, stage: true },
+    select: { id: true, name: true, businessName: true, stage: true, business: true },
     take: 8,
     orderBy: { createdAt: "desc" },
   });

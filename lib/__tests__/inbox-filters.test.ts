@@ -51,7 +51,7 @@ const application = (id: string, extra: Partial<Msg> = {}) =>
 const person = (id: string, from: string, extra: Partial<Msg> = {}) => thread(id, [{ from, subject: "Hello", ...extra }]);
 
 const NONE: CrmRecordMatches = { lead: null, distributor: null, applicant: null };
-const LEAD = { id: "l1", name: "Alice", stage: "UNCONTACTED", email: "alice@example.com", scrapped: false };
+const LEAD = { id: "l1", name: "Alice", stage: "UNCONTACTED", email: "alice@example.com", scrapped: false, business: "FDH" as const, businesses: ["FDH" as const] };
 
 function category(id: string): InboxCategory {
   const c = findInboxCategory(id);

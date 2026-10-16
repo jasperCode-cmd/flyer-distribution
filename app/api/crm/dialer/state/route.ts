@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { getNextDialerLead, getCallsMadeToday, getInboundLeadCount } from "@/lib/crm-data";
 import { SOURCE_LABELS } from "@/lib/crm-constants";
+import { parseBusinessFilter } from "@/lib/business";
 
 // Single round-trip for everything the dialer screen needs to render its
 // current lead: the next eligible lead itself, plus the two small bits of
@@ -15,6 +16,7 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const source = url.searchParams.get("source") || "COLD_OUTREACH";
   const tagId = url.searchParams.get("tagId") || undefined;
+  const business = parseBusinessFilter(url.searchParams.get("business"));
   const excludeIds = url.searchParams.get("excludeIds")?.split(",").filter(Boolean) || undefined;
 
   if (!(source in SOURCE_LABELS)) {
@@ -22,7 +24,7 @@ export async function GET(req: Request) {
   }
 
   const [lead, callsToday, inboundCount] = await Promise.all([
-    getNextDialerLead({ source, tagId, userId: session.user.id, excludeIds }),
+    getNextDialerLead({ source, tagId, userId: session.user.id, excludeIds, business }),
     getCallsMadeToday(session.user.id),
     getInboundLeadCount(),
   ]);

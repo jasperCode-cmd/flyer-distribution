@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import AddLeadForm from "@/components/crm/AddLeadForm";
 import { SOURCE_LABELS } from "@/lib/crm-constants";
+import { isBusiness } from "@/lib/business";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,8 @@ export default async function NewLeadPage({
   // Only a real lead source is accepted (the inbox sends OTHER); anything
   // else leaves the form's usual default.
   const source = prefill(query.source);
+  // A Bournemouth conversation in the inbox makes a Bournemouth lead.
+  const business = prefill(query.business);
   return (
     <AddLeadForm
       users={users}
@@ -29,6 +32,7 @@ export default async function NewLeadPage({
         name: prefill(query.name),
         email: prefill(query.email),
         source: source && source in SOURCE_LABELS ? source : undefined,
+        business: isBusiness(business) ? business : undefined,
       }}
     />
   );

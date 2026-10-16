@@ -406,6 +406,7 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: KanbanLead
           onClose={closeEmail}
           leadId={compose.lead.id}
           toAddress={compose.lead.email}
+          business={compose.lead.business ?? "FDH"}
           configured={compose.configured}
           configuredKnown={compose.configuredKnown}
           userFirstName={userFirstName}

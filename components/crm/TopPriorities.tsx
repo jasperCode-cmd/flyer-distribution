@@ -3,22 +3,34 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LevelChip, OverdueTag, subjectHref, subjectName } from "./priority-ui";
+import BusinessBadge from "./BusinessBadge";
 import {
   PRIORITIES_CHANGED_EVENT,
   removeItem,
+  rowsForBusiness,
   urgentHighCount,
   waitingLabel,
   type PriorityItem,
   type PriorityList,
 } from "@/lib/priorities";
+import type { BusinessFilter } from "@/lib/business";
 
 const SHOWN = 5;
 
 // The Dashboard's Top priorities: the first five of the Priorities list,
 // each with Done as its quick action. The database items come with the page
 // and unanswered emails are merged in once Gmail has been checked, so the
-// Dashboard never waits on Gmail.
-export default function TopPriorities({ initial, className = "" }: { initial: PriorityList; className?: string }) {
+// Dashboard never waits on Gmail. Under the Dashboard's business filter it
+// shows that business's rows, plus applications and tasks with no lead.
+export default function TopPriorities({
+  initial,
+  business = "ALL",
+  className = "",
+}: {
+  initial: PriorityList;
+  business?: BusinessFilter;
+  className?: string;
+}) {
   const [list, setList] = useState(initial);
   const [checkingEmail, setCheckingEmail] = useState(true);
   const [busyKey, setBusyKey] = useState<string | null>(null);
@@ -67,8 +79,9 @@ export default function TopPriorities({ initial, className = "" }: { initial: Pr
   }
 
   const now = new Date(list.generatedAt);
-  const top = list.rows.slice(0, SHOWN);
-  const pressing = urgentHighCount(list.rows);
+  const rows = rowsForBusiness(list.rows, business);
+  const top = rows.slice(0, SHOWN);
+  const pressing = urgentHighCount(rows);
 
   return (
     <section aria-labelledby="top-priorities-title" className={`rounded-lg border border-gray-200 bg-white ${className}`}>
@@ -81,8 +94,11 @@ export default function TopPriorities({ initial, className = "" }: { initial: Pr
             <span className="rounded-full bg-red-600 px-2 py-0.5 text-[11px] font-semibold text-white">{pressing} urgent or high</span>
           )}
         </div>
-        <Link href="/admin/crm/priorities" className="text-xs text-blue-700 hover:underline">
-          View all priorities{list.rows.length > 0 ? ` (${list.rows.length})` : ""}
+        <Link
+          href={business === "ALL" ? "/admin/crm/priorities" : `/admin/crm/priorities?business=${business}`}
+          className="text-xs text-blue-700 hover:underline"
+        >
+          View all priorities{rows.length > 0 ? ` (${rows.length})` : ""}
         </Link>
       </div>
       {top.length === 0 ? (
@@ -105,6 +121,7 @@ export default function TopPriorities({ initial, className = "" }: { initial: Pr
                       {row.others.length > 0 && <span className="font-normal text-gray-500"> +{row.others.length} more</span>}
                     </span>
                     <span className={`flex flex-wrap items-center gap-x-1.5 text-xs ${entry.overdue ? "text-red-700" : "text-gray-500"}`}>
+                      {entry.subject.kind === "lead" && <BusinessBadge business={entry.subject.business} />}
                       {name && <span className="truncate text-gray-600">{name},</span>}
                       {entry.overdue && <OverdueTag />}
                       <span>{waitingLabel(entry, now)}</span>

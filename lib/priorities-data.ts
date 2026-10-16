@@ -22,7 +22,7 @@ export const EMAIL_SCAN_THREADS = 50;
 const EMAIL_CACHE_MS = 2 * 60 * 1000;
 const EMAIL_REFRESH_MIN_MS = 10 * 1000;
 
-const LEAD_REF = { id: true, name: true, businessName: true, email: true, phone: true, stage: true } as const;
+const LEAD_REF = { id: true, name: true, businessName: true, email: true, phone: true, stage: true, business: true } as const;
 
 export async function loadDatabaseFacts(now: Date): Promise<Omit<PriorityInputs, "emails">> {
   const today = ukDay(now);
@@ -79,6 +79,7 @@ export async function loadDatabaseFacts(now: Date): Promise<Omit<PriorityInputs,
       email: l.email,
       phone: l.phone,
       stage: l.stage,
+      business: l.business,
       source: l.source,
       paymentStatus: l.paymentStatus,
       reviewStatus: l.reviewStatus,

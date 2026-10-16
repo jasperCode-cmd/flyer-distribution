@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SOURCE_LABELS, PRIORITIES, PRIORITY_LABELS } from "@/lib/crm-constants";
+import { BUSINESSES, BUSINESS_NAMES, type Business } from "@/lib/business";
 
 type Duplicate = { id: string; name: string; email: string | null; phone: string | null };
 
@@ -14,7 +15,7 @@ export default function AddLeadForm({
   users: { id: string; name: string }[];
   // Prefill from the inbox's "Create lead from this sender". Nothing is
   // saved until staff submit, and duplicate detection runs as usual.
-  initial?: { name?: string; email?: string; source?: string };
+  initial?: { name?: string; email?: string; source?: string; business?: Business };
 }) {
   const router = useRouter();
   const [form, setForm] = useState({
@@ -32,6 +33,7 @@ export default function AddLeadForm({
     source: initial?.source ?? "INSTAGRAM_DM",
     priority: "MEDIUM",
     assignedToId: "",
+    business: initial?.business ?? ("FDH" as Business),
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +72,7 @@ export default function AddLeadForm({
     const { lead, duplicates } = await res.json();
 
     if (duplicates && duplicates.length > 0) {
-      // Don't block creation — the lead is already saved — but pause here
+      // Don't block creation (the lead is already saved), but pause here
       // so staff can see the possible match before moving on.
       setResult({ leadId: lead.id, duplicates });
       return;
@@ -111,7 +113,7 @@ export default function AddLeadForm({
               {result.duplicates.map((d) => (
                 <li key={d.id}>
                   <Link href={`/admin/crm/leads/${d.id}`} className="text-sm text-blue-700 hover:underline">
-                    {d.name} {d.email ? `— ${d.email}` : d.phone ? `— ${d.phone}` : ""}
+                    {d.name} {d.email ? `- ${d.email}` : d.phone ? `- ${d.phone}` : ""}
                   </Link>
                 </li>
               ))}
@@ -143,6 +145,21 @@ export default function AddLeadForm({
           {input("leafletQuantity", "Leaflet Quantity")}
           {input("dealValue", "Deal Value (£)", { type: "number" })}
 
+          <div>
+            <label htmlFor="add-lead-business" className="block text-xs font-medium text-gray-500 mb-1">
+              Our business
+            </label>
+            <select
+              id="add-lead-business"
+              value={form.business}
+              onChange={(e) => set("business", e.target.value as Business)}
+              className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm bg-white"
+            >
+              {BUSINESSES.map((b) => (
+                <option key={b} value={b}>{BUSINESS_NAMES[b]}</option>
+              ))}
+            </select>
+          </div>
           <div>
             <label className="block text-xs font-medium text-gray-500 mb-1">Source</label>
             <select

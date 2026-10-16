@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { STAGE_LABELS } from "@/lib/crm-constants";
+import type { Business } from "@/lib/business";
+import BusinessBadge from "./BusinessBadge";
 
-type Result = { id: string; name: string; businessName: string | null; stage: string };
+type Result = { id: string; name: string; businessName: string | null; stage: string; business?: Business };
 
 // In the top bar the search is "collapsible": below 1366px, where the
 // navigation needs the room, it is a search button that opens the same box
@@ -98,7 +100,10 @@ export default function SearchBar({ collapsible = false }: { collapsible?: boole
               onClick={() => goTo(r.id)}
               className="block w-full text-left px-3 py-2 hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
             >
-              <p className="text-sm font-medium text-blue-900 truncate">{r.name}</p>
+              <p className="flex items-center gap-1.5 text-sm font-medium text-blue-900">
+                <span className="truncate">{r.name}</span>
+                <BusinessBadge business={r.business} />
+              </p>
               <p className="text-xs text-gray-400 truncate">
                 {r.businessName ? `${r.businessName} · ` : ""}
                 {STAGE_LABELS[r.stage] ?? r.stage}

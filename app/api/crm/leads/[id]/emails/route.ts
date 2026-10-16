@@ -17,7 +17,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json({ configured: false, messages: [] });
   }
 
-  const lead = await prisma.lead.findUnique({ where: { id }, select: { email: true } });
+  const lead = await prisma.lead.findUnique({ where: { id }, select: { email: true, business: true } });
   if (!lead) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -25,7 +25,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json({ configured: true, messages: [] });
   }
 
-  const result = await getConversation(lead.email);
+  // An FDH lead's conversation never shows Bournemouth mail; an LDB lead's
+  // does, with the LDB address's messages as ours.
+  const result = await getConversation(lead.email, lead.business);
   if (!result.ok) {
     const status = result.reason === "reconnect" ? 409 : 502;
     return NextResponse.json({ error: result.message, reason: result.reason, configured: true }, { status });

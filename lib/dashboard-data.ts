@@ -3,6 +3,7 @@ import { decimalToPence } from "./money";
 import { monthKeyLondon, type ProfitJob } from "./profit";
 import type { ExpenseRecord } from "./expenses";
 import { EXPENSE_ORDER, PROFIT_LEAD_ORDER, PROFIT_LEAD_SELECT, PROFIT_LEAD_WHERE, toExpenseRecord, toProfitJob } from "./profit-data";
+import { filterExpensesByBusiness, leadBusinessWhere, type BusinessFilter } from "./business";
 import {
   addDays,
   chartData,
@@ -24,12 +25,16 @@ import {
 } from "./dashboard";
 
 // Everything the Dashboard shows except Priorities (which has its own
-// loader), worked out on the server for the period in the address. Takes
-// the client as a parameter so a local-database test can run it too.
+// loader), worked out on the server for the period and business in the
+// address. Under a business filter every figure, chart and list is that
+// business's alone, except that shared expenses count under both, and a
+// calendar event with no lead shows under every filter. Takes the client as a
+// parameter so a local-database test can run it too.
 
 type DashboardDb = Pick<PrismaClient, "lead" | "expense" | "activity" | "job" | "calendarEvent">;
 
-export async function loadDashboard(db: DashboardDb, period: DashboardPeriod, now: Date) {
+export async function loadDashboard(db: DashboardDb, period: DashboardPeriod, now: Date, business: BusinessFilter = "ALL") {
+  const byBusiness = leadBusinessWhere(business);
   const today = ukDay(now);
   const currentMonth = monthKeyLondon(now);
   // Generous windows; the shared functions check the UK days.
@@ -39,20 +44,20 @@ export async function loadDashboard(db: DashboardDb, period: DashboardPeriod, no
   const callsSince = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
   const [jobRows, expenseRows, leadRows, calls, campaignRows, eventRows] = await Promise.all([
-    db.lead.findMany({ where: PROFIT_LEAD_WHERE, select: PROFIT_LEAD_SELECT, orderBy: PROFIT_LEAD_ORDER }),
+    db.lead.findMany({ where: { ...PROFIT_LEAD_WHERE, ...byBusiness }, select: PROFIT_LEAD_SELECT, orderBy: PROFIT_LEAD_ORDER }),
     db.expense.findMany({ orderBy: EXPENSE_ORDER }),
     db.lead.findMany({
-      where: { scrapped: false },
+      where: { scrapped: false, ...byBusiness },
       select: { id: true, source: true, stage: true, createdAt: true, wonAt: true, dealValue: true },
     }),
     db.activity.findMany({
-      where: { type: "CALL", createdAt: { gte: callsSince }, lead: { source: COLD_OUTREACH, scrapped: false } },
+      where: { type: "CALL", createdAt: { gte: callsSince }, lead: { source: COLD_OUTREACH, scrapped: false, ...byBusiness } },
       select: { leadId: true, createdAt: true },
     }),
     db.job.findMany({
       where: {
         campaignStartDate: { gte: windowStart, lte: campaignsEnd },
-        lead: { scrapped: false, stage: { in: ["WON", "COMPLETED"] } },
+        lead: { scrapped: false, stage: { in: ["WON", "COMPLETED"] }, ...byBusiness },
       },
       select: {
         campaignStartDate: true,
@@ -72,14 +77,18 @@ export async function loadDashboard(db: DashboardDb, period: DashboardPeriod, no
       },
     }),
     db.calendarEvent.findMany({
-      where: { completed: false, startDateTime: { gte: windowStart, lte: eventsEnd } },
+      where: {
+        completed: false,
+        startDateTime: { gte: windowStart, lte: eventsEnd },
+        ...(business === "ALL" ? {} : { OR: [{ linkedLeadId: null }, { linkedLead: byBusiness }] }),
+      },
       orderBy: { startDateTime: "asc" },
       select: { id: true, title: true, type: true, startDateTime: true, endDateTime: true, linkedLeadId: true },
     }),
   ]);
 
   const jobs: ProfitJob[] = jobRows.map(toProfitJob);
-  const expenses: ExpenseRecord[] = expenseRows.map(toExpenseRecord);
+  const expenses: ExpenseRecord[] = filterExpensesByBusiness(expenseRows.map(toExpenseRecord), business);
   const leads: DashboardLead[] = leadRows.map((l) => ({
     id: l.id,
     source: l.source,

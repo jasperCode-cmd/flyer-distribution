@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { getExcludedAddresses, isGmailConfigured, sendEmail } from "@/lib/gmail";
+import { getExcludedAddresses, isGmailConfigured } from "@/lib/gmail";
+import { getLdbSenderAddress } from "@/lib/ldb-address";
+import { newEmailBusiness, senderFor } from "@/lib/email-channel";
 import { findLeadsForAddresses, normalizeEmail } from "@/lib/inbox-leads";
 import { checkNewEmailAddress, sendNewEmail } from "@/lib/new-email";
 import { gmailFailureResponse } from "@/lib/inbox-api";
@@ -13,8 +15,14 @@ const MAX_SUBJECT = 200;
 const MAX_BODY = 20000;
 
 async function leadFor(address: string) {
-  const matches = await findLeadsForAddresses(prisma, [address]);
+  const matches = await findLeadsForAddresses(prisma, [address], { prefer: "FDH" });
   return matches.get(normalizeEmail(address)) ?? null;
+}
+
+// Never to an excluded address, or to our own Bournemouth address.
+function refusedAddresses(): string[] {
+  const ldb = getLdbSenderAddress();
+  return [...getExcludedAddresses(), ...(ldb ? [ldb] : [])];
 }
 
 // While the address is typed: is it usable, and whose is it? Shown in the
@@ -25,13 +33,23 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const checked = checkNewEmailAddress(new URL(req.url).searchParams.get("to"), getExcludedAddresses());
+  const checked = checkNewEmailAddress(new URL(req.url).searchParams.get("to"), refusedAddresses());
   if (!checked.ok) return NextResponse.json({ status: checked.reason, error: checked.error });
   const lead = await leadFor(checked.address);
+  const route = newEmailBusiness(lead);
+  if (!route.ok) return NextResponse.json({ status: "both_businesses", error: route.error });
   return NextResponse.json({
     status: "ok",
+    business: route.business,
     lead: lead
-      ? { id: lead.id, name: lead.name, stage: lead.stage, stageLabel: STAGE_LABELS[lead.stage] ?? lead.stage, scrapped: lead.scrapped }
+      ? {
+          id: lead.id,
+          name: lead.name,
+          stage: lead.stage,
+          stageLabel: STAGE_LABELS[lead.stage] ?? lead.stage,
+          scrapped: lead.scrapped,
+          business: lead.business,
+        }
       : null,
   });
 }
@@ -51,7 +69,7 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
-  const checked = checkNewEmailAddress(body?.to, getExcludedAddresses());
+  const checked = checkNewEmailAddress(body?.to, refusedAddresses());
   if (!checked.ok) {
     return NextResponse.json({ error: checked.error, reason: checked.reason }, { status: 400 });
   }
@@ -74,13 +92,19 @@ export async function POST(req: Request) {
   }
 
   const lead = await leadFor(checked.address);
+  // An LDB lead's address sends through Brevo; an address on leads of both
+  // businesses is refused.
+  const route = newEmailBusiness(lead);
+  if (!route.ok) {
+    return NextResponse.json({ error: route.error, reason: "both_businesses" }, { status: 409 });
+  }
   const outcome = await sendNewEmail({
     to: checked.address,
     lead,
     subject,
     body: text,
     userId: session.user.id,
-    sendEmailFn: sendEmail,
+    sendEmailFn: senderFor(route.business),
     prismaClient: prisma,
   });
 
@@ -94,5 +118,6 @@ export async function POST(req: Request) {
     lead: outcome.recordedOnLead && lead ? { id: lead.id, name: lead.name } : null,
     movedToAwaitingResponse: outcome.movedToAwaitingResponse,
     signature: outcome.signature ?? "none",
+    business: route.business,
   });
 }

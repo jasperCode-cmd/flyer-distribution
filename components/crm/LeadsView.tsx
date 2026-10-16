@@ -6,8 +6,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import KanbanBoard from "./KanbanBoard";
 import LeadTable from "./LeadTable";
 import LeadFilterBar from "./LeadFilterBar";
+import BusinessFilter from "./BusinessFilter";
 import type { KanbanLead } from "./LeadCard";
 import { applyLeadFilters, type LeadFilters } from "@/lib/crm-constants";
+import { parseBusinessFilter } from "@/lib/business";
 
 export default function LeadsView({
   leads,
@@ -28,7 +30,11 @@ export default function LeadsView({
   }, [deletedName, router]);
 
   const [view, setView] = useState<"kanban" | "table">("kanban");
-  const [filters, setFilters] = useState<LeadFilters>({});
+  // ?business=LDB opens the board on one business, e.g. from a link.
+  const [filters, setFilters] = useState<LeadFilters>(() => {
+    const business = parseBusinessFilter(searchParams.get("business"));
+    return business === "ALL" ? {} : { business };
+  });
 
   const filteredLeads = useMemo(
     () => applyLeadFilters(leads, view === "kanban" ? { ...filters, stage: undefined } : filters),
@@ -42,6 +48,7 @@ export default function LeadsView({
   if (filters.priority) exportParams.set("priority", filters.priority);
   if (filters.tagId) exportParams.set("tagId", filters.tagId);
   if (filters.atRiskOnly) exportParams.set("atRiskOnly", "true");
+  if (filters.business) exportParams.set("business", filters.business);
 
   return (
     <div>
@@ -89,6 +96,12 @@ export default function LeadsView({
           </Link>
         </div>
       </div>
+
+      <BusinessFilter
+        value={filters.business ?? "ALL"}
+        onChange={(business) => setFilters({ ...filters, business: business === "ALL" ? undefined : business })}
+        className="mb-2"
+      />
 
       <LeadFilterBar
         filters={filters}

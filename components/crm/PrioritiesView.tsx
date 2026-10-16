@@ -6,6 +6,7 @@ import EmailComposeModal, { sentLabel, type ReplyContext } from "./EmailComposeM
 import type { ConversationMessage } from "./EmailsSection";
 import LostReasonModal from "./LostReasonModal";
 import PriorityRowCard, { type RowHandlers } from "./PriorityRowCard";
+import BusinessFilter from "./BusinessFilter";
 import { trapTab } from "./profit-ui";
 import {
   awaitingItem,
@@ -20,6 +21,7 @@ import {
   PRIORITY_LEVELS,
   REASON_TYPES,
   removeItem,
+  rowsForBusiness,
   SNOOZE_DAYS,
   STILL_IN_TALKS_DAYS,
   ukDay,
@@ -32,9 +34,10 @@ import {
   type PriorityRow,
   type ReasonType,
 } from "@/lib/priorities";
+import type { Business, BusinessFilter as BusinessView } from "@/lib/business";
 
 type Toast = { text: string; kind: "success" | "error" };
-type EmailLead = { id: string; name: string; email: string };
+type EmailLead = { id: string; name: string; email: string; business: Business };
 type Compose = { lead: EmailLead; latestReply: ReplyContext | null; configured: boolean; configuredKnown: boolean };
 type BulkResult = { id: string; status: "done" | "skipped" | "failed"; message?: string };
 type Problem = { title: string; lines: string[] };
@@ -56,13 +59,20 @@ function chipClass(active: boolean): string {
 // The Priorities list, grouped by level and then by reason, with a checkbox
 // on every row for the bulk bar. The database items come with the page;
 // unanswered emails are fetched straight after (Gmail is slower) and merged in.
-export default function PrioritiesView({ initial }: { initial: PriorityList }) {
+export default function PrioritiesView({
+  initial,
+  initialBusiness = "ALL",
+}: {
+  initial: PriorityList;
+  initialBusiness?: BusinessView;
+}) {
   const { data: session } = useSession();
   const userFirstName = (session?.user?.name ?? "").split(" ")[0] || "the team";
   const [list, setList] = useState(initial);
   const [emailLoading, setEmailLoading] = useState(true);
   const [level, setLevel] = useState<PriorityLevel | "ALL">("ALL");
   const [type, setType] = useState<ReasonType | "ALL">("ALL");
+  const [business, setBusiness] = useState<BusinessView>(initialBusiness);
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [busyKey, setBusyKey] = useState<string | null>(null);
@@ -105,15 +115,27 @@ export default function PrioritiesView({ initial }: { initial: PriorityList }) {
   }
 
   const now = new Date(list.generatedAt);
-  const visible = useMemo(() => filterRows(list.rows, level, type), [list.rows, level, type]);
+  // The business filter comes first: every count on the page is of the
+  // chosen business's rows (plus applications and tasks with no lead).
+  const businessRows = useMemo(() => rowsForBusiness(list.rows, business), [list.rows, business]);
+  const visible = useMemo(() => filterRows(businessRows, level, type), [businessRows, level, type]);
   const sections = useMemo(() => groupRows(visible, expanded), [visible, expanded]);
   // Only rows still on screen count as selected, so a filter never hides
   // something the bulk bar would act on.
   const selectedRows = visible.filter((r) => selected.has(r.id));
-  const pressing = urgentHighCount(list.rows);
+  const pressing = urgentHighCount(businessRows);
   const filtered = level !== "ALL" || type !== "ALL";
-  const levelCount = (l: PriorityLevel | "ALL") => filterRows(list.rows, l, type).length;
-  const typeCount = (t: ReasonType | "ALL") => filterRows(list.rows, level, t).length;
+  const levelCount = (l: PriorityLevel | "ALL") => filterRows(businessRows, l, type).length;
+  const typeCount = (t: ReasonType | "ALL") => filterRows(businessRows, level, t).length;
+
+  function changeBusiness(next: BusinessView) {
+    setBusiness(next);
+    // In the address, so Refresh keeps it.
+    const url = new URL(window.location.href);
+    if (next === "ALL") url.searchParams.delete("business");
+    else url.searchParams.set("business", next);
+    window.history.replaceState(null, "", `${url.pathname}${url.search}`);
+  }
 
   // --- One row --------------------------------------------------------------
 
@@ -212,7 +234,9 @@ export default function PrioritiesView({ initial }: { initial: PriorityList }) {
 
   function emailLeadOf(row: PriorityRow): EmailLead | null {
     const s = row.primary.subject;
-    return s.kind === "lead" && s.email?.trim() ? { id: s.id, name: s.name, email: s.email.trim() } : null;
+    return s.kind === "lead" && s.email?.trim()
+      ? { id: s.id, name: s.name, email: s.email.trim(), business: s.business ?? "FDH" }
+      : null;
   }
 
   const handlers: RowHandlers = {
@@ -359,7 +383,7 @@ export default function PrioritiesView({ initial }: { initial: PriorityList }) {
         <div>
           <h1 className="text-xl font-bold text-blue-900">Priorities</h1>
           <p className="text-sm text-gray-600">
-            {list.rows.length === 0 ? "Nothing needs doing right now." : `${list.rows.length} to do, ${pressing} urgent or high.`}
+            {businessRows.length === 0 ? "Nothing needs doing right now." : `${businessRows.length} to do, ${pressing} urgent or high.`}
           </p>
         </div>
         <button
@@ -370,6 +394,8 @@ export default function PrioritiesView({ initial }: { initial: PriorityList }) {
           Add task
         </button>
       </div>
+
+      <BusinessFilter value={business} onChange={changeBusiness} />
 
       <div className="space-y-2 rounded-lg border border-gray-200 bg-white p-3">
         <div role="group" aria-label="Level" className="flex flex-wrap items-center gap-1.5">
@@ -425,7 +451,7 @@ export default function PrioritiesView({ initial }: { initial: PriorityList }) {
       )}
 
       <h2 ref={listHeadingRef} tabIndex={-1} className="sr-only">
-        {filtered ? `${visible.length} of ${list.rows.length} shown` : "The list"}
+        {filtered ? `${visible.length} of ${businessRows.length} shown` : "The list"}
       </h2>
 
       {sections.length === 0 ? (
@@ -578,6 +604,7 @@ export default function PrioritiesView({ initial }: { initial: PriorityList }) {
           onClose={closeEmail}
           leadId={compose.lead.id}
           toAddress={compose.lead.email}
+          business={compose.lead.business}
           configured={compose.configured}
           configuredKnown={compose.configuredKnown}
           userFirstName={userFirstName}

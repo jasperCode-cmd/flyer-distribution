@@ -3,6 +3,8 @@
 // on the amount paid; the deal value only gives the secondary "expected
 // profit". No VAT anywhere: the business is not VAT registered.
 
+import type { Business } from "./business";
+
 export const COST_CATEGORIES = ["DISTRIBUTOR", "FUEL", "PRINTING", "DESIGN", "ADDITIONAL"] as const;
 export type CostCategory = (typeof COST_CATEGORIES)[number];
 export type PayType = "FLAT" | "PER_THOUSAND";
@@ -27,6 +29,8 @@ export type ProfitJob = {
   leadId: string;
   name: string;
   businessName: string | null;
+  // Missing means FDH, as every lead from before businesses existed is.
+  business?: Business;
   stage: string;
   wonAt: string | null;
   dealPence: number | null;

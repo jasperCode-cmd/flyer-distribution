@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { applyLeadFilters, STAGE_LABELS, SOURCE_LABELS, PRIORITY_LABELS } from "@/lib/crm-constants";
+import { parseBusinessFilter } from "@/lib/business";
 
 // Column headers mirror the field aliases recognized by /api/crm/import,
 // so an exported file can be re-imported without remapping columns.
@@ -36,6 +37,7 @@ export async function GET(req: Request) {
 
   const url = new URL(req.url);
   const params = url.searchParams;
+  const business = parseBusinessFilter(params.get("business"));
 
   const leads = await prisma.lead.findMany({
     where: { scrapped: false },
@@ -52,6 +54,7 @@ export async function GET(req: Request) {
       priority: params.get("priority") || undefined,
       tagId: params.get("tagId") || undefined,
       atRiskOnly: params.get("atRiskOnly") === "true",
+      business: business === "ALL" ? undefined : business,
     }
   );
 

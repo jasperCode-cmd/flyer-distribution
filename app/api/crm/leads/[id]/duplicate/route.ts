@@ -3,8 +3,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
 // Creates a fresh Lead pre-filled with only the original's contact/identity
-// details — everything pipeline-related (stage, priority, deal value,
-// payment/review status, assignment) is left at its schema default rather
+// details and business; everything pipeline-related (stage, priority, deal
+// value, payment/review status, assignment) is left at its schema default rather
 // than copied, since this is meant for a second, separate engagement with
 // an existing client, not a clone of where the original left off. History
 // (activities, tasks, the linked Job) is deliberately not carried over for
@@ -37,6 +37,7 @@ export async function POST(
       postcode: original.postcode,
       businessName: original.businessName,
       addressArea: original.addressArea,
+      business: original.business,
       tags: {
         create: original.tags.map((t) => ({ tagId: t.tagId })),
       },

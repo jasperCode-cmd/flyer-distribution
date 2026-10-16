@@ -4,9 +4,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import EmailComposeModal, { sentLabel, type ReplyContext } from "./EmailComposeModal";
+import BusinessBadge from "./BusinessBadge";
+import BusinessFilter from "./BusinessFilter";
 import type { ConversationMessage } from "./EmailsSection";
 import { STAGE_LABELS } from "@/lib/crm-constants";
 import { appendUniqueThreads, inboxFilterUrl } from "@/lib/inbox-list";
+import type { Business, BusinessFilter as BusinessView } from "@/lib/business";
 
 const SEARCH_MAX = 200;
 
@@ -28,6 +31,8 @@ type ThreadRow = {
   lead: InboxLead | null;
   distributor?: InboxDistributor | null;
   applicant?: InboxApplicant | null;
+  // Bournemouth mail (through the LDB address, or with an LDB lead) is LDB.
+  business?: Business;
 };
 
 type LoadStatus = "loading" | "ready" | "not_configured" | "reconnect" | "error" | "not_found";
@@ -72,6 +77,9 @@ type OpenThread = {
   applicant?: InboxApplicant | null;
   // Who a reply goes to, as worked out by the server from the thread.
   recipient?: string;
+  // Which business a reply goes from: LDB replies only ever go through the
+  // Bournemouth sender.
+  business?: Business;
 };
 
 // Maps an API failure to a state. Error text shown to staff is always one of
@@ -200,10 +208,12 @@ export default function InboxView({
   categories,
   initialCategory,
   initialUnread,
+  initialBusiness = "ALL",
 }: {
   categories: CategoryOption[];
   initialCategory: string;
   initialUnread: boolean;
+  initialBusiness?: BusinessView;
 }) {
   const { data: session } = useSession();
   const userFirstName = (session?.user?.name ?? "").split(" ")[0] || "the team";
@@ -217,6 +227,7 @@ export default function InboxView({
   const [reloadKey, setReloadKey] = useState(0);
   const [category, setCategory] = useState(initialCategory);
   const [unreadOnly, setUnreadOnly] = useState(initialUnread);
+  const [business, setBusiness] = useState<BusinessView>(initialBusiness);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [open, setOpen] = useState<OpenThread | null>(null);
@@ -232,9 +243,10 @@ export default function InboxView({
       if (category !== "all") params.set("category", category);
       if (unreadOnly) params.set("unread", "1");
       if (activeQuery) params.set("q", activeQuery);
+      if (business !== "ALL") params.set("business", business);
       return params.toString();
     },
-    [category, unreadOnly, activeQuery]
+    [category, unreadOnly, activeQuery, business]
   );
 
   useEffect(() => {
@@ -296,19 +308,27 @@ export default function InboxView({
 
   // A new filter starts from the newest emails, and goes in the address so
   // Refresh and the back button keep it.
-  function changeFilter(next: { category?: string; unread?: boolean }) {
+  function changeFilter(next: { category?: string; unread?: boolean; business?: BusinessView }) {
     const nextCategory = next.category ?? category;
     const nextUnread = next.unread ?? unreadOnly;
+    const nextBusiness = next.business ?? business;
     setCategory(nextCategory);
     setUnreadOnly(nextUnread);
+    if (nextBusiness !== business) {
+      // The open conversation may not belong under the other business.
+      setBusiness(nextBusiness);
+      setSelectedId(null);
+      setOpen(null);
+    }
     setPageTokens([null]);
-    window.history.replaceState(null, "", inboxFilterUrl(nextCategory, nextUnread));
+    window.history.replaceState(null, "", inboxFilterUrl(nextCategory, nextUnread, nextBusiness));
   }
 
   const loadThread = useCallback(async (id: string) => {
     setOpen({ status: "loading" });
     try {
-      const res = await fetch(`/api/crm/inbox/threads/${id}`);
+      const query = business === "ALL" ? "" : `?business=${business}`;
+      const res = await fetch(`/api/crm/inbox/threads/${id}${query}`);
       const data = await res.json();
       if (!res.ok || data.configured === false) {
         setOpen({ status: failureStatus(res, data), message: res.status === 404 ? data.error : undefined });
@@ -321,11 +341,12 @@ export default function InboxView({
         distributor: data.distributor,
         applicant: data.applicant,
         recipient: data.recipient,
+        business: data.business === "LDB" ? "LDB" : "FDH",
       });
     } catch {
       setOpen({ status: "error" });
     }
-  }, []);
+  }, [business]);
 
   useEffect(() => {
     if (!toast) return;
@@ -377,7 +398,7 @@ export default function InboxView({
 
   // Gmail unusable: no search, list or reading pane, just what to do about it.
   const connectionProblem = list.status === "not_configured" || list.status === "reconnect";
-  const filtered = !!activeQuery || category !== "all" || unreadOnly;
+  const filtered = !!activeQuery || category !== "all" || unreadOnly || business !== "ALL";
 
   const loadMoreButton = (
     <button
@@ -434,6 +455,11 @@ export default function InboxView({
         <div className="lg:grid lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] lg:gap-4 lg:items-start">
           {/* List */}
           <section aria-label="Conversations" className={selectedId ? "hidden lg:block" : "block"}>
+            <BusinessFilter
+              value={business}
+              onChange={(next) => next !== business && changeFilter({ business: next })}
+              className="mb-2"
+            />
             {/* One row; on a phone it scrolls sideways rather than wrapping. */}
             <div
               role="group"
@@ -548,8 +574,9 @@ export default function InboxView({
                           {t.hasAttachment && <PaperclipIcon />}
                         </div>
                         <p className="truncate text-xs text-gray-500 mt-0.5">{t.snippet}</p>
-                        {(t.lead || t.distributor || t.applicant) && (
-                          <div className="mt-1.5 flex flex-wrap gap-1">
+                        {(t.lead || t.distributor || t.applicant || t.business === "LDB") && (
+                          <div className="mt-1.5 flex flex-wrap items-center gap-1">
+                            <BusinessBadge business={t.business} />
                             {t.lead && <LeadBadge lead={t.lead} />}
                             <PeopleBadge distributor={t.distributor} applicant={t.applicant} />
                           </div>
@@ -645,6 +672,7 @@ export default function InboxView({
                       </p>
                     )}
                     <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                      <BusinessBadge business={open.business} />
                       {open.lead ? (
                         <LeadBadge lead={open.lead} />
                       ) : leadCandidate?.address && !open.distributor && !open.applicant ? (
@@ -653,6 +681,7 @@ export default function InboxView({
                             name: leadCandidate.name !== leadCandidate.address ? leadCandidate.name : "",
                             email: leadCandidate.address,
                             source: "OTHER",
+                            ...(open.business === "LDB" ? { business: "LDB" } : {}),
                           }).toString()}`}
                           className="inline-flex items-center rounded-md border border-gray-300 px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50"
                         >
@@ -710,6 +739,7 @@ export default function InboxView({
           sendUrl={`/api/crm/inbox/threads/${thread.id}/reply`}
           toAddress={open.recipient}
           showReplyingTo
+          business={open.business ?? "FDH"}
           configured
           configuredKnown
           userFirstName={userFirstName}

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatPence, formatPercent } from "@/lib/money";
 import { STAGE_LABELS, STAGES } from "@/lib/crm-constants";
 import { CALENDAR_EVENT_TYPE_LABELS } from "@/lib/calendar-constants";
+import type { BusinessFilter } from "@/lib/business";
 import {
   CAMPAIGN_DAYS,
   EVENT_DAYS,
@@ -37,10 +38,12 @@ function Figure({ label, value, note }: { label: string; value: string; note: st
 export function SalesPipeline({
   pipeline,
   period,
+  business = "ALL",
   className = "",
 }: {
   pipeline: PipelineFigures;
   period: DashboardPeriod;
+  business?: BusinessFilter;
   className?: string;
 }) {
   const created = STAGES.reduce((sum, s) => sum + (pipeline.stageCounts[s] ?? 0), 0);
@@ -50,7 +53,10 @@ export function SalesPipeline({
         <h2 id="dash-pipeline" className="text-sm font-bold text-blue-900">
           Sales pipeline <span className="font-normal text-gray-500">· {periodLabel(period)}, cold outreach left out</span>
         </h2>
-        <Link href="/admin/crm/leads" className="text-xs text-blue-700 hover:underline">
+        <Link
+          href={business === "ALL" ? "/admin/crm/leads" : `/admin/crm/leads?business=${business}`}
+          className="text-xs text-blue-700 hover:underline"
+        >
           Leads
         </Link>
       </div>

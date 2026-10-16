@@ -395,6 +395,7 @@ test("every note the CRM writes for itself is worded so the follow-up rule ignor
     "app/api/crm/leads/[id]/duplicate/route.ts": "Duplicated from ",
     "app/api/crm/import/route.ts": "Imported note: ",
     "app/api/quote-lead/route.ts": "Service type: ",
+    "lib/ldb-intake.ts": "Service type: ",
     "app/api/crm/profit/jobs/[leadId]/route.ts": "on the Profit page",
     "app/api/crm/profit/jobs/[leadId]/retainer/route.ts": "on the Profit page",
     // Writes planPriorityAction's Still in talks note, checked above; used
@@ -409,6 +410,8 @@ test("every note the CRM writes for itself is worded so the follow-up rule ignor
   assert.match(readFileSync(typedByPerson[0], "utf8"), /body\.notes/);
   // The website form's note is written with no user, which on its own marks it.
   assert.doesNotMatch(readFileSync("app/api/quote-lead/route.ts", "utf8"), /userId/);
+  // So is the Bournemouth website's.
+  assert.doesNotMatch(readFileSync("lib/ldb-intake.ts", "utf8"), /userId/);
   // The only other notes come through the lead page, typed by a person.
   assert.match(readFileSync("components/crm/LeadDetail.tsx", "utf8"), /logActivity\("NOTE", newNote\.trim\(\)\)/);
 

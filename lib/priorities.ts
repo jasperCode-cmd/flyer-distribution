@@ -1,3 +1,4 @@
+import { itemInFilter, type Business, type BusinessFilter } from "./business";
 import { isPersonLoggedContact } from "./activity-origin";
 import { STAGE_LABELS } from "./crm-constants";
 
@@ -71,6 +72,8 @@ export type LeadRef = {
   email: string | null;
   phone: string | null;
   stage: string;
+  // Missing means FDH, as every lead from before businesses existed is.
+  business?: Business;
 };
 
 // userId is null for an activity no one was signed in for (the website form).
@@ -231,6 +234,7 @@ function leadSubject(lead: LeadRef): PrioritySubject {
     email: lead.email,
     phone: lead.phone,
     stage: lead.stage,
+    business: lead.business ?? "FDH",
   };
 }
 
@@ -482,6 +486,18 @@ export function removeItem(rows: PriorityRow[], key: string): PriorityRow[] {
 // same as the section and group it is listed under.
 export function filterRows(rows: PriorityRow[], level: PriorityLevel | "ALL", type: ReasonType | "ALL"): PriorityRow[] {
   return rows.filter((r) => (level === "ALL" || r.level === level) && (type === "ALL" || r.primary.type === type));
+}
+
+// --- The business filter ----------------------------------------------------------
+
+// A lead's rows show under its own business; an application, or a task with
+// no lead, shows under every filter.
+export function rowsForBusiness(rows: PriorityRow[], filter: BusinessFilter): PriorityRow[] {
+  if (filter === "ALL") return rows;
+  return rows.filter((row) => {
+    const subject = row.primary.subject;
+    return itemInFilter(subject.kind === "lead" ? subject : null, filter);
+  });
 }
 
 // --- Sections and groups on the page -------------------------------------------

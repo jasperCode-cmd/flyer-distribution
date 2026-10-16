@@ -15,10 +15,12 @@ import {
   type ExpenseRecord,
 } from "@/lib/expenses";
 import { trapTab } from "./profit-ui";
+import { EXPENSE_BUSINESSES, EXPENSE_BUSINESS_LABELS } from "@/lib/business";
 
 // Business expenses: not tied to any job. One-off on a date, or every month
 // from a start month. Ending a monthly expense sets its end month, so the
-// months before it stay counted; delete is for one added by mistake.
+// months before it stay counted; delete is for one added by mistake. Each is
+// FDH's, LDB's or shared (the default), and a shared one counts under both.
 
 function formatDay(date: string): string {
   const [y, m, d] = date.split("-").map(Number);
@@ -200,7 +202,7 @@ export default function ProfitExpenses({
               <thead className="border-b border-gray-200 text-xs text-gray-500">
                 <tr>
                   <th scope="col" className="px-3 py-2 text-left font-semibold">Expense</th>
-                  <th scope="col" className="px-3 py-2 text-left font-semibold">Category</th>
+                  <th scope="col" className="px-3 py-2 text-left font-semibold">Category and business</th>
                   <th scope="col" className="px-3 py-2 text-left font-semibold">When</th>
                   <th scope="col" className="px-3 py-2 text-right font-semibold">Amount</th>
                   <th scope="col" className="px-3 py-2 text-right font-semibold">Counts, {period}</th>
@@ -214,7 +216,10 @@ export default function ProfitExpenses({
                       <p className="font-medium text-gray-900">{e.label}</p>
                       {e.note && <p className="text-xs text-gray-500">{e.note}</p>}
                     </td>
-                    <td className="px-3 py-2.5 text-gray-700">{EXPENSE_CATEGORY_LABELS[e.category]}</td>
+                    <td className="px-3 py-2.5 text-gray-700">
+                      {EXPENSE_CATEGORY_LABELS[e.category]}
+                      <p className="text-xs text-gray-500">{EXPENSE_BUSINESS_LABELS[e.business ?? "SHARED"]}</p>
+                    </td>
                     <td className="px-3 py-2.5 text-gray-700">
                       {describeWhen(e)}
                       {future(e) && <span className="ml-1.5 rounded-full bg-gray-100 px-1.5 py-0.5 text-[11px] text-gray-600">Not counted yet</span>}
@@ -239,7 +244,9 @@ export default function ProfitExpenses({
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-semibold text-gray-900 break-words">{e.label}</p>
-                    <p className="text-xs text-gray-500">{EXPENSE_CATEGORY_LABELS[e.category]}</p>
+                    <p className="text-xs text-gray-500">
+                      {EXPENSE_CATEGORY_LABELS[e.category]}, {EXPENSE_BUSINESS_LABELS[e.business ?? "SHARED"]}
+                    </p>
                   </div>
                   <p className="shrink-0 text-right tabular-nums">
                     <span className="font-semibold text-gray-900">{formatPence(e.amountPence)}</span>
@@ -310,6 +317,7 @@ function ExpenseForm({
     startMonth: existing?.startMonth ?? currentMonth,
     endMonth: ending ? currentMonth : existing?.endMonth ?? "",
     note: existing?.note ?? "",
+    business: existing?.business ?? "SHARED",
   }));
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -366,6 +374,16 @@ function ExpenseForm({
           <div>
             <label htmlFor={`${id}-label`} className="mb-1 block text-xs font-medium text-gray-700">Label</label>
             <input id={`${id}-label`} value={f.label} maxLength={MAX_EXPENSE_LABEL} onChange={(e) => set("label", e.target.value)} placeholder="Office rent" className={inputCls} />
+          </div>
+          <div>
+            <label htmlFor={`${id}-business`} className="mb-1 block text-xs font-medium text-gray-700">Business</label>
+            <select id={`${id}-business`} value={f.business} onChange={(e) => set("business", e.target.value)} className={inputCls}>
+              {EXPENSE_BUSINESSES.map((b) => (
+                <option key={b} value={b}>
+                  {b === "SHARED" ? "Shared (counts under both)" : EXPENSE_BUSINESS_LABELS[b]}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div>

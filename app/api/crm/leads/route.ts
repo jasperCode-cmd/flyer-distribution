@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { isBusiness } from "@/lib/business";
 import { leadWithLastActivityArgs, findDuplicateLeads } from "@/lib/crm-data";
 
 export async function GET() {
@@ -41,13 +42,17 @@ export async function POST(req: Request) {
     source,
     priority,
     assignedToId,
+    business,
   } = body;
 
   if (!name || typeof name !== "string") {
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
   }
+  if (business !== undefined && !isBusiness(business)) {
+    return NextResponse.json({ error: "Choose FDH or Bournemouth" }, { status: 400 });
+  }
 
-  // Don't block creation — just surface what's already on file so staff
+  // Don't block creation; just surface what's already on file so staff
   // can decide whether this is really a new lead.
   const duplicates = await findDuplicateLeads(email, phone);
 
@@ -67,6 +72,7 @@ export async function POST(req: Request) {
       source: source || "OTHER",
       priority: priority || "MEDIUM",
       assignedToId: assignedToId || null,
+      business: business ?? "FDH",
     },
   });
 

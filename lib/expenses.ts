@@ -1,3 +1,4 @@
+import { isExpenseBusiness, type ExpenseBusiness } from "./business";
 import { parsePoundsToPence } from "./money";
 
 // Business expenses and retainers for the Profit page. Pure and client-safe.
@@ -34,6 +35,8 @@ export type ExpenseRecord = {
   endMonth: string | null;
   note: string | null;
   createdAt: string;
+  // Missing means shared, as every expense from before businesses existed is.
+  business?: ExpenseBusiness;
 };
 
 export const MAX_EXPENSE_LABEL = 100;
@@ -88,6 +91,7 @@ export type ExpenseData = {
   startMonth: Date | null;
   endMonth: Date | null;
   note: string | null;
+  business: ExpenseBusiness;
 };
 
 export function validateExpenseInput(raw: unknown): { ok: true; data: ExpenseData } | { ok: false; error: string } {
@@ -109,7 +113,10 @@ export function validateExpenseInput(raw: unknown): { ok: true; data: ExpenseDat
   const note = text(body.note);
   if (note.length > MAX_EXPENSE_NOTE) return { ok: false, error: `The note can be up to ${MAX_EXPENSE_NOTE} characters.` };
 
-  const base = { label, category, amountPence, note: note || null };
+  const business = body.business === undefined ? "SHARED" : body.business;
+  if (!isExpenseBusiness(business)) return { ok: false, error: "Choose which business the expense is for." };
+
+  const base = { label, category, amountPence, note: note || null, business };
   if (body.kind === "ONE_OFF") {
     const date = dateInputToDb(text(body.date));
     if (!date) return { ok: false, error: "Choose the date of the expense." };

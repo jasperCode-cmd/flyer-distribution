@@ -4,6 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { SOURCE_LABELS } from "@/lib/crm-constants";
 import DialerAnsweredPanel from "./DialerAnsweredPanel";
+import BusinessBadge from "./BusinessBadge";
+import BusinessFilter from "./BusinessFilter";
+import type { Business, BusinessFilter as BusinessView } from "@/lib/business";
 
 type LastCall = { createdAt: string; user: { name: string } | null };
 
@@ -23,6 +26,7 @@ export type DialerLead = {
   assignedTo: { id: string; name: string } | null;
   createdAt: string;
   activities: LastCall[];
+  business?: Business;
 };
 
 function daysAgo(iso: string) {
@@ -44,6 +48,7 @@ function Spinner({ className = "" }: { className?: string }) {
 export default function DialerScreen({ tags }: { tags: { id: string; name: string }[] }) {
   const [source, setSource] = useState("COLD_OUTREACH");
   const [tagId, setTagId] = useState("");
+  const [business, setBusiness] = useState<BusinessView>("ALL");
   const [current, setCurrent] = useState<DialerLead | null | undefined>(undefined); // undefined = loading
   const [previous, setPrevious] = useState<DialerLead | null>(null);
   const [skippedIds, setSkippedIds] = useState<string[]>([]);
@@ -55,10 +60,10 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
   const [warmSaved, setWarmSaved] = useState(false);
   const [noAnswerPrompt, setNoAnswerPrompt] = useState<{ leadId: string; leadName: string; streak: number } | null>(null);
   // Both No Answer and Skip trigger a network round-trip before the next
-  // lead appears — with no other feedback in between, a click can read as
+  // lead appears; with no other feedback in between, a click can read as
   // "did that actually register?". actionInFlight puts a spinner directly
   // on the button that was clicked; toast leaves a brief confirmation
-  // visible while the next lead loads in. Back is deliberately excluded —
+  // visible while the next lead loads in. Back is deliberately excluded:
   // it only swaps to an already-held-in-memory snapshot, no network call,
   // so there's no gap for either to fill.
   const [actionInFlight, setActionInFlight] = useState<"NO_ANSWER" | "SKIP" | null>(null);
@@ -74,6 +79,7 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
     async (excludeIds: string[]) => {
       const params = new URLSearchParams({ source });
       if (tagId) params.set("tagId", tagId);
+      if (business !== "ALL") params.set("business", business);
       if (excludeIds.length > 0) params.set("excludeIds", excludeIds.join(","));
       const res = await fetch(`/api/crm/dialer/state?${params}`);
       if (!res.ok) return;
@@ -82,7 +88,7 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
       setCallsToday(data.callsToday);
       setInboundCount(data.inboundCount);
     },
-    [source, tagId]
+    [source, tagId, business]
   );
 
   useEffect(() => {
@@ -171,7 +177,7 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
     } catch {
       // Clipboard access can be denied (permissions, insecure context); the
       // tel: link right next to this button still works either way.
-      setToast("Couldn't copy — clipboard access denied");
+      setToast("Couldn't copy, clipboard access denied");
     }
   }
 
@@ -210,6 +216,7 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
+        <BusinessFilter value={business} onChange={setBusiness} />
         <select
           value={source}
           onChange={(e) => setSource(e.target.value)}
@@ -255,7 +262,10 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
       {!loading && current && (
         <div className="space-y-3">
           <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5">
-            <h2 className="text-lg font-bold text-blue-900">{current.name}</h2>
+            <div className="flex items-center gap-2 min-w-0">
+              <h2 className="text-lg font-bold text-blue-900 truncate">{current.name}</h2>
+              <BusinessBadge business={current.business} />
+            </div>
             {current.businessName && <p className="text-sm text-gray-500">{current.businessName}</p>}
             <dl className="grid grid-cols-2 gap-x-3 gap-y-1.5 mt-3 text-xs">
               <div>
@@ -264,7 +274,7 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
               </div>
               <div>
                 <dt className="text-gray-400">Area</dt>
-                <dd className="text-gray-700">{current.addressArea || current.postcode || "—"}</dd>
+                <dd className="text-gray-700">{current.addressArea || current.postcode || "-"}</dd>
               </div>
               {current.targetAreas && (
                 <div className="col-span-2">
@@ -321,7 +331,7 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
 
           {warmSaved ? (
             <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-center space-y-3">
-              <p className="text-sm font-semibold text-emerald-800">Saved — moved to Warm / Awaiting Response.</p>
+              <p className="text-sm font-semibold text-emerald-800">Saved and moved to Warm / Awaiting Response.</p>
               <button
                 type="button"
                 onClick={goToNext}
@@ -382,7 +392,7 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
         <div className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="bg-white w-full sm:max-w-sm rounded-t-xl sm:rounded-xl p-5">
             <h3 className="text-sm font-bold text-gray-900 mb-1">
-              No Answer — {noAnswerPrompt.streak} Calls in a Row
+              No Answer: {noAnswerPrompt.streak} Calls in a Row
             </h3>
             <p className="text-xs text-gray-500 mb-4">Remove {noAnswerPrompt.leadName}?</p>
             <div className="flex gap-2">
@@ -406,7 +416,7 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
       )}
 
       {queueOpen && (
-        <DialerQueueModal source={source} tagId={tagId} onClose={() => setQueueOpen(false)} />
+        <DialerQueueModal source={source} tagId={tagId} business={business} onClose={() => setQueueOpen(false)} />
       )}
 
       {toast && (
@@ -418,16 +428,27 @@ export default function DialerScreen({ tags }: { tags: { id: string; name: strin
   );
 }
 
-function DialerQueueModal({ source, tagId, onClose }: { source: string; tagId: string; onClose: () => void }) {
+function DialerQueueModal({
+  source,
+  tagId,
+  business,
+  onClose,
+}: {
+  source: string;
+  tagId: string;
+  business: BusinessView;
+  onClose: () => void;
+}) {
   const [leads, setLeads] = useState<DialerLead[] | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams({ source });
     if (tagId) params.set("tagId", tagId);
+    if (business !== "ALL") params.set("business", business);
     fetch(`/api/crm/dialer/queue?${params}`)
       .then((r) => r.json())
       .then((d) => setLeads(d.leads ?? []));
-  }, [source, tagId]);
+  }, [source, tagId, business]);
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
@@ -445,7 +466,10 @@ function DialerQueueModal({ source, tagId, onClose }: { source: string; tagId: s
             <ul className="divide-y divide-gray-100">
               {leads.map((l) => (
                 <li key={l.id} className="px-4 py-2.5">
-                  <p className="text-sm font-medium text-blue-900">{l.name}</p>
+                  <p className="flex items-center gap-1.5 text-sm font-medium text-blue-900">
+                    <span className="truncate">{l.name}</span>
+                    <BusinessBadge business={l.business} />
+                  </p>
                   <p className="text-xs text-gray-400">
                     {l.nextCallableAt ? `Due ${new Date(l.nextCallableAt).toLocaleDateString("en-GB")}` : "Never called"}
                     {l.assignedTo && ` · Assigned to ${l.assignedTo.name}`}

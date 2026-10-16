@@ -16,7 +16,7 @@ export async function GET() {
   const [websiteLeads, newApplications, dueCallbacks, { overdue, today }] = await Promise.all([
     prisma.lead.findMany({
       where: { scrapped: false, stage: "UNCONTACTED", source: "WEBSITE_QUOTE_FORM" },
-      select: { id: true, name: true, createdAt: true },
+      select: { id: true, name: true, createdAt: true, business: true },
       orderBy: { createdAt: "desc" },
     }),
     // Same idea as website leads: applications that just came in through

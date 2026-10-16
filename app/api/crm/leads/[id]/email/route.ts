@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { sendEmail } from "@/lib/gmail";
+import { senderFor } from "@/lib/email-channel";
 import { sendLeadEmailAndRecord } from "@/lib/send-lead-email";
 
 export const runtime = "nodejs";
@@ -40,7 +40,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   // so a caller can't redirect a send to an address of their choosing.
   const lead = await prisma.lead.findUnique({
     where: { id },
-    select: { id: true, email: true, scrapped: true, stage: true },
+    select: { id: true, email: true, scrapped: true, stage: true, business: true },
   });
   if (!lead) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -59,7 +59,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     body: text,
     userId: session.user.id,
     threadContext: threadId && lastMessageId ? { threadId, lastMessageId } : null,
-    sendEmailFn: sendEmail,
+    // FDH through Gmail, LDB only ever through Brevo.
+    sendEmailFn: senderFor(lead.business),
     prismaClient: prisma,
   });
 

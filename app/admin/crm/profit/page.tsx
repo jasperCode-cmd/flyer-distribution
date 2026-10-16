@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import ProfitTabs, { type ProfitTab } from "@/components/crm/ProfitTabs";
 import { ALL_TIME, isMonthKey, monthKeyLondon } from "@/lib/profit";
+import { parseBusinessFilter } from "@/lib/business";
 import {
   EXPENSE_ORDER,
   PROFIT_LEAD_ORDER,
@@ -13,13 +14,14 @@ import {
 export const dynamic = "force-dynamic";
 
 // Every lead in Won or Completed, read straight from the leads table, and
-// every business expense. The tab and month come from the address so Refresh
-// and the back button keep them; with none given the page opens on the
-// Overview for All time. A future month is never shown.
+// every business expense. The tab, month and business come from the address
+// so Refresh and the back button keep them; with none given the page opens
+// on the Overview for All time and both businesses. A future month is never
+// shown.
 export default async function ProfitPage({
   searchParams,
 }: {
-  searchParams: Promise<{ month?: string | string[]; tab?: string | string[] }>;
+  searchParams: Promise<{ month?: string | string[]; tab?: string | string[]; business?: string | string[] }>;
 }) {
   const params = await searchParams;
   const currentMonth = monthKeyLondon(new Date());
@@ -43,6 +45,7 @@ export default async function ProfitPage({
       distributors={distributors}
       initialMonth={month}
       initialTab={tab}
+      initialBusiness={parseBusinessFilter(params.business)}
       currentMonth={currentMonth}
     />
   );

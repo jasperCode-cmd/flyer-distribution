@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { STAGE_LABELS, SOURCE_LABELS, PRIORITY_LABELS, STAGES } from "@/lib/crm-constants";
 import type { KanbanLead } from "./LeadCard";
+import BusinessBadge from "./BusinessBadge";
 
 type SortKey = "name" | "dealValue" | "stage" | "createdAt";
 
@@ -60,7 +61,7 @@ export default function LeadTable({
 
   // The selection is scoped to the rows currently on screen. `leads` is
   // already the filtered set, but the raw `selected` state survives a filter
-  // change — so a lead selected under one filter could otherwise still be
+  // change, so a lead selected under one filter could otherwise still be
   // caught by a bulk action taken under another, with no row visible to show
   // it. Intersecting with the visible ids makes what you see what you change.
   const visibleIds = useMemo(() => new Set(sorted.map((l) => l.id)), [sorted]);
@@ -79,7 +80,7 @@ export default function LeadTable({
     });
   }
 
-  // Selects exactly the rows on screen — i.e. the current filtered set —
+  // Selects exactly the rows on screen (i.e. the current filtered set),
   // never the whole table.
   function toggleSelectAll() {
     setSelected(
@@ -119,7 +120,7 @@ export default function LeadTable({
     await applyBulk({ source: bulkSource }, () => setBulkSource(""));
   }
 
-  // Same underlying action as dragging the card on the Kanban board — same
+  // Same underlying action as dragging the card on the Kanban board: same
   // PATCH endpoint, so the same server-side Stage Change activity log either
   // way. Rows here aren't wrapped in a row-level Link (only the name text
   // and the "View" link are), but preventDefault/stopPropagation are kept
@@ -277,15 +278,18 @@ export default function LeadTable({
               />
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-2">
-                  <Link
-                    href={`/admin/crm/leads/${lead.id}`}
-                    className="text-[13px] font-semibold text-blue-900 hover:underline truncate"
-                  >
-                    {lead.atRisk && <span className="text-red-500 mr-1">⚑</span>}
-                    {lead.name}
-                  </Link>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Link
+                      href={`/admin/crm/leads/${lead.id}`}
+                      className="text-[13px] font-semibold text-blue-900 hover:underline truncate"
+                    >
+                      {lead.atRisk && <span className="text-red-500 mr-1">⚑</span>}
+                      {lead.name}
+                    </Link>
+                    <BusinessBadge business={lead.business} />
+                  </div>
                   <span className="text-[11px] font-medium text-gray-700 shrink-0">
-                    {lead.dealValue ? formatCurrency(Number(lead.dealValue)) : "—"}
+                    {lead.dealValue ? formatCurrency(Number(lead.dealValue)) : "-"}
                   </span>
                 </div>
                 {lead.businessName &&
@@ -309,11 +313,11 @@ export default function LeadTable({
                   </div>
                   <div className="flex gap-1 min-w-0">
                     <dt className="text-gray-400 shrink-0">Source</dt>
-                    <dd className="text-gray-700 truncate">{SOURCE_LABELS[lead.source] ?? "—"}</dd>
+                    <dd className="text-gray-700 truncate">{SOURCE_LABELS[lead.source] ?? "-"}</dd>
                   </div>
                   <div className="flex gap-1 min-w-0">
                     <dt className="text-gray-400 shrink-0">Assigned</dt>
-                    <dd className="text-gray-700 truncate">{lead.assignedTo?.name ?? "—"}</dd>
+                    <dd className="text-gray-700 truncate">{lead.assignedTo?.name ?? "-"}</dd>
                   </div>
                   <div className="flex gap-1 min-w-0 col-span-2">
                     <dt className="text-gray-400 shrink-0">Created</dt>
@@ -373,7 +377,7 @@ export default function LeadTable({
           </thead>
           <tbody className="divide-y divide-gray-100">
             {sorted.map((lead) => {
-              // Muted marker when the two match — kept distinct from "—",
+              // Muted marker when the two match, kept distinct from "-",
               // which means no business recorded at all.
               const business = lead.businessName?.trim() ?? "";
               const sameAsName = businessMatchesName(lead);
@@ -391,10 +395,11 @@ export default function LeadTable({
                 <td className="px-3 py-2.5 text-sm font-medium text-blue-900 truncate" title={lead.name}>
                   {lead.atRisk && <span className="text-red-500 mr-1">⚑</span>}
                   {lead.name}
+                  <BusinessBadge business={lead.business} className="ml-1.5 align-middle" />
                 </td>
                 <td className="px-3 py-2.5 text-sm text-gray-600 truncate">
                   {business === "" ? (
-                    "—"
+                    "-"
                   ) : sameAsName ? (
                     <span className="text-xs italic text-gray-400" title={business}>
                       same as name
@@ -408,13 +413,13 @@ export default function LeadTable({
                   {PRIORITY_LABELS[lead.priority] ?? lead.priority}
                 </td>
                 <td className="px-3 py-2.5 text-sm text-gray-600 truncate" title={SOURCE_LABELS[lead.source] ?? ""}>
-                  {SOURCE_LABELS[lead.source] ?? "—"}
+                  {SOURCE_LABELS[lead.source] ?? "-"}
                 </td>
                 <td className="px-3 py-2.5 text-sm text-gray-600 truncate" title={lead.assignedTo?.name ?? ""}>
-                  {lead.assignedTo?.name ?? "—"}
+                  {lead.assignedTo?.name ?? "-"}
                 </td>
                 <td className="px-3 py-2.5 text-sm text-gray-600 whitespace-nowrap">
-                  {lead.dealValue ? formatCurrency(Number(lead.dealValue)) : "—"}
+                  {lead.dealValue ? formatCurrency(Number(lead.dealValue)) : "-"}
                 </td>
                 <td className="px-3 py-2.5 text-sm text-gray-500 whitespace-nowrap">
                   {new Date(lead.createdAt).toLocaleDateString("en-GB")}

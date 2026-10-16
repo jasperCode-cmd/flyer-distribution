@@ -1,6 +1,8 @@
 import "server-only";
 import { OAuth2Client } from "google-auth-library";
 import { gmail as gmailClient, gmail_v1 } from "@googleapis/gmail";
+import { getLdbSenderAddress } from "./ldb-address";
+import type { Business, BusinessFilter } from "./business";
 import { convert as htmlToText } from "html-to-text";
 import { randomBytes } from "node:crypto";
 
@@ -65,6 +67,8 @@ export type InboxThreadSummary = {
   unread: boolean;
   hasAttachment: boolean;
   messageCount: number;
+  // Whether the conversation went through the Bournemouth address.
+  ldbThread?: boolean;
 };
 
 // The other party on a thread: the latest sender who isn't us, or, if every
@@ -89,6 +93,7 @@ export type InboxThread = {
   recipient: Counterparty | null;
   lastMessageId: string | null;
   messages: ConversationMessage[];
+  ldbThread: boolean;
 };
 
 export type InboxReplyContext = {
@@ -98,6 +103,7 @@ export type InboxReplyContext = {
   replyTo: Counterparty | null;
   recipient: Counterparty | null;
   lastMessageId: string | null;
+  ldbThread: boolean;
 };
 
 function readEnv() {
@@ -113,7 +119,7 @@ export function isGmailConfigured(): boolean {
   return readEnv() !== null;
 }
 
-// Addresses the CRM never shows or emails (GMAIL_EXCLUDE_ADDRESSES).
+// Addresses the CRM never emails (GMAIL_EXCLUDE_ADDRESSES).
 export function getExcludedAddresses(): string[] {
   const raw = process.env.GMAIL_EXCLUDE_ADDRESSES;
   if (!raw) return [];
@@ -121,6 +127,20 @@ export function getExcludedAddresses(): string[] {
     .split(",")
     .map((a) => a.trim().toLowerCase())
     .filter(Boolean);
+}
+
+// Addresses whose conversations are hidden everywhere: the excluded ones,
+// except the Bournemouth address (LDB_SENDER_ADDRESS), whose mail is shown
+// in LDB and All views and never in FDH ones.
+export function getHiddenAddresses(): string[] {
+  const ldb = getLdbSenderAddress();
+  return getExcludedAddresses().filter((a) => a !== ldb);
+}
+
+// Our own addresses: a message from either one counts as sent by us.
+export function ownAddresses(senderAddress: string): string[] {
+  const ldb = getLdbSenderAddress();
+  return [senderAddress.toLowerCase(), ...(ldb ? [ldb] : [])];
 }
 
 function buildClient(env: NonNullable<ReturnType<typeof readEnv>>) {
@@ -455,6 +475,10 @@ export async function mapWithConcurrency<T, R>(
   return results;
 }
 
+function ownSet(own: string | string[]): Set<string> {
+  return new Set((Array.isArray(own) ? own : [own]).map((a) => a.trim().toLowerCase()).filter(Boolean));
+}
+
 export function shouldExcludeMessage(
   headers: gmail_v1.Schema$MessagePartHeader[] | undefined,
   excluded: string[]
@@ -470,13 +494,12 @@ export function shouldExcludeMessage(
 
 export function parseConversationMessage(
   message: gmail_v1.Schema$Message,
-  senderAddress: string
+  own: string | string[]
 ): ConversationMessage | null {
   const headers = message.payload?.headers;
   const from = getHeader(headers, "From") ?? "";
   const fromAddress = extractAddress(from).toLowerCase();
-  const direction: ConversationMessage["direction"] =
-    fromAddress === senderAddress.toLowerCase() ? "sent" : "received";
+  const direction: ConversationMessage["direction"] = ownSet(own).has(fromAddress) ? "sent" : "received";
 
   return {
     id: message.id ?? "",
@@ -503,6 +526,32 @@ export function shouldExcludeThread(
   return messages.some((m) => shouldExcludeMessage(m.payload?.headers, excluded));
 }
 
+// Bournemouth mail: a conversation that touches the LDB address anywhere
+// (sent from it, to it, copied to it or delivered through it).
+export function isLdbThread(messages: gmail_v1.Schema$Message[] | undefined, ldbAddress: string | null): boolean {
+  return !!ldbAddress && shouldExcludeThread(messages, [ldbAddress]);
+}
+
+// What a view leaves out: hidden addresses always, and an FDH view the
+// Bournemouth address too.
+export function viewExcluded(view: BusinessFilter, hidden: string[], ldbAddress: string | null): string[] {
+  return view === "FDH" && ldbAddress ? [...hidden, ldbAddress] : hidden;
+}
+
+// Whether a thread shows in a view, from its own addresses. (The Inbox also
+// counts a conversation with an LDB lead as Bournemouth mail; that needs the
+// database and is applied by the route.)
+export function threadInView(
+  messages: gmail_v1.Schema$Message[] | undefined,
+  view: BusinessFilter,
+  context: { hidden: string[]; ldbAddress: string | null }
+): boolean {
+  if (shouldExcludeThread(messages, context.hidden)) return false;
+  if (view === "ALL") return true;
+  const ldb = isLdbThread(messages, context.ldbAddress);
+  return view === "LDB" ? ldb : !ldb;
+}
+
 export function isThreadInInbox(messages: gmail_v1.Schema$Message[] | undefined): boolean {
   return (messages ?? []).some((m) => m.labelIds?.includes("INBOX"));
 }
@@ -513,26 +562,26 @@ function sortedOldestFirst(messages: gmail_v1.Schema$Message[] | undefined): gma
 
 // A Reply-To is only honoured when it holds exactly one valid address that
 // isn't our own; anything else (several addresses, junk) is ignored.
-export function singleReplyTo(headerValue: string | null, senderAddress: string): Counterparty | null {
+export function singleReplyTo(headerValue: string | null, own: string | string[]): Counterparty | null {
   if (!headerValue) return null;
   const parts = splitAddressList(headerValue);
   if (parts.length !== 1) return null;
   const box = parseMailbox(parts[0]);
   if (!EMAIL_RE.test(box.address)) return null;
-  if (box.address.toLowerCase() === senderAddress.toLowerCase()) return null;
+  if (ownSet(own).has(box.address.toLowerCase())) return null;
   return box;
 }
 
 export function findReplyTarget(
   messages: gmail_v1.Schema$Message[] | undefined,
-  senderAddress: string
+  own: string | string[]
 ): ReplyTarget {
-  const own = senderAddress.toLowerCase();
+  const ours = ownSet(own);
   const newestFirst = sortedOldestFirst(messages).reverse();
   for (const m of newestFirst) {
     const from = parseMailbox(getHeader(m.payload?.headers, "From"));
-    if (from.address && from.address.toLowerCase() !== own) {
-      const replyTo = singleReplyTo(getHeader(m.payload?.headers, "Reply-To"), senderAddress);
+    if (from.address && !ours.has(from.address.toLowerCase())) {
+      const replyTo = singleReplyTo(getHeader(m.payload?.headers, "Reply-To"), own);
       return { from, replyTo, recipient: replyTo ?? from };
     }
   }
@@ -543,9 +592,9 @@ export function findReplyTarget(
 
 export function findCounterparty(
   messages: gmail_v1.Schema$Message[] | undefined,
-  senderAddress: string
+  own: string | string[]
 ): Counterparty | null {
-  const target = findReplyTarget(messages, senderAddress);
+  const target = findReplyTarget(messages, own);
   return target.from ?? target.recipient;
 }
 
@@ -566,20 +615,20 @@ export type UnansweredMessage = {
 
 export function latestUnanswered(
   thread: gmail_v1.Schema$Thread,
-  senderAddress: string
+  own: string | string[]
 ): UnansweredMessage | null {
   const messages = sortedOldestFirst(thread.messages);
   const latest = messages[messages.length - 1];
   if (!thread.id || !latest?.id) return null;
   const from = parseMailbox(getHeader(latest.payload?.headers, "From"));
-  if (!from.address || from.address.toLowerCase() === senderAddress.toLowerCase()) return null;
+  if (!from.address || ownSet(own).has(from.address.toLowerCase())) return null;
   if (latest.labelIds?.includes("SENT")) return null;
   return {
     threadId: thread.id,
     messageId: latest.id,
     receivedAt: latest.internalDate ? new Date(Number(latest.internalDate)).toISOString() : new Date(0).toISOString(),
     fromAddress: from.address,
-    replyToAddress: singleReplyTo(getHeader(latest.payload?.headers, "Reply-To"), senderAddress)?.address ?? null,
+    replyToAddress: singleReplyTo(getHeader(latest.payload?.headers, "Reply-To"), own)?.address ?? null,
     subject: getHeader(messages[0].payload?.headers, "Subject")?.trim() || "(no subject)",
     messageIdHeader: getHeader(latest.payload?.headers, "Message-ID"),
   };
@@ -596,12 +645,12 @@ function looksLikeAttachment(message: gmail_v1.Schema$Message): boolean {
 
 export function summarizeThread(
   thread: gmail_v1.Schema$Thread,
-  senderAddress: string
+  own: string | string[]
 ): InboxThreadSummary | null {
   const messages = sortedOldestFirst(thread.messages);
   if (!thread.id || messages.length === 0) return null;
   const latest = messages[messages.length - 1];
-  const target = findReplyTarget(messages, senderAddress);
+  const target = findReplyTarget(messages, own);
   const sender = target.from ?? target.recipient ?? { name: "", address: "" };
   const subject = getHeader(messages[0].payload?.headers, "Subject")?.trim() || "(no subject)";
   return {
@@ -774,13 +823,18 @@ export async function sendEmail(
   }
 }
 
-export async function getConversation(leadEmail: string): Promise<GmailResult<ConversationMessage[]>> {
+// A lead's conversation. An FDH lead's never includes Bournemouth mail; an
+// LDB lead's does, and messages from the LDB address count as sent.
+export async function getConversation(
+  leadEmail: string,
+  business: Business = "FDH"
+): Promise<GmailResult<ConversationMessage[]>> {
   const env = readEnv();
   if (!env) return { ok: false, reason: "not_configured", message: "Gmail is not connected." };
 
   try {
     const client = buildClient(env);
-    const excluded = getExcludedAddresses();
+    const excluded = viewExcluded(business === "LDB" ? "ALL" : "FDH", getHiddenAddresses(), getLdbSenderAddress());
 
     const list = await client.users.messages.list({
       userId: "me",
@@ -819,7 +873,7 @@ export async function getConversation(leadEmail: string): Promise<GmailResult<Co
     const parsed = fetched
       .filter((m) => !excludedThreads.has(m.threadId ?? ""))
       .filter((m) => !shouldExcludeMessage(m.payload?.headers, excluded))
-      .map((m) => parseConversationMessage(m, env.senderAddress))
+      .map((m) => parseConversationMessage(m, ownAddresses(env.senderAddress)))
       .filter((m): m is ConversationMessage => m !== null)
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
@@ -842,7 +896,23 @@ export type GmailMessageReader = {
   getThread(threadId: string): Promise<gmail_v1.Schema$Thread | null>;
 };
 
-export type GmailReadContext = { senderAddress: string; excluded: string[] };
+// excluded is the hidden list (Bournemouth mail is not in it: a caller
+// decides what to do with that using ldbAddress); own is our addresses.
+export type GmailReadContext = {
+  senderAddress: string;
+  excluded: string[];
+  own?: string[];
+  ldbAddress?: string | null;
+};
+
+function readContext(senderAddress: string): Required<GmailReadContext> {
+  return {
+    senderAddress,
+    excluded: getHiddenAddresses(),
+    own: ownAddresses(senderAddress),
+    ldbAddress: getLdbSenderAddress(),
+  };
+}
 
 // Hands fn a reader backed by the real Gmail client, with the exclusion list
 // and our own address. Only list and get calls, under the existing scopes.
@@ -874,7 +944,7 @@ export async function withGmailMessageReader<T>(
         }
       },
     };
-    const data = await fn(reader, { senderAddress: env.senderAddress, excluded: getExcludedAddresses() });
+    const data = await fn(reader, readContext(env.senderAddress));
     return { ok: true, data };
   } catch (err) {
     const { reason, message } = classifyError(err);
@@ -913,13 +983,20 @@ export async function listInboxThreads(params: {
   unread?: boolean;
   categoryQuery?: string;
   keep?: (thread: gmail_v1.Schema$Thread) => boolean;
+  view?: BusinessFilter;
 }): Promise<GmailResult<{ threads: InboxThreadSummary[]; nextPageToken: string | null }>> {
   const env = readEnv();
   if (!env) return { ok: false, reason: "not_configured", message: "Gmail is not connected." };
 
   try {
     const client = buildClient(env);
-    const excluded = getExcludedAddresses();
+    const view = params.view ?? "ALL";
+    const ldbAddress = getLdbSenderAddress();
+    const excluded = viewExcluded(view, getHiddenAddresses(), ldbAddress);
+    const keep =
+      view === "LDB"
+        ? (t: gmail_v1.Schema$Thread) => isLdbThread(t.messages, ldbAddress) && (!params.keep || params.keep(t))
+        : params.keep;
     const { labelIds, q } = inboxListParams(params);
 
     const list = await client.users.threads.list({
@@ -941,8 +1018,12 @@ export async function listInboxThreads(params: {
       return res.data;
     });
 
-    const summaries = filterInboxPage(threads, excluded, params.keep)
-      .map((t) => summarizeThread(t, env.senderAddress))
+    const own = ownAddresses(env.senderAddress);
+    const summaries = filterInboxPage(threads, excluded, keep)
+      .map((t): InboxThreadSummary | null => {
+        const summary = summarizeThread(t, own);
+        return summary && { ...summary, ldbThread: isLdbThread(t.messages, ldbAddress) };
+      })
       .filter((t): t is InboxThreadSummary => t !== null);
 
     return { ok: true, data: { threads: summaries, nextPageToken: list.data.nextPageToken ?? null } };
@@ -998,7 +1079,7 @@ export async function withInboxReader<T>(
           }
         },
       },
-      { senderAddress: env.senderAddress, excluded: getExcludedAddresses() }
+      readContext(env.senderAddress)
     );
     return { ok: true, data };
   } catch (err) {
@@ -1011,7 +1092,10 @@ export async function withInboxReader<T>(
 // Full bodies, oldest first. Returns null (not an error) when the thread
 // doesn't exist, isn't in the inbox, or touches an excluded address, so the
 // route can answer 404 without saying which.
-export async function getInboxThread(threadId: string): Promise<GmailResult<InboxThread | null>> {
+export async function getInboxThread(
+  threadId: string,
+  view: BusinessFilter = "ALL"
+): Promise<GmailResult<InboxThread | null>> {
   const env = readEnv();
   if (!env) return { ok: false, reason: "not_configured", message: "Gmail is not connected." };
 
@@ -1019,14 +1103,16 @@ export async function getInboxThread(threadId: string): Promise<GmailResult<Inbo
     const client = buildClient(env);
     const res = await client.users.threads.get({ userId: "me", id: threadId, format: "full" });
     const messages = res.data.messages ?? [];
-    if (!isThreadInInbox(messages) || shouldExcludeThread(messages, getExcludedAddresses())) {
+    const ldbAddress = getLdbSenderAddress();
+    if (!isThreadInInbox(messages) || shouldExcludeThread(messages, viewExcluded(view, getHiddenAddresses(), ldbAddress))) {
       return { ok: true, data: null };
     }
 
+    const own = ownAddresses(env.senderAddress);
     const parsed = sortedOldestFirst(messages)
-      .map((m) => parseConversationMessage(m, env.senderAddress))
+      .map((m) => parseConversationMessage(m, own))
       .filter((m): m is ConversationMessage => m !== null);
-    const target = findReplyTarget(messages, env.senderAddress);
+    const target = findReplyTarget(messages, own);
 
     return {
       ok: true,
@@ -1038,6 +1124,7 @@ export async function getInboxThread(threadId: string): Promise<GmailResult<Inbo
         recipient: target.recipient,
         lastMessageId: lastMessageIdHeader(messages),
         messages: parsed,
+        ldbThread: isLdbThread(messages, ldbAddress),
       },
     };
   } catch (err) {
@@ -1063,11 +1150,11 @@ export async function getInboxReplyContext(threadId: string): Promise<GmailResul
       metadataHeaders: THREAD_METADATA_HEADERS,
     });
     const messages = res.data.messages ?? [];
-    if (!isThreadInInbox(messages) || shouldExcludeThread(messages, getExcludedAddresses())) {
+    if (!isThreadInInbox(messages) || shouldExcludeThread(messages, getHiddenAddresses())) {
       return { ok: true, data: null };
     }
     const first = sortedOldestFirst(messages)[0];
-    const target = findReplyTarget(messages, env.senderAddress);
+    const target = findReplyTarget(messages, ownAddresses(env.senderAddress));
     return {
       ok: true,
       data: {
@@ -1077,6 +1164,7 @@ export async function getInboxReplyContext(threadId: string): Promise<GmailResul
         replyTo: target.replyTo,
         recipient: target.recipient,
         lastMessageId: lastMessageIdHeader(messages),
+        ldbThread: isLdbThread(messages, getLdbSenderAddress()),
       },
     };
   } catch (err) {
@@ -1102,7 +1190,9 @@ export async function getInboxUnreadCount(): Promise<GmailResult<{ count: number
     const client = buildClient(env);
     const label = await client.users.labels.get({ userId: "me", id: "INBOX" });
     const labelCount = label.data.threadsUnread ?? 0;
-    const excluded = getExcludedAddresses();
+    // The default All view: hidden conversations never count; Bournemouth
+    // mail does.
+    const excluded = getHiddenAddresses();
 
     let value = { count: labelCount, more: false };
     if (excluded.length > 0 && labelCount > 0) {

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { OverdueTag, subjectHref } from "./priority-ui";
+import BusinessBadge from "./BusinessBadge";
 import {
   awaitingItem,
   canMarkLost,
@@ -108,6 +109,7 @@ export default function PriorityRowCard({
             {business && <span className="text-gray-500">, {business}</span>}
           </p>
           <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-gray-600">
+            {entry.subject.kind === "lead" && <BusinessBadge business={entry.subject.business} />}
             <span className="font-medium text-gray-700">{noLead ? "Task" : reasonText(entry)}</span>
             {entry.type === "unpaid" && entry.detail && <span className="text-gray-500">({entry.detail})</span>}
             {entry.type === "unanswered_email" && entry.detail && (

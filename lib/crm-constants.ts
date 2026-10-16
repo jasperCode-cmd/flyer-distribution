@@ -2,6 +2,8 @@
 // Anything touching Prisma lives in lib/crm-data.ts instead, so this file
 // never pulls the Postgres driver into the browser bundle.
 
+import { leadInFilter, type Business } from "./business";
+
 function toDate(d: Date | string): Date {
   return d instanceof Date ? d : new Date(d);
 }
@@ -117,6 +119,8 @@ export type LeadFilters = {
   atRiskOnly?: boolean;
   reviewStatus?: string;
   paymentStatus?: string;
+  // FDH or LDB; unset means both.
+  business?: Business;
 };
 
 type FilterableLead = {
@@ -130,6 +134,7 @@ type FilterableLead = {
   // this; a lead without them simply never matches those two filters.
   reviewStatus?: string;
   paymentStatus?: string;
+  business?: Business | null;
 };
 
 export function applyLeadFilters<T extends FilterableLead>(leads: T[], filters: LeadFilters): T[] {
@@ -144,6 +149,8 @@ export function applyLeadFilters<T extends FilterableLead>(leads: T[], filters: 
   if (filters.paymentStatus) {
     result = result.filter((l) => l.paymentStatus === filters.paymentStatus);
   }
+  const business = filters.business;
+  if (business) result = result.filter((l) => leadInFilter(l.business, business));
   return result;
 }
 

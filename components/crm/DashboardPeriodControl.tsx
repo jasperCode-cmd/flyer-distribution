@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { addDays, periodSearch, type DashboardPeriod } from "@/lib/dashboard";
+import type { BusinessFilter } from "@/lib/business";
 
 const SEGMENT =
   "inline-flex items-center gap-1 rounded px-3 py-1.5 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500";
@@ -11,8 +12,16 @@ const ON = "bg-blue-900 text-white";
 const OFF = "text-gray-700 hover:bg-gray-100";
 
 // All time, Last 30 days, or a custom range, kept in the page address so
-// Refresh and Back keep it.
-export default function DashboardPeriodControl({ period, today }: { period: DashboardPeriod; today: string }) {
+// Refresh and Back keep it. Changing it keeps the business filter.
+export default function DashboardPeriodControl({
+  period,
+  today,
+  business = "ALL",
+}: {
+  period: DashboardPeriod;
+  today: string;
+  business?: BusinessFilter;
+}) {
   const router = useRouter();
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -38,17 +47,17 @@ export default function DashboardPeriodControl({ period, today }: { period: Dash
     if (from > to) return setError("The start must be on or before the end.");
     if (from > today) return setError("The start can't be in the future.");
     setOpen(false);
-    router.push(`/admin/crm${periodSearch({ kind: "custom", from, to: to > today ? today : to })}`, { scroll: false });
+    router.push(`/admin/crm${periodSearch({ kind: "custom", from, to: to > today ? today : to }, business)}`, { scroll: false });
   }
 
   return (
     <div ref={wrapRef} className="relative">
       <div role="group" aria-label="Period" className="inline-flex flex-wrap rounded-md border border-gray-300 bg-white p-0.5">
-        <Link href="/admin/crm" scroll={false} aria-current={period.kind === "all" ? "true" : undefined} className={`${SEGMENT} ${period.kind === "all" ? ON : OFF}`}>
+        <Link href={`/admin/crm${periodSearch({ kind: "all" }, business)}`} scroll={false} aria-current={period.kind === "all" ? "true" : undefined} className={`${SEGMENT} ${period.kind === "all" ? ON : OFF}`}>
           All time
         </Link>
         <Link
-          href="/admin/crm?period=30d"
+          href={`/admin/crm${periodSearch({ kind: "last30", from: addDays(today, -29), to: today }, business)}`}
           scroll={false}
           aria-current={period.kind === "last30" ? "true" : undefined}
           className={`${SEGMENT} ${period.kind === "last30" ? ON : OFF}`}

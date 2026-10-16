@@ -18,6 +18,7 @@ export const PROFIT_LEAD_SELECT = {
   id: true,
   name: true,
   businessName: true,
+  business: true,
   stage: true,
   wonAt: true,
   dealValue: true,
@@ -48,6 +49,7 @@ export function toProfitJob(lead: ProfitLeadRow): ProfitJob {
     leadId: lead.id,
     name: lead.name,
     businessName: lead.businessName,
+    business: lead.business,
     stage: lead.stage,
     wonAt: lead.wonAt ? lead.wonAt.toISOString() : null,
     dealPence: decimalToPence(lead.dealValue),
@@ -98,5 +100,6 @@ export function toExpenseRecord(row: Prisma.ExpenseGetPayload<object>): ExpenseR
     endMonth: dbMonthToInput(row.endMonth),
     note: row.note,
     createdAt: row.createdAt.toISOString(),
+    business: row.business,
   };
 }

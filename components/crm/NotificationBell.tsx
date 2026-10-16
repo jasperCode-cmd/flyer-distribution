@@ -3,12 +3,17 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { APPLICATIONS_CHANGED_EVENT } from "@/lib/distributor-applications";
+import type { Business } from "@/lib/business";
+import BusinessBadge from "./BusinessBadge";
 
 const POLL_MS = 45000;
 
+// One line of the toast; a Bournemouth enquiry carries the badge.
+type ToastLine = { text: string; business?: Business };
+
 type Notifications = {
   count: number;
-  websiteLeads: { id: string; name: string; createdAt: string }[];
+  websiteLeads: { id: string; name: string; createdAt: string; business?: Business }[];
   // Older responses (a deploy mid-session) may not have this yet.
   newApplications?: { id: string; fullName: string; receivedAt: string }[];
   dueCallbacks: { id: string; name: string; nextCallableAt: string }[];
@@ -27,7 +32,7 @@ type Notifications = {
 export default function NotificationBell({ menuAlign = "right" }: { menuAlign?: "left" | "right" }) {
   const [data, setData] = useState<Notifications | null>(null);
   const [open, setOpen] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastLine[] | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const knownWebsiteIdsRef = useRef<Set<string> | null>(null);
   const knownApplicationIdsRef = useRef<Set<string> | null>(null);
@@ -53,22 +58,24 @@ export default function NotificationBell({ menuAlign = "right" }: { menuAlign?: 
         } else {
           const newOnes = next.websiteLeads.filter((l) => !knownWebsiteIdsRef.current!.has(l.id));
           const newApplications = applications.filter((a) => !knownApplicationIdsRef.current!.has(a.id));
-          const messages: string[] = [];
-          if (newOnes.length > 0) {
-            messages.push(
-              newOnes.length === 1
-                ? `New website enquiry: ${newOnes[0].name}`
-                : `${newOnes.length} new website enquiries just came in`
-            );
+          const messages: ToastLine[] = [];
+          if (newOnes.length === 1) {
+            messages.push({ text: `New website enquiry: ${newOnes[0].name}`, business: newOnes[0].business });
+          } else if (newOnes.length > 1) {
+            const ldb = newOnes.filter((l) => l.business === "LDB").length;
+            messages.push({
+              text: `${newOnes.length} new website enquiries just came in${ldb > 0 ? `, ${ldb} for Bournemouth` : ""}`,
+            });
           }
           if (newApplications.length > 0) {
-            messages.push(
-              newApplications.length === 1
-                ? `New distributor application: ${newApplications[0].fullName}`
-                : `${newApplications.length} new distributor applications just came in`
-            );
+            messages.push({
+              text:
+                newApplications.length === 1
+                  ? `New distributor application: ${newApplications[0].fullName}`
+                  : `${newApplications.length} new distributor applications just came in`,
+            });
           }
-          if (messages.length > 0) setToast(messages.join("\n"));
+          if (messages.length > 0) setToast(messages);
           knownWebsiteIdsRef.current = incomingIds;
           knownApplicationIdsRef.current = incomingApplicationIds;
         }
@@ -151,9 +158,10 @@ export default function NotificationBell({ menuAlign = "right" }: { menuAlign?: 
                         key={l.id}
                         href={`/admin/crm/leads/${l.id}`}
                         onClick={() => setOpen(false)}
-                        className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
                       >
-                        {l.name}
+                        <span className="truncate">{l.name}</span>
+                        <BusinessBadge business={l.business} />
                       </Link>
                     ))}
                   </div>
@@ -218,7 +226,14 @@ export default function NotificationBell({ menuAlign = "right" }: { menuAlign?: 
 
       {toast && (
         <div className="fixed top-20 right-4 z-[60] bg-blue-900 text-white text-sm rounded-lg shadow-xl px-4 py-3 flex items-center gap-3 max-w-xs animate-in fade-in">
-          <span className="flex-1 whitespace-pre-line">{toast}</span>
+          <span className="flex-1 space-y-1">
+            {toast.map((line) => (
+              <span key={line.text} className="flex flex-wrap items-center gap-1.5">
+                <span>{line.text}</span>
+                <BusinessBadge business={line.business} />
+              </span>
+            ))}
+          </span>
           <button
             type="button"
             onClick={() => setToast(null)}

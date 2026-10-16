@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { PRIORITY_LABELS, CLOSED_WON_STAGES } from "@/lib/crm-constants";
 import InlinePaymentReview from "./InlinePaymentReview";
+import BusinessBadge from "./BusinessBadge";
+import type { Business } from "@/lib/business";
 
 export type KanbanLead = {
   id: string;
@@ -20,6 +22,7 @@ export type KanbanLead = {
   amountPaid?: unknown;
   email?: string | null;
   phone?: string | null;
+  business?: Business;
 };
 
 function formatCurrency(n: number) {
@@ -80,7 +83,7 @@ export default function LeadCard({
   // or Completed, so the editor is confined to those columns.
   const isClosedWon = (CLOSED_WON_STAGES as readonly string[]).includes(lead.stage);
 
-  // A genuine live inbound enquiry, not yet actioned — distinct from the
+  // A genuine live inbound enquiry, not yet actioned, distinct from the
   // cold-outreach/import leads it would otherwise sit among in that column.
   const isNewWebsiteEnquiry = lead.stage === "UNCONTACTED" && lead.source === "WEBSITE_QUOTE_FORM";
   const canAdvance = lead.stage === "UNCONTACTED" && !!onAdvance;
@@ -92,13 +95,13 @@ export default function LeadCard({
   return (
     <Link
       href={`/admin/crm/leads/${lead.id}`}
-      // Anchors are natively draggable by default in every browser — with
+      // Anchors are natively draggable by default in every browser, with
       // zero jitter tolerance, unlike dnd-kit's own 8px activation distance.
       // A real hand's mousedown-to-mouseup on a pill inside this card almost
       // always drifts a pixel or two, which is enough for the browser to
       // start its own native HTML5 drag gesture on the <a> itself, and that
       // native drag swallows the click before it ever reaches the pill's
-      // onClick — confirmed via instrumented Playwright repro (a stray
+      // onClick (confirmed via instrumented Playwright repro: a stray
       // "dragstart" fired with no accompanying "click" at all). This is a
       // separate mechanism from dnd-kit's sensors (already guarded against
       // above) and needs its own, native fix.
@@ -119,6 +122,7 @@ export default function LeadCard({
             className={`shrink-0 w-2 h-2 rounded-full ${PRIORITY_DOT_COLOR[lead.priority] ?? "bg-gray-300"}`}
           />
           <p className="text-[13px] sm:text-sm font-semibold text-blue-900 truncate">{lead.name}</p>
+          <BusinessBadge business={lead.business} />
         </div>
         {lead.atRisk && (
           <span
@@ -215,11 +219,11 @@ export default function LeadCard({
           title="Move to Awaiting Response"
           aria-label="Move to Awaiting Response"
           // The card itself is a Link, and this button sits inside a
-          // draggable wrapper on the Kanban board — preventDefault/
+          // draggable wrapper on the Kanban board; preventDefault/
           // stopPropagation on click stops the Link navigating, and on
           // mousedown/touchstart keeps the board's drag sensors from ever
           // seeing the gesture start (see InlinePaymentReview.tsx for the
-          // full reasoning — this guard was briefly removed to let a card
+          // full reasoning: this guard was briefly removed to let a card
           // be dragged by grabbing a pill directly, which broke both pills
           // in Firefox, so it's reinstated here for the same reason).
           onMouseDown={(e) => e.stopPropagation()}

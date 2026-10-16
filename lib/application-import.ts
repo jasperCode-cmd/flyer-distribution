@@ -91,7 +91,9 @@ export function candidatesFromThread(
   context: GmailReadContext & { subject: string }
 ): ImportCandidate[] {
   const messages = thread.messages ?? [];
-  if (shouldExcludeThread(messages, context.excluded)) return [];
+  // Bournemouth mail is never an FDH distributor application.
+  const excluded = context.ldbAddress ? [...context.excluded, context.ldbAddress] : context.excluded;
+  if (shouldExcludeThread(messages, excluded)) return [];
   return messages
     .filter((m) => m.id && wanted.has(m.id))
     .filter((m) => isApplicationNotification(m, context.subject, context.senderAddress))

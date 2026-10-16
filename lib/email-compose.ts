@@ -1,6 +1,8 @@
 // What the compose modal sends, kept apart from the modal so it is unit
 // tested. Client-safe: no server imports.
 
+import type { Business } from "./business";
+
 export type ReplyContext = {
   subject: string;
   threadId: string;
@@ -42,4 +44,12 @@ export const MAX_EMAIL_ADDRESS = 254;
 export function looksLikeOneAddress(value: string): boolean {
   const v = value.trim();
   return v.length > 0 && v.length <= MAX_EMAIL_ADDRESS && SINGLE_EMAIL_RE.test(v);
+}
+
+// The body a new email starts with: a sign-off from whoever is signed in, or
+// for a Bournemouth (LDB) lead always "Kind regards," then "Dan".
+export const LDB_SIGN_OFF_NAME = "Dan";
+
+export function defaultComposeBody(business: Business, userFirstName: string): string {
+  return `\nKind regards,\n${business === "LDB" ? LDB_SIGN_OFF_NAME : userFirstName}`;
 }

@@ -8,6 +8,8 @@ import LostReasonModal from "./LostReasonModal";
 import ScheduleFollowUpModal from "./ScheduleFollowUpModal";
 import DeleteLeadModal from "./DeleteLeadModal";
 import EmailComposeModal, { sentLabel, type ReplyContext, type SendResult } from "./EmailComposeModal";
+import BusinessBadge from "./BusinessBadge";
+import { BUSINESSES, BUSINESS_NAMES, type Business } from "@/lib/business";
 import EmailsSection, { type EmailsState, type ConversationMessage } from "./EmailsSection";
 import { usePaymentReviewEditor } from "./usePaymentReviewEditor";
 import {
@@ -83,6 +85,7 @@ export type LeadDetailData = {
   paymentStatus: string;
   amountPaid: string | null;
   assignedToId: string | null;
+  business: Business;
   createdAt: string;
   activities: Activity[];
   job: Job | null;
@@ -131,6 +134,7 @@ export default function LeadDetail({
     source: lead.source,
     priority: lead.priority,
     assignedToId: lead.assignedToId ?? "",
+    business: lead.business,
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -283,6 +287,8 @@ export default function LeadDetail({
     setSaving(false);
     setSaved(true);
     router.refresh();
+    // The business decides which conversations are this lead's.
+    if (form.business !== lead.business) loadEmails();
     setTimeout(() => setSaved(false), 2000);
   }
 
@@ -433,7 +439,10 @@ export default function LeadDetail({
       <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div className="min-w-0">
-            <h1 className="text-lg font-bold text-blue-900 truncate">{lead.name}</h1>
+            <div className="flex items-center gap-2 min-w-0">
+              <h1 className="text-lg font-bold text-blue-900 truncate">{lead.name}</h1>
+              <BusinessBadge business={lead.business} />
+            </div>
             {lead.businessName && (
               <p className="text-sm text-gray-500">{lead.businessName}</p>
             )}
@@ -687,6 +696,21 @@ export default function LeadDetail({
           {field("targetAreas", "Target Area(s)")}
           {field("leafletQuantity", "Leaflet Quantity")}
           {field("dealValue", "Deal Value (£)", "number")}
+          <div>
+            <label htmlFor="lead-business" className="block text-xs font-medium text-gray-500 mb-1">
+              Our business
+            </label>
+            <select
+              id="lead-business"
+              value={form.business}
+              onChange={(e) => setForm((f) => ({ ...f, business: e.target.value as Business }))}
+              className="w-full border border-gray-300 rounded-md px-2 py-2 text-sm bg-white"
+            >
+              {BUSINESSES.map((b) => (
+                <option key={b} value={b}>{BUSINESS_NAMES[b]}</option>
+              ))}
+            </select>
+          </div>
         </div>
         <div className="flex gap-6 mt-3">
           <label className="flex items-center gap-2 text-sm text-gray-700">
@@ -935,6 +959,7 @@ export default function LeadDetail({
           onClose={() => setComposeOpen(false)}
           leadId={lead.id}
           toAddress={lead.email}
+          business={lead.business}
           configured={emailsState.configured}
           configuredKnown={emailsState.loaded}
           userFirstName={userFirstName}

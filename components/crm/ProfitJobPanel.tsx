@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
+import BusinessBadge from "./BusinessBadge";
 import { motion, useReducedMotion } from "framer-motion";
 import { formatPence, formatPercent, penceToInput } from "@/lib/money";
 import {
@@ -248,6 +249,7 @@ function Header({
         <p className="text-sm text-gray-500 truncate">{job.businessName || "-"}</p>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <StageBadge stage={job.stage} />
+          <BusinessBadge business={job.business} />
           {job.isRetainer && <RetainerBadge />}
           <IncludedBadges printing={job.printingIncluded} design={job.designIncluded} />
         </div>

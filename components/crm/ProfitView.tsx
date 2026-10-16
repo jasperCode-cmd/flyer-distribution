@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import Link from "next/link";
+import BusinessBadge from "./BusinessBadge";
 import {
   DndContext,
   DragOverlay,
@@ -451,7 +452,10 @@ function JobCard({
       >
         <span className="flex items-start justify-between gap-3">
           <span className="min-w-0">
-            <span className="block font-semibold text-gray-900 truncate">{job.name}</span>
+            <span className="flex items-center gap-1.5 min-w-0">
+              <span className="block font-semibold text-gray-900 truncate">{job.name}</span>
+              <BusinessBadge business={job.business} />
+            </span>
             <span className="block text-xs text-gray-500 truncate">{job.businessName || "-"}</span>
           </span>
           <StageBadge stage={job.stage} />

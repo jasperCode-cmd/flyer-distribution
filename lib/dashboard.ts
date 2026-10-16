@@ -3,6 +3,7 @@ import { STAGES } from "./crm-constants";
 import { ALL_TIME, COST_GROUPS, jobFigures, monthKeyLondon, type CostGroupId, type ProfitJob } from "./profit";
 import { EXPENSE_CATEGORIES, type ExpenseCategory, type ExpenseRecord } from "./expenses";
 import { dataMonths, expenseMonths, monthsBetween, periodFigures, retainerMonths, type PeriodFigures } from "./profit-overview";
+import type { BusinessFilter } from "./business";
 
 // The Dashboard's figures, pure and client-safe so each one is tested from
 // plain data.
@@ -75,10 +76,18 @@ export function previousPeriod(period: DashboardPeriod): { from: string; to: str
   return { from: addDays(period.from, -n), to: addDays(period.from, -1) };
 }
 
-export function periodSearch(period: DashboardPeriod): string {
-  if (period.kind === "all") return "";
-  if (period.kind === "last30") return "?period=30d";
-  return `?from=${period.from}&to=${period.to}`;
+// The Dashboard address for a period and business filter; All time for
+// both businesses is the plain address.
+export function periodSearch(period: DashboardPeriod, business: BusinessFilter = "ALL"): string {
+  const params = new URLSearchParams();
+  if (period.kind === "last30") params.set("period", "30d");
+  if (period.kind === "custom") {
+    params.set("from", period.from);
+    params.set("to", period.to);
+  }
+  if (business !== "ALL") params.set("business", business);
+  const query = params.toString();
+  return query ? `?${query}` : "";
 }
 
 function shortDay(day: string, withYear: boolean): string {

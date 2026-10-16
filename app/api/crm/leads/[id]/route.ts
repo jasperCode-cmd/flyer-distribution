@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { isBusiness } from "@/lib/business";
 
 export async function GET(
   _req: Request,
@@ -62,12 +63,17 @@ export async function PATCH(
     "reviewStatus",
     "paymentStatus",
     "amountPaid",
+    "business",
   ] as const;
 
   // Both decimal columns arrive as strings from the form inputs and have to
   // be coerced; an empty or unparseable value clears the column rather than
   // writing NaN.
   const DECIMAL_FIELDS = new Set(["dealValue", "amountPaid"]);
+
+  if ("business" in body && !isBusiness(body.business)) {
+    return NextResponse.json({ error: "Choose FDH or Bournemouth" }, { status: 400 });
+  }
 
   const data: Record<string, unknown> = {};
   for (const field of allowedFields) {
@@ -113,7 +119,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  // A Job represents real completed work — deleting the lead would silently
+  // A Job represents real completed work: deleting the lead would silently
   // cascade the Job away too (the FK is ON DELETE CASCADE), so that's
   // blocked here rather than left to the database to do quietly.
   if (lead.job) {

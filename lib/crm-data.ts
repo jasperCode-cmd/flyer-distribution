@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
+import { leadBusinessWhere, type BusinessFilter } from "./business";
 
 export function leadWithLastActivityArgs() {
   return {
@@ -73,16 +74,19 @@ export function dialerQueueWhere({
   tagId,
   userId,
   excludeIds,
+  business = "ALL",
 }: {
   source: string;
   tagId?: string;
   userId: string;
   excludeIds?: string[];
+  business?: BusinessFilter;
 }) {
   return {
     scrapped: false,
     stage: "UNCONTACTED" as const,
     source: source as never,
+    ...leadBusinessWhere(business),
     ...(tagId ? { tags: { some: { tagId } } } : {}),
     OR: [{ assignedToId: null }, { assignedToId: userId }],
     AND: [
@@ -105,6 +109,7 @@ export function dialerLeadSelect() {
     id: true,
     name: true,
     businessName: true,
+    business: true,
     phone: true,
     source: true,
     addressArea: true,
@@ -130,6 +135,7 @@ export async function getNextDialerLead(params: {
   tagId?: string;
   userId: string;
   excludeIds?: string[];
+  business?: BusinessFilter;
 }) {
   return prisma.lead.findFirst({
     where: dialerQueueWhere(params),
@@ -138,7 +144,7 @@ export async function getNextDialerLead(params: {
   });
 }
 
-export async function getDialerQueueList(params: { source: string; tagId?: string; userId: string }) {
+export async function getDialerQueueList(params: { source: string; tagId?: string; userId: string; business?: BusinessFilter }) {
   return prisma.lead.findMany({
     where: dialerQueueWhere(params),
     orderBy: dialerQueueOrderBy,

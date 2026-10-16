@@ -1,3 +1,5 @@
+import type { Business } from "./business";
+
 export type InboxLeadCandidate = {
   id: string;
   name: string;
@@ -5,6 +7,8 @@ export type InboxLeadCandidate = {
   email: string | null;
   scrapped: boolean;
   createdAt: Date;
+  // Missing means FDH, as every lead from before businesses existed is.
+  business?: Business;
 };
 
 export type InboxLeadMatch = {
@@ -13,28 +17,46 @@ export type InboxLeadMatch = {
   stage: string;
   email: string;
   scrapped: boolean;
+  business: Business;
+  // Every business with a lead on this address, so a caller can tell when
+  // one address belongs to both.
+  businesses: Business[];
 };
+
+// Which leads may match: only one business's (a Bournemouth conversation
+// only ever matches an LDB lead), or any, preferring one business's.
+export type LeadMatchOptions = { only?: Business; prefer?: Business };
 
 export function normalizeEmail(address: string | null | undefined): string {
   return (address ?? "").trim().toLowerCase();
 }
 
 // Case-insensitive, exact-address match of each inbox address to a lead.
-// When several leads share an address, a live lead wins over a scrapped one,
-// then the most recently created. Pure, so it is unit tested without a DB.
+// When several leads share an address, the preferred business wins, then a
+// live lead over a scrapped one, then the most recently created. Pure, so it
+// is unit tested without a DB.
 export function matchLeadsByEmail(
   addresses: string[],
-  leads: InboxLeadCandidate[]
+  leads: InboxLeadCandidate[],
+  options: LeadMatchOptions = {}
 ): Map<string, InboxLeadMatch> {
+  const businessOf = (lead: InboxLeadCandidate): Business => lead.business ?? "FDH";
   const best = new Map<string, InboxLeadCandidate>();
+  const businesses = new Map<string, Set<Business>>();
   for (const lead of leads) {
     const key = normalizeEmail(lead.email);
     if (!key) continue;
+    if (!businesses.has(key)) businesses.set(key, new Set());
+    businesses.get(key)!.add(businessOf(lead));
+    if (options.only && businessOf(lead) !== options.only) continue;
     const current = best.get(key);
+    const preferred = (l: InboxLeadCandidate) => (options.prefer && businessOf(l) === options.prefer ? 1 : 0);
     if (
       !current ||
-      (current.scrapped && !lead.scrapped) ||
-      (current.scrapped === lead.scrapped && lead.createdAt.getTime() > current.createdAt.getTime())
+      preferred(lead) > preferred(current) ||
+      (preferred(lead) === preferred(current) &&
+        ((current.scrapped && !lead.scrapped) ||
+          (current.scrapped === lead.scrapped && lead.createdAt.getTime() > current.createdAt.getTime())))
     ) {
       best.set(key, lead);
     }
@@ -51,6 +73,8 @@ export function matchLeadsByEmail(
         stage: lead.stage,
         email: lead.email.trim(),
         scrapped: lead.scrapped,
+        business: businessOf(lead),
+        businesses: [...(businesses.get(key) ?? [])].sort(),
       });
     }
   }
@@ -63,22 +87,31 @@ export type InboxLeadsPrisma = {
   lead: {
     findMany: (args: {
       where: { OR: { email: { equals: string; mode: "insensitive" } }[] };
-      select: { id: true; name: true; stage: true; email: true; scrapped: true; createdAt: true };
+      select: { id: true; name: true; stage: true; email: true; scrapped: true; createdAt: true; business: true };
     }) => Promise<InboxLeadCandidate[]>;
   };
 };
 
-export async function findLeadsForAddresses(
+export async function findLeadCandidates(
   prismaClient: InboxLeadsPrisma,
   addresses: string[]
-): Promise<Map<string, InboxLeadMatch>> {
+): Promise<{ unique: string[]; leads: InboxLeadCandidate[] }> {
   const unique = [...new Set(addresses.map(normalizeEmail).filter(Boolean))];
-  if (unique.length === 0) return new Map();
+  if (unique.length === 0) return { unique, leads: [] };
   const leads = await prismaClient.lead.findMany({
     where: { OR: unique.map((email) => ({ email: { equals: email, mode: "insensitive" } })) },
-    select: { id: true, name: true, stage: true, email: true, scrapped: true, createdAt: true },
+    select: { id: true, name: true, stage: true, email: true, scrapped: true, createdAt: true, business: true },
   });
-  return matchLeadsByEmail(unique, leads);
+  return { unique, leads };
+}
+
+export async function findLeadsForAddresses(
+  prismaClient: InboxLeadsPrisma,
+  addresses: string[],
+  options: LeadMatchOptions = {}
+): Promise<Map<string, InboxLeadMatch>> {
+  const { unique, leads } = await findLeadCandidates(prismaClient, addresses);
+  return unique.length === 0 ? new Map() : matchLeadsByEmail(unique, leads, options);
 }
 
 // A thread can be matched by its Reply-To as well as its sender, so a form
