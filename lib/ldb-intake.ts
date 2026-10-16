@@ -193,6 +193,39 @@ export function enquiryNote(enquiry: LdbEnquiry, duplicates: { id: string; name:
   return lines.join("\n");
 }
 
+// The lead an enquiry becomes, with its note written by no user. Shared with
+// the Gmail backfill (scripts/backfill-ldb-enquiries.ts), so an imported lead
+// is built exactly like a new one; it can set when the enquiry came in and a
+// different starting stage.
+export type LdbLeadOverrides = {
+  createdAt?: Date;
+  stage?: "UNCONTACTED" | "AWAITING_RESPONSE" | "LOST";
+  lostReason?: "OTHER";
+  lostReasonNote?: string;
+};
+
+export function ldbLeadData(enquiry: LdbEnquiry, note: string, overrides: LdbLeadOverrides = {}) {
+  const { createdAt, stage = "UNCONTACTED", lostReason, lostReasonNote } = overrides;
+  return {
+    name: enquiry.name,
+    email: enquiry.email,
+    phone: enquiry.phone,
+    businessName: enquiry.businessName,
+    postcode: enquiry.postcode,
+    // With no areas given, where the project is stands in for them.
+    targetAreas: enquiry.areas ?? enquiry.projectLocation,
+    leafletQuantity: enquiry.quantity,
+    printingIncluded: enquiry.printingIncluded,
+    designIncluded: enquiry.designIncluded,
+    business: "LDB" as const,
+    source: "WEBSITE_QUOTE_FORM" as const,
+    stage,
+    ...(lostReason ? { lostReason, lostReasonNote: lostReasonNote ?? null } : {}),
+    ...(createdAt ? { createdAt } : {}),
+    activities: { create: { type: "NOTE" as const, detail: note, ...(createdAt ? { createdAt } : {}) } },
+  };
+}
+
 // Narrow shapes of the Prisma calls used, so a test can pass a plain object.
 // `any` for the arguments is deliberate, as in send-lead-email.ts.
 export type LdbIntakeDb = {
@@ -245,25 +278,7 @@ export async function handleLdbIntake(req: Request, deps: LdbIntakeDeps): Promis
     }
 
     const duplicates = await deps.findDuplicates(enquiry.email, enquiry.phone);
-    await deps.db.lead.create({
-      data: {
-        name: enquiry.name,
-        email: enquiry.email,
-        phone: enquiry.phone,
-        businessName: enquiry.businessName,
-        postcode: enquiry.postcode,
-        // With no areas given, where the project is stands in for them.
-        targetAreas: enquiry.areas ?? enquiry.projectLocation,
-        leafletQuantity: enquiry.quantity,
-        printingIncluded: enquiry.printingIncluded,
-        designIncluded: enquiry.designIncluded,
-        business: "LDB",
-        source: "WEBSITE_QUOTE_FORM",
-        stage: "UNCONTACTED",
-        activities: { create: { type: "NOTE", detail: enquiryNote(enquiry, duplicates) } },
-      },
-      select: { id: true },
-    });
+    await deps.db.lead.create({ data: ldbLeadData(enquiry, enquiryNote(enquiry, duplicates)), select: { id: true } });
     return Response.json(OK);
   } catch (err) {
     // Only the error's type: a database error's message can echo the values
