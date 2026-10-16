@@ -479,6 +479,22 @@ function ownSet(own: string | string[]): Set<string> {
   return new Set((Array.isArray(own) ? own : [own]).map((a) => a.trim().toLowerCase()).filter(Boolean));
 }
 
+// Who a message is from, as the CRM treats it. A message from one of our
+// addresses whose Reply-To is a single address outside ours is a form
+// notification sent as our own address (the LDB website's, through the
+// send-as Bournemouth address), so it is received from the Reply-To person.
+// Anything else from our addresses, with no Reply-To or a Reply-To of ours
+// (the CRM's own emails), is sent by us.
+export function messageSender(
+  headers: gmail_v1.Schema$MessagePartHeader[] | undefined,
+  own: string | string[]
+): { from: Counterparty; sent: boolean; viaReplyTo: boolean } {
+  const from = parseMailbox(getHeader(headers, "From"));
+  if (!ownSet(own).has(from.address.toLowerCase())) return { from, sent: false, viaReplyTo: false };
+  const replyTo = singleReplyTo(getHeader(headers, "Reply-To"), own);
+  return replyTo ? { from: replyTo, sent: false, viaReplyTo: true } : { from, sent: true, viaReplyTo: false };
+}
+
 export function shouldExcludeMessage(
   headers: gmail_v1.Schema$MessagePartHeader[] | undefined,
   excluded: string[]
@@ -497,9 +513,14 @@ export function parseConversationMessage(
   own: string | string[]
 ): ConversationMessage | null {
   const headers = message.payload?.headers;
-  const from = getHeader(headers, "From") ?? "";
-  const fromAddress = extractAddress(from).toLowerCase();
-  const direction: ConversationMessage["direction"] = ownSet(own).has(fromAddress) ? "sent" : "received";
+  const sender = messageSender(headers, own);
+  const direction: ConversationMessage["direction"] = sender.sent ? "sent" : "received";
+  // A notification sent as our address shows its Reply-To person as the sender.
+  const from = sender.viaReplyTo
+    ? sender.from.name && sender.from.name !== sender.from.address
+      ? `${sender.from.name} <${sender.from.address}>`
+      : sender.from.address
+    : getHeader(headers, "From") ?? "";
 
   return {
     id: message.id ?? "",
@@ -576,13 +597,14 @@ export function findReplyTarget(
   messages: gmail_v1.Schema$Message[] | undefined,
   own: string | string[]
 ): ReplyTarget {
-  const ours = ownSet(own);
   const newestFirst = sortedOldestFirst(messages).reverse();
   for (const m of newestFirst) {
-    const from = parseMailbox(getHeader(m.payload?.headers, "From"));
-    if (from.address && !ours.has(from.address.toLowerCase())) {
+    // The latest message not sent by us, a send-as notification counting as
+    // its Reply-To person's.
+    const sender = messageSender(m.payload?.headers, own);
+    if (sender.from.address && !sender.sent) {
       const replyTo = singleReplyTo(getHeader(m.payload?.headers, "Reply-To"), own);
-      return { from, replyTo, recipient: replyTo ?? from };
+      return { from: sender.from, replyTo, recipient: replyTo ?? sender.from };
     }
   }
   const latest = newestFirst[0];
@@ -620,6 +642,9 @@ export function latestUnanswered(
   const messages = sortedOldestFirst(thread.messages);
   const latest = messages[messages.length - 1];
   if (!thread.id || !latest?.id) return null;
+  // The raw From address on purpose, not messageSender: a notification sent
+  // as our address is the enquiry itself, never an email from the lead
+  // waiting for an answer. The lead's own replies come from their address.
   const from = parseMailbox(getHeader(latest.payload?.headers, "From"));
   if (!from.address || ownSet(own).has(from.address.toLowerCase())) return null;
   if (latest.labelIds?.includes("SENT")) return null;
@@ -825,6 +850,27 @@ export async function sendEmail(
 
 // A lead's conversation. An FDH lead's never includes Bournemouth mail; an
 // LDB lead's does, and messages from the LDB address count as sent.
+// A lead's conversation: from or to them, plus their address anywhere, which
+// finds a notification sent as our address with them only as Reply-To (Gmail
+// can't search Reply-To). inLeadConversation then keeps only what they're
+// really part of.
+export function conversationQuery(leadEmail: string): string {
+  return `(from:"${leadEmail}" OR to:"${leadEmail}" OR "${leadEmail}")`;
+}
+
+// From them (directly, or as the Reply-To of a send-as notification), or to,
+// copied or blind-copied to them. Their address merely mentioned in a body
+// doesn't count.
+export function inLeadConversation(message: gmail_v1.Schema$Message, leadEmail: string, own: string | string[]): boolean {
+  const headers = message.payload?.headers;
+  const lead = leadEmail.trim().toLowerCase();
+  if (parseMailbox(getHeader(headers, "From")).address.toLowerCase() === lead) return true;
+  if (messageSender(headers, own).from.address.toLowerCase() === lead) return true;
+  return ["To", "Cc", "Bcc"].some((name) =>
+    splitAddressList(getHeader(headers, name) ?? "").some((part) => extractAddress(part).toLowerCase() === lead)
+  );
+}
+
 export async function getConversation(
   leadEmail: string,
   business: Business = "FDH"
@@ -838,7 +884,7 @@ export async function getConversation(
 
     const list = await client.users.messages.list({
       userId: "me",
-      q: `(from:"${leadEmail}" OR to:"${leadEmail}")`,
+      q: conversationQuery(leadEmail),
       maxResults: MAX_MESSAGES,
     });
 
@@ -870,10 +916,12 @@ export async function getConversation(
       });
     }
 
+    const own = ownAddresses(env.senderAddress);
     const parsed = fetched
       .filter((m) => !excludedThreads.has(m.threadId ?? ""))
       .filter((m) => !shouldExcludeMessage(m.payload?.headers, excluded))
-      .map((m) => parseConversationMessage(m, ownAddresses(env.senderAddress)))
+      .filter((m) => inLeadConversation(m, leadEmail, own))
+      .map((m) => parseConversationMessage(m, own))
       .filter((m): m is ConversationMessage => m !== null)
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
