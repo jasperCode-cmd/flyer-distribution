@@ -41,6 +41,8 @@ export default function NotificationBell({ menuAlign = "right" }: { menuAlign?: 
     let cancelled = false;
 
     async function poll() {
+      // A tab in the background doesn't poll; it catches up when shown again.
+      if (document.visibilityState !== "visible") return;
       try {
         const res = await fetch("/api/crm/notifications");
         if (!res.ok || cancelled) return;
@@ -91,10 +93,12 @@ export default function NotificationBell({ menuAlign = "right" }: { menuAlign?: 
     // An application approved or moved on from New (one at a time or in
     // bulk) leaves the bell straight away rather than at the next poll.
     window.addEventListener(APPLICATIONS_CHANGED_EVENT, poll);
+    document.addEventListener("visibilitychange", poll);
     return () => {
       cancelled = true;
       clearInterval(interval);
       window.removeEventListener(APPLICATIONS_CHANGED_EVENT, poll);
+      document.removeEventListener("visibilitychange", poll);
     };
   }, []);
 

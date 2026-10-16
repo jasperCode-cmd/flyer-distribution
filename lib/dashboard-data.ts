@@ -4,6 +4,7 @@ import { monthKeyLondon, type ProfitJob } from "./profit";
 import type { ExpenseRecord } from "./expenses";
 import { EXPENSE_ORDER, PROFIT_LEAD_ORDER, PROFIT_LEAD_SELECT, PROFIT_LEAD_WHERE, toExpenseRecord, toProfitJob } from "./profit-data";
 import { filterExpensesByBusiness, leadBusinessWhere, type BusinessFilter } from "./business";
+import { QUERY_CONCURRENCY, runLimited } from "./run-limited";
 import {
   addDays,
   chartData,
@@ -43,18 +44,18 @@ export async function loadDashboard(db: DashboardDb, period: DashboardPeriod, no
   const eventsEnd = new Date(Date.parse(`${addDays(today, 8)}T00:00:00Z`));
   const callsSince = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-  const [jobRows, expenseRows, leadRows, calls, campaignRows, eventRows] = await Promise.all([
-    db.lead.findMany({ where: { ...PROFIT_LEAD_WHERE, ...byBusiness }, select: PROFIT_LEAD_SELECT, orderBy: PROFIT_LEAD_ORDER }),
-    db.expense.findMany({ orderBy: EXPENSE_ORDER }),
-    db.lead.findMany({
+  const [jobRows, expenseRows, leadRows, calls, campaignRows, eventRows] = await runLimited(QUERY_CONCURRENCY, [
+    () => db.lead.findMany({ where: { ...PROFIT_LEAD_WHERE, ...byBusiness }, select: PROFIT_LEAD_SELECT, orderBy: PROFIT_LEAD_ORDER }),
+    () => db.expense.findMany({ orderBy: EXPENSE_ORDER }),
+    () => db.lead.findMany({
       where: { scrapped: false, ...byBusiness },
       select: { id: true, source: true, stage: true, createdAt: true, wonAt: true, dealValue: true },
     }),
-    db.activity.findMany({
+    () => db.activity.findMany({
       where: { type: "CALL", createdAt: { gte: callsSince }, lead: { source: COLD_OUTREACH, scrapped: false, ...byBusiness } },
       select: { leadId: true, createdAt: true },
     }),
-    db.job.findMany({
+    () => db.job.findMany({
       where: {
         campaignStartDate: { gte: windowStart, lte: campaignsEnd },
         lead: { scrapped: false, stage: { in: ["WON", "COMPLETED"] }, ...byBusiness },
@@ -76,7 +77,7 @@ export async function loadDashboard(db: DashboardDb, period: DashboardPeriod, no
         },
       },
     }),
-    db.calendarEvent.findMany({
+    () => db.calendarEvent.findMany({
       where: {
         completed: false,
         startDateTime: { gte: windowStart, lte: eventsEnd },

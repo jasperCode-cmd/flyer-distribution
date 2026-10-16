@@ -2,6 +2,7 @@ import "server-only";
 import { prisma } from "./prisma";
 import { mapWithConcurrency, withInboxReader } from "./gmail";
 import { unansweredLeadEmails } from "./priorities-email";
+import { QUERY_CONCURRENCY, runLimited } from "./run-limited";
 import {
   addDays,
   buildPriorities,
@@ -30,8 +31,8 @@ export async function loadDatabaseFacts(now: Date): Promise<Omit<PriorityInputs,
   const campaignFrom = new Date(Date.parse(`${addDays(today, -1)}T00:00:00Z`));
   const campaignTo = new Date(Date.parse(`${addDays(today, 9)}T00:00:00Z`));
 
-  const [leads, applications, tasks, dismissals] = await Promise.all([
-    prisma.lead.findMany({
+  const [leads, applications, tasks, dismissals] = await runLimited(QUERY_CONCURRENCY, [
+    () => prisma.lead.findMany({
       where: {
         scrapped: false,
         OR: [
@@ -57,15 +58,15 @@ export async function loadDatabaseFacts(now: Date): Promise<Omit<PriorityInputs,
         costs: { where: { category: "DISTRIBUTOR" }, select: { id: true }, take: 1 },
       },
     }),
-    prisma.distributorApplication.findMany({
+    () => prisma.distributorApplication.findMany({
       where: { status: "NEW" },
       select: { id: true, fullName: true, email: true, phone: true, status: true, receivedAt: true, updatedAt: true },
     }),
-    prisma.task.findMany({
+    () => prisma.task.findMany({
       where: { completed: false },
       select: { id: true, description: true, dueDate: true, priority: true, lead: { select: LEAD_REF } },
     }),
-    prisma.priorityDismissal.findMany({
+    () => prisma.priorityDismissal.findMany({
       select: { itemKey: true, fingerprint: true, snoozedUntil: true, dismissed: true },
     }),
   ]);

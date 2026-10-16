@@ -19,6 +19,7 @@
     "@googleapis/gmail": "^22.0.1",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "7.10.0",
+    "@vercel/functions": "3.9.9",
     "bcrypt": "^6.0.0",
     "framer-motion": "^13.4.1",
     "google-auth-library": "^11.2.0",
