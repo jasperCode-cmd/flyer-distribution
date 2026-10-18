@@ -10,6 +10,7 @@ import {
   canDelete,
   canEmail,
   canMarkPaid,
+  canMarkSent,
   canVoid,
   depositPence,
   ukToday,
@@ -156,7 +157,8 @@ export default function DocumentActions({
         link: { href: documentHref({ kind: "invoice", id: data.depositInvoiceId }), label: `Open ${data.depositNumber}` },
         leadChanged: true,
       });
-    } else if (action === "decline") onChanged({ message: `${doc.number} marked declined.`, leadChanged: false });
+    } else if (action === "sent") onChanged({ message: `${doc.number} marked as sent. Nothing was emailed.`, leadChanged: true });
+    else if (action === "decline") onChanged({ message: `${doc.number} marked declined.`, leadChanged: false });
     else if (action === "void") onChanged({ message: `${doc.number} voided.`, leadChanged: doc.status === "PAID" });
   }
 
@@ -186,6 +188,23 @@ export default function DocumentActions({
             onClick={() => setPending({ kind: "email" })}
           >
             Email to client
+          </button>
+        )}
+        {canMarkSent(status) && (
+          <button
+            type="button"
+            className={BTN_PLAIN}
+            onClick={() =>
+              setPending({
+                kind: "confirm",
+                title: `Mark ${doc.number} as sent?`,
+                text: "For when you have sent it yourself, outside the CRM. Nothing is emailed: it is marked Sent from now and a note is added to the lead.",
+                action: "sent",
+                label: "Mark as sent",
+              })
+            }
+          >
+            Mark as sent
           </button>
         )}
         {isQuote && canAcceptOrDecline(status as QuoteStatus) && (

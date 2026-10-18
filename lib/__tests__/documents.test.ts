@@ -5,6 +5,8 @@ import { readFileSync, readdirSync } from "node:fs";
 import {
   amountDuePence,
   balancePence,
+  canMarkSent,
+  isUnpaidInvoice,
   deductibleDeposits,
   depositPence,
   fillTemplate,
@@ -338,14 +340,33 @@ test("bank details are nowhere in the repository: only the setting names, empty,
   for (const name of PAYMENT_ENV_NAMES) assert.match(example, new RegExp(`^${name}=""$`, "m"));
 });
 
+// --- Mark as sent ------------------------------------------------------------------------------
+
+test("Mark as sent is for drafts only, and a marked invoice counts as unpaid", () => {
+  for (const status of ["DRAFT", "SENT", "ACCEPTED", "DECLINED", "PAID", "VOID"] as const) {
+    assert.equal(canMarkSent(status), status === "DRAFT", status);
+  }
+  assert.equal(isUnpaidInvoice({ kind: "invoice", status: "SENT" }), true);
+  for (const status of ["DRAFT", "PAID", "VOID"]) assert.equal(isUnpaidInvoice({ kind: "invoice", status }), false, status);
+  assert.equal(isUnpaidInvoice({ kind: "quote", status: "SENT" }), false);
+});
+
 // --- Notes -------------------------------------------------------------------------------------
 
 test("the notes the CRM writes about documents start with Quote QUO- or Invoice INV-, so they never count as contact", () => {
   const source = readFileSync("lib/documents/service.ts", "utf8");
   const calls = [...source.matchAll(/noteData\(\s*[\w.]+,\s*`([^`]*)`/g)].map((m) => m[1]);
-  assert.equal(calls.length, 4, "accepted, declined, paid, voided");
+  assert.equal(calls.length, 6, "accepted, declined, paid, voided, and a quote or invoice marked as sent");
   for (const detail of calls) assert.match(detail, /^(Quote \$\{quote\.number\}|Invoice \$\{invoice\.number\}) /);
-  for (const sample of ["Quote QUO-1001 accepted. Deal value set to £600.00", "Quote QUO-1001 marked declined.", "Invoice INV-1106 marked paid: £300.00", "Invoice INV-1106 voided."]) {
+  assert.ok(calls.includes("Quote ${quote.number} marked as sent") && calls.includes("Invoice ${invoice.number} marked as sent"));
+  for (const sample of [
+    "Quote QUO-1001 accepted. Deal value set to £600.00",
+    "Quote QUO-1001 marked declined.",
+    "Invoice INV-1106 marked paid: £300.00",
+    "Invoice INV-1106 voided.",
+    "Quote QUO-1001 marked as sent",
+    "Invoice INV-1106 marked as sent",
+  ]) {
     assert.equal(isSystemNote(sample), true, sample);
   }
 });

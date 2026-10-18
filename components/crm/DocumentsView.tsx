@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { formatPence } from "@/lib/money";
 import type { BusinessFilter as Filter } from "@/lib/business";
-import { DOCUMENT_TYPE_LABELS, STATUS_LABELS, formatLongDate, type DocumentType } from "@/lib/documents/rules";
+import { DOCUMENT_TYPE_LABELS, STATUS_LABELS, formatLongDate, isUnpaidInvoice, type DocumentType } from "@/lib/documents/rules";
 import BusinessBadge from "./BusinessBadge";
 import BusinessFilter from "./BusinessFilter";
 import { DocumentStatusPill, documentHref, pdfHref } from "./DocumentActions";
@@ -45,7 +45,7 @@ export default function DocumentsView({ documents, today, bank }: { documents: D
     () =>
       view === "unpaid"
         ? byBusiness
-            .filter((d) => d.kind === "invoice" && d.status === "SENT")
+            .filter(isUnpaidInvoice)
             .filter((d) => type === "ALL" || d.type === type)
             .sort((a, b) => (dueKey(a) < dueKey(b) ? -1 : 1))
         : byBusiness.filter((d) => (type === "ALL" || d.type === type) && (status === "ALL" || d.status === status)),

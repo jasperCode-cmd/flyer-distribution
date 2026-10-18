@@ -452,6 +452,30 @@ export async function voidInvoice(db: Db, id: string, opts: { userId: string | n
 
 // --- Sending ---------------------------------------------------------------------
 
+// Mark as sent, for a draft sent outside the CRM (downloaded and emailed by
+// hand): it becomes Sent now and the lead gets a note. Nothing is emailed.
+export async function markDocumentSent(db: Db, kind: "quote" | "invoice", id: string, opts: { userId: string | null; now: Date }) {
+  return db.$transaction(async (tx) => {
+    if (kind === "quote") {
+      const changed = await tx.quote.updateMany({ where: { id, status: "DRAFT" }, data: { status: "SENT", sentAt: opts.now } });
+      if (changed.count === 0) {
+        const exists = await tx.quote.findUnique({ where: { id }, select: { id: true } });
+        throw exists ? new DocumentError("Only a draft can be marked as sent", 409) : notFound("Quote");
+      }
+      const quote = await tx.quote.findUniqueOrThrow({ where: { id }, select: { number: true, leadId: true } });
+      await tx.activity.create({ data: noteData(quote.leadId, `Quote ${quote.number} marked as sent`, opts.userId) });
+      return;
+    }
+    const changed = await tx.invoice.updateMany({ where: { id, status: "DRAFT" }, data: { status: "SENT", sentAt: opts.now } });
+    if (changed.count === 0) {
+      const exists = await tx.invoice.findUnique({ where: { id }, select: { id: true } });
+      throw exists ? new DocumentError("Only a draft can be marked as sent", 409) : notFound("Invoice");
+    }
+    const invoice = await tx.invoice.findUniqueOrThrow({ where: { id }, select: { number: true, leadId: true } });
+    await tx.activity.create({ data: noteData(invoice.leadId, `Invoice ${invoice.number} marked as sent`, opts.userId) });
+  });
+}
+
 // The write that goes in the same transaction as the sent email's Activity:
 // a draft becomes Sent; anything already sent just gets the new time.
 export function markSentOp(db: Db, kind: "quote" | "invoice", id: string, now: Date) {

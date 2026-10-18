@@ -147,6 +147,16 @@ export function canMarkPaid(status: InvoiceStatus): boolean {
 export function canVoid(status: InvoiceStatus): boolean {
   return status === "SENT" || status === "PAID";
 }
+// For a draft sent outside the CRM (downloaded and emailed by hand).
+export function canMarkSent(status: DocumentStatus): boolean {
+  return status === "DRAFT";
+}
+
+// What the Unpaid invoices view lists: invoices that have gone out, by the
+// CRM or by hand, and aren't paid. Drafts haven't gone out; void ones aren't owed.
+export function isUnpaidInvoice(doc: { kind: string; status: string }): boolean {
+  return doc.kind === "invoice" && doc.status === "SENT";
+}
 
 // --- Days -------------------------------------------------------------------------
 

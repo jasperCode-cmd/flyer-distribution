@@ -2,7 +2,7 @@ import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
-import { parseDocumentInput, ukToday, addDays, type DocumentType } from "@/lib/documents/rules";
+import { isUnpaidInvoice, parseDocumentInput, ukToday, addDays, type DocumentType } from "@/lib/documents/rules";
 import {
   DocumentError,
   acceptQuote,
@@ -11,6 +11,8 @@ import {
   declineQuote,
   deleteInvoice,
   deleteQuote,
+  listDocuments,
+  markDocumentSent,
   markInvoicePaid,
   markSentOp,
   takeNumber,
@@ -230,6 +232,54 @@ test("real database: Mark paid sets amount paid and payment status; the balance 
   const notes = await prisma.activity.findMany({ where: { leadId: lead.id, type: "NOTE" }, orderBy: { createdAt: "asc" }, select: { detail: true } });
   assert.ok(notes.some((n) => n.detail.startsWith(`Invoice ${balance.number} marked paid: £400.00 received`)));
   assert.ok(notes.some((n) => n.detail === `Invoice ${balance.number} voided.`));
+});
+
+test("real database: Mark as sent sets Sent and sentAt, notes it on the lead, emails nobody, and the invoice shows as unpaid", { skip }, async () => {
+  const lead = await makeLead({ stage: "UNCONTACTED" });
+  const quote = await createQuote(prisma, lead.id, input("QUOTE", [["Distribution", "450.00"]]));
+  const invoice = await createInvoice(prisma, { leadId: lead.id, type: "FULL", data: input("FULL", [["Distribution", "450.00"]]) });
+  const stillDraft = await createInvoice(prisma, { leadId: lead.id, type: "FULL", data: input("FULL", [["Distribution", "100.00"]]) });
+
+  // Any network call (Brevo goes through fetch) would be counted here.
+  const realFetch = globalThis.fetch;
+  let fetches = 0;
+  globalThis.fetch = (async (...args: Parameters<typeof fetch>) => {
+    fetches++;
+    return realFetch(...args);
+  }) as typeof fetch;
+  try {
+    await markDocumentSent(prisma, "quote", quote.id, { userId, now });
+    await markDocumentSent(prisma, "invoice", invoice.id, { userId, now });
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+  assert.equal(fetches, 0, "nothing sent");
+
+  const q = await prisma.quote.findUniqueOrThrow({ where: { id: quote.id } });
+  const i = await prisma.invoice.findUniqueOrThrow({ where: { id: invoice.id } });
+  assert.deepEqual([q.status, q.sentAt?.toISOString()], ["SENT", now.toISOString()]);
+  assert.deepEqual([i.status, i.sentAt?.toISOString()], ["SENT", now.toISOString()]);
+
+  const after = await prisma.lead.findUniqueOrThrow({ where: { id: lead.id }, include: { activities: { orderBy: { createdAt: "asc" } } } });
+  assert.deepEqual(
+    after.activities.map((a) => [a.type, a.detail, a.userId]),
+    [
+      ["NOTE", `Quote ${quote.number} marked as sent`, userId],
+      ["NOTE", `Invoice ${invoice.number} marked as sent`, userId],
+    ],
+    "a note each, and no email recorded"
+  );
+  assert.equal(after.stage, "UNCONTACTED", "no email, so the stage is left alone");
+
+  // Drafts only.
+  await assert.rejects(markDocumentSent(prisma, "invoice", invoice.id, { userId, now }), (err: unknown) =>
+    err instanceof DocumentError && err.status === 409 && err.message === "Only a draft can be marked as sent"
+  );
+
+  // Unpaid invoices lists the marked invoice, not the draft or the quote.
+  const unpaid = (await listDocuments(prisma, { leadId: lead.id })).filter(isUnpaidInvoice).map((d) => d.number);
+  assert.deepEqual(unpaid, [invoice.number]);
+  assert.ok(!unpaid.includes(stillDraft.number) && !unpaid.includes(quote.number));
 });
 
 test("real database: a lead with quotes or invoices can't be deleted", { skip }, async () => {

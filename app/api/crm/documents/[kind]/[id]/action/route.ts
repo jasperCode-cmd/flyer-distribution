@@ -2,12 +2,13 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { isDocumentKind } from "@/lib/documents/rules";
-import { acceptQuote, declineQuote, markInvoicePaid, voidInvoice } from "@/lib/documents/service";
+import { acceptQuote, declineQuote, markDocumentSent, markInvoicePaid, voidInvoice } from "@/lib/documents/service";
 import { documentErrorResponse } from "@/lib/documents/views";
 
 export const runtime = "nodejs";
 
-// Mark accepted or declined (quotes), mark paid or void (invoices).
+// Mark as sent (drafts sent by hand), mark accepted or declined (quotes),
+// mark paid or void (invoices).
 export async function POST(req: Request, { params }: { params: Promise<{ kind: string; id: string }> }) {
   const session = await auth();
   if (!session?.user) {
@@ -25,6 +26,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ kind: s
   const action = body?.action;
 
   try {
+    // Records it as sent without sending anything.
+    if (action === "sent") {
+      await markDocumentSent(prisma, kind, id, opts);
+      return NextResponse.json({ ok: true });
+    }
     if (kind === "quote" && action === "accept") {
       const result = await acceptQuote(prisma, id, opts);
       return NextResponse.json({ ok: true, ...result });
