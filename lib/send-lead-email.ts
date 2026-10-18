@@ -28,6 +28,32 @@ export type SendLeadEmailResult =
   | { ok: false; sent: false; reason: "not_configured" | "reconnect" | "error"; message: string }
   | { ok: false; sent: true; message: string };
 
+// An Uncontacted lead moving to Awaiting Response because something went to
+// it: the lead update (the shared stage data the Dialer's Warm outcome uses
+// too) and its stage-change entry. Used when an email is sent from the CRM
+// and when a quote or invoice is marked as sent by hand.
+export function moveToAwaitingResponseOps(
+  prismaClient: Pick<SendLeadEmailPrisma, "activity" | "lead">,
+  leadId: string,
+  because: string,
+  userId: string | null
+): unknown[] {
+  return [
+    prismaClient.lead.update({
+      where: { id: leadId },
+      data: awaitingResponseStageData(),
+    }),
+    prismaClient.activity.create({
+      data: {
+        leadId,
+        type: "STAGE_CHANGE",
+        detail: `Stage changed from ${STAGE_LABELS.UNCONTACTED} to ${STAGE_LABELS.AWAITING_RESPONSE} because ${because}.`,
+        userId,
+      },
+    }),
+  ];
+}
+
 // Sends the email, then (only on a successful send) records it as an
 // Activity and, only from Uncontacted, moves the lead to Awaiting Response
 // using the same shared stage data the Dialer's Warm outcome uses. If
@@ -77,20 +103,7 @@ export async function sendLeadEmailAndRecord(params: {
     if (params.extraOps) ops.push(...params.extraOps());
 
     if (movedToAwaitingResponse) {
-      ops.push(
-        params.prismaClient.lead.update({
-          where: { id: params.lead.id },
-          data: awaitingResponseStageData(),
-        }),
-        params.prismaClient.activity.create({
-          data: {
-            leadId: params.lead.id,
-            type: "STAGE_CHANGE",
-            detail: `Stage changed from ${STAGE_LABELS.UNCONTACTED} to ${STAGE_LABELS.AWAITING_RESPONSE} because an email was sent.`,
-            userId: params.userId,
-          },
-        })
-      );
+      ops.push(...moveToAwaitingResponseOps(params.prismaClient, params.lead.id, "an email was sent", params.userId));
     }
 
     await params.prismaClient.$transaction(ops);

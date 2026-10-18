@@ -28,8 +28,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ kind: s
   try {
     // Records it as sent without sending anything.
     if (action === "sent") {
-      await markDocumentSent(prisma, kind, id, opts);
-      return NextResponse.json({ ok: true });
+      const result = await markDocumentSent(prisma, kind, id, opts);
+      return NextResponse.json({ ok: true, ...result });
     }
     if (kind === "quote" && action === "accept") {
       const result = await acceptQuote(prisma, id, opts);

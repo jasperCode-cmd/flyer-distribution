@@ -24,6 +24,7 @@ import { sendDocumentEmail } from "@/lib/documents/email";
 import { sendEmailVia } from "@/lib/gmail";
 import { sendViaBrevo } from "@/lib/ldb-email";
 import { toProfitJob, PROFIT_LEAD_SELECT } from "@/lib/profit-data";
+import { stageEnteredAt } from "@/lib/priorities";
 import { placeholderBankEnv, readPdf } from "./documents-fixtures";
 
 // Quotes and invoices against a real database, but only a throwaway local
@@ -234,8 +235,8 @@ test("real database: Mark paid sets amount paid and payment status; the balance 
   assert.ok(notes.some((n) => n.detail === `Invoice ${balance.number} voided.`));
 });
 
-test("real database: Mark as sent sets Sent and sentAt, notes it on the lead, emails nobody, and the invoice shows as unpaid", { skip }, async () => {
-  const lead = await makeLead({ stage: "UNCONTACTED" });
+test("real database: Mark as sent sets Sent and sentAt, notes it on the lead, moves an Uncontacted lead to Awaiting Response, emails nobody, and the invoice shows as unpaid", { skip }, async () => {
+  const lead = await makeLead({ stage: "UNCONTACTED", noAnswerStreak: 2, nextCallableAt: new Date("2026-11-01T09:00:00.000Z") });
   const quote = await createQuote(prisma, lead.id, input("QUOTE", [["Distribution", "450.00"]]));
   const invoice = await createInvoice(prisma, { leadId: lead.id, type: "FULL", data: input("FULL", [["Distribution", "450.00"]]) });
   const stillDraft = await createInvoice(prisma, { leadId: lead.id, type: "FULL", data: input("FULL", [["Distribution", "100.00"]]) });
@@ -247,29 +248,39 @@ test("real database: Mark as sent sets Sent and sentAt, notes it on the lead, em
     fetches++;
     return realFetch(...args);
   }) as typeof fetch;
+  let first, second;
   try {
-    await markDocumentSent(prisma, "quote", quote.id, { userId, now });
-    await markDocumentSent(prisma, "invoice", invoice.id, { userId, now });
+    first = await markDocumentSent(prisma, "quote", quote.id, { userId, now });
+    second = await markDocumentSent(prisma, "invoice", invoice.id, { userId, now });
   } finally {
     globalThis.fetch = realFetch;
   }
   assert.equal(fetches, 0, "nothing sent");
+  assert.deepEqual(first, { movedToAwaitingResponse: true }, "the first one moves the Uncontacted lead");
+  assert.deepEqual(second, { movedToAwaitingResponse: false }, "by the second it is already Awaiting Response");
 
   const q = await prisma.quote.findUniqueOrThrow({ where: { id: quote.id } });
   const i = await prisma.invoice.findUniqueOrThrow({ where: { id: invoice.id } });
   assert.deepEqual([q.status, q.sentAt?.toISOString()], ["SENT", now.toISOString()]);
   assert.deepEqual([i.status, i.sentAt?.toISOString()], ["SENT", now.toISOString()]);
 
-  const after = await prisma.lead.findUniqueOrThrow({ where: { id: lead.id }, include: { activities: { orderBy: { createdAt: "asc" } } } });
+  const after = await prisma.lead.findUniqueOrThrow({ where: { id: lead.id }, include: { activities: true } });
+  // In one transaction the entries share a time, so they are compared in any order.
+  const entry = (a: { type: string; detail: string; userId: string | null }) => [a.type, a.detail, a.userId].join(" | ");
   assert.deepEqual(
-    after.activities.map((a) => [a.type, a.detail, a.userId]),
+    after.activities.map(entry).sort(),
     [
-      ["NOTE", `Quote ${quote.number} marked as sent`, userId],
       ["NOTE", `Invoice ${invoice.number} marked as sent`, userId],
-    ],
-    "a note each, and no email recorded"
+      ["NOTE", `Quote ${quote.number} marked as sent`, userId],
+      ["STAGE_CHANGE", `Stage changed from Uncontacted to Warm / Awaiting Response because Quote ${quote.number} was marked as sent.`, userId],
+    ].map((e) => e.join(" | ")),
+    "a note each, one stage change, and no email recorded"
   );
-  assert.equal(after.stage, "UNCONTACTED", "no email, so the stage is left alone");
+  // The same shared stage data as emailing from the CRM: the Dialer's fields are reset too.
+  assert.deepEqual([after.stage, after.noAnswerStreak, after.nextCallableAt], ["AWAITING_RESPONSE", 0, null]);
+  // Priorities reads the stage change as when the lead started awaiting a response.
+  const facts = after.activities.map((a) => ({ type: a.type, detail: a.detail, createdAt: a.createdAt.toISOString(), userId: a.userId }));
+  assert.equal(stageEnteredAt({ activities: facts }, "AWAITING_RESPONSE"), facts.find((a) => a.type === "STAGE_CHANGE")!.createdAt);
 
   // Drafts only.
   await assert.rejects(markDocumentSent(prisma, "invoice", invoice.id, { userId, now }), (err: unknown) =>
@@ -280,6 +291,18 @@ test("real database: Mark as sent sets Sent and sentAt, notes it on the lead, em
   const unpaid = (await listDocuments(prisma, { leadId: lead.id })).filter(isUnpaidInvoice).map((d) => d.number);
   assert.deepEqual(unpaid, [invoice.number]);
   assert.ok(!unpaid.includes(stillDraft.number) && !unpaid.includes(quote.number));
+});
+
+test("real database: Mark as sent leaves a lead in any other stage where it is", { skip }, async () => {
+  for (const stage of ["AWAITING_RESPONSE", "WON", "COMPLETED", "LOST"] as const) {
+    const lead = await makeLead({ stage });
+    const invoice = await createInvoice(prisma, { leadId: lead.id, type: "FULL", data: input("FULL", [["Distribution", "100.00"]]) });
+    assert.deepEqual(await markDocumentSent(prisma, "invoice", invoice.id, { userId, now }), { movedToAwaitingResponse: false }, stage);
+    const after = await prisma.lead.findUniqueOrThrow({ where: { id: lead.id }, include: { activities: true } });
+    assert.equal(after.stage, stage);
+    assert.deepEqual(after.activities.map((a) => [a.type, a.detail]), [["NOTE", `Invoice ${invoice.number} marked as sent`]], `${stage}: the note only, no stage change`);
+    assert.equal((await prisma.invoice.findUniqueOrThrow({ where: { id: invoice.id } })).status, "SENT");
+  }
 });
 
 test("real database: a lead with quotes or invoices can't be deleted", { skip }, async () => {

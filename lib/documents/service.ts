@@ -2,6 +2,8 @@ import "server-only";
 import type { Prisma, PrismaClient } from "@/generated/prisma/client";
 import { decimalToPence, formatPence } from "@/lib/money";
 import { isWonStage, stageChangeOps } from "@/lib/lead-stage";
+import { shouldMoveToAwaitingResponse } from "@/lib/crm-data";
+import { moveToAwaitingResponseOps } from "@/lib/send-lead-email";
 import { brandingFor } from "./branding";
 import {
   addDays,
@@ -452,9 +454,26 @@ export async function voidInvoice(db: Db, id: string, opts: { userId: string | n
 
 // --- Sending ---------------------------------------------------------------------
 
+// As when a document is emailed from the CRM: an Uncontacted lead moves to
+// Awaiting Response, by the email path's own rule and writes. A lead in any
+// other stage is left alone.
+async function moveUncontactedLead(tx: Tx, leadId: string, what: string, userId: string | null): Promise<boolean> {
+  await lockLead(tx, leadId);
+  const lead = await tx.lead.findUniqueOrThrow({ where: { id: leadId }, select: { stage: true } });
+  if (!shouldMoveToAwaitingResponse(lead.stage)) return false;
+  for (const op of moveToAwaitingResponseOps(tx, leadId, `${what} was marked as sent`, userId)) await op;
+  return true;
+}
+
 // Mark as sent, for a draft sent outside the CRM (downloaded and emailed by
-// hand): it becomes Sent now and the lead gets a note. Nothing is emailed.
-export async function markDocumentSent(db: Db, kind: "quote" | "invoice", id: string, opts: { userId: string | null; now: Date }) {
+// hand): it becomes Sent now, the lead gets a note, and an Uncontacted lead
+// moves to Awaiting Response as it would had the CRM sent it. Nothing is emailed.
+export async function markDocumentSent(
+  db: Db,
+  kind: "quote" | "invoice",
+  id: string,
+  opts: { userId: string | null; now: Date }
+): Promise<{ movedToAwaitingResponse: boolean }> {
   return db.$transaction(async (tx) => {
     if (kind === "quote") {
       const changed = await tx.quote.updateMany({ where: { id, status: "DRAFT" }, data: { status: "SENT", sentAt: opts.now } });
@@ -464,7 +483,7 @@ export async function markDocumentSent(db: Db, kind: "quote" | "invoice", id: st
       }
       const quote = await tx.quote.findUniqueOrThrow({ where: { id }, select: { number: true, leadId: true } });
       await tx.activity.create({ data: noteData(quote.leadId, `Quote ${quote.number} marked as sent`, opts.userId) });
-      return;
+      return { movedToAwaitingResponse: await moveUncontactedLead(tx, quote.leadId, `Quote ${quote.number}`, opts.userId) };
     }
     const changed = await tx.invoice.updateMany({ where: { id, status: "DRAFT" }, data: { status: "SENT", sentAt: opts.now } });
     if (changed.count === 0) {
@@ -473,6 +492,7 @@ export async function markDocumentSent(db: Db, kind: "quote" | "invoice", id: st
     }
     const invoice = await tx.invoice.findUniqueOrThrow({ where: { id }, select: { number: true, leadId: true } });
     await tx.activity.create({ data: noteData(invoice.leadId, `Invoice ${invoice.number} marked as sent`, opts.userId) });
+    return { movedToAwaitingResponse: await moveUncontactedLead(tx, invoice.leadId, `Invoice ${invoice.number}`, opts.userId) };
   });
 }
 

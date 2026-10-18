@@ -157,7 +157,12 @@ export default function DocumentActions({
         link: { href: documentHref({ kind: "invoice", id: data.depositInvoiceId }), label: `Open ${data.depositNumber}` },
         leadChanged: true,
       });
-    } else if (action === "sent") onChanged({ message: `${doc.number} marked as sent. Nothing was emailed.`, leadChanged: true });
+    } else if (action === "sent") {
+      onChanged({
+        message: `${doc.number} marked as sent. Nothing was emailed.${data.movedToAwaitingResponse ? " The lead moved to Awaiting Response." : ""}`,
+        leadChanged: true,
+      });
+    }
     else if (action === "decline") onChanged({ message: `${doc.number} marked declined.`, leadChanged: false });
     else if (action === "void") onChanged({ message: `${doc.number} voided.`, leadChanged: doc.status === "PAID" });
   }
@@ -198,7 +203,7 @@ export default function DocumentActions({
               setPending({
                 kind: "confirm",
                 title: `Mark ${doc.number} as sent?`,
-                text: "For when you have sent it yourself, outside the CRM. Nothing is emailed: it is marked Sent from now and a note is added to the lead.",
+                text: "For when you have sent it yourself, outside the CRM. Nothing is emailed: it is marked Sent from now and a note is added to the lead. An Uncontacted lead moves to Awaiting Response, as when the CRM sends it.",
                 action: "sent",
                 label: "Mark as sent",
               })
