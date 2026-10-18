@@ -401,6 +401,9 @@ test("every note the CRM writes for itself is worded so the follow-up rule ignor
     // Writes planPriorityAction's Still in talks note, checked above; used
     // by the single-row actions route and the bulk route.
     "lib/priority-actions.ts": "plan.activity.detail",
+    // Quotes and invoices accepted, declined, paid or voided, all through
+    // noteData; documents.test.ts checks each starts "Quote QUO-" or "Invoice INV-".
+    "lib/documents/service.ts": "function noteData(",
   };
   assert.deepEqual(writers.sort(), [...typedByPerson, ...Object.keys(systemWording)].sort());
   for (const [file, wording] of Object.entries(systemWording)) {

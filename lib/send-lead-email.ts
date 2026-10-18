@@ -1,7 +1,7 @@
 import "server-only";
 import { awaitingResponseStageData, shouldMoveToAwaitingResponse } from "./crm-data";
 import { STAGE_LABELS } from "./crm-constants";
-import type { GmailResult, SignatureOutcome, ThreadContext } from "./gmail";
+import type { EmailAttachment, GmailResult, SignatureOutcome, ThreadContext } from "./gmail";
 
 // Minimal shapes of the Prisma calls this needs, so a test can pass a plain
 // mock object instead of a real PrismaClient. The real route passes the
@@ -20,6 +20,7 @@ export type SendEmailFn = (params: {
   subject: string;
   body: string;
   threadContext?: ThreadContext | null;
+  attachments?: EmailAttachment[];
 }) => Promise<GmailResult<{ messageId: string; threadId: string; signature?: SignatureOutcome }>>;
 
 export type SendLeadEmailResult =
@@ -42,12 +43,19 @@ export async function sendLeadEmailAndRecord(params: {
   threadContext?: ThreadContext | null;
   sendEmailFn: SendEmailFn;
   prismaClient: SendLeadEmailPrisma;
+  // Files sent with it, such as a quote's PDF; named on the Activity.
+  attachments?: EmailAttachment[];
+  // More writes for the same transaction as the Activity, such as marking
+  // the quote it carries as sent. Like the Activity, only after a send.
+  extraOps?: () => unknown[];
 }): Promise<SendLeadEmailResult> {
+  const attachments = params.attachments ?? [];
   const result = await params.sendEmailFn({
     to: params.to,
     subject: params.subject,
     body: params.body,
     threadContext: params.threadContext,
+    ...(attachments.length > 0 ? { attachments } : {}),
   });
 
   if (!result.ok) {
@@ -55,9 +63,9 @@ export async function sendLeadEmailAndRecord(params: {
   }
 
   const movedToAwaitingResponse = shouldMoveToAwaitingResponse(params.lead.stage);
-  const activityDetail = `Email: "${params.subject}"\n\n${params.body.slice(0, 200)}${
-    params.body.length > 200 ? "..." : ""
-  }`;
+  const activityDetail =
+    `Email: "${params.subject}"\n\n${params.body.slice(0, 200)}${params.body.length > 200 ? "..." : ""}` +
+    (attachments.length > 0 ? `\n\nAttached: ${attachments.map((a) => a.filename).join(", ")}` : "");
 
   try {
     const ops: unknown[] = [
@@ -65,6 +73,8 @@ export async function sendLeadEmailAndRecord(params: {
         data: { leadId: params.lead.id, type: "EMAIL", detail: activityDetail, userId: params.userId },
       }),
     ];
+
+    if (params.extraOps) ops.push(...params.extraOps());
 
     if (movedToAwaitingResponse) {
       ops.push(

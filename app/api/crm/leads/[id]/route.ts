@@ -112,11 +112,25 @@ export async function DELETE(
 
   const lead = await prisma.lead.findUnique({
     where: { id },
-    select: { id: true, name: true, job: { select: { id: true } } },
+    select: {
+      id: true,
+      name: true,
+      job: { select: { id: true } },
+      _count: { select: { quotes: true, invoices: true } },
+    },
   });
 
   if (!lead) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  // Quotes and invoices are financial records with numbers that are never
+  // reused, so a lead that has any is kept.
+  if (lead._count.quotes > 0 || lead._count.invoices > 0) {
+    return NextResponse.json(
+      { error: "This lead has quotes or invoices, so it can't be deleted. Scrap it instead." },
+      { status: 409 }
+    );
   }
 
   // A Job represents real completed work: deleting the lead would silently

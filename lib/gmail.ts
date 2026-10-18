@@ -267,12 +267,26 @@ function newBoundary(): string {
   return `fdh_${randomBytes(12).toString("hex")}`;
 }
 
+// A file sent with an email, such as a quote's PDF.
+export type EmailAttachment = { filename: string; mimeType: string; content: Uint8Array };
+
+// Only plain characters in an attachment's name, so it needs no encoding.
+export function safeAttachmentName(name: string): string {
+  return name.replace(/[^A-Za-z0-9._-]/g, "-").slice(0, 120) || "attachment";
+}
+
+function base64Lines(content: Uint8Array): string {
+  return (Buffer.from(content).toString("base64").match(/.{1,76}/g) ?? []).join("\r\n");
+}
+
 // Every email goes out as multipart/alternative: a text/plain part (the
 // body, then the signature as plain text) and a text/html part (the body
 // HTML-escaped with line breaks as <br>, then our signature inside a
 // gmail_signature div, the way Gmail itself sends it). The body is always
 // escaped, so nothing typed can become HTML. Threading headers are exactly
-// as before.
+// as before. With attachments, that same alternative part goes inside a
+// multipart/mixed message, followed by each file; without any, the message
+// is exactly as it always was.
 export function buildRawMessage(params: {
   from: string;
   to: string;
@@ -281,8 +295,12 @@ export function buildRawMessage(params: {
   inReplyTo?: string | null;
   signatureHtml?: string | null;
   boundary?: string;
+  attachments?: EmailAttachment[];
+  mixedBoundary?: string;
 }): string {
   const boundary = params.boundary ?? newBoundary();
+  const attachments = params.attachments ?? [];
+  const mixed = attachments.length > 0 ? params.mixedBoundary ?? newBoundary() : null;
   const signatureHtml = params.signatureHtml?.trim() || null;
   const body = params.body.replace(/\r\n|\r/g, "\n");
 
@@ -301,12 +319,13 @@ export function buildRawMessage(params: {
     `To: ${params.to}`,
     `Subject: ${encodeMimeHeader(params.subject)}`,
     "MIME-Version: 1.0",
-    `Content-Type: multipart/alternative; boundary="${boundary}"`,
+    mixed ? `Content-Type: multipart/mixed; boundary="${mixed}"` : `Content-Type: multipart/alternative; boundary="${boundary}"`,
   ];
   if (params.inReplyTo) {
     lines.push(`In-Reply-To: ${params.inReplyTo}`);
     lines.push(`References: ${params.inReplyTo}`);
   }
+  if (mixed) lines.push("", `--${mixed}`, `Content-Type: multipart/alternative; boundary="${boundary}"`);
   lines.push(
     "",
     `--${boundary}`,
@@ -322,6 +341,20 @@ export function buildRawMessage(params: {
     `--${boundary}--`,
     ""
   );
+  if (mixed) {
+    for (const file of attachments) {
+      const name = safeAttachmentName(file.filename);
+      lines.push(
+        `--${mixed}`,
+        `Content-Type: ${file.mimeType}; name="${name}"`,
+        `Content-Disposition: attachment; filename="${name}"`,
+        "Content-Transfer-Encoding: base64",
+        "",
+        base64Lines(file.content)
+      );
+    }
+    lines.push(`--${mixed}--`, "");
+  }
   return base64UrlEncode(lines.join("\r\n"));
 }
 
@@ -784,6 +817,7 @@ export type SendEmailParams = {
   subject: string;
   body: string;
   threadContext?: ThreadContext | null;
+  attachments?: EmailAttachment[];
 };
 
 // The send itself, given the two Gmail calls it needs, so a test can drive
@@ -803,6 +837,7 @@ export async function sendEmailVia(
     body: params.body,
     inReplyTo: params.threadContext?.lastMessageId ?? null,
     signatureHtml: signature.status === "found" ? signature.html : null,
+    attachments: params.attachments,
   });
 
   try {

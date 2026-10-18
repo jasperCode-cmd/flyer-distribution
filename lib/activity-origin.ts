@@ -25,6 +25,8 @@ export const SYSTEM_NOTE_PATTERNS: readonly RegExp[] = [
   /^Imported note: /,
   // The website quote form's details.
   /^Service type: /,
+  // A quote or invoice accepted, declined, paid or voided.
+  /^(Quote QUO|Invoice INV)-\d+ /,
 ];
 
 export function isSystemNote(detail: string): boolean {

@@ -11,6 +11,7 @@ import EmailComposeModal, { sentLabel, type ReplyContext, type SendResult } from
 import BusinessBadge from "./BusinessBadge";
 import { BUSINESSES, BUSINESS_NAMES, type Business } from "@/lib/business";
 import EmailsSection, { type EmailsState, type ConversationMessage } from "./EmailsSection";
+import LeadDocuments from "./LeadDocuments";
 import { usePaymentReviewEditor } from "./usePaymentReviewEditor";
 import {
   STAGE_LABELS,
@@ -86,6 +87,7 @@ export type LeadDetailData = {
   amountPaid: string | null;
   assignedToId: string | null;
   business: Business;
+  scrapped?: boolean;
   createdAt: string;
   activities: Activity[];
   job: Job | null;
@@ -839,6 +841,8 @@ export default function LeadDetail({
       )}
 
       {/* Follow-up tasks */}
+      <LeadDocuments leadId={lead.id} scrapped={lead.scrapped ?? false} />
+
       <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-bold text-blue-900">Follow-ups</h2>

@@ -18,7 +18,7 @@ type ScrappedLead = {
 const CLEAR_BIN_PHRASE = "DELETE ALL SCRAPPED LEADS";
 
 function reasonBadge(lead: ScrappedLead) {
-  if (!lead.scrapReason) return "—";
+  if (!lead.scrapReason) return "-";
   if (lead.scrapReason === "NO_ANSWER") return `No Answer (${lead.noAnswerStreak} calls)`;
   if (lead.scrapReason === "OTHER") return lead.scrapNote || "Other";
   return SCRAP_REASON_LABELS[lead.scrapReason] ?? lead.scrapReason;
@@ -82,7 +82,7 @@ export default function ScrappedLeadsView({ leads }: { leads: ScrappedLead[] }) 
   }
 
   function recoverAll() {
-    // Deliberately excludes ASKED_NOT_TO_CONTACT — a real opt-out request,
+    // Deliberately excludes ASKED_NOT_TO_CONTACT: a real opt-out request,
     // never swept back in by a bulk action.
     const ids = leads.filter((l) => l.scrapReason !== "ASKED_NOT_TO_CONTACT").map((l) => l.id);
     recoverIds(ids);
@@ -101,7 +101,7 @@ export default function ScrappedLeadsView({ leads }: { leads: ScrappedLead[] }) 
       const { deleted, blocked } = await res.json();
       if (blocked.length > 0) {
         setLastResult(
-          `Deleted ${deleted}. ${blocked.length} couldn't be deleted (has a Job on record): ${blocked
+          `Deleted ${deleted}. ${blocked.length} couldn't be deleted (a Job, quote or invoice on record): ${blocked
             .map((b: { name: string }) => b.name)
             .join(", ")}`
         );
@@ -205,14 +205,14 @@ export default function ScrappedLeadsView({ leads }: { leads: ScrappedLead[] }) 
                       {l.name}
                     </Link>
                   </td>
-                  <td className="px-3 py-2.5 text-sm text-gray-600">{l.businessName || "—"}</td>
+                  <td className="px-3 py-2.5 text-sm text-gray-600">{l.businessName || "-"}</td>
                   <td className="px-3 py-2.5">
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${BADGE_COLOR[l.scrapReason ?? ""] ?? "bg-gray-100 text-gray-600"}`}>
                       {reasonBadge(l)}
                     </span>
                   </td>
                   <td className="px-3 py-2.5 text-sm text-gray-500">
-                    {l.scrappedAt ? new Date(l.scrappedAt).toLocaleDateString("en-GB") : "—"}
+                    {l.scrappedAt ? new Date(l.scrappedAt).toLocaleDateString("en-GB") : "-"}
                   </td>
                 </tr>
               ))}

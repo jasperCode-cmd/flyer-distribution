@@ -1,5 +1,5 @@
 import "server-only";
-import { escapeHtml, type GmailResult, type SignatureOutcome, type ThreadContext } from "./gmail";
+import { escapeHtml, safeAttachmentName, type EmailAttachment, type GmailResult, type SignatureOutcome, type ThreadContext } from "./gmail";
 
 // Email for Leaflet Distribution Bournemouth (LDB) leads. It never goes
 // through the FDH Gmail: it is sent with Brevo's transactional API from the
@@ -63,6 +63,8 @@ export type BrevoEmail = {
   textContent: string;
   htmlContent: string;
   headers?: Record<string, string>;
+  // Files, as base64; Brevo works out each one's type from its name.
+  attachment?: { name: string; content: string }[];
 };
 
 export type LdbSendParams = {
@@ -70,6 +72,7 @@ export type LdbSendParams = {
   subject: string;
   body: string;
   threadContext?: ThreadContext | null;
+  attachments?: EmailAttachment[];
 };
 
 // The request body, the same two parts the Gmail path sends: the body then
@@ -93,6 +96,12 @@ export function buildBrevoEmail(env: LdbEnv, params: LdbSendParams): BrevoEmail 
   };
   const inReplyTo = params.threadContext?.lastMessageId?.trim();
   if (inReplyTo) email.headers = { "In-Reply-To": inReplyTo, References: inReplyTo };
+  if (params.attachments && params.attachments.length > 0) {
+    email.attachment = params.attachments.map((file) => ({
+      name: safeAttachmentName(file.filename),
+      content: Buffer.from(file.content).toString("base64"),
+    }));
+  }
   return email;
 }
 

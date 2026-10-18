@@ -124,11 +124,18 @@ export async function DELETE(req: Request) {
 
   const leads = await prisma.lead.findMany({
     where: { id: { in: ids } },
-    select: { id: true, name: true, job: { select: { id: true } } },
+    select: {
+      id: true,
+      name: true,
+      job: { select: { id: true } },
+      _count: { select: { quotes: true, invoices: true } },
+    },
   });
 
-  const blocked = leads.filter((l) => l.job).map((l) => ({ id: l.id, name: l.name }));
-  const deletable = leads.filter((l) => !l.job).map((l) => l.id);
+  // A lead with quotes or invoices keeps them (and so itself), like one with a Job.
+  const keep = (l: (typeof leads)[number]) => !!l.job || l._count.quotes > 0 || l._count.invoices > 0;
+  const blocked = leads.filter(keep).map((l) => ({ id: l.id, name: l.name }));
+  const deletable = leads.filter((l) => !keep(l)).map((l) => l.id);
 
   if (deletable.length > 0) {
     await prisma.lead.deleteMany({ where: { id: { in: deletable } } });

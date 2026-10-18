@@ -20,6 +20,11 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Quote and invoice PDFs read their fonts and logo from disk, so the files
+  // ship with the routes that make them.
+  outputFileTracingIncludes: {
+    "/api/crm/documents/**/*": ["./lib/documents/assets/**/*"],
+  },
   async headers() {
     return [
       {
