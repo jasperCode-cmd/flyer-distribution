@@ -185,6 +185,8 @@ model Lead {
   tags           LeadTag[]
   calendarEvents CalendarEvent[]
   costs          JobCost[]
+  quotes         Quote[]
+  invoices       Invoice[]
 
   @@index([stage])
   @@index([assignedToId])
@@ -568,4 +570,187 @@ model CalendarEvent {
   @@index([distributorId])
   @@index([linkedLeadId])
   @@index([linkedJobId])
+}
+
+// --- Quotes and invoices ------------------------------------------------------
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  DECLINED
+}
+
+enum InvoiceType {
+  // 50% of the campaign total, due on receipt, to book the campaign.
+  DEPOSIT
+  // The campaign total less the paid deposits it deducts.
+  BALANCE
+  // The whole campaign total, for a job with no deposit.
+  FULL
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  // A sent invoice is voided rather than deleted, so its number stays used.
+  VOID
+}
+
+// The two numbering sequences: invoices (INV-) and quotes (QUO-), each
+// shared by both businesses.
+enum DocumentSequence {
+  INVOICE
+  QUOTE
+}
+
+// The next number to hand out in each sequence. A number is taken by
+// incrementing the row inside the transaction that saves the document, so
+// two people can never get the same one, and nothing ever decrements it, so
+// a number is never reused, even when a draft is deleted. Seeded by its
+// migration so the next invoice is INV-1106 and the next quote QUO-1001.
+model DocumentCounter {
+  sequence DocumentSequence @id
+  next     Int
+}
+
+// A quote for a lead. The business, and the client details printed on it,
+// are copied from the lead when it is created and edited on the quote, so a
+// later change to the lead never alters a document already issued. All
+// money is integer pence; there is no VAT anywhere. Dates are UK calendar
+// days. A lead with quotes or invoices can't be deleted (Restrict).
+model Quote {
+  id     String @id @default(cuid())
+  // "QUO-1001", from the QUOTE sequence.
+  number String @unique
+
+  leadId   String
+  lead     Lead     @relation(fields: [leadId], references: [id], onDelete: Restrict)
+  business Business
+
+  status     QuoteStatus @default(DRAFT)
+  issueDate  DateTime    @db.Date
+  validUntil DateTime    @db.Date
+
+  // The client as printed on the quote.
+  clientName         String
+  clientBusinessName String?
+  clientEmail        String?
+  // The lead's address, or its area when there is no address.
+  clientAddress      String?
+  targetAreas        String?
+
+  // The sum of the lines, worked out on the server.
+  totalPence Int
+  notes      String?
+
+  sentAt     DateTime?
+  acceptedAt DateTime?
+  declinedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lines    QuoteLine[]
+  invoices Invoice[]
+
+  @@index([leadId])
+  @@index([status])
+}
+
+model QuoteLine {
+  id      String @id @default(cuid())
+  quoteId String
+  quote   Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  label       String
+  // The leaflet quantity, where the line has one.
+  quantity    Int?
+  amountPence Int
+  sortOrder   Int
+
+  @@index([quoteId])
+}
+
+// An invoice for a lead, optionally from a quote. totalPence is the campaign
+// total (the sum of the lines); amountDuePence is what this invoice asks for:
+// half the total for a deposit, the total less the paid deposits it deducts
+// for a balance, the total for a full invoice. Due on receipt, or by dueDate.
+model Invoice {
+  id     String @id @default(cuid())
+  // "INV-1106", from the INVOICE sequence.
+  number String @unique
+
+  leadId   String
+  lead     Lead     @relation(fields: [leadId], references: [id], onDelete: Restrict)
+  // The quote it came from, if any. Deleting a draft quote keeps the invoice.
+  quoteId  String?
+  quote    Quote?   @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  business Business
+
+  type         InvoiceType
+  status       InvoiceStatus @default(DRAFT)
+  issueDate    DateTime      @db.Date
+  dueOnReceipt Boolean       @default(false)
+  // Set unless the invoice is due on receipt.
+  dueDate      DateTime?     @db.Date
+
+  // The client as printed on the invoice.
+  clientName         String
+  clientBusinessName String?
+  clientEmail        String?
+  clientAddress      String?
+  targetAreas        String?
+
+  totalPence     Int
+  amountDuePence Int
+  notes          String?
+
+  // The day the payment was received.
+  paidAt   DateTime? @db.Date
+  sentAt   DateTime?
+  voidedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  lines      InvoiceLine[]
+  // On a balance invoice: the deposits it deducts.
+  deductions InvoiceDeduction[] @relation("BalanceInvoice")
+  // On a deposit invoice: the balance invoices that deduct it.
+  deductedBy InvoiceDeduction[] @relation("DepositInvoice")
+
+  @@index([leadId])
+  @@index([quoteId])
+  @@index([status])
+}
+
+model InvoiceLine {
+  id        String  @id @default(cuid())
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  label       String
+  quantity    Int?
+  amountPence Int
+  sortOrder   Int
+
+  @@index([invoiceId])
+}
+
+// A paid deposit deducted on a balance invoice. amountPence is the deposit as
+// it was deducted, so the balance invoice reads the same later. Deleting a
+// draft balance invoice removes its rows; a deposit that has been deducted
+// can't be deleted.
+model InvoiceDeduction {
+  balanceInvoiceId String
+  balanceInvoice   Invoice @relation("BalanceInvoice", fields: [balanceInvoiceId], references: [id], onDelete: Cascade)
+  depositInvoiceId String
+  depositInvoice   Invoice @relation("DepositInvoice", fields: [depositInvoiceId], references: [id], onDelete: Restrict)
+
+  amountPence Int
+
+  @@id([balanceInvoiceId, depositInvoiceId])
+  @@index([depositInvoiceId])
 }
