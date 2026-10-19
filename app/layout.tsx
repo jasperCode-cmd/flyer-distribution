@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import SlotPopup from "@/components/SlotPopup";
 import FloatingQuoteButton from "@/components/FloatingQuoteButton";
+import SiteSchema from "@/components/SiteSchema";
 
 // Both are variable fonts, so every weight comes from one file each,
 // self-hosted at build time (no request to Google from the browser).
@@ -73,18 +74,6 @@ export const metadata: Metadata = {
   },
 };
 
-const websiteSchema = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "@id": "https://www.flyerdistributionhampshire.co.uk/#website",
-  "name": "Flyer Distribution Hampshire",
-  "url": "https://www.flyerdistributionhampshire.co.uk",
-  "publisher": {
-    "@id": "https://www.flyerdistributionhampshire.co.uk/#business",
-  },
-  "inLanguage": "en-GB",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -93,10 +82,7 @@ export default function RootLayout({
   return (
     <html lang="en-GB" className={`${schibsted.variable} ${atkinson.variable} h-full`}>
       <body className="min-h-full flex flex-col font-sans antialiased bg-slate-50 text-gray-800">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
-        />
+        <SiteSchema />
         <AnnouncementBar />
         <Header />
         <main className="flex-1">{children}</main>

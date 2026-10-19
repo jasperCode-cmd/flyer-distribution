@@ -560,7 +560,13 @@ function CostGroups({
             {lines.length > 0 ? (
               <ul className="divide-y divide-gray-100 px-3">
                 {lines.map((line) => (
-                  <CostLineRow key={line.id} line={line} onEdit={() => onEditCost(line)} onDelete={() => onDeleteCost(line)} />
+                  <CostLineRow
+                    key={line.id}
+                    line={line}
+                    leadId={job.leadId}
+                    onEdit={() => onEditCost(line)}
+                    onDelete={() => onDeleteCost(line)}
+                  />
                 ))}
               </ul>
             ) : (
@@ -636,10 +642,12 @@ export function AddDistributorSelect({
 
 function CostLineRow({
   line,
+  leadId,
   onEdit,
   onDelete,
 }: {
   line: CostLine;
+  leadId: string;
   onEdit: () => void;
   onDelete: () => Promise<string | null>;
 }) {
@@ -663,7 +671,15 @@ function CostLineRow({
       </div>
       <span className="text-sm font-medium tabular-nums text-gray-900">{formatPence(line.amountPence)}</span>
       <div className="flex w-full justify-end gap-1 sm:w-auto">
-        {confirming ? (
+        {line.fromMap ? (
+          // Kept in step with its area on the map, so it is changed there.
+          <Link
+            href={`/admin/crm/map?lead=${encodeURIComponent(leadId)}`}
+            className="rounded-md px-2 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-50"
+          >
+            From the Area Planner
+          </Link>
+        ) : confirming ? (
           <>
             <span className="self-center text-xs text-gray-600">Delete?</span>
             <button

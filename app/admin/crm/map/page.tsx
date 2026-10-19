@@ -1,39 +1,42 @@
+import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { areaPlannerDataStatus } from "@/lib/area-planner/data";
+import { linkableLeads, listProjects, loadProject, plannerDistributors } from "@/lib/area-planner/service";
+import AreaPlanner from "@/components/area-planner/AreaPlanner";
 
 export const dynamic = "force-dynamic";
 
-export default async function MapPage() {
-  const jobsWithCoords = await prisma.job.count({
-    where: { latitude: { not: null }, longitude: { not: null } },
-  });
+export const metadata: Metadata = { title: "Area Planner" };
+
+// The Area Planner, on the Jobs "Map" page it replaced (same address, so no
+// redirect is needed). ?project= opens a project; ?lead= opens a job's
+// project, as linked from its map-made cost lines on the Profit page.
+export default async function AreaPlannerPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ project?: string; lead?: string }>;
+}) {
+  const params = await searchParams;
+  const [projects, leads, distributors, data] = await Promise.all([
+    listProjects(prisma),
+    linkableLeads(prisma),
+    plannerDistributors(prisma),
+    areaPlannerDataStatus(),
+  ]);
+  const wanted =
+    projects.find((p) => p.id === params.project) ??
+    projects.find((p) => params.lead && p.leadId === params.lead) ??
+    projects.find((p) => !p.closedAt) ??
+    null;
+  const project = wanted ? await loadProject(prisma, wanted.id) : null;
 
   return (
-    <div>
-      <h1 className="text-xl font-bold text-blue-900 mb-1">Job Map</h1>
-      <p className="text-sm text-gray-500 mb-4">
-        A geographic view of jobs, once a mapping provider is connected.
-      </p>
-
-      <div className="bg-white rounded-lg border border-gray-200 p-10 text-center">
-        <div className="max-w-md mx-auto">
-          <p className="text-4xl mb-3">🗺️</p>
-          <h2 className="text-sm font-bold text-blue-900 mb-2">No map connected yet</h2>
-          <p className="text-sm text-gray-500">
-            The <code className="bg-gray-100 px-1 rounded">Job</code> record already has{" "}
-            <code className="bg-gray-100 px-1 rounded">latitude</code> and{" "}
-            <code className="bg-gray-100 px-1 rounded">longitude</code> fields ready to store
-            coordinates. To show pins here, connect a mapping provider (e.g. Google Maps or
-            Mapbox), geocode job addresses into those fields, and render the map on this page —
-            none of that is wired up yet, and no external mapping API is called anywhere in this
-            build.
-          </p>
-          {jobsWithCoords > 0 && (
-            <p className="text-xs text-gray-400 mt-3">
-              {jobsWithCoords} job(s) currently have coordinates stored.
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
+    <AreaPlanner
+      initialProjects={projects}
+      initialLeads={leads}
+      initialDistributors={distributors}
+      initialProject={project}
+      data={{ installed: data.installed, sample: data.sample, credits: data.credits }}
+    />
   );
 }

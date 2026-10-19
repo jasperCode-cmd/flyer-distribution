@@ -1,36 +1,22 @@
 import type { NextConfig } from "next";
-
-const securityHeaders = [
-  { key: "X-Frame-Options", value: "DENY" },
-  { key: "X-Content-Type-Options", value: "nosniff" },
-  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  {
-    key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=()",
-  },
-  {
-    key: "Strict-Transport-Security",
-    value: "max-age=63072000; includeSubDomains; preload",
-  },
-  {
-    key: "Content-Security-Policy",
-    value:
-      "default-src 'self'; img-src 'self' images.unsplash.com images.pexels.com data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' fonts.gstatic.com; connect-src 'self' api.web3forms.com;",
-  },
-];
+import { MAP_PAGE_HEADER_RULES, SECURITY_HEADERS } from "./lib/security-headers";
 
 const nextConfig: NextConfig = {
   // Quote and invoice PDFs read their fonts and logo from disk, so the files
   // ship with the routes that make them.
   outputFileTracingIncludes: {
     "/api/crm/documents/**/*": ["./lib/documents/assets/**/*"],
+    // The Area Planner's postcode shapes and Census household figures.
+    "/api/crm/area-planner/**/*": ["./data/area-planner/**/*"],
+    "/admin/crm/map": ["./data/area-planner/**/*"],
   },
   async headers() {
     return [
       {
         source: "/(.*)",
-        headers: securityHeaders,
+        headers: SECURITY_HEADERS,
       },
+      ...MAP_PAGE_HEADER_RULES,
     ];
   },
   images: {

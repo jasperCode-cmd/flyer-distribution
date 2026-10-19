@@ -73,6 +73,7 @@ export function toProfitJob(lead: ProfitLeadRow): ProfitJob {
       label: c.label,
       note: c.note,
       createdAt: c.createdAt.toISOString(),
+      fromMap: c.areaId !== null,
     })),
   };
 }

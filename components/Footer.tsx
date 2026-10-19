@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { hidesSiteChrome } from "@/lib/site-chrome";
 
 const serviceLinks = [
   { href: "/services", label: "Services" },
@@ -54,7 +55,7 @@ function LinkColumn({
 
 export default function Footer() {
   const pathname = usePathname();
-  if (pathname.startsWith("/admin/crm")) return null;
+  if (hidesSiteChrome(pathname)) return null;
 
   return (
     <>

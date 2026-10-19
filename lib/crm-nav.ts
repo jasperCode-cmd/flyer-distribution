@@ -76,7 +76,7 @@ export const CRM_NAV_GROUPS: CrmNavGroup[] = [
       { href: "/admin/crm/profit", label: "Profit" },
       { href: "/admin/crm/documents", label: "Documents" },
       { href: "/admin/crm/jobs-by-area", label: "Jobs by Area" },
-      { href: "/admin/crm/map", label: "Map" },
+      { href: "/admin/crm/map", label: "Area Planner" },
     ],
   },
   {

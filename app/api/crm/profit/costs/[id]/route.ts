@@ -7,7 +7,10 @@ import type { CostCategory } from "@/lib/profit";
 
 // Edits or deletes one cost line. What the line is for (its category) is
 // fixed once it is added. Both return the job as the Profit page shows it,
-// or null if the lead has since left Won or Completed.
+// or null if the lead has since left Won or Completed. A line the Area
+// Planner made from a planned area is changed there, never here.
+
+const FROM_MAP = "This cost comes from the Area Planner. Change it on the map.";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -19,6 +22,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const existing = await prisma.jobCost.findUnique({ where: { id } });
   if (!existing) {
     return NextResponse.json({ error: "That cost has already been deleted." }, { status: 404 });
+  }
+  if (existing.areaId) {
+    return NextResponse.json({ error: FROM_MAP }, { status: 409 });
   }
 
   const body = await req.json().catch(() => null);
@@ -55,9 +61,12 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   }
 
   const { id } = await params;
-  const existing = await prisma.jobCost.findUnique({ where: { id }, select: { leadId: true } });
+  const existing = await prisma.jobCost.findUnique({ where: { id }, select: { leadId: true, areaId: true } });
   if (!existing) {
     return NextResponse.json({ error: "That cost has already been deleted." }, { status: 404 });
+  }
+  if (existing.areaId) {
+    return NextResponse.json({ error: FROM_MAP }, { status: 409 });
   }
 
   try {

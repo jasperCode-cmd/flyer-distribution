@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { hidesSiteChrome } from "@/lib/site-chrome";
 import { campaignSlots, slotNoun } from "@/lib/campaign-constants";
 import SlotCountdown from "./SlotCountdown";
 
@@ -12,7 +13,7 @@ const BACKDROP_GUARD_MS = 1000;
 
 export default function SlotPopup() {
   const pathname = usePathname();
-  const skip = pathname === "/quote" || pathname.startsWith("/admin/crm");
+  const skip = pathname === "/quote" || hidesSiteChrome(pathname);
 
   const [visible, setVisible] = useState(false);
   const [canDismissOnBackdrop, setCanDismissOnBackdrop] = useState(false);

@@ -23,6 +23,9 @@ export type CostLine = {
   label: string | null;
   note: string | null;
   createdAt: string;
+  // Made by the Area Planner from one planned area: edited from the map,
+  // not here. Missing means false.
+  fromMap?: boolean;
 };
 
 export type ProfitJob = {

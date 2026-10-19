@@ -230,6 +230,7 @@ export default function DistributorsView({ initial }: { initial: DistributorSumm
                         }}
                         className="text-left font-semibold text-blue-900 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
                       >
+                        <MapColourDot colour={d.mapColour} />
                         {d.name}
                       </button>
                     </td>
@@ -329,7 +330,10 @@ function DistributorCard({ d, onOpen }: { d: DistributorSummary; onOpen: () => v
         className="flex-1 text-left p-3 rounded-t-lg hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500"
       >
         <span className="flex items-start justify-between gap-2">
-          <span className="min-w-0 text-sm font-semibold text-blue-900 [overflow-wrap:anywhere]">{d.name}</span>
+          <span className="min-w-0 text-sm font-semibold text-blue-900 [overflow-wrap:anywhere]">
+            <MapColourDot colour={d.mapColour} />
+            {d.name}
+          </span>
           <ActiveChip active={d.active} />
         </span>
         <span className="mt-1 block text-xs text-gray-600">{d.application?.area || "Area: -"}</span>
@@ -506,5 +510,18 @@ function AddDistributorForm({
         </form>
       </div>
     </div>
+  );
+}
+
+// Their one colour on the Area Planner, its images and links.
+function MapColourDot({ colour }: { colour?: string | null }) {
+  if (!colour) return null;
+  return (
+    <span
+      className="mr-1.5 inline-block h-2.5 w-2.5 rounded-full align-middle"
+      style={{ backgroundColor: colour }}
+      title="Their colour on the Area Planner"
+      aria-hidden="true"
+    />
   );
 }

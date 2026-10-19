@@ -28,6 +28,8 @@ export type DistributorRecord = {
   email: string | null;
   notes: string | null;
   active: boolean;
+  // Their colour on the Area Planner, once they have been placed on a map.
+  mapColour?: string | null;
   // Their most recent application, if they came from one. Manually added
   // distributors have none.
   application: ApplicationFacts | null;

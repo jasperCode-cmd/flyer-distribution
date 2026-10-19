@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { hidesSiteChrome } from "@/lib/site-chrome";
 import { campaignSlots, slotNoun } from "@/lib/campaign-constants";
 import SlotCountReveal from "./SlotCountReveal";
 
 export default function AnnouncementBar() {
   const pathname = usePathname();
-  if (pathname === "/quote" || pathname.startsWith("/admin/crm")) return null;
+  if (pathname === "/quote" || hidesSiteChrome(pathname)) return null;
 
   return (
     <Link

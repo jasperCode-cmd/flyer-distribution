@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { hidesSiteChrome } from "@/lib/site-chrome";
 import { useState, useRef, useEffect } from "react";
 
 const servicesGroups = [
@@ -50,7 +51,7 @@ export default function Header() {
   }, []);
 
   const pathname = usePathname();
-  if (pathname.startsWith("/admin/crm")) return null;
+  if (hidesSiteChrome(pathname)) return null;
 
   return (
     <header className="bg-white border-b border-blue-100 sticky top-0 z-50 shadow-sm">

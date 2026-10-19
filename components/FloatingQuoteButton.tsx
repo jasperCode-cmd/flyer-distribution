@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { hidesSiteChrome } from "@/lib/site-chrome";
 import { AnimatePresence, motion, useAnimation } from "framer-motion";
 import QuoteForm from "./QuoteForm";
 
@@ -41,7 +42,7 @@ function CloseIcon() {
 // full-size form, or on the internal /admin/crm tool.
 export default function FloatingQuoteButton() {
   const pathname = usePathname();
-  const skip = pathname === "/quote" || pathname.startsWith("/admin/crm");
+  const skip = pathname === "/quote" || hidesSiteChrome(pathname);
   const isHomepage = pathname === "/";
 
   const [visible, setVisible] = useState(!isHomepage);

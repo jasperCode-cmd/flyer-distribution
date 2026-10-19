@@ -32,6 +32,7 @@ export async function loadDistributorDirectory(db: DirectoryDb, now: Date): Prom
         email: true,
         notes: true,
         active: true,
+        mapColour: true,
         // Their most recent application, when they came from one.
         applications: {
           orderBy: { receivedAt: "desc" },
@@ -78,6 +79,7 @@ export async function loadDistributorDirectory(db: DirectoryDb, now: Date): Prom
         email: d.email,
         notes: d.notes,
         active: d.active,
+        mapColour: d.mapColour,
         application: app
           ? {
               id: app.id,
