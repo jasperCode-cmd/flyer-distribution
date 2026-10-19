@@ -1,0 +1,34 @@
+{
+  "format": "fdh-area-planner-data",
+  "version": 1,
+  "builtAt": "2026-10-19T21:38:16.208Z",
+  "sample": false,
+  "areas": [
+    "BH",
+    "SO",
+    "PO",
+    "SP",
+    "DT"
+  ],
+  "counts": {
+    "outputAreas": 8482,
+    "outputAreasInSectors": 8460,
+    "districts": 105,
+    "sectors": 390,
+    "unmappableSectors": 10,
+    "households": 1121690
+  },
+  "bbox": [
+    -3.06101,
+    50.513111,
+    -0.592536,
+    51.339355
+  ],
+  "credits": [
+    "Source: Office for National Statistics licensed under the Open Government Licence v.3.0",
+    "Contains OS data © Crown copyright and database right 2026",
+    "Contains Royal Mail data © Royal Mail copyright and database right 2026",
+    "Census 2021 household counts (TS041) by Output Area, ONS"
+  ],
+  "sourceBuiltAt": "2026-10-19T21:36:38.696Z"
+}
