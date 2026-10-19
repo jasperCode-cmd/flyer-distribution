@@ -508,6 +508,12 @@ model DistributorApplication {
   notes  String?
   source DistributorApplicationSource
 
+  // Which business's website it came through: FDH's Work With Us form (and
+  // the Gmail import), or Leaflet Distribution Bournemouth's. Every
+  // application from before this existed is FDH. Approved applicants become
+  // distributors shared by both businesses.
+  business Business @default(FDH)
+
   distributorId String?
   distributor   Distributor? @relation(fields: [distributorId], references: [id], onDelete: SetNull)
 
