@@ -187,6 +187,8 @@ model Lead {
   costs          JobCost[]
   quotes         Quote[]
   invoices       Invoice[]
+  // Its map on the Area Planner, if one has been made.
+  areaProject    AreaProject?
 
   @@index([stage])
   @@index([assignedToId])
@@ -332,8 +334,8 @@ model Job {
   campaignStartDate DateTime?
   completionDate    DateTime?
 
-  // Nullable foundation for a future real map integration, not populated
-  // or read by any external mapping API today.
+  // Unused: nothing reads or writes these. The Area Planner places a job
+  // by its planned areas instead. Kept so no stored value is ever lost.
   latitude  Float?
   longitude Float?
 
@@ -363,6 +365,11 @@ model Distributor {
   notes  String?
   active Boolean @default(true)
 
+  // Their colour on the Area Planner, its images and private links, as
+  // "#RRGGBB": given once from a fixed palette the first time they are
+  // placed on a map, then never changed.
+  mapColour String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -370,6 +377,8 @@ model Distributor {
   calendarEvents CalendarEvent[]
   applications   DistributorApplication[]
   costs          JobCost[]
+  plannedAreas   PlannedArea[]
+  areaShareLinks AreaShareLink[]
 
   @@index([active])
 }
@@ -417,6 +426,12 @@ model JobCost {
   // Required for ADDITIONAL lines (checked by the API).
   label String?
   note  String?
+
+  // Set on a distributor line made by the Area Planner from one planned
+  // area: it is edited from the map, not the Profit page, and goes when the
+  // area goes.
+  areaId String?      @unique
+  area   PlannedArea? @relation(fields: [areaId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -759,4 +774,122 @@ model InvoiceDeduction {
 
   @@id([balanceInvoiceId, depositInvoiceId])
   @@index([depositInvoiceId])
+}
+
+// --- Area Planner ----------------------------------------------------------
+
+// How an area was made: a shape drawn on the map, or a postcode district or
+// sector typed in.
+enum AreaKind {
+  CIRCLE
+  RECTANGLE
+  POLYGON
+  POSTCODE
+}
+
+enum AreaStatus {
+  PLANNED
+  ASSIGNED
+  DONE
+}
+
+// A map of distributor areas for one job: a Won or Completed lead (one
+// project per lead), or a map-only project that can be linked to one later.
+// A closed project drops out of the tabs and can be reopened. If its lead is
+// deleted it becomes map-only again, keeping its areas.
+model AreaProject {
+  id    String  @id @default(cuid())
+  name  String
+  notes String?
+
+  leadId String? @unique
+  lead   Lead?   @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  // A map-only project's business, which brands its images and pages. A
+  // linked project follows its lead's business.
+  business Business @default(FDH)
+
+  // Shown on distributor images and private pages instead of the name,
+  // which for a lead is usually the client's.
+  distributorTitle String?
+
+  // Map-only projects: the leaflet total to plan against. A linked project
+  // uses its lead's leaflet quantity.
+  targetLeaflets Int?
+
+  // Private links for an LDB project stay off until switched on for it.
+  ldbLinksEnabled Boolean @default(false)
+
+  closedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  areas      PlannedArea[]
+  shareLinks AreaShareLink[]
+
+  @@index([closedAt])
+}
+
+// One area on a project's map.
+model PlannedArea {
+  id        String      @id @default(cuid())
+  projectId String
+  project   AreaProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  kind      AreaKind
+  // A GeoJSON Polygon or MultiPolygon, in longitude and latitude (WGS84).
+  // A circle also keeps the centre and radius it is edited by.
+  geometry  Json
+  centreLat Float?
+  centreLng Float?
+  radiusM   Int?
+  // "BH6" or "BH6 3" for a postcode shape.
+  postcode  String?
+
+  label         String?
+  distributorId String?
+  distributor   Distributor? @relation(fields: [distributorId], references: [id], onDelete: SetNull)
+  leafletCount  Int?
+  status        AreaStatus   @default(PLANNED)
+
+  // About how many homes, from Census 2021 households by Output Area,
+  // worked out on the server whenever the area is saved.
+  households Int?
+
+  // The distributor's pay for this area, in whole pence like JobCost. With
+  // a distributor and a leaflet count it makes the area's cost line, held
+  // until a map-only project is linked to a lead. No pay, no cost line.
+  payType     DistributorPayType?
+  ratePence   Int?
+  amountPence Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  costLine JobCost?
+
+  @@index([projectId])
+  @@index([distributorId])
+}
+
+// A distributor's private, read-only link to their own areas on one project.
+// Only a SHA-256 hash of the token is stored, so the link is shown once when
+// it is made. Revoking takes effect at once; closing the project sets it to
+// expire 14 days later.
+model AreaShareLink {
+  id            String      @id @default(cuid())
+  projectId     String
+  project       AreaProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  distributorId String
+  distributor   Distributor @relation(fields: [distributorId], references: [id], onDelete: Cascade)
+
+  tokenHash String @unique
+
+  createdAt    DateTime  @default(now())
+  revokedAt    DateTime?
+  expiresAt    DateTime?
+  lastViewedAt DateTime?
+
+  @@index([projectId, distributorId])
 }
