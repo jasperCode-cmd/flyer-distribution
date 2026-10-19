@@ -357,11 +357,12 @@ test("Priorities: a new LDB application is Low with its business, and follows th
   assert.deepEqual(keys("FDH"), ["application:fdh-app", "application:old-app"]);
 });
 
-test("the Gmail import stays FDH: every imported application is saved as FDH", async () => {
+test("the Gmail import saves an FDH notification's application as FDH (Bournemouth ones: ldb-application-import.test.ts)", async () => {
   let saved: Record<string, unknown>[] = [];
   const candidate = {
     messageId: "m1",
     receivedAt: "2026-10-01T09:00:00.000Z",
+    business: "FDH",
     parsed: {
       readable: true,
       fields: { fullName: "Old Applicant", phone: "07700900321", email: null, area: null, age: null, hasCar: null, hasLicence: null, availability: null },

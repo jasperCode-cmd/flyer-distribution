@@ -315,8 +315,11 @@ export type ParsedApplication = {
   // Fields the form requires that couldn't be read. Email is optional on the
   // form, so it is never listed.
   missing: ApplicationFieldKey[];
-  // False when there's no name, which is the one thing a record needs.
+  // False when there's no name, which is the one thing a record needs (or,
+  // for a Bournemouth website notification, when the LDB intake would refuse it).
   readable: boolean;
+  // Why a Bournemouth notification can't be imported.
+  problem?: string;
 };
 
 const REQUIRED_ON_FORM: ApplicationFieldKey[] = [

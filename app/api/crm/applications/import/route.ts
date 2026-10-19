@@ -55,16 +55,19 @@ export async function GET() {
       messageId: c.messageId,
       threadId: c.threadId,
       receivedAt: c.receivedAt,
+      business: c.business,
       fields: c.parsed.fields,
       missing: c.parsed.missing,
       readable: c.parsed.readable,
+      problem: c.parsed.problem ?? null,
       duplicate: flags.get(c.messageId) ?? null,
     })),
   });
 }
 
 // Confirm: imports the chosen emails, read again from Gmail, with source
-// GMAIL_IMPORT and receivedAt set to each email's date.
+// GMAIL_IMPORT, receivedAt set to each email's date, and the business of the
+// website it came through.
 export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user) {

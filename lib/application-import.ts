@@ -1,6 +1,7 @@
 import type { gmail_v1 } from "@googleapis/gmail";
 import {
   extractTextVariants,
+  isLdbThread,
   mapWithConcurrency,
   parseMailbox,
   shouldExcludeThread,
@@ -15,11 +16,16 @@ import {
   type ApplicationFields,
   type ParsedApplication,
 } from "./distributor-applications";
+import { isLdbApplicationNotification, ldbApplicationSearchQuery, readLdbApplication } from "./ldb-application-import";
+import type { NotificationRules } from "./ldb-backfill";
+import type { Business } from "./business";
 
-// Importing past applications from the business Gmail. Read-only: Gmail is
-// only searched and read, never changed. Every thread is checked against
-// GMAIL_EXCLUDE_ADDRESSES as a whole, the same rule as the inbox, so an
-// application involving the other business never comes in.
+// Importing past applications from the business Gmail: the FDH form's Work
+// With Us notifications and the Leaflet Distribution Bournemouth website's
+// distributor application notifications (lib/ldb-application-import.ts).
+// Read-only: Gmail is only searched and read, never changed. Every thread is
+// checked against the hidden addresses as a whole, the same rule as the
+// inbox, so an application involving another business never comes in.
 
 export const IMPORT_SCAN_MAX = 500;
 const THREAD_CONCURRENCY = 5;
@@ -28,6 +34,8 @@ export type ImportCandidate = {
   messageId: string;
   threadId: string;
   receivedAt: string;
+  // Which website's notification it is, and so the business it is saved as.
+  business: Business;
   parsed: ParsedApplication;
 };
 
@@ -79,25 +87,52 @@ export function candidateFromMessage(message: gmail_v1.Schema$Message, senderAdd
     messageId: message.id ?? "",
     threadId: message.threadId ?? "",
     receivedAt: receivedAt(message),
+    business: "FDH",
     parsed: parseApplicationEmail({ plain, fromHtml, replyTo: replyTo?.address ?? null }),
   };
 }
 
+// How a Bournemouth notification is told apart: sent from the LDB address to
+// the Hampshire Gmail, with none of our addresses as Reply-To.
+function ldbRules(context: GmailReadContext, ldbAddress: string): NotificationRules {
+  const inbox = context.senderAddress.toLowerCase();
+  const ours = [...new Set([...(context.own ?? []), inbox, ldbAddress].map((a) => a.toLowerCase()))];
+  return { from: ldbAddress.toLowerCase(), inbox, ours };
+}
+
 // The application emails in one thread, or none at all if the thread
-// touches an excluded address anywhere.
+// touches a hidden address anywhere. A thread that involves the LDB address
+// is Bournemouth mail, so never an FDH application; only the LDB website's
+// own notifications are taken from it.
 export function candidatesFromThread(
   thread: gmail_v1.Schema$Thread,
   wanted: Set<string>,
   context: GmailReadContext & { subject: string }
 ): ImportCandidate[] {
   const messages = thread.messages ?? [];
-  // Bournemouth mail is never an FDH distributor application.
-  const excluded = context.ldbAddress ? [...context.excluded, context.ldbAddress] : context.excluded;
-  if (shouldExcludeThread(messages, excluded)) return [];
+  if (shouldExcludeThread(messages, context.excluded)) return [];
+  const ldbAddress = context.ldbAddress ?? null;
+  const ldbThread = isLdbThread(messages, ldbAddress);
+  const rules = ldbAddress ? ldbRules(context, ldbAddress) : null;
   return messages
     .filter((m) => m.id && wanted.has(m.id))
-    .filter((m) => isApplicationNotification(m, context.subject, context.senderAddress))
-    .map((m) => candidateFromMessage(m, context.senderAddress));
+    .flatMap((m): ImportCandidate[] => {
+      if (!ldbThread && isApplicationNotification(m, context.subject, context.senderAddress)) {
+        return [candidateFromMessage(m, context.senderAddress)];
+      }
+      if (rules && isLdbApplicationNotification(m, rules)) {
+        return [
+          {
+            messageId: m.id ?? "",
+            threadId: m.threadId ?? thread.id ?? "",
+            receivedAt: receivedAt(m),
+            business: "LDB",
+            parsed: readLdbApplication(m, rules.ours),
+          },
+        ];
+      }
+      return [];
+    });
 }
 
 async function readThreads(
@@ -113,31 +148,62 @@ async function readThreads(
     .sort((a, b) => b.receivedAt.localeCompare(a.receivedAt));
 }
 
+type MessageRef = { id: string; threadId: string };
+
+// Up to max results of one search, newest first, across pages.
+async function listUpTo(
+  reader: GmailMessageReader,
+  q: string,
+  max: number
+): Promise<{ refs: MessageRef[]; truncated: boolean }> {
+  const found: MessageRef[] = [];
+  let pageToken: string | undefined;
+  do {
+    const page = await reader.listMessageIds(q, pageToken);
+    found.push(...page.messages);
+    pageToken = page.nextPageToken ?? undefined;
+    if (found.length >= max) return { refs: found.slice(0, max), truncated: found.length > max || !!pageToken };
+  } while (pageToken);
+  return { refs: found, truncated: false };
+}
+
+// Both searches' results, taken in turn so that neither website's can crowd
+// out the other's, without duplicates and no more than max in all.
+function mergeRefs(lists: MessageRef[][], max: number): { refs: MessageRef[]; dropped: boolean } {
+  const seen = new Set<string>();
+  const refs: MessageRef[] = [];
+  const longest = Math.max(0, ...lists.map((l) => l.length));
+  for (let i = 0; i < longest; i++) {
+    for (const list of lists) {
+      const ref = list[i];
+      if (!ref || seen.has(ref.id)) continue;
+      seen.add(ref.id);
+      refs.push(ref);
+    }
+  }
+  return { refs: refs.slice(0, max), dropped: refs.length > max };
+}
+
 // The preview: every application email found, newest first, minus any
 // already imported (by Gmail message ID). Those are skipped before their
-// content is even fetched. Nothing is saved here.
+// content is even fetched. Nothing is saved here. The FDH notifications are
+// found by their subject, and the Bournemouth ones by theirs and the LDB
+// address, when there is one.
 export async function findApplicationEmails(
   reader: GmailMessageReader,
   context: GmailReadContext & { subject: string },
   options: { alreadyImported: (messageIds: string[]) => Promise<Set<string>>; max?: number }
 ): Promise<{ candidates: ImportCandidate[]; alreadyImported: number; truncated: boolean }> {
   const max = options.max ?? IMPORT_SCAN_MAX;
-  const q = applicationSearchQuery(context.subject);
-  const found: { id: string; threadId: string }[] = [];
-  let pageToken: string | undefined;
-  let truncated = false;
+  const queries = [
+    applicationSearchQuery(context.subject),
+    ...(context.ldbAddress ? [ldbApplicationSearchQuery(context.ldbAddress)] : []),
+  ];
+  const searches: { refs: MessageRef[]; truncated: boolean }[] = [];
+  for (const q of queries) searches.push(await listUpTo(reader, q, max));
+  const { refs, dropped } = mergeRefs(searches.map((s) => s.refs), max);
+  const truncated = dropped || searches.some((s) => s.truncated);
 
-  do {
-    const page = await reader.listMessageIds(q, pageToken);
-    found.push(...page.messages);
-    pageToken = page.nextPageToken ?? undefined;
-    if (found.length >= max) {
-      truncated = found.length > max || !!pageToken;
-      break;
-    }
-  } while (pageToken);
-
-  const refs = found.slice(0, max);
   const imported = await options.alreadyImported(refs.map((r) => r.id));
   const fresh = refs.filter((r) => !imported.has(r.id));
   const candidates = await readThreads(reader, fresh, context);
@@ -201,8 +267,7 @@ export type SaveImportDb = {
     createMany(args: {
       data: (ApplicationFields & {
         source: "GMAIL_IMPORT";
-        // The import reads the FDH Gmail's Work With Us notifications only.
-        business: "FDH";
+        business: Business;
         gmailMessageId: string;
         receivedAt: Date;
         notes: string | null;
@@ -225,7 +290,7 @@ export async function saveImportedApplications(
     data: readable.map((c) => ({
       ...c.parsed.fields,
       source: "GMAIL_IMPORT",
-      business: "FDH",
+      business: c.business,
       gmailMessageId: c.messageId,
       receivedAt: new Date(c.receivedAt),
       notes: duplicateNote(flags.get(c.messageId) ?? null),

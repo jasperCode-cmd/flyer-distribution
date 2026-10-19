@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { APPLICATION_FIELD_LABELS, type ApplicationFieldKey, type ApplicationFields } from "@/lib/distributor-applications";
+import type { Business } from "@/lib/business";
+import BusinessBadge from "./BusinessBadge";
 import { formatReceived, yesNo } from "./application-ui";
 
 type DuplicateFlag =
@@ -13,9 +15,11 @@ type PreviewItem = {
   messageId: string;
   threadId: string;
   receivedAt: string;
+  business: Business;
   fields: ApplicationFields;
   missing: ApplicationFieldKey[];
   readable: boolean;
+  problem: string | null;
   duplicate: DuplicateFlag;
 };
 
@@ -222,6 +226,7 @@ export default function ApplicationImport({
                             <div className="flex flex-wrap items-baseline justify-between gap-x-3">
                               <p className="text-sm font-semibold text-blue-900 wrap-break-word">
                                 {f.fullName || "Name not found"}
+                                <BusinessBadge business={item.business} className="ml-1.5 align-middle" />
                               </p>
                               <p className="text-[11px] text-gray-400">Received {formatReceived(item.receivedAt, true)}</p>
                             </div>
@@ -238,7 +243,7 @@ export default function ApplicationImport({
                               ).map(([label, value]) => (
                                 <div key={label} className="flex gap-1.5 min-w-0">
                                   <dt className="text-gray-500 shrink-0">{label}:</dt>
-                                  <dd className="text-gray-800 break-all">{value ?? "-"}</dd>
+                                  <dd className="text-gray-800 min-w-0 wrap-break-word">{value ?? "-"}</dd>
                                 </div>
                               ))}
                               <div className="flex gap-1.5 sm:col-span-2 min-w-0">
@@ -248,7 +253,7 @@ export default function ApplicationImport({
                             </dl>
                             {!item.readable && (
                               <p className="mt-1.5 text-xs font-medium text-red-700">
-                                No name could be read from this email, so it can&apos;t be imported.
+                                {item.problem ?? "No name could be read from this email"}, so it can&apos;t be imported.
                               </p>
                             )}
                             {item.readable && item.missing.length > 0 && (

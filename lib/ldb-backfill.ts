@@ -163,17 +163,26 @@ const CELL_TEXT = {
   ],
 };
 
-// Reads the notification's table, a label and its value per row, straight
-// from the HTML, so a value can never run into the next row. The heading and
-// anything outside the table are ignored.
-export function parseNotificationTable(html: string): NotificationFields {
-  const found: NotificationFields = {};
+// Every row of an LDB notification's table that is exactly a label cell and
+// a value cell, as text, read straight from the HTML so a value can never run
+// into the next row. Shared with the LDB applications import.
+export function notificationTableRows(html: string): [label: string, value: string][] {
+  const rows: [string, string][] = [];
   for (const row of html.matchAll(ROW_RE)) {
     const cells = [...row[1].matchAll(CELL_RE)].map((c) => htmlToText(c[2], CELL_TEXT).trim());
-    if (cells.length !== 2) continue;
-    const key = labelKey(cells[0]);
-    if (!key || key === "ignore" || found[key] !== undefined || !cells[1]) continue;
-    found[key] = cells[1];
+    if (cells.length === 2) rows.push([cells[0], cells[1]]);
+  }
+  return rows;
+}
+
+// Reads the notification's table, a label and its value per row. The heading
+// and anything outside the table are ignored.
+export function parseNotificationTable(html: string): NotificationFields {
+  const found: NotificationFields = {};
+  for (const [label, value] of notificationTableRows(html)) {
+    const key = labelKey(label);
+    if (!key || key === "ignore" || found[key] !== undefined || !value) continue;
+    found[key] = value;
   }
   return found;
 }
@@ -182,13 +191,22 @@ export function parseNotificationTable(html: string): NotificationFields {
 // line then its value (how a table comes out as text). A value runs over
 // following lines until a blank line, the next label or the footer.
 export function parseNotificationText(text: string): NotificationFields {
-  const found: NotificationFields = {};
-  let current: RawKey | "ignore" | null = null;
+  return readLabelledText(text, labelKey);
+}
+
+// The same reading with any set of labels, by keyOf ("ignore" for a label to
+// pass over). Shared with the LDB applications import.
+export function readLabelledText<K extends string>(
+  text: string,
+  keyOf: (label: string) => K | "ignore" | null
+): Partial<Record<K, string>> {
+  const found: Partial<Record<K, string>> = {};
+  let current: K | "ignore" | null = null;
   let buffer: string[] = [];
 
   function close() {
     if (current && current !== "ignore" && buffer.length > 0 && found[current] === undefined) {
-      found[current] = buffer.join(current === "areas" ? ", " : "\n");
+      found[current] = buffer.join((current as string) === "areas" ? ", " : "\n");
     }
     current = null;
     buffer = [];
@@ -205,14 +223,14 @@ export function parseNotificationText(text: string): NotificationFields {
       continue;
     }
     const colon = line.match(/^([^:]{1,60}?)\s*:\s*(.*)$/);
-    const colonLabel = colon ? labelKey(colon[1]) : null;
+    const colonLabel = colon ? keyOf(colon[1]) : null;
     if (colon && colonLabel) {
       close();
       current = colonLabel;
       if (colon[2].trim()) buffer.push(colon[2].trim());
       continue;
     }
-    const wholeLabel = labelKey(line.replace(/[?*]+$/, ""));
+    const wholeLabel = keyOf(line.replace(/[?*]+$/, ""));
     if (wholeLabel) {
       close();
       current = wholeLabel;
@@ -295,9 +313,19 @@ export type NotificationRules = { from: string; inbox: string; ours: string[] };
 // Bournemouth lead come from the same address, but they go to the lead with
 // Reply-To the LDB address, so they are never notifications.
 export function isNotification(message: gmail_v1.Schema$Message, rules: NotificationRules): boolean {
+  return isNotificationFrom(message, rules, isNotificationSubject);
+}
+
+// The same check for any kind of LDB website notification, by its subject:
+// enquiries above, distributor applications in lib/application-import.ts.
+export function isNotificationFrom(
+  message: gmail_v1.Schema$Message,
+  rules: NotificationRules,
+  isSubject: (subject: string | null) => boolean
+): boolean {
   if ((message.labelIds ?? []).includes("DRAFT")) return false;
   if (parseMailbox(header(message, "From")).address.toLowerCase() !== rules.from) return false;
-  if (!isNotificationSubject(header(message, "Subject"))) return false;
+  if (!isSubject(header(message, "Subject"))) return false;
   const to = addressesIn(message, ["To", "Cc"]);
   if (!to.includes(rules.inbox) || to.some((a) => !rules.ours.includes(a))) return false;
   const replyTo = addressesIn(message, ["Reply-To"]);
@@ -308,7 +336,7 @@ export type ReadNotification =
   | { ok: true; enquiry: LdbEnquiry }
   | { ok: false; reason: string; name: string | null; email: string | null; phone: string | null };
 
-function htmlPart(part: gmail_v1.Schema$MessagePart | undefined): string | null {
+export function htmlPart(part: gmail_v1.Schema$MessagePart | undefined): string | null {
   if (!part) return null;
   if (part.mimeType === "text/html" && part.body?.data && !part.filename) {
     return Buffer.from(part.body.data, "base64url").toString("utf-8");

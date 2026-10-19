@@ -628,6 +628,7 @@ test("import flags likely duplicates by phone, against the CRM and within the sa
     messageId: id,
     threadId: id,
     receivedAt: date,
+    business: "FDH",
     parsed: parseApplicationEmail({ plain: `Name: P ${id}\nPhone: ${phone}`, fromHtml: null, replyTo: null }),
   });
   const flags = flagDuplicates(
@@ -660,9 +661,9 @@ test("import saves with source GMAIL_IMPORT, the email's date, and lets the data
   const count = await saveImportedApplications(
     db,
     [
-      { messageId: "m1", threadId: "t1", receivedAt: "2026-09-25T10:30:00.000Z", parsed },
-      { messageId: "m2", threadId: "t2", receivedAt: "2026-09-26T10:30:00.000Z", parsed },
-      { messageId: "m3", threadId: "t3", receivedAt: "2026-09-27T10:30:00.000Z", parsed: unreadable },
+      { messageId: "m1", threadId: "t1", receivedAt: "2026-09-25T10:30:00.000Z", business: "FDH", parsed },
+      { messageId: "m2", threadId: "t2", receivedAt: "2026-09-26T10:30:00.000Z", business: "FDH", parsed },
+      { messageId: "m3", threadId: "t3", receivedAt: "2026-09-27T10:30:00.000Z", business: "FDH", parsed: unreadable },
     ],
     new Map([["m2", { kind: "existing", name: "Jo Bloggs", receivedAt: "2026-09-01T00:00:00.000Z" }]])
   );
