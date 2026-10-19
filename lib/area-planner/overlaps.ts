@@ -29,12 +29,15 @@ export function overlapOf(a: AreaGeometry, b: AreaGeometry): { geometry: AreaGeo
   return size >= MIN_OVERLAP_M2 ? { geometry: shared.geometry, areaM2: size } : null;
 }
 
-// Largest first.
-export function findOverlaps(areas: OverlapInput[]): Overlap[] {
+// Largest first. The pair check can be swapped for one that remembers.
+export function findOverlaps(
+  areas: OverlapInput[],
+  pairOverlap: (a: OverlapInput, b: OverlapInput) => ReturnType<typeof overlapOf> = (a, b) => overlapOf(a.geometry, b.geometry)
+): Overlap[] {
   const found: Overlap[] = [];
   for (let i = 0; i < areas.length; i++) {
     for (let j = i + 1; j < areas.length; j++) {
-      const shared = overlapOf(areas[i].geometry, areas[j].geometry);
+      const shared = pairOverlap(areas[i], areas[j]);
       if (shared) found.push({ a: areas[i].id, b: areas[j].id, ...shared });
     }
   }

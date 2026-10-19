@@ -1,8 +1,5 @@
 import "server-only";
 import type { Prisma, PrismaClient } from "@/generated/prisma/client";
-import { featureCollection } from "@turf/helpers";
-import type { Feature, MultiPolygon, Polygon } from "geojson";
-import { union } from "@turf/union";
 import { WON_STAGES } from "@/lib/lead-stage";
 import { leafletCountFromQuantity } from "@/lib/profit";
 import type { Business } from "@/lib/business";
@@ -10,10 +7,10 @@ import { estimateHouseholds, findPostcode, postcodeGeometry } from "./data";
 import { nextMapColour } from "./colours";
 import { syncAreaCostLine } from "./costs";
 import { circleGeometry, type AreaGeometry } from "./geometry";
-import { findOverlaps } from "./overlaps";
 import { parsePostcodeList, sectorReading, type PostcodeProblem } from "./postcodes";
 import { buildShareView, defaultDistributorTitle, type ShareView } from "./share-view";
 import { hashShareToken, isShareTokenShaped, linkState, newShareToken, shareExpiryFrom } from "./share-links";
+import { projectHouseholds } from "./project-estimates";
 import type { AreaChanges, NewArea, NewProject, ProjectChanges } from "./validate";
 import type {
   AreaKind,
@@ -121,21 +118,6 @@ function toPlannerArea(row: AreaRow): PlannerArea {
   };
 }
 
-function feature(geometry: AreaGeometry): Feature<Polygon | MultiPolygon> {
-  return { type: "Feature", properties: {}, geometry };
-}
-
-// All of a project's areas as one shape, so overlaps count once.
-export function combinedGeometry(geometries: AreaGeometry[]): AreaGeometry | null {
-  if (geometries.length === 0) return null;
-  if (geometries.length === 1) return geometries[0];
-  try {
-    return union(featureCollection(geometries.map(feature)))?.geometry ?? null;
-  } catch {
-    return null;
-  }
-}
-
 // --- Reading -------------------------------------------------------------------
 
 export async function listProjects(db: Db): Promise<ProjectTab[]> {
@@ -194,13 +176,7 @@ export async function loadProject(db: Db, id: string, now = new Date()): Promise
   if (!row) return null;
   const business = businessOf(row);
   const areas = row.areas.map(toPlannerArea);
-  const overlaps = await Promise.all(
-    findOverlaps(areas.map((a) => ({ id: a.id, geometry: a.geometry }))).map(async (o) => ({
-      ...o,
-      households: await estimateHouseholds(o.geometry),
-    }))
-  );
-  const combined = combinedGeometry(areas.map((a) => a.geometry));
+  const { overlaps, totalHouseholds } = await projectHouseholds(areas.map((a) => ({ id: a.id, geometry: a.geometry })));
   const campaignStart = row.lead?.job?.campaignStartDate ?? null;
   return {
     id: row.id,
@@ -230,7 +206,7 @@ export async function loadProject(db: Db, id: string, now = new Date()): Promise
     closedAt: row.closedAt ? row.closedAt.toISOString() : null,
     areas,
     overlaps,
-    totalHouseholds: areas.length === 0 ? 0 : combined ? await estimateHouseholds(combined) : null,
+    totalHouseholds,
     links: linksByDistributor(row, business, now),
   };
 }

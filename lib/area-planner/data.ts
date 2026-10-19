@@ -1,16 +1,31 @@
 import "server-only";
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { gunzipSync } from "node:zlib";
 import type { MultiPolygon, Polygon } from "geojson";
 import { decodeBbox, decodeGeometry, type EncodedGeometry } from "./compact-geometry";
-import { bboxesMeet, geometryBbox, weightedHouseholds, type Bbox, type OutputArea } from "./households";
+import {
+  bboxesMeet,
+  clippedHouseholds,
+  householdsFromCovers,
+  partCover,
+  polygonBoxes,
+  shapeParts,
+  type Bbox,
+  type OutputArea,
+  type PartCover,
+  type ShapePart,
+} from "./households";
+import { Lru } from "./lru";
 
 // Reads the Area Planner's postcode and household data (built by
 // scripts/area-planner/build-data.ts) on the server, on demand: the indexes
 // when first needed, and only the district and grid cell files a request
-// touches. Parsed files stay in memory per data folder. Output Area shapes
-// never go to the browser.
+// touches. Parsed files stay in memory per data folder, and so does how much
+// of each Output Area every shape part worked out lately covers, so a shape
+// that hasn't changed isn't worked out again. Output Area shapes never go to
+// the browser.
 //
 // When no data is installed (no manifest.json), lookups return null and the
 // status says so; once installed, an unreadable file is an error.
@@ -31,7 +46,11 @@ type DirCache = {
   oaIndex?: Promise<OaEntry[]>;
   districtFiles: Map<string, Promise<Record<string, EncodedGeometry>>>;
   cells: Map<string, Promise<Map<string, Polygon | MultiPolygon>>>;
+  covers: Lru<PartCover>;
 };
+
+// Shape parts remembered per data folder.
+const REMEMBERED_PARTS = 500;
 
 const caches = new Map<string, DirCache>();
 
@@ -45,7 +64,7 @@ export function clearAreaPlannerDataCache(): void {
 
 function cacheFor(dir: string): DirCache {
   let cache = caches.get(dir);
-  if (!cache) caches.set(dir, (cache = { districtFiles: new Map(), cells: new Map() }));
+  if (!cache) caches.set(dir, (cache = { districtFiles: new Map(), cells: new Map(), covers: new Lru(REMEMBERED_PARTS) }));
   return cache;
 }
 
@@ -178,19 +197,45 @@ export async function postcodeGeometry(code: string): Promise<Polygon | MultiPol
   return encoded ? decodeGeometry(encoded) : null;
 }
 
+// A short fixed-length name for a shape, for remembering work done on it.
+export function geometryKey(value: unknown): string {
+  return createHash("sha256").update(JSON.stringify(value)).digest("base64url");
+}
+
+async function outputAreas(dir: string, entries: OaEntry[]): Promise<OutputArea[]> {
+  const cellKeys = [...new Set(entries.map((oa) => oa.cell))];
+  const cells = new Map(await Promise.all(cellKeys.map(async (key) => [key, await cellOf(dir, key)] as const)));
+  const oas: OutputArea[] = [];
+  for (const oa of entries) {
+    const shape = cells.get(oa.cell)?.get(oa.code);
+    if (shape) oas.push({ code: oa.code, households: oa.households, bbox: oa.bbox, geometry: shape });
+  }
+  return oas;
+}
+
+async function coverOf(dir: string, index: OaEntry[], part: ShapePart): Promise<PartCover> {
+  const cache = cacheFor(dir);
+  const key = geometryKey(part.polygon.coordinates);
+  const known = cache.covers.get(key);
+  if (known) return known;
+  const near = index.filter((oa) => oa.households > 0 && bboxesMeet(part.bbox, oa.bbox));
+  const cover = partCover(part, await outputAreas(dir, near));
+  cache.covers.set(key, cover);
+  return cover;
+}
+
 // About how many homes are in a shape, from Census 2021 households by Output
 // Area. Null when no data is installed.
 export async function estimateHouseholds(geometry: Polygon | MultiPolygon): Promise<number | null> {
   const dir = areaPlannerDataDir();
   if (!(await manifestOf(dir))) return null;
-  const box = geometryBbox(geometry);
-  const near = (await oaIndexOf(dir)).filter((oa) => oa.households > 0 && bboxesMeet(box, oa.bbox));
-  const cellKeys = [...new Set(near.map((oa) => oa.cell))];
-  const cells = new Map(await Promise.all(cellKeys.map(async (key) => [key, await cellOf(dir, key)] as const)));
-  const oas: OutputArea[] = [];
-  for (const oa of near) {
-    const shape = cells.get(oa.cell)?.get(oa.code);
-    if (shape) oas.push({ code: oa.code, households: oa.households, bbox: oa.bbox, geometry: shape });
+  const index = await oaIndexOf(dir);
+  const parts = shapeParts(geometry);
+  if (!parts) {
+    const boxes = polygonBoxes(geometry);
+    const near = index.filter((oa) => oa.households > 0 && boxes.some((box) => bboxesMeet(box, oa.bbox)));
+    return Math.round(clippedHouseholds(geometry, await outputAreas(dir, near)));
   }
-  return Math.round(weightedHouseholds(geometry, oas));
+  const covers = await Promise.all(parts.map((part) => coverOf(dir, index, part)));
+  return Math.round(householdsFromCovers(index, covers));
 }
