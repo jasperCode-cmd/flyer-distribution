@@ -168,6 +168,7 @@ test("endpoint saves a valid application and returns nothing that was stored", a
     hasLicence: false,
     availability: "Weekday mornings and most weekends",
     source: "WEBSITE_FORM",
+    business: "FDH",
     receivedAt: NOW,
   });
 });
@@ -267,7 +268,7 @@ test("duplicate: the same phone within 7 days, in another format, is noted on th
   assert.equal(updates.length, 1);
   assert.equal(updates[0].where.id, "app1");
   const notes = updates[0].data.notes;
-  assert.ok(notes.startsWith("Spoke on WhatsApp.\n\nApplied again through the website form on 10 Oct 2026."));
+  assert.ok(notes.startsWith("Spoke on WhatsApp.\n\nApplied again through the Flyer Distribution Hampshire website on 10 Oct 2026."));
   assert.ok(notes.includes("Email: sam@example.com"));
   assert.ok(notes.includes("Where they live: Southampton, SO15 2AB"));
   assert.ok(!notes.includes("Age:"), "unchanged fields aren't repeated");

@@ -5,14 +5,16 @@ import { useEffect, useState } from "react";
 import {
   APPLICATIONS_CHANGED_EVENT,
   APPLICATION_LIMITS,
-  APPLICATION_SOURCE_LABELS,
   APPLICATION_STATUSES,
   APPLICATION_STATUS_LABELS,
+  applicationSourceLabel,
   telHref,
   whatsAppHref,
   type ApplicationStatus,
 } from "@/lib/distributor-applications";
 import { StatusBadge, formatReceived, yesNo } from "./application-ui";
+import BusinessBadge from "./BusinessBadge";
+import type { Business } from "@/lib/business";
 
 type Application = {
   id: string;
@@ -26,6 +28,7 @@ type Application = {
   availability: string | null;
   status: ApplicationStatus;
   source: string;
+  business: Business;
   notes: string | null;
   receivedAt: string;
   distributor: { id: string; name: string } | null;
@@ -137,9 +140,12 @@ export default function ApplicationDetail({ application }: { application: Applic
 
       <div className="mt-2 mb-4 flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
-          <h1 className="text-xl font-bold text-blue-900 wrap-break-word">{application.fullName}</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl font-bold text-blue-900 wrap-break-word">{application.fullName}</h1>
+            <BusinessBadge business={application.business} />
+          </div>
           <p className="text-xs text-gray-500 mt-0.5">
-            Received {formatReceived(application.receivedAt, true)}, {APPLICATION_SOURCE_LABELS[application.source] ?? application.source}
+            Received {formatReceived(application.receivedAt, true)}, {applicationSourceLabel(application.source, application.business)}
           </p>
         </div>
         <StatusBadge status={status} />

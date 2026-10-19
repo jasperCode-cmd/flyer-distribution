@@ -15,7 +15,7 @@ type Notifications = {
   count: number;
   websiteLeads: { id: string; name: string; createdAt: string; business?: Business }[];
   // Older responses (a deploy mid-session) may not have this yet.
-  newApplications?: { id: string; fullName: string; receivedAt: string }[];
+  newApplications?: { id: string; fullName: string; receivedAt: string; business?: Business }[];
   dueCallbacks: { id: string; name: string; nextCallableAt: string }[];
   followUps: { id: string; description: string; leadId: string; leadName: string; overdue: boolean }[];
 };
@@ -69,12 +69,15 @@ export default function NotificationBell({ menuAlign = "right" }: { menuAlign?: 
               text: `${newOnes.length} new website enquiries just came in${ldb > 0 ? `, ${ldb} for Bournemouth` : ""}`,
             });
           }
-          if (newApplications.length > 0) {
+          if (newApplications.length === 1) {
             messages.push({
-              text:
-                newApplications.length === 1
-                  ? `New distributor application: ${newApplications[0].fullName}`
-                  : `${newApplications.length} new distributor applications just came in`,
+              text: `New distributor application: ${newApplications[0].fullName}`,
+              business: newApplications[0].business,
+            });
+          } else if (newApplications.length > 1) {
+            const ldb = newApplications.filter((a) => a.business === "LDB").length;
+            messages.push({
+              text: `${newApplications.length} new distributor applications just came in${ldb > 0 ? `, ${ldb} for Bournemouth` : ""}`,
             });
           }
           if (messages.length > 0) setToast(messages);
@@ -180,9 +183,10 @@ export default function NotificationBell({ menuAlign = "right" }: { menuAlign?: 
                         key={a.id}
                         href={`/admin/crm/applications/${a.id}`}
                         onClick={() => setOpen(false)}
-                        className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
                       >
-                        {a.fullName}
+                        <span className="truncate">{a.fullName}</span>
+                        <BusinessBadge business={a.business} />
                       </Link>
                     ))}
                   </div>

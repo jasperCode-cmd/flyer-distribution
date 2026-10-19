@@ -6,17 +6,27 @@ import {
 } from "./distributor-applications";
 import { APPLICATION_HONEYPOT_FIELD } from "./distributor-application-form";
 import { clientKey } from "./rate-limit";
+import type { Business } from "./business";
 
-// Across every server instance, at most this many website applications are
-// saved per hour. Far above real use; it only matters if someone floods the
-// endpoint, and even then each applicant's email still arrives.
+// Across every server instance, at most this many applications are saved per
+// hour from each business's website, counting only that website's own. Far
+// above real use; it only matters if someone floods an endpoint, and then the
+// other website's applications still get through.
 export const APPLICATIONS_PER_HOUR_CAP = 60;
 
 export type ApplicationEndpointDb = SaveApplicationDb & {
   distributorApplication: SaveApplicationDb["distributorApplication"] & {
-    count(args: { where: { source: "WEBSITE_FORM"; createdAt: { gte: Date } } }): Promise<number>;
+    count(args: { where: { source: "WEBSITE_FORM"; business: Business; createdAt: { gte: Date } } }): Promise<number>;
   };
 };
+
+// How many applications came through one business's website in the hour
+// before `now`, for its cap.
+export function websiteApplicationsLastHour(db: ApplicationEndpointDb, business: Business, now: Date): Promise<number> {
+  return db.distributorApplication.count({
+    where: { source: "WEBSITE_FORM", business, createdAt: { gte: new Date(now.getTime() - 60 * 60 * 1000) } },
+  });
+}
 
 // Every outcome a genuine applicant can reach answers with the same body, so
 // the response never says whether a phone number has applied before, and
@@ -58,9 +68,7 @@ export async function handleApplicationRequest(
 
   const now = deps.now?.() ?? new Date();
   try {
-    const lastHour = await deps.db.distributorApplication.count({
-      where: { source: "WEBSITE_FORM", createdAt: { gte: new Date(now.getTime() - 60 * 60 * 1000) } },
-    });
+    const lastHour = await websiteApplicationsLastHour(deps.db, "FDH", now);
     if (lastHour >= APPLICATIONS_PER_HOUR_CAP) {
       return Response.json({ error: "Too many requests" }, { status: 429 });
     }

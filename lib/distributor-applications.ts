@@ -1,4 +1,5 @@
 import { buildDistributorData } from "./distributors";
+import { BUSINESS_NAMES, leadInFilter, type Business, type BusinessFilter } from "./business";
 
 // Distributor applications: checking what the public form sends, matching
 // phone numbers, reading application emails, and the database steps behind
@@ -19,6 +20,13 @@ export const APPLICATION_SOURCE_LABELS: Record<string, string> = {
   WEBSITE_FORM: "Website form",
   GMAIL_IMPORT: "Gmail import",
 };
+
+// Where an application came from, as shown on its page: a Bournemouth one
+// says so.
+export function applicationSourceLabel(source: string, business?: Business): string {
+  if (source === "WEBSITE_FORM" && business === "LDB") return "Bournemouth website form";
+  return APPLICATION_SOURCE_LABELS[source] ?? source;
+}
 
 // Fired in the browser when applications change, so the CRM navigation
 // refreshes its New count straight away.
@@ -68,13 +76,14 @@ export const APPLICATION_FIELD_LABELS: Record<ApplicationFieldKey, string> = {
   availability: "Availability",
 };
 
-const EMAIL_RE = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
+export const APPLICATION_EMAIL_RE = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
+const EMAIL_RE = APPLICATION_EMAIL_RE;
 
-function collapse(value: string): string {
+export function collapse(value: string): string {
   return value.replace(/\s+/g, " ").trim();
 }
 
-function tidyMultiline(value: string): string {
+export function tidyMultiline(value: string): string {
   return value
     .replace(/\r\n?/g, "\n")
     .split("\n")
@@ -95,7 +104,7 @@ function digitsOf(value: string | null | undefined): string {
   return (value ?? "").replace(/\D/g, "");
 }
 
-function looksLikePhone(value: string): boolean {
+export function looksLikePhone(value: string): boolean {
   const digits = digitsOf(value).length;
   return digits >= 7 && digits <= 20 && !/[<>]|:\/\//.test(value);
 }
@@ -372,9 +381,13 @@ export function parseApplicationEmail(params: {
 export type ApplicationListItem = ApplicationFields & {
   id: string;
   status: ApplicationStatus;
+  // Which website it came through; missing means FDH.
+  business?: Business;
 };
 
 export type ApplicationFilters = {
+  // All, FDH or LDB, like the Leads page; missing means All.
+  business?: Exclude<BusinessFilter, "ALL">;
   status?: ApplicationStatus | "";
   car?: "yes" | "no" | "";
   licence?: "yes" | "no" | "";
@@ -404,6 +417,7 @@ export function matchesApplicationSearch(app: ApplicationListItem, query: string
 export function filterApplications<T extends ApplicationListItem>(apps: T[], filters: ApplicationFilters): T[] {
   const area = compact(filters.area);
   return apps.filter((a) => {
+    if (filters.business && !leadInFilter(a.business, filters.business)) return false;
     if (filters.status && a.status !== filters.status) return false;
     if (filters.car && a.hasCar !== (filters.car === "yes")) return false;
     if (filters.licence && a.hasLicence !== (filters.licence === "yes")) return false;
@@ -439,7 +453,7 @@ export type SaveApplicationDb = {
       take: number;
     }): Promise<StoredApplication[]>;
     create(args: {
-      data: ApplicationFields & { source: "WEBSITE_FORM"; receivedAt: Date };
+      data: ApplicationFields & { source: "WEBSITE_FORM"; business: Business; receivedAt: Date };
       select: { id: true };
     }): Promise<{ id: string }>;
     update(args: { where: { id: string }; data: { notes: string } }): Promise<unknown>;
@@ -462,12 +476,14 @@ function describeChanges(existing: ApplicationFields, incoming: ApplicationField
 export type SaveApplicationResult = { created: true } | { created: false; duplicate: true };
 
 // A second application from the same phone number within 7 days isn't saved
-// again: the existing one gets a note saying they applied again, with any
-// details that differ this time.
+// again, whichever business's website either came through (distributors are
+// shared): the existing one gets a note saying they applied again and
+// through which website, with any details that differ this time.
 export async function saveWebsiteApplication(
   db: SaveApplicationDb,
   fields: ApplicationFields,
-  now: Date = new Date()
+  now: Date = new Date(),
+  business: Business = "FDH"
 ): Promise<SaveApplicationResult> {
   const since = new Date(now.getTime() - DUPLICATE_WINDOW_DAYS * 24 * 60 * 60 * 1000);
   const recent = await db.distributorApplication.findMany({
@@ -480,7 +496,7 @@ export async function saveWebsiteApplication(
   if (existing) {
     const changes = describeChanges(existing, fields);
     const entry = [
-      `Applied again through the website form on ${formatNoteDate(now)}.`,
+      `Applied again through the ${BUSINESS_NAMES[business]} website on ${formatNoteDate(now)}.`,
       ...(changes.length ? ["Details that differ this time:", ...changes] : []),
     ].join("\n");
     const notes = existing.notes ? `${existing.notes}\n\n${entry}` : entry;
@@ -491,7 +507,7 @@ export async function saveWebsiteApplication(
   }
 
   await db.distributorApplication.create({
-    data: { ...fields, source: "WEBSITE_FORM", receivedAt: now },
+    data: { ...fields, source: "WEBSITE_FORM", business, receivedAt: now },
     select: { id: true },
   });
   return { created: true };

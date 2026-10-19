@@ -60,7 +60,7 @@ export async function loadDatabaseFacts(now: Date): Promise<Omit<PriorityInputs,
     }),
     () => prisma.distributorApplication.findMany({
       where: { status: "NEW" },
-      select: { id: true, fullName: true, email: true, phone: true, status: true, receivedAt: true, updatedAt: true },
+      select: { id: true, fullName: true, email: true, phone: true, business: true, status: true, receivedAt: true, updatedAt: true },
     }),
     () => prisma.task.findMany({
       where: { completed: false },

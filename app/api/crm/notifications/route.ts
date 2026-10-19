@@ -24,7 +24,7 @@ export async function GET() {
     // left out, so an import never floods the bell.
     prisma.distributorApplication.findMany({
       where: { status: "NEW", source: "WEBSITE_FORM" },
-      select: { id: true, fullName: true, receivedAt: true },
+      select: { id: true, fullName: true, receivedAt: true, business: true },
       orderBy: { receivedAt: "desc" },
     }),
     prisma.lead.findMany({

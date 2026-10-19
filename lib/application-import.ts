@@ -201,6 +201,8 @@ export type SaveImportDb = {
     createMany(args: {
       data: (ApplicationFields & {
         source: "GMAIL_IMPORT";
+        // The import reads the FDH Gmail's Work With Us notifications only.
+        business: "FDH";
         gmailMessageId: string;
         receivedAt: Date;
         notes: string | null;
@@ -223,6 +225,7 @@ export async function saveImportedApplications(
     data: readable.map((c) => ({
       ...c.parsed.fields,
       source: "GMAIL_IMPORT",
+      business: "FDH",
       gmailMessageId: c.messageId,
       receivedAt: new Date(c.receivedAt),
       notes: duplicateNote(flags.get(c.messageId) ?? null),

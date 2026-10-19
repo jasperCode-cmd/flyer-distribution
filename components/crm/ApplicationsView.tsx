@@ -15,6 +15,9 @@ import type { BulkOutcome } from "@/lib/application-bulk";
 import { StatusBadge, formatReceived, yesNo } from "./application-ui";
 import ApplicationImport from "./ApplicationImport";
 import ApplicationBulkMove from "./ApplicationBulkMove";
+import BusinessBadge from "./BusinessBadge";
+import BusinessFilter from "./BusinessFilter";
+import type { Business } from "@/lib/business";
 
 export type ApplicationRow = {
   id: string;
@@ -28,6 +31,7 @@ export type ApplicationRow = {
   availability: string | null;
   status: ApplicationStatus;
   source: string;
+  business: Business;
   receivedAt: string;
   distributor: { id: string; name: string } | null;
 };
@@ -43,12 +47,15 @@ function SourceTag({ source }: { source: string }) {
 export default function ApplicationsView({
   applications,
   gmailConfigured,
+  initialBusiness,
 }: {
   applications: ApplicationRow[];
   gmailConfigured: boolean;
+  // From ?business=, like the Leads page.
+  initialBusiness?: Business;
 }) {
   const router = useRouter();
-  const [filters, setFilters] = useState<ApplicationFilters>({});
+  const [filters, setFilters] = useState<ApplicationFilters>(initialBusiness ? { business: initialBusiness } : {});
   const [importOpen, setImportOpen] = useState(false);
   const [toast, setToast] = useState<{ text: string; kind: "success" | "error" } | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -136,6 +143,12 @@ export default function ApplicationsView({
           Import past applications from Gmail
         </button>
       </div>
+
+      <BusinessFilter
+        value={filters.business ?? "ALL"}
+        onChange={(business) => setFilters((f) => ({ ...f, business: business === "ALL" ? undefined : business }))}
+        className="mb-3"
+      />
 
       <div className="bg-white rounded-lg border border-gray-200 p-3 mb-4 grid grid-cols-2 lg:grid-cols-6 gap-2">
         <input
@@ -289,6 +302,7 @@ export default function ApplicationsView({
                       >
                         {a.fullName}
                       </Link>
+                      <BusinessBadge business={a.business} className="ml-1.5 align-middle" />
                       {a.email && <p className="text-xs text-gray-500 break-all">{a.email}</p>}
                     </td>
                     <td className="px-3 py-2.5 text-sm text-gray-700 whitespace-nowrap">{a.phone ?? "-"}</td>
@@ -333,7 +347,10 @@ export default function ApplicationsView({
                 </label>
                 <Link href={`/admin/crm/applications/${a.id}`} className="block min-w-0 flex-1 p-3 pl-1">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm font-semibold text-blue-900 min-w-0 wrap-break-word">{a.fullName}</p>
+                    <p className="text-sm font-semibold text-blue-900 min-w-0 wrap-break-word">
+                      {a.fullName}
+                      <BusinessBadge business={a.business} className="ml-1.5 align-middle" />
+                    </p>
                     <StatusBadge status={a.status} />
                   </div>
                   <p className="text-xs text-gray-600 mt-1">

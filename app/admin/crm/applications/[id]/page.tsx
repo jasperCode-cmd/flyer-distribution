@@ -26,6 +26,7 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
         availability: a.availability,
         status: a.status,
         source: a.source,
+        business: a.business,
         notes: a.notes,
         receivedAt: a.receivedAt.toISOString(),
         distributor: a.distributor,

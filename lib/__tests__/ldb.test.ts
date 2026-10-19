@@ -644,7 +644,7 @@ test("Leads: the business filter keeps each business's leads, and a lead with no
   assert.deepEqual(ids({ business: "LDB", stage: "WON" }), [], "it combines with the other filters");
 });
 
-test("Priorities: an LDB lead's rows show under LDB only; applications and tasks with no lead show under every filter", () => {
+test("Priorities: an LDB lead's rows show under LDB only, an application under its own business (FDH when not recorded), and tasks with no lead under every filter", () => {
   const leadFacts = (id: string, business?: "FDH" | "LDB"): LeadFacts => ({
     id,
     name: `Lead ${id}`,
@@ -673,7 +673,7 @@ test("Priorities: an LDB lead's rows show under LDB only; applications and tasks
   });
   const keys = (filter: "ALL" | "FDH" | "LDB") => rowsForBusiness(rows, filter).map((r) => r.primary.key).sort();
   assert.deepEqual(keys("ALL"), ["application:app", "new_enquiry:fdh", "new_enquiry:ldb", "new_enquiry:old", "task:task"]);
-  assert.deepEqual(keys("LDB"), ["application:app", "new_enquiry:ldb", "task:task"]);
+  assert.deepEqual(keys("LDB"), ["new_enquiry:ldb", "task:task"]);
   assert.deepEqual(keys("FDH"), ["application:app", "new_enquiry:fdh", "new_enquiry:old", "task:task"]);
   const ldbRow = rows.find((r) => r.primary.key === "new_enquiry:ldb");
   assert.equal(ldbRow?.primary.subject.kind === "lead" && ldbRow.primary.subject.business, "LDB", "the row knows its badge");

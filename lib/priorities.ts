@@ -101,6 +101,8 @@ export type ApplicationFacts = {
   fullName: string;
   email: string | null;
   phone: string | null;
+  // Which website it came through; missing means FDH.
+  business?: Business;
   status: string;
   receivedAt: string;
   updatedAt: string;
@@ -144,7 +146,7 @@ export type PriorityInputs = {
 
 export type PrioritySubject =
   | ({ kind: "lead" } & LeadRef)
-  | { kind: "application"; id: string; name: string; email: string | null; phone: string | null }
+  | { kind: "application"; id: string; name: string; email: string | null; phone: string | null; business: Business }
   | { kind: "none" };
 
 export type PriorityItem = {
@@ -378,7 +380,7 @@ export function automaticItems(inputs: PriorityInputs): PriorityItem[] {
         detail: null,
         fingerprint: `NEW:${app.updatedAt}`,
         since: app.receivedAt,
-        subject: { kind: "application", id: app.id, name: app.fullName, email: app.email, phone: app.phone },
+        subject: { kind: "application", id: app.id, name: app.fullName, email: app.email, phone: app.phone, business: app.business ?? "FDH" },
       })
     );
   }
@@ -490,13 +492,13 @@ export function filterRows(rows: PriorityRow[], level: PriorityLevel | "ALL", ty
 
 // --- The business filter ----------------------------------------------------------
 
-// A lead's rows show under its own business; an application, or a task with
-// no lead, shows under every filter.
+// A lead's rows show under its own business, and so do an application's (the
+// website it came through); a task with no lead shows under every filter.
 export function rowsForBusiness(rows: PriorityRow[], filter: BusinessFilter): PriorityRow[] {
   if (filter === "ALL") return rows;
   return rows.filter((row) => {
     const subject = row.primary.subject;
-    return itemInFilter(subject.kind === "lead" ? subject : null, filter);
+    return itemInFilter(subject.kind === "lead" || subject.kind === "application" ? subject : null, filter);
   });
 }
 

@@ -121,7 +121,7 @@ export default function TopPriorities({
                       {row.others.length > 0 && <span className="font-normal text-gray-500"> +{row.others.length} more</span>}
                     </span>
                     <span className={`flex flex-wrap items-center gap-x-1.5 text-xs ${entry.overdue ? "text-red-700" : "text-gray-500"}`}>
-                      {entry.subject.kind === "lead" && <BusinessBadge business={entry.subject.business} />}
+                      {(entry.subject.kind === "lead" || entry.subject.kind === "application") && <BusinessBadge business={entry.subject.business} />}
                       {name && <span className="truncate text-gray-600">{name},</span>}
                       {entry.overdue && <OverdueTag />}
                       <span>{waitingLabel(entry, now)}</span>
