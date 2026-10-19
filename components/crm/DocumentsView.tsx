@@ -128,64 +128,116 @@ export default function DocumentsView({ documents, today, bank }: { documents: D
         </div>
       )}
 
-      <div className="bg-white rounded-lg border border-gray-200 overflow-x-auto">
-        {shown.length === 0 ? (
+      {shown.length === 0 ? (
+        <div className="bg-white rounded-lg border border-gray-200">
           <p className="text-sm text-gray-400 p-5">{view === "unpaid" ? "No unpaid invoices." : "No documents match these filters."}</p>
-        ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-xs text-gray-500 text-left">
-              <tr>
-                <th className="px-3 py-2 font-medium">Number</th>
-                <th className="px-3 py-2 font-medium">Type</th>
-                <th className="px-3 py-2 font-medium">Lead</th>
-                <th className="px-3 py-2 font-medium">Status</th>
-                <th className="px-3 py-2 font-medium text-right">{view === "unpaid" ? "Amount due" : "Amount"}</th>
-                <th className="px-3 py-2 font-medium">Issued</th>
-                <th className="px-3 py-2 font-medium">{view === "unpaid" ? "Due" : "Due / valid until"}</th>
-                <th className="px-3 py-2 font-medium sr-only">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {shown.map((d) => (
-                <tr key={`${d.kind}-${d.id}`} className="align-top">
-                  <td className="px-3 py-2 font-semibold whitespace-nowrap">
-                    <Link href={documentHref(d)} className="text-blue-800 hover:underline">
+        </div>
+      ) : (
+        <>
+          {/* Relative, so the hidden Actions heading stays inside the scrolling box. */}
+          <div className="hidden md:block relative bg-white rounded-lg border border-gray-200 overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-xs text-gray-500 text-left">
+                <tr>
+                  <th className="px-3 py-2 font-medium">Number</th>
+                  <th className="px-3 py-2 font-medium">Type</th>
+                  <th className="px-3 py-2 font-medium">Lead</th>
+                  <th className="px-3 py-2 font-medium">Status</th>
+                  <th className="px-3 py-2 font-medium text-right">{view === "unpaid" ? "Amount due" : "Amount"}</th>
+                  <th className="px-3 py-2 font-medium">Issued</th>
+                  <th className="px-3 py-2 font-medium">{view === "unpaid" ? "Due" : "Due / valid until"}</th>
+                  <th className="px-3 py-2 font-medium sr-only">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {shown.map((d) => (
+                  <tr key={`${d.kind}-${d.id}`} className="align-top">
+                    <td className="px-3 py-2 font-semibold whitespace-nowrap">
+                      <Link href={documentHref(d)} className="text-blue-800 hover:underline">
+                        {d.number}
+                      </Link>
+                    </td>
+                    <td className="px-3 py-2 whitespace-nowrap text-gray-700">{DOCUMENT_TYPE_LABELS[d.type]}</td>
+                    <td className="px-3 py-2 min-w-[10rem]">
+                      <Link href={`/admin/crm/leads/${d.leadId}`} className="text-gray-900 hover:underline">
+                        {d.leadName}
+                      </Link>{" "}
+                      <BusinessBadge business={d.business} />
+                    </td>
+                    <td className="px-3 py-2 whitespace-nowrap">
+                      <DocumentStatusPill status={d.status} />
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums whitespace-nowrap">{formatPence(d.amountPence)}</td>
+                    <td className="px-3 py-2 whitespace-nowrap text-gray-700">{formatLongDate(d.issueDate)}</td>
+                    <td className={`px-3 py-2 whitespace-nowrap ${view === "unpaid" && overdue(d) ? "text-red-700 font-semibold" : "text-gray-700"}`}>
+                      {d.dueOnReceipt ? "On receipt" : d.dueDate ? formatLongDate(d.dueDate) : "-"}
+                      {view === "unpaid" && overdue(d) ? " (overdue)" : ""}
+                    </td>
+                    <td className="px-3 py-2 whitespace-nowrap text-right">{pdfLink(d, bank.ready)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Phones: one card per document. */}
+          <ul className="space-y-2 md:hidden">
+            {shown.map((d) => (
+              <li key={`${d.kind}-${d.id}`} className="rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <Link href={documentHref(d)} className="font-semibold text-blue-800 hover:underline">
                       {d.number}
                     </Link>
-                  </td>
-                  <td className="px-3 py-2 whitespace-nowrap text-gray-700">{DOCUMENT_TYPE_LABELS[d.type]}</td>
-                  <td className="px-3 py-2 min-w-[10rem]">
-                    <Link href={`/admin/crm/leads/${d.leadId}`} className="text-gray-900 hover:underline">
-                      {d.leadName}
-                    </Link>{" "}
-                    <BusinessBadge business={d.business} />
-                  </td>
-                  <td className="px-3 py-2 whitespace-nowrap">
-                    <DocumentStatusPill status={d.status} />
-                  </td>
-                  <td className="px-3 py-2 text-right tabular-nums whitespace-nowrap">{formatPence(d.amountPence)}</td>
-                  <td className="px-3 py-2 whitespace-nowrap text-gray-700">{formatLongDate(d.issueDate)}</td>
-                  <td className={`px-3 py-2 whitespace-nowrap ${view === "unpaid" && overdue(d) ? "text-red-700 font-semibold" : "text-gray-700"}`}>
-                    {d.dueOnReceipt ? "On receipt" : d.dueDate ? formatLongDate(d.dueDate) : "-"}
-                    {view === "unpaid" && overdue(d) ? " (overdue)" : ""}
-                  </td>
-                  <td className="px-3 py-2 whitespace-nowrap text-right">
-                    {d.kind === "invoice" && !bank.ready ? (
-                      <span className="text-xs text-gray-400">PDF unavailable</span>
-                    ) : (
-                      <a href={pdfHref(d)} className="text-xs font-medium text-blue-700 hover:underline">
-                        Download PDF
-                      </a>
+                    <p className="text-xs text-gray-500">{DOCUMENT_TYPE_LABELS[d.type]}</p>
+                  </div>
+                  <DocumentStatusPill status={d.status} />
+                </div>
+                <p className="mt-1 text-sm break-words">
+                  <Link href={`/admin/crm/leads/${d.leadId}`} className="text-gray-900 hover:underline">
+                    {d.leadName}
+                  </Link>{" "}
+                  <BusinessBadge business={d.business} />
+                </p>
+                <div className="mt-1 flex items-end justify-between gap-3">
+                  <div className="min-w-0 text-xs text-gray-600">
+                    <p>Issued {formatLongDate(d.issueDate)}</p>
+                    {dueText(d) && (
+                      <p className={view === "unpaid" && overdue(d) ? "text-red-700 font-semibold" : ""}>
+                        {dueText(d)}
+                        {view === "unpaid" && overdue(d) ? " (overdue)" : ""}
+                      </p>
                     )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+                  </div>
+                  <p className="shrink-0 text-right tabular-nums">
+                    <span className="block text-[11px] text-gray-500">{view === "unpaid" ? "Amount due" : "Amount"}</span>
+                    <span className="font-semibold text-gray-900">{formatPence(d.amountPence)}</span>
+                  </p>
+                </div>
+                <div className="mt-2 border-t border-gray-100 pt-2">{pdfLink(d, bank.ready)}</div>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   );
+}
+
+function pdfLink(d: DocumentListRow, bankReady: boolean) {
+  if (d.kind === "invoice" && !bankReady) return <span className="text-xs text-gray-400">PDF unavailable</span>;
+  return (
+    <a href={pdfHref(d)} className="text-xs font-medium text-blue-700 hover:underline">
+      Download PDF
+    </a>
+  );
+}
+
+// "Valid until" for a quote, "Due" for an invoice; null when there's no date.
+function dueText(d: DocumentListRow): string | null {
+  if (d.dueOnReceipt) return "Due on receipt";
+  if (!d.dueDate) return null;
+  return `${d.kind === "quote" ? "Valid until" : "Due"} ${formatLongDate(d.dueDate)}`;
 }
 
 // Due on receipt first, then by due date.
