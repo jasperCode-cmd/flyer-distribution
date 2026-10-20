@@ -10,7 +10,8 @@ import type { PayType } from "@/lib/profit";
 
 // Editing the selected area: its distributor, leaflets, label, status and
 // pay, a circle's radius, and the shape itself (drag on the map). Saving
-// keeps its Profit cost line in step.
+// keeps its Profit cost line in step. Changes show at once and save in the
+// background, so nothing here waits for the server.
 
 export type AreaFormValues = {
   distributorId: string;
@@ -28,7 +29,8 @@ type Props = {
   linked: boolean;
   readOnly: boolean;
   editingShape: boolean;
-  busy: boolean;
+  // Its homes are being worked out again after a shape change.
+  estimating: boolean;
   onSave: (values: AreaFormValues) => void;
   onRadius: (radiusM: number) => void;
   onToggleShapeEdit: () => void;
@@ -51,7 +53,7 @@ function initialValues(area: PlannerArea): AreaFormValues {
 const KIND_LABELS = { CIRCLE: "Circle", RECTANGLE: "Rectangle", POLYGON: "Drawn shape", POSTCODE: "Postcode shape" } as const;
 
 export default function AreaPanel(props: Props) {
-  const { area, distributors, linked, readOnly, busy } = props;
+  const { area, distributors, linked, readOnly } = props;
   const [values, setValues] = useState(() => initialValues(area));
   const [radius, setRadius] = useState(area.radiusM ? String(area.radiusM) : "");
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -84,7 +86,7 @@ export default function AreaPanel(props: Props) {
         <div className="min-w-0">
           <h2 className="truncate text-sm font-bold text-blue-900">{areaName(area)}</h2>
           <p className="text-xs text-gray-500">
-            {KIND_LABELS[area.kind]}, {formatArea(areaM2(area.geometry))}, {homesText(area.households)}
+            {KIND_LABELS[area.kind]}, {formatArea(areaM2(area.geometry))}, {props.estimating ? "working out the homes..." : homesText(area.households)}
           </p>
         </div>
         <button type="button" onClick={props.onClose} className="text-xs font-semibold text-gray-500 hover:text-gray-800">
@@ -199,8 +201,8 @@ export default function AreaPanel(props: Props) {
 
         {!readOnly && (
           <div className="flex flex-wrap items-center gap-2 sm:col-span-2">
-            <button type="submit" disabled={busy} className="rounded-md bg-blue-700 px-3 py-1.5 text-sm font-bold text-white hover:bg-blue-800 disabled:opacity-60">
-              {busy ? "Saving..." : "Save area"}
+            <button type="submit" className="rounded-md bg-blue-700 px-3 py-1.5 text-sm font-bold text-white hover:bg-blue-800">
+              Save area
             </button>
           </div>
         )}
@@ -229,7 +231,7 @@ export default function AreaPanel(props: Props) {
                   className="mt-1 block w-32 rounded-md border border-gray-300 px-2 py-1.5 text-sm font-normal"
                 />
               </label>
-              <button type="submit" disabled={busy} className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-800 hover:bg-gray-50">
+              <button type="submit" className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-800 hover:bg-gray-50">
                 Set radius
               </button>
             </form>
@@ -246,7 +248,7 @@ export default function AreaPanel(props: Props) {
             {confirmDelete ? (
               <>
                 <span className="text-xs text-gray-700">Delete this area{area.hasCostLine ? " and its Profit cost line" : ""}?</span>
-                <button type="button" onClick={props.onDelete} disabled={busy} className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-bold text-white hover:bg-red-700">
+                <button type="button" onClick={props.onDelete} className="rounded-md bg-red-600 px-3 py-1.5 text-sm font-bold text-white hover:bg-red-700">
                   Yes, delete
                 </button>
                 <button type="button" onClick={() => setConfirmDelete(false)} className="rounded-md border border-gray-300 px-3 py-1.5 text-sm">

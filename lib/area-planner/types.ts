@@ -81,11 +81,16 @@ export type PlannerProject = {
   ldbLinksEnabled: boolean;
   closedAt: string | null;
   areas: PlannerArea[];
+  links: PlannerLink[];
+};
+
+// Worked out from all a project's areas together, so sent apart from them
+// (and sometimes after them).
+export type ProjectTotals = {
   overlaps: PlannerOverlap[];
   // About how many homes all its areas cover together, overlaps counted
   // once; null when the household data isn't installed.
   totalHouseholds: number | null;
-  links: PlannerLink[];
 };
 
 export type ProjectTab = {

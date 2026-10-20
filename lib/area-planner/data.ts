@@ -7,9 +7,9 @@ import type { MultiPolygon, Polygon } from "geojson";
 import { decodeBbox, decodeGeometry, type EncodedGeometry } from "./compact-geometry";
 import {
   bboxesMeet,
-  clippedHouseholds,
+  clippedHouseholdsAsync,
   householdsFromCovers,
-  partCover,
+  partCoverAsync,
   polygonBoxes,
   shapeParts,
   type Bbox,
@@ -18,6 +18,7 @@ import {
   type ShapePart,
 } from "./households";
 import { Lru } from "./lru";
+import { untimed, type StepTimer } from "./timing";
 
 // Reads the Area Planner's postcode and household data (built by
 // scripts/area-planner/build-data.ts) on the server, on demand: the indexes
@@ -213,29 +214,34 @@ async function outputAreas(dir: string, entries: OaEntry[]): Promise<OutputArea[
   return oas;
 }
 
-async function coverOf(dir: string, index: OaEntry[], part: ShapePart): Promise<PartCover> {
+async function coverOf(dir: string, index: OaEntry[], part: ShapePart, timer: StepTimer): Promise<PartCover> {
   const cache = cacheFor(dir);
   const key = geometryKey(part.polygon.coordinates);
   const known = cache.covers.get(key);
   if (known) return known;
   const near = index.filter((oa) => oa.households > 0 && bboxesMeet(part.bbox, oa.bbox));
-  const cover = partCover(part, await outputAreas(dir, near));
+  const oas = await timer.step("data-files", () => outputAreas(dir, near));
+  const cover = await timer.step("households", () => partCoverAsync(part, oas));
   cache.covers.set(key, cover);
   return cover;
 }
 
 // About how many homes are in a shape, from Census 2021 households by Output
-// Area. Null when no data is installed.
-export async function estimateHouseholds(geometry: Polygon | MultiPolygon): Promise<number | null> {
+// Area. Null when no data is installed. Parts are worked out one after
+// another, handing back control as they go.
+export async function estimateHouseholds(geometry: Polygon | MultiPolygon, timer: StepTimer = untimed): Promise<number | null> {
   const dir = areaPlannerDataDir();
-  if (!(await manifestOf(dir))) return null;
-  const index = await oaIndexOf(dir);
+  const ready = await timer.step("data-files", async () => ((await manifestOf(dir)) ? oaIndexOf(dir) : null));
+  if (!ready) return null;
+  const index = ready;
   const parts = shapeParts(geometry);
   if (!parts) {
     const boxes = polygonBoxes(geometry);
     const near = index.filter((oa) => oa.households > 0 && boxes.some((box) => bboxesMeet(box, oa.bbox)));
-    return Math.round(clippedHouseholds(geometry, await outputAreas(dir, near)));
+    const oas = await timer.step("data-files", () => outputAreas(dir, near));
+    return Math.round(await timer.step("households", () => clippedHouseholdsAsync(geometry, oas)));
   }
-  const covers = await Promise.all(parts.map((part) => coverOf(dir, index, part)));
+  const covers: PartCover[] = [];
+  for (const part of parts) covers.push(await coverOf(dir, index, part, timer));
   return Math.round(householdsFromCovers(index, covers));
 }

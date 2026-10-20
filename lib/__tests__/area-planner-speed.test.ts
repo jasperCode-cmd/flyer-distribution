@@ -5,7 +5,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
 import { areaPlannerDataStatus, clearAreaPlannerDataCache, estimateHouseholds, postcodeGeometry } from "@/lib/area-planner/data";
 import { circleGeometry, type AreaGeometry } from "@/lib/area-planner/geometry";
-import { clearProjectEstimatesCache, projectHouseholds } from "@/lib/area-planner/project-estimates";
+import { clearProjectEstimatesCache, projectHouseholds, projectHouseholdsWithin } from "@/lib/area-planner/project-estimates";
 import { createPostcodeAreas, createProject, loadProject, updateArea } from "@/lib/area-planner/service";
 
 // The Area Planner's estimates on the real postcode and household data in
@@ -87,6 +87,35 @@ test("drawn shapes, overlaps and totals: the same figures as before", async (t) 
     [["BH6 3", "circle", 3005], ["BH6 3", "rectangle", 1421], ["circle", "rectangle", 1057]]
   );
   assert.equal(result.totalHouseholds, 12020);
+});
+
+// Ten neighbouring Southampton districts: the slowest first load seen (a
+// cold server took 24 seconds to work them out before the speed-up).
+const SOUTHAMPTON = ["SO14", "SO15", "SO16", "SO17", "SO18", "SO19", "SO30", "SO31", "SO40", "SO45"];
+const SOUTHAMPTON_TOTAL = 174588;
+
+test("past its time budget a reply goes without the totals, which finish in the background", async (t) => {
+  if (noData) return t.skip(noData);
+  const areas = await Promise.all(SOUTHAMPTON.map(async (code) => ({ id: code, geometry: (await postcodeGeometry(code))! })));
+  cold();
+  const start = performance.now();
+  assert.equal(await projectHouseholdsWithin(areas, 50), null, "not ready within 50 ms: null, not a wait");
+  assert.ok(performance.now() - start < 1000, `came back in ${Math.round(performance.now() - start)} ms`);
+
+  // The work carries on, and the server stays free for other requests while
+  // it does: no stretch without a timer getting its turn.
+  let last = performance.now();
+  let worst = 0;
+  const tick = setInterval(() => {
+    const now = performance.now();
+    worst = Math.max(worst, now - last);
+    last = now;
+  }, 5);
+  const totals = await projectHouseholds(areas);
+  clearInterval(tick);
+  assert.equal(totals.totalHouseholds, SOUTHAMPTON_TOTAL);
+  assert.ok(worst < 500, `the longest the server was held up was ${Math.round(worst)} ms`);
+  t.diagnostic(`Southampton districts: the server was never held up for more than ${Math.round(worst)} ms`);
 });
 
 // --- A timed save, against a throwaway local database ---------------------------------

@@ -21,6 +21,16 @@ import { OVERLAP_STYLE, areaPathStyle, escapeHtml } from "./map-style";
 // click-to-place polygon from Geoman, and our own press-and-drag lasso),
 // editing the selected area's shape, and finding which area is under a
 // point for distributors dropped from the sidebar. Browser only.
+//
+// Areas are drawn on one canvas, which stays quick with many detailed
+// shapes; Leaflet simplifies each outline for the zoom it's drawn at (the
+// stored shape, used for saving and estimates, is never changed). Only an
+// area that changed is touched: its layer is remade only when its shape
+// changed, and restyled or relabelled only when those changed. A label
+// shows when its area is at least as big as the label on screen and it
+// doesn't cover another label (see placeLabels), and otherwise on hover, so
+// labels never pile up. Overlaps go on their own SVG layer above, for the
+// hatching.
 
 export type Tool = "select" | "circle" | "rectangle" | "polygon" | "lasso";
 
@@ -53,21 +63,34 @@ type Props = {
   onToolDone: () => void;
 };
 
-type Entry = { layer: L.Polygon | L.Circle; signature: string };
+type Entry = {
+  layer: L.Polygon | L.Circle;
+  area: PlannerArea;
+  shape: string;
+  style: string;
+  label: string;
+  selected: boolean;
+  // The label's size on screen, measured once shown.
+  labelSize: { w: number; h: number } | null;
+  hovered: boolean;
+};
+
+// Pixels of leeway Leaflet may drop from an outline at the zoom it's drawn at.
+const SMOOTH_FACTOR = 1.5;
 
 function shapeSignature(area: PlannerArea): string {
   return JSON.stringify([area.kind, area.centre, area.radiusM, area.kind === "CIRCLE" ? null : area.geometry]);
 }
 
-function makeLayer(area: PlannerArea): L.Polygon | L.Circle {
+function makeLayer(area: PlannerArea, renderer: L.Renderer): L.Polygon | L.Circle {
   if (area.kind === "CIRCLE" && area.centre && area.radiusM) {
-    return L.circle([area.centre.lat, area.centre.lng], { radius: area.radiusM });
+    return L.circle([area.centre.lat, area.centre.lng], { radius: area.radiusM, renderer });
   }
   if (area.kind === "RECTANGLE" && area.geometry.type === "Polygon") {
     const latlngs = area.geometry.coordinates[0].map(([lng, lat]) => L.latLng(lat, lng));
-    return L.rectangle(L.latLngBounds(latlngs));
+    return L.rectangle(L.latLngBounds(latlngs), { renderer, smoothFactor: SMOOTH_FACTOR });
   }
-  return L.polygon(toLatLngs(area.geometry) as L.LatLngExpression[][]);
+  return L.polygon(toLatLngs(area.geometry) as L.LatLngExpression[][], { renderer, smoothFactor: SMOOTH_FACTOR });
 }
 
 function layerShape(layer: L.Polygon | L.Circle, kind: PlannerArea["kind"]): ShapeInput {
@@ -107,6 +130,8 @@ function lassoGeometry(points: L.LatLng[]): AreaGeometry | null {
 export default function PlannerMap(props: Props) {
   const element = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
+  const renderer = useRef<L.Canvas | null>(null);
+  const overlapRenderer = useRef<L.SVG | null>(null);
   const areaGroup = useRef<L.LayerGroup | null>(null);
   const overlapGroup = useRef<L.LayerGroup | null>(null);
   const entries = useRef(new Map<string, Entry>());
@@ -130,6 +155,44 @@ export default function PlannerMap(props: Props) {
     return best?.id ?? null;
   }
 
+  // Shows the labels that have room: a label shows when its area is at
+  // least as big as the label on screen and it doesn't cover a label already
+  // shown (smaller areas first, so a shape inside another keeps its label).
+  // The selected and hovered areas always show theirs; the rest show on hover.
+  function placeLabels() {
+    const map = mapRef.current;
+    if (!map) return;
+    const candidates: { entry: Entry; el: HTMLElement; roomy: boolean; size: number; box: [number, number, number, number] }[] = [];
+    for (const entry of entries.current.values()) {
+      const tooltip = entry.layer.getTooltip();
+      const el = tooltip?.getElement();
+      const at = tooltip?.getLatLng();
+      if (!el || !at) continue;
+      if (!entry.labelSize) {
+        el.classList.remove("ap-label-hidden");
+        const measured = el.getBoundingClientRect();
+        if (measured.width > 0) entry.labelSize = { w: measured.width, h: measured.height };
+      }
+      const label = entry.labelSize ?? { w: 90, h: 32 };
+      const bounds = entry.layer.getBounds();
+      const sw = map.latLngToContainerPoint(bounds.getSouthWest());
+      const ne = map.latLngToContainerPoint(bounds.getNorthEast());
+      const w = Math.abs(ne.x - sw.x);
+      const h = Math.abs(sw.y - ne.y);
+      const c = map.latLngToContainerPoint(at);
+      candidates.push({ entry, el, roomy: w >= label.w && h >= label.h, size: w * h, box: [c.x - label.w / 2, c.y - label.h / 2, c.x + label.w / 2, c.y + label.h / 2] });
+    }
+    candidates.sort((a, b) => Number(b.entry.selected) - Number(a.entry.selected) || a.size - b.size);
+    const shown: [number, number, number, number][] = [];
+    const covers = (a: number[], b: number[]) => a[0] < b[2] && b[0] < a[2] && a[1] < b[3] && b[1] < a[3];
+    for (const c of candidates) {
+      const forced = c.entry.selected || c.entry.hovered;
+      const show = forced || (c.roomy && !shown.some((box) => covers(box, c.box)));
+      if (show && !c.entry.hovered) shown.push(c.box);
+      c.el.classList.toggle("ap-label-hidden", !show);
+    }
+  }
+
   props.handleRef.current = {
     pointAt(clientX, clientY) {
       const map = mapRef.current;
@@ -151,7 +214,12 @@ export default function PlannerMap(props: Props) {
     const map = createBaseMap(element.current);
     map.pm.setGlobalOptions({ snappable: false, allowSelfIntersection: false });
     mapRef.current = map;
+    renderer.current = L.canvas({ padding: 0.5, tolerance: 6 });
     areaGroup.current = L.layerGroup().addTo(map);
+    const pane = map.createPane("ap-overlaps");
+    pane.style.zIndex = "450";
+    pane.style.pointerEvents = "none";
+    overlapRenderer.current = L.svg({ pane: "ap-overlaps" });
     overlapGroup.current = L.layerGroup().addTo(map);
 
     map.on("click", (e: L.LeafletMouseEvent) => {
@@ -160,6 +228,7 @@ export default function PlannerMap(props: Props) {
       if (p.assigning) p.onPlace({ lat: e.latlng.lat, lng: e.latlng.lng }, areaUnder(e.latlng));
       else p.onSelect(null);
     });
+    map.on("zoomend", placeLabels);
 
     map.on("pm:create", (e) => {
       const layer = e.layer as L.Polygon | L.Circle;
@@ -180,12 +249,12 @@ export default function PlannerMap(props: Props) {
     };
   }, []);
 
-  // Areas: kept in step with the props, rebuilding only what changed so a
-  // shape being edited isn't interrupted.
+  // Areas: kept in step with the props, touching only what changed.
   useEffect(() => {
     const map = mapRef.current;
     const group = areaGroup.current;
-    if (!map || !group) return;
+    const canvas = renderer.current;
+    if (!map || !group || !canvas) return;
     const byId = new Map(props.distributors.map((d) => [d.id, d]));
     const ids = new Set(props.areas.map((a) => a.id));
     for (const [id, entry] of entries.current) {
@@ -194,54 +263,107 @@ export default function PlannerMap(props: Props) {
         entries.current.delete(id);
       }
     }
+    let changed = false;
     for (const area of props.areas) {
-      const signature = shapeSignature(area);
+      const distributor = area.distributorId ? byId.get(area.distributorId) : undefined;
+      const selected = area.id === props.selectedId;
+      const style = areaPathStyle({ colour: distributor?.colour ?? null, assigned: !!distributor, status: area.status, selected });
+      const styleKey = JSON.stringify(style);
+      const label = labelHtml(area, distributor);
+      const editing = area.id === props.editingId && !props.readOnly;
       let entry = entries.current.get(area.id);
-      if (entry && entry.signature !== signature) {
+      if (entry && entry.area === area && entry.style === styleKey && entry.label === label && entry.selected === selected && entry.layer.pm.enabled() === editing) {
+        continue;
+      }
+      const shape = shapeSignature(area);
+      if (entry && !editing && entry.layer.pm.enabled()) {
+        // Editing has finished: send any edit still waiting, then draw the
+        // area afresh from what's stored (which a failed save puts back).
+        const timer = editTimers.current.get(area.id);
+        if (timer !== undefined) {
+          window.clearTimeout(timer);
+          editTimers.current.delete(area.id);
+          latest.current.onShapeEdited(area.id, layerShape(entry.layer, entry.area.kind));
+        }
+        entry.layer.pm.disable();
         entry.layer.remove();
+        entries.current.delete(area.id);
         entry = undefined;
+      } else if (entry && entry.shape !== shape) {
+        if (entry.layer.pm.enabled()) {
+          // Being edited: the layer already shows the new shape.
+          entry.shape = shape;
+        } else {
+          entry.layer.remove();
+          entries.current.delete(area.id);
+          entry = undefined;
+        }
       }
       if (!entry) {
-        const layer = makeLayer(area);
+        const layer = makeLayer(area, canvas);
+        const id = area.id;
         layer.on("click", (e: L.LeafletMouseEvent) => {
           L.DomEvent.stopPropagation(e);
           const p = latest.current;
           if (p.tool !== "select") return;
-          if (p.assigning) p.onPlace({ lat: e.latlng.lat, lng: e.latlng.lng }, area.id);
-          else p.onSelect(area.id);
+          if (p.assigning) p.onPlace({ lat: e.latlng.lat, lng: e.latlng.lng }, id);
+          else p.onSelect(id);
         });
         layer.on("pm:edit", () => {
           const timers = editTimers.current;
-          window.clearTimeout(timers.get(area.id));
+          window.clearTimeout(timers.get(id));
           timers.set(
-            area.id,
-            window.setTimeout(() => latest.current.onShapeEdited(area.id, layerShape(layer, area.kind)), 400)
+            id,
+            window.setTimeout(() => {
+              timers.delete(id);
+              const now = entries.current.get(id);
+              if (now) latest.current.onShapeEdited(id, layerShape(now.layer, now.area.kind));
+            }, 400)
           );
         });
         layer.bindTooltip("", { permanent: true, direction: "center", className: "ap-label", interactive: false });
         layer.addTo(group);
-        entry = { layer, signature };
+        const fresh: Entry = { layer, area, shape, style: "", label: "", selected: false, labelSize: null, hovered: false };
+        layer.on("mouseover", () => {
+          fresh.hovered = true;
+          placeLabels();
+        });
+        layer.on("mouseout", () => {
+          fresh.hovered = false;
+          placeLabels();
+        });
+        entry = fresh;
         entries.current.set(area.id, entry);
       }
-      const distributor = area.distributorId ? byId.get(area.distributorId) : undefined;
-      entry.layer.setStyle(
-        areaPathStyle({ colour: distributor?.colour ?? null, assigned: !!distributor, status: area.status, selected: area.id === props.selectedId })
-      );
-      entry.layer.setTooltipContent(labelHtml(area, distributor));
-      const editing = area.id === props.editingId && !props.readOnly;
+      if (entry.style !== styleKey) {
+        entry.layer.setStyle(style);
+        entry.style = styleKey;
+      }
+      if (entry.label !== label) {
+        entry.layer.setTooltipContent(label);
+        entry.label = label;
+        entry.labelSize = null;
+      }
       if (editing && !entry.layer.pm.enabled()) entry.layer.pm.enable({ draggable: true, allowSelfIntersection: false });
       if (!editing && entry.layer.pm.enabled()) entry.layer.pm.disable();
-      if (area.id === props.selectedId) entry.layer.bringToFront();
+      if (selected && !entry.selected) entry.layer.bringToFront();
+      entry.selected = selected;
+      entry.area = area;
+      changed = true;
     }
+    if (changed) placeLabels();
   }, [props.areas, props.distributors, props.selectedId, props.editingId, props.readOnly]);
 
-  // Overlaps, hatched red over everything.
+  // Overlaps, hatched red over everything, redrawn only when they change.
   useEffect(() => {
     const group = overlapGroup.current;
-    if (!group) return;
+    const map = mapRef.current;
+    if (!group || !map) return;
+    const svg = overlapRenderer.current;
+    if (!svg) return;
     group.clearLayers();
     for (const o of props.overlaps) {
-      L.polygon(toLatLngs(o.geometry) as L.LatLngExpression[][], { ...OVERLAP_STYLE, className: "ap-overlap", interactive: false }).addTo(group);
+      L.polygon(toLatLngs(o.geometry) as L.LatLngExpression[][], { ...OVERLAP_STYLE, className: "ap-overlap", interactive: false, pane: "ap-overlaps", renderer: svg }).addTo(group);
     }
   }, [props.overlaps]);
 

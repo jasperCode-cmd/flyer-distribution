@@ -3,14 +3,22 @@
 import { useState } from "react";
 import { formatPence } from "@/lib/money";
 import { homesText, projectSummary } from "@/lib/area-planner/summary";
-import type { PlannerDistributor, PlannerLink, PlannerProject } from "@/lib/area-planner/types";
+import type { PlannerArea, PlannerDistributor, PlannerLink, PlannerProject } from "@/lib/area-planner/types";
 
 // Under the map: leaflets assigned against the job's quantity, about how
 // many homes the project covers, and per distributor their areas, leaflets
-// and pay, with their image and private link.
+// and pay, with their image and private link. Leaflets and pay come from the
+// areas as shown, so they change the moment an area does; the homes figure
+// comes from the server and says so while it's being worked out again.
 
 type Props = {
   project: PlannerProject;
+  areas: PlannerArea[];
+  totalHouseholds: number | null;
+  // Whether the homes figure is known at all yet, and whether it's out of date.
+  totalsKnown: boolean;
+  totalsStale: boolean;
+  overlapCount: number;
   distributors: PlannerDistributor[];
   onSelectArea: (id: string) => void;
   onDownload: (distributorId: string) => void;
@@ -31,9 +39,10 @@ function day(iso: string): string {
   return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
 
-export default function ProjectSummary({ project, distributors, onSelectArea, onDownload, onMakeLink, onRevokeLink, busyKey, newLink }: Props) {
+export default function ProjectSummary(props: Props) {
+  const { project, areas, distributors, onSelectArea, onDownload, onMakeLink, onRevokeLink, busyKey, newLink } = props;
   const target = project.lead ? project.lead.quantity : project.targetLeaflets;
-  const summary = projectSummary(project.areas, distributors, target);
+  const summary = projectSummary(areas, distributors, target);
   const linksOn = project.business === "FDH" || project.ldbLinksEnabled;
   const [copied, setCopied] = useState<string | null>(null);
   const percent = summary.target ? Math.min(100, Math.round((summary.assignedLeaflets / summary.target) * 100)) : null;
@@ -67,8 +76,11 @@ export default function ProjectSummary({ project, distributors, onSelectArea, on
         </div>
         <div>
           <dt className="text-xs text-gray-500">Homes covered</dt>
-          <dd className="text-sm font-semibold text-gray-900">{homesText(project.totalHouseholds)}</dd>
-          {project.overlaps.length > 0 && <p className="text-xs text-gray-500">Overlapping areas counted once.</p>}
+          <dd className="text-sm font-semibold text-gray-900" aria-busy={props.totalsStale}>
+            {props.totalsKnown ? homesText(props.totalHouseholds) : "Working out the homes..."}
+          </dd>
+          {props.totalsKnown && props.totalsStale && <p className="text-xs text-gray-500">Updating for the latest changes...</p>}
+          {props.overlapCount > 0 && <p className="text-xs text-gray-500">Overlapping areas counted once.</p>}
         </div>
         <div>
           <dt className="text-xs text-gray-500">Distributor pay</dt>

@@ -11,10 +11,13 @@ import { feature, featureCollection } from "@turf/helpers";
 // A shape is worked out one polygon part at a time, against only the Output
 // Areas near that part. An Output Area whose edges come nowhere near the
 // part's edges is wholly inside or wholly outside it, which needs no
-// clipping; only the ones the part's edges touch or cross are clipped. A
-// shape whose parts cross themselves or each other is clipped whole, Output
-// Area by Output Area, as before. Either way each Output Area's share and the
-// total come out the same.
+// clipping; only the ones the part's edges touch or cross are clipped, and
+// a large part is first cut down to a box just around the Output Area, which
+// leaves everything inside the Output Area as it was. A shape whose parts
+// cross themselves or each other is clipped whole, Output Area by Output
+// Area, as before. Either way each Output Area's share and the total come
+// out the same. The work comes in small steps, so the server can hand back
+// control between them (see the async versions).
 
 export type Bbox = [minLon: number, minLat: number, maxLon: number, maxLat: number];
 
@@ -57,7 +60,49 @@ const EPS = 1e-9;
 
 type Edge = { x1: number; y1: number; x2: number; y2: number; minX: number; maxX: number; minY: number; maxY: number; ring: number; at: number; last: boolean };
 
-export type ShapePart = { polygon: Polygon; bbox: Bbox; edges: Edge[] };
+type EdgeGrid = { x0: number; y0: number; cellW: number; cellH: number; n: number; cells: Edge[][] };
+
+export type ShapePart = { polygon: Polygon; bbox: Bbox; edges: Edge[]; grid?: EdgeGrid };
+
+// The part's edges filed in a grid over its box, so the edges near a point
+// are found without looking at all of them. Made the first time it's needed.
+function gridOf(part: ShapePart): EdgeGrid {
+  if (part.grid) return part.grid;
+  const [x0, y0, x1, y1] = part.bbox;
+  const n = Math.max(1, Math.min(64, Math.ceil(Math.sqrt(part.edges.length / 2))));
+  const cellW = (x1 - x0) / n || EPS;
+  const cellH = (y1 - y0) / n || EPS;
+  const cells: Edge[][] = Array.from({ length: n * n }, () => []);
+  const grid = { x0, y0, cellW, cellH, n, cells };
+  for (const e of part.edges) {
+    const [i0, j0, i1, j1] = cellRange(grid, e.minX - EPS, e.minY - EPS, e.maxX + EPS, e.maxY + EPS);
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) cells[j * n + i].push(e);
+  }
+  part.grid = grid;
+  return grid;
+}
+
+function cellRange(g: EdgeGrid, minX: number, minY: number, maxX: number, maxY: number): [number, number, number, number] {
+  const clamp = (v: number) => Math.max(0, Math.min(g.n - 1, v));
+  return [
+    clamp(Math.floor((minX - g.x0) / g.cellW)),
+    clamp(Math.floor((minY - g.y0) / g.cellH)),
+    clamp(Math.floor((maxX - g.x0) / g.cellW)),
+    clamp(Math.floor((maxY - g.y0) / g.cellH)),
+  ];
+}
+
+// Whether any of the part's edges come near this edge.
+function touchesPartEdge(part: ShapePart, edge: Edge): boolean {
+  const g = gridOf(part);
+  const [i0, j0, i1, j1] = cellRange(g, edge.minX - EPS, edge.minY - EPS, edge.maxX + EPS, edge.maxY + EPS);
+  for (let j = j0; j <= j1; j++) {
+    for (let i = i0; i <= i1; i++) {
+      for (const other of g.cells[j * g.n + i]) if (edgesMeet(edge, other)) return true;
+    }
+  }
+  return false;
+}
 
 function ringEdges(ring: Position[], ringId: number): Edge[] {
   const edges: Edge[] = [];
@@ -191,7 +236,7 @@ function quickSide(part: ShapePart, oa: OutputArea): "inside" | "outside" | null
     for (const ring of rings) {
       for (const edge of ringEdges(ring, -1)) {
         if (edge.minX > box[2] + EPS || edge.maxX < box[0] - EPS || edge.minY > box[3] + EPS || edge.maxY < box[1] - EPS) continue;
-        for (const other of part.edges) if (edgesMeet(edge, other)) return null;
+        if (touchesPartEdge(part, edge)) return null;
       }
     }
   }
@@ -206,12 +251,72 @@ function quickSide(part: ShapePart, oa: OutputArea): "inside" | "outside" | null
   return side ? "inside" : "outside";
 }
 
+// A large part cut down to a box a little bigger than the Output Area, so
+// clipping it against the Output Area handles a few dozen edges rather than
+// thousands. Everything inside the box is unchanged; where a ring leaves
+// the box it runs along the box's edge instead, which is outside the Output
+// Area. Null when nothing of the part is in the box.
+const CUT_DOWN_EDGES = 200;
+const CUT_MARGIN = 1e-4;
+
+function clipRing(ring: Position[], box: Bbox): Position[] {
+  const [x0, y0, x1, y1] = box;
+  const sides: [(p: Position) => boolean, (a: Position, b: Position) => Position][] = [
+    [(p) => p[0] >= x0, (a, b) => [x0, a[1] + ((b[1] - a[1]) * (x0 - a[0])) / (b[0] - a[0])]],
+    [(p) => p[0] <= x1, (a, b) => [x1, a[1] + ((b[1] - a[1]) * (x1 - a[0])) / (b[0] - a[0])]],
+    [(p) => p[1] >= y0, (a, b) => [a[0] + ((b[0] - a[0]) * (y0 - a[1])) / (b[1] - a[1]), y0]],
+    [(p) => p[1] <= y1, (a, b) => [a[0] + ((b[0] - a[0]) * (y1 - a[1])) / (b[1] - a[1]), y1]],
+  ];
+  let points = ring.slice(0, -1);
+  for (const [inside, cut] of sides) {
+    const out: Position[] = [];
+    for (let i = 0; i < points.length; i++) {
+      const a = points[(i + points.length - 1) % points.length];
+      const b = points[i];
+      if (inside(b)) {
+        if (!inside(a)) out.push(cut(a, b));
+        out.push(b);
+      } else if (inside(a)) {
+        out.push(cut(a, b));
+      }
+    }
+    points = out;
+    if (points.length === 0) return [];
+  }
+  const tidy = points.filter((p, i) => i === 0 || p[0] !== points[i - 1][0] || p[1] !== points[i - 1][1]);
+  if (tidy.length > 1 && tidy[0][0] === tidy[tidy.length - 1][0] && tidy[0][1] === tidy[tidy.length - 1][1]) tidy.pop();
+  return tidy.length >= 3 ? [...tidy, tidy[0]] : [];
+}
+
+function partNear(part: ShapePart, oaBox: Bbox): Polygon | null {
+  const box: Bbox = [oaBox[0] - CUT_MARGIN, oaBox[1] - CUT_MARGIN, oaBox[2] + CUT_MARGIN, oaBox[3] + CUT_MARGIN];
+  const [outer, ...holes] = part.polygon.coordinates.map((ring) => clipRing(ring, box));
+  if (!outer || outer.length === 0) return null;
+  return { type: "Polygon", coordinates: [outer, ...holes.filter((h) => h.length > 0)] };
+}
+
+function clippedArea(part: ShapePart, oa: OutputArea): number {
+  let shape: Polygon | null = part.polygon;
+  if (part.edges.length > CUT_DOWN_EDGES) {
+    shape = partNear(part, oa.bbox);
+    if (!shape) return 0;
+  }
+  try {
+    const overlap = intersect(featureCollection([feature(shape), feature(oa.geometry)]));
+    return overlap ? area(overlap) : 0;
+  } catch (err) {
+    if (shape === part.polygon) throw err;
+    const overlap = intersect(featureCollection([feature(part.polygon), feature(oa.geometry)]));
+    return overlap ? area(overlap) : 0;
+  }
+}
+
 // How much of each nearby Output Area lies inside one part, in square
 // metres, with each Output Area's whole area. Only Output Areas with homes
-// and some area inside are listed.
+// and some area inside are listed. One step per Output Area.
 export type PartCover = Map<string, { covered: number; whole: number }>;
 
-export function partCover(part: ShapePart, oas: OutputArea[]): PartCover {
+function* coverSteps(part: ShapePart, oas: OutputArea[]): Generator<void, PartCover> {
   const cover: PartCover = new Map();
   for (const oa of oas) {
     if (oa.households <= 0 || !bboxesMeet(part.bbox, oa.bbox)) continue;
@@ -219,14 +324,40 @@ export function partCover(part: ShapePart, oas: OutputArea[]): PartCover {
     if (!(whole > 0)) continue;
     const side = quickSide(part, oa);
     if (side === "outside") continue;
-    let covered = whole;
-    if (side === null) {
-      const overlap = intersect(featureCollection([feature(part.polygon), feature(oa.geometry)]));
-      covered = overlap ? area(overlap) : 0;
-    }
+    const covered = side === "inside" ? whole : clippedArea(part, oa);
     if (covered > 0) cover.set(oa.code, { covered, whole });
+    yield;
   }
   return cover;
+}
+
+function runSteps<T>(steps: Generator<void, T>): T {
+  for (;;) {
+    const next = steps.next();
+    if (next.done) return next.value;
+  }
+}
+
+// Runs the steps, handing control back every `sliceMs` so other work on the
+// server (other requests, timers) isn't held up.
+export async function runStepsAsync<T>(steps: Generator<void, T>, sliceMs = 20): Promise<T> {
+  let since = performance.now();
+  for (;;) {
+    const next = steps.next();
+    if (next.done) return next.value;
+    if (performance.now() - since >= sliceMs) {
+      await new Promise<void>((resolve) => setImmediate(resolve));
+      since = performance.now();
+    }
+  }
+}
+
+export function partCover(part: ShapePart, oas: OutputArea[]): PartCover {
+  return runSteps(coverSteps(part, oas));
+}
+
+export function partCoverAsync(part: ShapePart, oas: OutputArea[]): Promise<PartCover> {
+  return runStepsAsync(coverSteps(part, oas));
 }
 
 // The parts' covers added up for each Output Area, in the order given, so
@@ -258,14 +389,23 @@ export function weightedHouseholds(shape: Polygon | MultiPolygon, oas: OutputAre
 // Each nearby Output Area clipped against the whole shape, for shapes whose
 // parts can't be worked out one at a time. Only Output Areas whose box meets
 // one of the shape's polygons can share any of it.
-export function clippedHouseholds(shape: Polygon | MultiPolygon, oas: OutputArea[]): number {
+function* clippedSteps(shape: Polygon | MultiPolygon, oas: OutputArea[]): Generator<void, number> {
   const boxes = polygonBoxes(shape);
   let total = 0;
   for (const oa of oas) {
     if (oa.households <= 0 || !boxes.some((box) => bboxesMeet(box, oa.bbox))) continue;
     total += oa.households * shareInside(shape, oa.geometry);
+    yield;
   }
   return total;
+}
+
+export function clippedHouseholds(shape: Polygon | MultiPolygon, oas: OutputArea[]): number {
+  return runSteps(clippedSteps(shape, oas));
+}
+
+export function clippedHouseholdsAsync(shape: Polygon | MultiPolygon, oas: OutputArea[]): Promise<number> {
+  return runStepsAsync(clippedSteps(shape, oas));
 }
 
 export function polygonBoxes(shape: Polygon | MultiPolygon): Bbox[] {

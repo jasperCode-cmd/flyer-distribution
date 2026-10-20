@@ -10,7 +10,8 @@ import { circleGeometry, type AreaGeometry } from "./geometry";
 import { parsePostcodeList, sectorReading, type PostcodeProblem } from "./postcodes";
 import { buildShareView, defaultDistributorTitle, type ShareView } from "./share-view";
 import { hashShareToken, isShareTokenShaped, linkState, newShareToken, shareExpiryFrom } from "./share-links";
-import { projectHouseholds } from "./project-estimates";
+import { projectHouseholds, projectHouseholdsWithin } from "./project-estimates";
+import { untimed, type StepTimer } from "./timing";
 import type { AreaChanges, NewArea, NewProject, ProjectChanges } from "./validate";
 import type {
   AreaKind,
@@ -21,6 +22,7 @@ import type {
   PlannerLink,
   PlannerProject,
   ProjectTab,
+  ProjectTotals,
 } from "./types";
 
 // The Area Planner in the database. Every change to an area and its Profit
@@ -67,6 +69,10 @@ const AREA_SELECT = {
 
 type AreaRow = Prisma.PlannedAreaGetPayload<{ select: typeof AREA_SELECT }>;
 
+// Areas made together (a list of postcodes) share a time, so the id settles
+// their order: the same every time, for the overlaps and the totals.
+const AREA_ORDER: Prisma.PlannedAreaOrderByWithRelationInput[] = [{ createdAt: "asc" }, { id: "asc" }];
+
 const PROJECT_INCLUDE = {
   lead: {
     select: {
@@ -79,7 +85,7 @@ const PROJECT_INCLUDE = {
       job: { select: { campaignStartDate: true } },
     },
   },
-  areas: { select: AREA_SELECT, orderBy: { createdAt: "asc" } },
+  areas: { select: AREA_SELECT, orderBy: AREA_ORDER },
   shareLinks: { where: { revokedAt: null }, orderBy: { createdAt: "desc" } },
 } satisfies Prisma.AreaProjectInclude;
 
@@ -154,7 +160,11 @@ export async function plannerDistributors(db: Db): Promise<PlannerDistributor[]>
   return rows.map((r) => ({ id: r.id, name: r.name, colour: r.mapColour, active: r.active }));
 }
 
-function linksByDistributor(row: ProjectRow, business: Business, now: Date): PlannerLink[] {
+function linksByDistributor(
+  row: Pick<ProjectRow, "shareLinks" | "ldbLinksEnabled">,
+  business: Business,
+  now: Date
+): PlannerLink[] {
   const seen = new Set<string>();
   const links: PlannerLink[] = [];
   for (const link of row.shareLinks) {
@@ -171,12 +181,8 @@ function linksByDistributor(row: ProjectRow, business: Business, now: Date): Pla
   return links;
 }
 
-export async function loadProject(db: Db, id: string, now = new Date()): Promise<PlannerProject | null> {
-  const row = await db.areaProject.findUnique({ where: { id }, include: PROJECT_INCLUDE });
-  if (!row) return null;
+function toPlannerProject(row: ProjectRow, now: Date): PlannerProject {
   const business = businessOf(row);
-  const areas = row.areas.map(toPlannerArea);
-  const { overlaps, totalHouseholds } = await projectHouseholds(areas.map((a) => ({ id: a.id, geometry: a.geometry })));
   const campaignStart = row.lead?.job?.campaignStartDate ?? null;
   return {
     id: row.id,
@@ -204,11 +210,64 @@ export async function loadProject(db: Db, id: string, now = new Date()): Promise
     targetLeaflets: row.targetLeaflets,
     ldbLinksEnabled: row.ldbLinksEnabled,
     closedAt: row.closedAt ? row.closedAt.toISOString() : null,
-    areas,
-    overlaps,
-    totalHouseholds,
+    areas: row.areas.map(toPlannerArea),
     links: linksByDistributor(row, business, now),
   };
+}
+
+// The project's details and areas, straight from the database, without the
+// totals (they can take longer; see totalsFor).
+export async function loadProjectAreas(db: Db, id: string, now = new Date(), timer: StepTimer = untimed): Promise<PlannerProject | null> {
+  const row = await timer.step("db-project", () => db.areaProject.findUnique({ where: { id }, include: PROJECT_INCLUDE }));
+  return row ? toPlannerProject(row, now) : null;
+}
+
+// The project with its totals, waiting however long they take. For tests
+// and scripts; the routes send the areas first (loadProjectAreas, totalsFor).
+export async function loadProject(db: Db, id: string, now = new Date(), timer: StepTimer = untimed): Promise<(PlannerProject & ProjectTotals) | null> {
+  const project = await loadProjectAreas(db, id, now, timer);
+  if (!project) return null;
+  return { ...project, ...(await projectHouseholds(totalsInput(project.areas), timer)) };
+}
+
+function totalsInput(areas: { id: string; geometry: AreaGeometry }[]) {
+  return areas.map((a) => ({ id: a.id, geometry: a.geometry }));
+}
+
+// The totals for these areas if they're ready within budgetMs, else null
+// (the page then asks /totals).
+export function totalsFor(areas: { id: string; geometry: AreaGeometry }[], budgetMs: number, timer: StepTimer, route: string): Promise<ProjectTotals | null> {
+  return projectHouseholdsWithin(totalsInput(areas), budgetMs, timer, route);
+}
+
+// A project's area shapes as they're stored now, in the order
+// loadProjectAreas gives them, for its totals.
+export async function storedShapes(db: Db, projectId: string): Promise<{ id: string; geometry: AreaGeometry }[]> {
+  const rows = await db.plannedArea.findMany({ where: { projectId }, select: { id: true, geometry: true }, orderBy: AREA_ORDER });
+  return rows.map((r) => ({ id: r.id, geometry: asGeometry(r.geometry) }));
+}
+
+// The distributor an area went to, as the page shows it (their colour may
+// have just been given).
+export async function plannerDistributor(db: Db, id: string | null): Promise<PlannerDistributor | null> {
+  if (!id) return null;
+  const d = await db.distributor.findUnique({ where: { id }, select: { id: true, name: true, mapColour: true, active: true } });
+  return d ? { id: d.id, name: d.name, colour: d.mapColour, active: d.active } : null;
+}
+
+// A project's private links, as the summary shows them.
+export async function projectLinks(db: Db, projectId: string, now = new Date()): Promise<PlannerLink[]> {
+  const row = await db.areaProject.findUnique({
+    where: { id: projectId },
+    select: {
+      business: true,
+      ldbLinksEnabled: true,
+      lead: { select: { business: true } },
+      shareLinks: PROJECT_INCLUDE.shareLinks,
+    },
+  });
+  if (!row) throw notFound();
+  return linksByDistributor(row, businessOf(row), now);
 }
 
 // --- Projects --------------------------------------------------------------------
@@ -399,8 +458,8 @@ export async function createPostcodeAreas(
   return { created, problems };
 }
 
-// Returns the area's project, for the page to reload.
-export async function updateArea(db: Db, id: string, changes: AreaChanges): Promise<string> {
+// Returns the area as saved, and its project.
+export async function updateArea(db: Db, id: string, changes: AreaChanges): Promise<{ projectId: string; area: PlannerArea }> {
   const shape = changes.shape ? shapeData(changes.shape) : null;
   const households = shape ? await estimateHouseholds(shape.geometry) : undefined;
   return db.$transaction(async (tx) => {
@@ -430,8 +489,8 @@ export async function updateArea(db: Db, id: string, changes: AreaChanges): Prom
     }
 
     const row = await tx.plannedArea.update({ where: { id }, data, select: AREA_SELECT });
-    await syncAreaCostLine(tx, row, project.leadId);
-    return existing.projectId;
+    const line = await syncAreaCostLine(tx, row, project.leadId);
+    return { projectId: existing.projectId, area: { ...toPlannerArea(row), hasCostLine: line === "created" || line === "updated" } };
   });
 }
 

@@ -1,5 +1,7 @@
 /* Area Planner map: labels in dark ink on white (never the area colour),
-   and overlaps filled with the red hatch defined in PlannerMap. */
+   hidden when their area has no room for them on screen (they show on
+   hover instead), and overlaps filled with the red hatch defined in
+   PlannerMap. */
 .leaflet-tooltip.ap-label {
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid #cbd5e1;
@@ -18,6 +20,9 @@
 }
 .leaflet-tooltip.ap-label strong {
   font-weight: 700;
+}
+.leaflet-tooltip.ap-label.ap-label-hidden {
+  display: none;
 }
 path.ap-overlap {
   fill: url(#ap-hatch);

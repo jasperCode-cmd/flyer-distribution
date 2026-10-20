@@ -43,3 +43,25 @@ export function findOverlaps(
   }
   return found.sort((x, y) => y.areaM2 - x.areaM2);
 }
+
+// The same, handing back control between pairs once `sliceMs` has passed,
+// so a large project doesn't hold up the server.
+export async function findOverlapsAsync(
+  areas: OverlapInput[],
+  pairOverlap: (a: OverlapInput, b: OverlapInput) => ReturnType<typeof overlapOf> = (a, b) => overlapOf(a.geometry, b.geometry),
+  sliceMs = 20
+): Promise<Overlap[]> {
+  const found: Overlap[] = [];
+  let since = performance.now();
+  for (let i = 0; i < areas.length; i++) {
+    for (let j = i + 1; j < areas.length; j++) {
+      const shared = pairOverlap(areas[i], areas[j]);
+      if (shared) found.push({ a: areas[i].id, b: areas[j].id, ...shared });
+      if (performance.now() - since >= sliceMs) {
+        await new Promise<void>((resolve) => setImmediate(resolve));
+        since = performance.now();
+      }
+    }
+  }
+  return found.sort((x, y) => y.areaM2 - x.areaM2);
+}

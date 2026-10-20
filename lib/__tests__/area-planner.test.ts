@@ -467,7 +467,7 @@ function routeFiles(dir: string): string[] {
 
 test("every Area Planner route checks the session itself before anything else", () => {
   const files = routeFiles("app/api/crm/area-planner");
-  assert.equal(files.length, 7);
+  assert.equal(files.length, 8);
   let handlers = 0;
   for (const file of files) {
     const source = readFileSync(file, "utf8");
@@ -477,7 +477,7 @@ test("every Area Planner route checks the session itself before anything else", 
       assert.match(body, /^\s*const session = await auth\(\);\s*if \(!session\?\.user\) \{\s*return NextResponse\.json\(\{ error: "Unauthorized" \}, \{ status: 401 \}\);/, `${file} ${m[1]}`);
     }
   }
-  assert.equal(handlers, 11);
+  assert.equal(handlers, 12);
 });
 
 test("the Profit page's cost routes refuse lines made by the map", () => {
