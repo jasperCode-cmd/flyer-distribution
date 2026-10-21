@@ -8,7 +8,8 @@ import { getInvoice, getQuote, type InvoiceRecord, type QuoteRecord } from "./se
 
 // A saved quote or invoice as its PDF. Invoices need the bank details from
 // the environment; without them nothing is rendered and the reason is
-// returned instead (setting names only, never values).
+// returned instead (setting names only, never values). A deposit recorded
+// from outside the CRM has no PDF.
 
 export function quotePdfModel(q: QuoteRecord): PdfDocumentModel {
   return {
@@ -84,6 +85,8 @@ export async function renderStoredDocument(
   }
   const invoice = await getInvoice(db, id);
   if (!invoice) return { ok: false, status: 404, error: "Invoice not found" };
+  // Never made into a PDF (or so emailed): the CRM didn't issue it.
+  if (invoice.issuedOutsideCrm) return { ok: false, status: 409, error: `${invoice.number} was issued outside the CRM, so the CRM has no PDF of it.` };
   const payment = readPaymentDetails(env);
   if (!payment.ok) return { ok: false, status: 503, error: payment.message };
   const bytes = await renderDocumentPdf(invoicePdfModel(invoice), { payment: payment.details });

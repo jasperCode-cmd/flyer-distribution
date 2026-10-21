@@ -39,7 +39,9 @@ export async function GET(_req: Request, { params }: Params) {
         ? { configured: true, label: "The CRM's Gmail" }
         : { configured: false, label: "Gmail is not connected." };
   const bank = kind === "invoice" ? paymentDetailsStatus() : { ready: true as const };
+  const outside = record.kind === "invoice" && record.issuedOutsideCrm;
   const blockers = [
+    ...(outside ? ["It was issued outside the CRM, so it can't be emailed from here."] : []),
     ...(!canEmail(record.status) ? [`A ${record.status.toLowerCase()} document can't be emailed.`] : []),
     ...(!documentRecipient(record) ? ["There is no valid email address on this document or its lead."] : []),
     ...(!sender.configured ? [sender.label] : []),

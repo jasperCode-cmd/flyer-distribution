@@ -6,10 +6,12 @@ import { isDocumentKind } from "@/lib/documents/rules";
 import { getInvoice, getQuote } from "@/lib/documents/service";
 import { invoiceDetail, quoteDetail } from "@/lib/documents/views";
 import DocumentBuilder from "@/components/crm/DocumentBuilder";
+import RecordedDepositView from "@/components/crm/RecordedDepositView";
 
 export const dynamic = "force-dynamic";
 
-// One quote or invoice: editable while a draft, otherwise shown with its actions.
+// One quote or invoice: editable while a draft, otherwise shown with its
+// actions. A deposit recorded from outside the CRM has a page of its own.
 export default async function DocumentPage({
   params,
   searchParams,
@@ -23,6 +25,7 @@ export default async function DocumentPage({
   const record = kind === "quote" ? await getQuote(prisma, id) : await getInvoice(prisma, id);
   if (!record) notFound();
   const doc = kind === "quote" ? quoteDetail(record as NonNullable<Awaited<ReturnType<typeof getQuote>>>) : invoiceDetail(record as NonNullable<Awaited<ReturnType<typeof getInvoice>>>);
+  if (doc.issuedOutsideCrm) return <RecordedDepositView doc={doc} />;
   const branding = brandingFor(doc.business);
   return (
     <DocumentBuilder

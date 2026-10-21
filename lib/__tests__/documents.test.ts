@@ -5,7 +5,9 @@ import { readFileSync, readdirSync } from "node:fs";
 import {
   amountDuePence,
   balancePence,
+  FIRST_CRM_INVOICE_NUMBER,
   canMarkSent,
+  clientFromLead,
   isUnpaidInvoice,
   deductibleDeposits,
   depositPence,
@@ -14,8 +16,11 @@ import {
   leadPaymentFromInvoices,
   linesTotalPence,
   parseDocumentInput,
+  parseInvoiceNumber,
   parseLeafletQuantity,
+  parseRecordedDeposit,
   prefillFromLead,
+  recordedNumberProblem,
   type DepositForBalance,
 } from "@/lib/documents/rules";
 import { FDH_DOCUMENTS } from "@/lib/documents/business/fdh";
@@ -356,7 +361,7 @@ test("Mark as sent is for drafts only, and a marked invoice counts as unpaid", (
 test("the notes the CRM writes about documents start with Quote QUO- or Invoice INV-, so they never count as contact", () => {
   const source = readFileSync("lib/documents/service.ts", "utf8");
   const calls = [...source.matchAll(/noteData\(\s*[\w.]+,\s*`([^`]*)`/g)].map((m) => m[1]);
-  assert.equal(calls.length, 6, "accepted, declined, paid, voided, and a quote or invoice marked as sent");
+  assert.equal(calls.length, 8, "accepted, declined, paid, voided, a quote or invoice marked as sent, and a deposit from outside the CRM recorded or removed");
   for (const detail of calls) assert.match(detail, /^(Quote \$\{quote\.number\}|Invoice \$\{invoice\.number\}) /);
   assert.ok(calls.includes("Quote ${quote.number} marked as sent") && calls.includes("Invoice ${invoice.number} marked as sent"));
   for (const sample of [
@@ -366,9 +371,77 @@ test("the notes the CRM writes about documents start with Quote QUO- or Invoice 
     "Invoice INV-1106 voided.",
     "Quote QUO-1001 marked as sent",
     "Invoice INV-1106 marked as sent",
+    "Invoice INV-1105 recorded as a deposit issued and paid outside the CRM: £250.00, issued 1 October 2026, received 3 October 2026.",
+    "Invoice INV-1105 record removed: the deposit of £250.00 recorded as paid outside the CRM no longer counts.",
   ]) {
     assert.equal(isSystemNote(sample), true, sample);
   }
+});
+
+// --- Deposits issued outside the CRM -----------------------------------------------------------
+
+test("a deposit from outside the CRM: an INV number as issued, below INV-1106 where the CRM's own start", () => {
+  assert.equal(FIRST_CRM_INVOICE_NUMBER, 1106);
+  for (const typed of ["INV-1105", "inv-1105", "INV 1105", "INV1105", " INV-01105 ", "INV\u20141105", "INV\u20131105"]) {
+    assert.deepEqual(parseInvoiceNumber(typed), { number: "INV-1105", n: 1105 }, typed);
+  }
+  for (const typed of ["1105", "QUO-1001", "INV-", "INV-1105A", "FDH-1105", "INV-0", "INV--1105", "INVOICE 1105"]) {
+    assert.equal(parseInvoiceNumber(typed), null, typed);
+  }
+  // Below INV-1106 only: no number the CRM has ever issued or could issue.
+  assert.equal(recordedNumberProblem(1), null);
+  assert.equal(recordedNumberProblem(1105), null);
+  assert.match(recordedNumberProblem(1106) ?? "", /^INV-1106 is a number the CRM gives out\. A deposit issued outside the CRM must be numbered below INV-1106\.$/);
+  assert.ok(recordedNumberProblem(1559), "one the CRM has issued since");
+  assert.ok(recordedNumberProblem(250000), "one it could issue in future");
+  // And never at or above the counter's next number, were that ever lower.
+  assert.match(recordedNumberProblem(1060, 1050) ?? "", /below INV-1050/);
+  assert.equal(recordedNumberProblem(1049, 1050), null);
+});
+
+test("a deposit from outside the CRM: the amount and both dates are checked, and none may be in the future", () => {
+  const today = "2026-10-21";
+  const ok = { number: "inv 1105", amount: "£1,250.50", issueDate: "2026-10-01", paidOn: "2026-10-03" };
+  assert.deepEqual(parseRecordedDeposit(ok, today), {
+    ok: true,
+    data: { number: "INV-1105", amountPence: 125050, issueDate: "2026-10-01", paidOn: "2026-10-03" },
+  });
+  // Paid before it was issued is allowed, as when marking a CRM invoice paid.
+  assert.equal(parseRecordedDeposit({ ...ok, paidOn: "2026-09-30" }, today).ok, true);
+  const refused: [Record<string, unknown>, RegExp][] = [
+    [{ ...ok, number: "" }, /Type the invoice number as it was issued/],
+    [{ ...ok, number: "QUO-1001" }, /must be INV and its number/],
+    [{ ...ok, number: "INV-1106" }, /INV-1106 is a number the CRM gives out/],
+    [{ ...ok, amount: "" }, /amount paid in pounds/],
+    [{ ...ok, amount: "12.345" }, /amount paid in pounds/],
+    [{ ...ok, amount: "0" }, /more than £0\.00/],
+    [{ ...ok, issueDate: "2026-02-30" }, /date it was issued/],
+    [{ ...ok, issueDate: "2026-10-22" }, /issue date can't be in the future/],
+    [{ ...ok, paidOn: undefined }, /date it was paid/],
+    [{ ...ok, paidOn: "2026-10-22" }, /payment date can't be in the future/],
+  ];
+  for (const [body, error] of refused) {
+    const result = parseRecordedDeposit(body, today);
+    assert.ok(!result.ok && error.test(result.error), JSON.stringify(body));
+  }
+  assert.equal(parseRecordedDeposit(null, today).ok, false);
+});
+
+test("a recorded deposit takes the client details from the lead, as a new document does", () => {
+  const lead = {
+    name: "Sophie Turner",
+    businessName: "Turner's Bakery",
+    email: "sophie@example.com",
+    addressArea: "Boscombe",
+    postcode: "BH5 1AA",
+    targetAreas: "Boscombe",
+    leafletQuantity: null,
+    printingIncluded: false,
+    designIncluded: false,
+    dealValue: null,
+  };
+  assert.deepEqual(clientFromLead(lead), prefillFromLead(lead).client);
+  assert.equal(clientFromLead(lead).address, "Boscombe, BH5 1AA");
 });
 
 // --- Email attachments ---------------------------------------------------------------------------

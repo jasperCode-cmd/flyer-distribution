@@ -7,7 +7,7 @@ import type { BusinessFilter as Filter } from "@/lib/business";
 import { DOCUMENT_TYPE_LABELS, STATUS_LABELS, formatLongDate, isUnpaidInvoice, type DocumentType } from "@/lib/documents/rules";
 import BusinessBadge from "./BusinessBadge";
 import BusinessFilter from "./BusinessFilter";
-import { DocumentStatusPill, documentHref, pdfHref } from "./DocumentActions";
+import { DocumentStatusPill, RecordedOutsideLabel, documentHref, pdfHref } from "./DocumentActions";
 
 // Every quote and invoice, with filters for business, type and status, and
 // an Unpaid invoices view: sent invoices not yet paid, with their totals.
@@ -27,6 +27,8 @@ export type DocumentListRow = {
   issueDate: string;
   dueDate: string | null;
   dueOnReceipt: boolean;
+  // A deposit issued and paid outside the CRM, recorded here: it has no PDF.
+  issuedOutsideCrm: boolean;
 };
 
 const TYPE_FILTERS: ("ALL" | DocumentType)[] = ["ALL", "QUOTE", "DEPOSIT", "BALANCE", "FULL"];
@@ -225,6 +227,7 @@ export default function DocumentsView({ documents, today, bank }: { documents: D
 }
 
 function pdfLink(d: DocumentListRow, bankReady: boolean) {
+  if (d.issuedOutsideCrm) return <RecordedOutsideLabel />;
   if (d.kind === "invoice" && !bankReady) return <span className="text-xs text-gray-400">PDF unavailable</span>;
   return (
     <a href={pdfHref(d)} className="text-xs font-medium text-blue-700 hover:underline">

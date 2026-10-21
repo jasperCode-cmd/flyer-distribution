@@ -841,7 +841,7 @@ export default function LeadDetail({
       )}
 
       {/* Follow-up tasks */}
-      <LeadDocuments leadId={lead.id} scrapped={lead.scrapped ?? false} />
+      <LeadDocuments leadId={lead.id} scrapped={lead.scrapped ?? false} amountPaid={amountPaid === "" ? null : amountPaid} />
 
       <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5">
         <div className="flex items-center justify-between mb-3">

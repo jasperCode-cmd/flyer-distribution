@@ -242,14 +242,28 @@ export function mainLineLabel(printingIncluded: boolean): string {
 
 const toInput = (pence: number) => (pence / 100).toFixed(2);
 
-// The client details and lines a new document starts with, from the lead:
-// the main line at the deal value (less the design line, when there is one
-// and the deal value covers it), and a design line when design is included.
-export function prefillFromLead(lead: LeadForDocument): { client: ClientDetails; lines: LineDraft[] } {
+// The client as a document shows them, from the lead: its address, or its
+// area, with the postcode unless the area already includes it.
+export function clientFromLead(
+  lead: Pick<LeadForDocument, "name" | "businessName" | "email" | "addressArea" | "postcode" | "targetAreas">
+): ClientDetails {
   const address = [lead.addressArea?.trim(), lead.postcode?.trim()]
     .filter((part): part is string => !!part)
     .filter((part, i, parts) => i === 0 || !parts[0].toUpperCase().includes(part.toUpperCase()))
     .join(", ");
+  return {
+    name: lead.name,
+    businessName: lead.businessName ?? "",
+    email: lead.email ?? "",
+    address,
+    targetAreas: lead.targetAreas ?? "",
+  };
+}
+
+// The client details and lines a new document starts with, from the lead:
+// the main line at the deal value (less the design line, when there is one
+// and the deal value covers it), and a design line when design is included.
+export function prefillFromLead(lead: LeadForDocument): { client: ClientDetails; lines: LineDraft[] } {
   const dealPence = decimalToPence(lead.dealValue);
   const design = lead.designIncluded;
   const mainPence =
@@ -263,16 +277,7 @@ export function prefillFromLead(lead: LeadForDocument): { client: ClientDetails;
     },
   ];
   if (design) lines.push({ label: "Design", quantity: "", amount: toInput(DESIGN_DEFAULT_PENCE) });
-  return {
-    client: {
-      name: lead.name,
-      businessName: lead.businessName ?? "",
-      email: lead.email ?? "",
-      address,
-      targetAreas: lead.targetAreas ?? "",
-    },
-    lines,
-  };
+  return { client: clientFromLead(lead), lines };
 }
 
 // Lines and client details copied from another document, for the form.
@@ -437,6 +442,61 @@ export function parseDocumentInput(
       totalPence,
     },
   };
+}
+
+// --- Deposits issued outside the CRM ---------------------------------------------------
+
+// A deposit invoice that was issued and paid outside the CRM can be recorded
+// on its lead, so balance invoices deduct it. The CRM numbers its own
+// invoices from INV-1106 (its migration seeded the counter there), so a
+// recorded one must be an INV number below that: no number the CRM has ever
+// issued or could issue can be used.
+export const FIRST_CRM_INVOICE_NUMBER = 1106;
+export const RECORDED_OUTSIDE_LABEL = "Recorded, issued outside the CRM";
+
+export type RecordedDepositData = { number: string; amountPence: number; issueDate: string; paidOn: string };
+
+// "INV-1105", "inv 1105", "INV1105" or "INV-01105" as "INV-1105", with its
+// number; null for anything that isn't an INV number.
+export function parseInvoiceNumber(value: string): { number: string; n: number } | null {
+  const m = /^INV\s*[-\u2013]?\s*(\d{1,7})$/i.exec(tidyDocumentText(value).trim());
+  if (!m) return null;
+  const n = Number(m[1]);
+  return n >= 1 ? { number: formatDocumentNumber("INVOICE", n), n } : null;
+}
+
+// Why an INV number can't be recorded as issued outside the CRM, or null if
+// it can. counterNext is the next number the CRM would give out, checked too
+// in case the counter ever stood below INV-1106.
+export function recordedNumberProblem(n: number, counterNext: number = FIRST_CRM_INVOICE_NUMBER): string | null {
+  const limit = Math.min(FIRST_CRM_INVOICE_NUMBER, counterNext);
+  if (n < limit) return null;
+  return `${formatDocumentNumber("INVOICE", n)} is a number the CRM gives out. A deposit issued outside the CRM must be numbered below ${formatDocumentNumber("INVOICE", limit)}.`;
+}
+
+export function parseRecordedDeposit(
+  raw: unknown,
+  today: string
+): { ok: true; data: RecordedDepositData } | { ok: false; error: string } {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return { ok: false, error: "Invalid deposit" };
+  const body = raw as Record<string, unknown>;
+  const typed = typeof body.number === "string" ? body.number.trim() : "";
+  if (!typed) return { ok: false, error: "Type the invoice number as it was issued, like INV-1105" };
+  const parsed = parseInvoiceNumber(typed);
+  if (!parsed) return { ok: false, error: "The invoice number must be INV and its number, like INV-1105" };
+  const problem = recordedNumberProblem(parsed.n);
+  if (problem) return { ok: false, error: problem };
+
+  const amountPence = parsePoundsToPence(body.amount);
+  if (amountPence === null) return { ok: false, error: "Type the amount paid in pounds, like 250.00" };
+  if (amountPence <= 0) return { ok: false, error: "The amount paid must be more than £0.00" };
+
+  if (!isValidDay(body.issueDate)) return { ok: false, error: "Choose the date it was issued" };
+  if (body.issueDate > today) return { ok: false, error: "The issue date can't be in the future" };
+  if (!isValidDay(body.paidOn)) return { ok: false, error: "Choose the date it was paid" };
+  if (body.paidOn > today) return { ok: false, error: "The payment date can't be in the future" };
+
+  return { ok: true, data: { number: parsed.number, amountPence, issueDate: body.issueDate, paidOn: body.paidOn } };
 }
 
 // --- Email wording -------------------------------------------------------------------

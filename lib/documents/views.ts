@@ -22,8 +22,12 @@ export type DocumentDetail = {
   totalPence: number;
   amountDuePence: number;
   deductions: { number: string; paidOn: string | null; amountPence: number }[];
+  // On a deposit: the balance invoices that deduct it.
+  deductedBy: { id: string; number: string; status: string }[];
   paidAt: string | null;
   sentAt: string | null;
+  // A deposit issued and paid outside the CRM, recorded here.
+  issuedOutsideCrm: boolean;
 };
 
 export function quoteDetail(q: QuoteRecord): DocumentDetail {
@@ -47,8 +51,10 @@ export function quoteDetail(q: QuoteRecord): DocumentDetail {
     totalPence: q.totalPence,
     amountDuePence: q.totalPence,
     deductions: [],
+    deductedBy: [],
     paidAt: null,
     sentAt: q.sentAt?.toISOString() ?? null,
+    issuedOutsideCrm: false,
   };
 }
 
@@ -77,8 +83,10 @@ export function invoiceDetail(i: InvoiceRecord): DocumentDetail {
       paidOn: d.depositInvoice.paidAt ? dbDay(d.depositInvoice.paidAt) : null,
       amountPence: d.amountPence,
     })),
+    deductedBy: i.deductedBy.map((d) => d.balanceInvoice),
     paidAt: i.paidAt ? dbDay(i.paidAt) : null,
     sentAt: i.sentAt?.toISOString() ?? null,
+    issuedOutsideCrm: i.issuedOutsideCrm,
   };
 }
 

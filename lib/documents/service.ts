@@ -9,6 +9,7 @@ import {
   addDays,
   amountDuePence,
   balancePence,
+  clientFromLead,
   dayToDb,
   dbDay,
   deductibleDeposits,
@@ -18,12 +19,16 @@ import {
   formatLongDate,
   isValidDay,
   leadPaymentFromInvoices,
+  parseInvoiceNumber,
   prefillFromLead,
+  recordedNumberProblem,
+  tidyDocumentText,
   ukToday,
   type DocumentData,
   type DocumentSequence,
   type InvoiceStatus,
   type InvoiceType,
+  type RecordedDepositData,
 } from "./rules";
 
 // Quotes and invoices in the database. Every change that decides a number,
@@ -424,8 +429,11 @@ export async function markInvoicePaid(db: Db, id: string, opts: { paidOn: string
 
 export async function voidInvoice(db: Db, id: string, opts: { userId: string | null; now: Date }) {
   return db.$transaction(async (tx) => {
-    const invoice = await tx.invoice.findUnique({ where: { id }, select: { leadId: true, number: true, type: true, status: true } });
+    const invoice = await tx.invoice.findUnique({ where: { id }, select: { leadId: true, number: true, type: true, status: true, issuedOutsideCrm: true } });
     if (!invoice) throw notFound("Invoice");
+    if (invoice.issuedOutsideCrm) {
+      throw new DocumentError(`${invoice.number} was issued outside the CRM, so it can't be voided here. Remove the record instead if it was recorded by mistake.`, 409);
+    }
     await lockLead(tx, invoice.leadId);
     if (invoice.type === "DEPOSIT") {
       const deductedBy = await tx.invoiceDeduction.findMany({
@@ -449,6 +457,120 @@ export async function voidInvoice(db: Db, id: string, opts: { userId: string | n
     if (invoice.status === "PAID") await recalcLeadPayment(tx, invoice.leadId);
     if (invoice.type === "DEPOSIT") await refreshDraftBalances(tx, invoice.leadId);
     await tx.activity.create({ data: noteData(invoice.leadId, `Invoice ${invoice.number} voided.`, opts.userId) });
+  });
+}
+
+// --- Deposits issued outside the CRM ---------------------------------------------
+
+const alreadyInCrm = (number: string) => new DocumentError(`${number} is already in the CRM`, 409);
+
+// A deposit invoice issued and paid outside the CRM, recorded on its lead so
+// balance invoices deduct it as they do a paid CRM deposit: saved as a paid
+// deposit under the number it was issued with (parseRecordedDeposit checks
+// it is an INV number below INV-1106; it is checked against the counter here
+// too), with the lead's details, no lines, and its total and amount due both
+// the amount paid. Nothing is made or sent. As when any invoice is marked
+// paid, the lead's amount paid and payment status are worked out again from
+// its paid invoices, replacing whatever was typed in by hand, and its draft
+// balance invoices take the deposit off.
+export async function recordOutsideDeposit(db: Db, leadId: string, data: RecordedDepositData, opts: { userId: string | null }) {
+  const parsed = parseInvoiceNumber(data.number);
+  if (!parsed || parsed.number !== data.number) throw new DocumentError("The invoice number must be INV and its number, like INV-1105");
+  try {
+    return await db.$transaction(async (tx) => {
+      await leadForNew(tx, leadId);
+      await lockLead(tx, leadId);
+      const counter = await tx.documentCounter.findUniqueOrThrow({ where: { sequence: "INVOICE" }, select: { next: true } });
+      const problem = recordedNumberProblem(parsed.n, counter.next);
+      if (problem) throw new DocumentError(problem);
+      if (await tx.invoice.findUnique({ where: { number: data.number }, select: { id: true } })) throw alreadyInCrm(data.number);
+
+      const lead = await tx.lead.findUniqueOrThrow({
+        where: { id: leadId },
+        select: { business: true, name: true, businessName: true, email: true, addressArea: true, postcode: true, targetAreas: true },
+      });
+      const client = clientFromLead(lead);
+      const kept = (v: string) => tidyDocumentText(v).trim() || null;
+      const invoice = await tx.invoice.create({
+        data: {
+          number: data.number,
+          leadId,
+          business: lead.business,
+          type: "DEPOSIT",
+          status: "PAID",
+          issuedOutsideCrm: true,
+          issueDate: dayToDb(data.issueDate),
+          // Its terms were on the invoice issued outside the CRM, not known here.
+          dueOnReceipt: false,
+          dueDate: null,
+          clientName: kept(client.name) ?? lead.name,
+          clientBusinessName: kept(client.businessName),
+          clientEmail: kept(client.email),
+          clientAddress: kept(client.address),
+          targetAreas: kept(client.targetAreas),
+          totalPence: data.amountPence,
+          amountDuePence: data.amountPence,
+          paidAt: dayToDb(data.paidOn),
+        },
+        select: { id: true, number: true },
+      });
+      await recalcLeadPayment(tx, leadId);
+      await refreshDraftBalances(tx, leadId);
+      await tx.activity.create({
+        data: noteData(
+          leadId,
+          `Invoice ${invoice.number} recorded as a deposit issued and paid outside the CRM: ${formatPence(data.amountPence)}, issued ${formatLongDate(data.issueDate)}, received ${formatLongDate(data.paidOn)}.`,
+          opts.userId
+        ),
+      });
+      return invoice;
+    });
+  } catch (err) {
+    // Two people recording the same number at once: the second is refused.
+    if ((err as { code?: unknown } | null)?.code === "P2002") throw alreadyInCrm(data.number);
+    throw err;
+  }
+}
+
+// Removing a deposit recorded from outside the CRM, to put right one recorded
+// by mistake. Only while no balance invoice that has gone out deducts it: a
+// sent or paid one must be voided first, and a void one keeps the deposit it
+// deducted on record (so it reads the same later), so the record stays too.
+// The lead's amount paid and payment status are worked out again, its draft
+// balance invoices stop deducting it, and the lead gets a note.
+export async function removeRecordedDeposit(db: Db, id: string, opts: { userId: string | null }) {
+  return db.$transaction(async (tx) => {
+    const invoice = await tx.invoice.findUnique({ where: { id }, select: { leadId: true, number: true, amountDuePence: true, issuedOutsideCrm: true } });
+    if (!invoice) throw notFound("Invoice");
+    if (!invoice.issuedOutsideCrm) throw new DocumentError("Only a deposit recorded from outside the CRM can be removed. Void it instead.", 409);
+    await lockLead(tx, invoice.leadId);
+    // The balance invoices that deduct it, locked so none is sent while this runs.
+    const deducting = await tx.$queryRaw<{ number: string; status: string }[]>`
+      SELECT b."number", b."status"::text AS "status"
+      FROM "InvoiceDeduction" d JOIN "Invoice" b ON b."id" = d."balanceInvoiceId"
+      WHERE d."depositInvoiceId" = ${id}
+      ORDER BY b."number"
+      FOR UPDATE OF b`;
+    const issued = deducting.find((b) => b.status !== "DRAFT");
+    if (issued) {
+      throw new DocumentError(
+        issued.status === "VOID"
+          ? `Balance invoice ${issued.number}, now void, deducted this deposit when it went out and is kept as it was, so this record has to stay.`
+          : `Balance invoice ${issued.number} deducts this deposit. Void that first.`,
+        409
+      );
+    }
+    await tx.invoiceDeduction.deleteMany({ where: { depositInvoiceId: id } });
+    await tx.invoice.delete({ where: { id } });
+    await recalcLeadPayment(tx, invoice.leadId);
+    await refreshDraftBalances(tx, invoice.leadId);
+    await tx.activity.create({
+      data: noteData(
+        invoice.leadId,
+        `Invoice ${invoice.number} record removed: the deposit of ${formatPence(invoice.amountDuePence)} recorded as paid outside the CRM no longer counts.`,
+        opts.userId
+      ),
+    });
   });
 }
 
@@ -523,6 +645,11 @@ export async function getInvoice(db: Db, id: string) {
         orderBy: { depositInvoice: { number: "asc" } },
         include: { depositInvoice: { select: { id: true, number: true, paidAt: true } } },
       },
+      // On a deposit: the balance invoices that deduct it.
+      deductedBy: {
+        orderBy: { balanceInvoice: { number: "asc" } },
+        select: { balanceInvoice: { select: { id: true, number: true, status: true } } },
+      },
     },
   });
 }
@@ -549,6 +676,8 @@ export type DocumentRow = {
   dueOnReceipt: boolean;
   paidAt: string | null;
   sentAt: string | null;
+  // A deposit issued and paid outside the CRM, recorded here.
+  issuedOutsideCrm: boolean;
 };
 
 export async function listDocuments(db: Db, where: { leadId?: string } = {}): Promise<DocumentRow[]> {
@@ -574,6 +703,7 @@ export async function listDocuments(db: Db, where: { leadId?: string } = {}): Pr
       dueOnReceipt: false,
       paidAt: null,
       sentAt: q.sentAt?.toISOString() ?? null,
+      issuedOutsideCrm: false,
     })),
     ...invoices.map((i) => ({
       kind: "invoice" as const,
@@ -592,6 +722,7 @@ export async function listDocuments(db: Db, where: { leadId?: string } = {}): Pr
       dueOnReceipt: i.dueOnReceipt,
       paidAt: i.paidAt ? dbDay(i.paidAt) : null,
       sentAt: i.sentAt?.toISOString() ?? null,
+      issuedOutsideCrm: i.issuedOutsideCrm,
     })),
   ];
   // Newest first; a quote and an invoice on the same day by number.

@@ -4,10 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { formatPence } from "@/lib/money";
 import { DOCUMENT_TYPE_LABELS, formatLongDate, type DocumentType } from "@/lib/documents/rules";
-import DocumentActions, { DocumentStatusPill, type DocumentChange, type DocumentSummary } from "./DocumentActions";
+import DocumentActions, { DocumentStatusPill, RecordedOutsideLabel, type DocumentChange, type DocumentSummary } from "./DocumentActions";
+import RecordDepositModal from "./RecordDepositModal";
 
 // "Quotes and invoices" on a lead's page: its documents, newest first, with
-// their actions, and buttons to make new ones.
+// their actions, buttons to make new ones, and a way to record a deposit
+// that was issued and paid outside the CRM.
 
 type Row = DocumentSummary & { issueDate: string };
 type State = { loaded: boolean; error: string | null; documents: Row[]; bank: { ready: boolean; message?: string } };
@@ -38,9 +40,19 @@ function saveFlash(flash: Flash) {
 
 const CREATE = "text-xs font-bold px-3 py-1.5 rounded-md border";
 
-export default function LeadDocuments({ leadId, scrapped }: { leadId: string; scrapped: boolean }) {
+export default function LeadDocuments({
+  leadId,
+  scrapped,
+  amountPaid,
+}: {
+  leadId: string;
+  scrapped: boolean;
+  // The amount paid as the lead shows it now, for the record-a-deposit confirm box.
+  amountPaid: string | null;
+}) {
   const [state, setState] = useState<State>({ loaded: false, error: null, documents: [], bank: { ready: true } });
   const [flash, setFlash] = useState<Flash | null>(null);
+  const [recording, setRecording] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -88,9 +100,32 @@ export default function LeadDocuments({ leadId, scrapped }: { leadId: string; sc
             <Link href={newHref("FULL")} className={`${CREATE} border-gray-300 text-gray-700 hover:bg-gray-50`}>
               Create full invoice
             </Link>
+            <button
+              type="button"
+              disabled={!state.loaded || !!state.error}
+              onClick={() => setRecording(true)}
+              className={`${CREATE} border-gray-300 border-dashed text-gray-700 hover:bg-gray-50 disabled:opacity-50`}
+            >
+              Record a deposit paid outside the CRM
+            </button>
           </div>
         )}
       </div>
+
+      {recording && (
+        <RecordDepositModal
+          leadId={leadId}
+          paidInvoicesPence={state.documents
+            .filter((d) => d.kind === "invoice" && d.status === "PAID")
+            .reduce((sum, d) => sum + d.amountPence, 0)}
+          leadAmountPaid={amountPaid}
+          onCancel={() => setRecording(false)}
+          onRecorded={(number) => {
+            setRecording(false);
+            changed({ message: `${number} recorded as a paid deposit. The lead's amount paid and payment status are updated.`, leadChanged: true });
+          }}
+        />
+      )}
 
       {!state.bank.ready && (
         <p className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-md px-3 py-2 mb-3">{state.bank.message}</p>
@@ -121,6 +156,7 @@ export default function LeadDocuments({ leadId, scrapped }: { leadId: string; sc
                   <span className="text-sm font-bold text-gray-900">{doc.number}</span>
                   <span className="text-xs text-gray-500">{DOCUMENT_TYPE_LABELS[doc.type]}</span>
                   <DocumentStatusPill status={doc.status} />
+                  {doc.issuedOutsideCrm && <RecordedOutsideLabel />}
                 </div>
                 <div className="text-sm text-gray-900 tabular-nums">
                   <span className="font-semibold">{formatPence(doc.amountPence)}</span>

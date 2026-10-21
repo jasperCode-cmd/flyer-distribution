@@ -2,7 +2,7 @@ import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
-import { isUnpaidInvoice, parseDocumentInput, ukToday, addDays, type DocumentType } from "@/lib/documents/rules";
+import { isUnpaidInvoice, parseDocumentInput, parseRecordedDeposit, ukToday, addDays, type DocumentType } from "@/lib/documents/rules";
 import {
   DocumentError,
   acceptQuote,
@@ -15,6 +15,8 @@ import {
   markDocumentSent,
   markInvoicePaid,
   markSentOp,
+  recordOutsideDeposit,
+  removeRecordedDeposit,
   takeNumber,
   updateInvoice,
   voidInvoice,
@@ -422,4 +424,166 @@ test("real database: without the bank details an invoice can't be downloaded or 
   // A quote never needs them.
   const quote = await createQuote(prisma, lead.id, input("QUOTE", [["Distribution", "100.00"]]));
   assert.equal((await renderStoredDocument(prisma, "quote", quote.id, {})).ok, true);
+});
+
+// --- Deposits issued outside the CRM --------------------------------------------------------
+
+// Numbers below INV-1106 (the CRM's own start), each test its own.
+function recorded(number: string, amount: string, issueDate = addDays(today, -20), paidOn = addDays(today, -18)) {
+  const parsed = parseRecordedDeposit({ number, amount, issueDate, paidOn }, today);
+  assert.ok(parsed.ok, parsed.ok ? "" : parsed.error);
+  return parsed.data;
+}
+
+async function leadPayment(leadId: string) {
+  const l = await prisma.lead.findUniqueOrThrow({ where: { id: leadId }, select: { amountPaid: true, paymentStatus: true } });
+  return { amountPaid: l.amountPaid?.toFixed(2) ?? null, status: l.paymentStatus };
+}
+
+test("real database: a deposit from outside the CRM is recorded paid, with no PDF, no email and no void", { skip }, async () => {
+  const lead = await makeLead({ stage: "WON", businessName: "Turner's Bakery", addressArea: "Boscombe", postcode: "BH5 1AA" });
+  const result = await recordOutsideDeposit(prisma, lead.id, recorded("INV-1001", "250.00"), { userId });
+  assert.equal(result.number, "INV-1001");
+
+  const invoice = await prisma.invoice.findUniqueOrThrow({ where: { id: result.id }, include: { lines: true } });
+  assert.deepEqual(
+    [invoice.type, invoice.status, invoice.issuedOutsideCrm, invoice.amountDuePence, invoice.totalPence, invoice.lines.length],
+    ["DEPOSIT", "PAID", true, 25000, 25000, 0]
+  );
+  assert.equal(invoice.issueDate.toISOString().slice(0, 10), addDays(today, -20));
+  assert.equal(invoice.paidAt?.toISOString().slice(0, 10), addDays(today, -18));
+  assert.deepEqual([invoice.clientName, invoice.clientBusinessName, invoice.clientAddress], [lead.name, "Turner's Bakery", "Boscombe, BH5 1AA"]);
+  assert.equal(invoice.sentAt, null);
+
+  // Listed with its flag, so the page shows "Recorded, issued outside the CRM".
+  const row = (await listDocuments(prisma, { leadId: lead.id })).find((d) => d.id === result.id);
+  assert.equal(row?.issuedOutsideCrm, true);
+
+  // No PDF, even with the bank details set up.
+  const pdf = await renderStoredDocument(prisma, "invoice", result.id, placeholderBankEnv());
+  assert.ok(!pdf.ok && pdf.status === 409 && /issued outside the CRM, so the CRM has no PDF of it/.test(pdf.error));
+  // No email: nothing reaches either sender.
+  let sends = 0;
+  const senders = {
+    gmail: async () => {
+      sends++;
+      return { ok: true as const, data: { messageId: "x", threadId: "y" } };
+    },
+    ldb: async () => {
+      sends++;
+      return { ok: true as const, data: { messageId: "x", threadId: "y" } };
+    },
+  };
+  const email = await sendDocumentEmail({ db: prisma, kind: "invoice", id: result.id, subject: "Deposit", body: "Hi", userId, now, senders, env: placeholderBankEnv() });
+  assert.ok(!email.ok && email.status === 409);
+  assert.equal(sends, 0);
+  // No void, and it can't be marked paid or sent again.
+  await assert.rejects(voidInvoice(prisma, result.id, { userId, now }), /issued outside the CRM, so it can't be voided here/);
+  await assert.rejects(markInvoicePaid(prisma, result.id, { paidOn: today, userId, now }), /already paid or void/);
+  await assert.rejects(markDocumentSent(prisma, "invoice", result.id, { userId, now }), /Only a draft can be marked as sent/);
+
+  const notes = await prisma.activity.findMany({ where: { leadId: lead.id, type: "NOTE" }, select: { detail: true, userId: true } });
+  assert.deepEqual(notes.map((n) => n.detail), [
+    `Invoice INV-1001 recorded as a deposit issued and paid outside the CRM: £250.00, issued ${formatDay(addDays(today, -20))}, received ${formatDay(addDays(today, -18))}.`,
+  ]);
+});
+
+const formatDay = (day: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(`${day}T00:00:00Z`));
+
+test("real database: a recorded number must not already exist, nor be one the CRM gives out", { skip }, async () => {
+  const lead = await makeLead({ stage: "WON" });
+  await recordOutsideDeposit(prisma, lead.id, recorded("INV-1002", "100.00"), { userId });
+  await assert.rejects(recordOutsideDeposit(prisma, lead.id, recorded("inv 1002", "50.00"), { userId }), (err: unknown) =>
+    err instanceof DocumentError && err.status === 409 && err.message === "INV-1002 is already in the CRM"
+  );
+  // A number the CRM has already issued, and one it would issue next, are refused before they reach the database...
+  const issued = await createInvoice(prisma, { leadId: lead.id, type: "FULL", data: input("FULL", [["Distribution", "10.00"]]) });
+  for (const number of [issued.number, "INV-1106"]) {
+    const parsed = parseRecordedDeposit({ number, amount: "10.00", issueDate: today, paidOn: today }, today);
+    assert.ok(!parsed.ok && /is a number the CRM gives out/.test(parsed.error), number);
+  }
+  // ...and by the service itself, against the counter, whatever it is sent.
+  const counter = await prisma.documentCounter.findUniqueOrThrow({ where: { sequence: "INVOICE" } });
+  await assert.rejects(
+    recordOutsideDeposit(prisma, lead.id, { number: `INV-${counter.next}`, amountPence: 100, issueDate: today, paidOn: today }, { userId }),
+    /is a number the CRM gives out/
+  );
+  // Two people recording the same number at once, on different leads: only one is kept.
+  const other = await makeLead({ stage: "WON" });
+  const both = await Promise.allSettled([
+    recordOutsideDeposit(prisma, lead.id, recorded("INV-1003", "10.00"), { userId }),
+    recordOutsideDeposit(prisma, other.id, recorded("INV-1003", "10.00"), { userId }),
+  ]);
+  assert.equal(both.filter((r) => r.status === "fulfilled").length, 1);
+  const refused = both.find((r) => r.status === "rejected") as PromiseRejectedResult;
+  assert.ok(refused.reason instanceof DocumentError && refused.reason.status === 409, String(refused.reason));
+  assert.equal(await prisma.invoice.count({ where: { number: "INV-1003" } }), 1);
+  // A scrapped lead can't have one recorded.
+  const scrapped = await makeLead({ scrapped: true });
+  await assert.rejects(recordOutsideDeposit(prisma, scrapped.id, recorded("INV-1004", "10.00"), { userId }), /This lead is scrapped/);
+});
+
+test("real database: balance invoices deduct a recorded deposit like a CRM one, drafts update, and the amount paid replaces the hand-typed one", { skip }, async () => {
+  // The amount paid typed in by hand before anything was recorded.
+  const lead = await makeLead({ stage: "WON", dealValue: "1000.00", amountPaid: "999.00", paymentStatus: "PAID_IN_FULL" });
+  const draft = await createInvoice(prisma, { leadId: lead.id, type: "BALANCE", data: input("BALANCE", [["Distribution", "1000.00"]]) });
+  assert.equal((await prisma.invoice.findUniqueOrThrow({ where: { id: draft.id } })).amountDuePence, 100000, "nothing to deduct yet");
+
+  const deposit = await recordOutsideDeposit(prisma, lead.id, recorded("INV-1005", "400.00"), { userId });
+  assert.deepEqual(await leadPayment(lead.id), { amountPaid: "400.00", status: "DEPOSIT_PAID" }, "worked out from the paid invoices, not kept from the hand-typed 999.00");
+
+  // The draft made before it now deducts it.
+  const updated = await prisma.invoice.findUniqueOrThrow({ where: { id: draft.id }, include: { deductions: true } });
+  assert.equal(updated.amountDuePence, 60000);
+  assert.deepEqual(updated.deductions.map((d) => [d.depositInvoiceId, d.amountPence]), [[deposit.id, 40000]]);
+  await deleteInvoice(prisma, draft.id);
+
+  // A new balance invoice deducts it, and its PDF shows the deduction as for a CRM deposit.
+  const balance = await createInvoice(prisma, { leadId: lead.id, type: "BALANCE", data: input("BALANCE", [["Distribution", "1000.00"]]) });
+  const made = await prisma.invoice.findUniqueOrThrow({ where: { id: balance.id }, include: { deductions: true } });
+  assert.equal(made.amountDuePence, 60000);
+  assert.deepEqual(made.deductions.map((d) => d.depositInvoiceId), [deposit.id]);
+  const pdf = await renderStoredDocument(prisma, "invoice", balance.id, placeholderBankEnv());
+  assert.ok(pdf.ok);
+  const text = (await readPdf(pdf.bytes)).text;
+  assert.ok(text.includes("INV-1005") && text.includes("£400.00") && text.includes("£600.00"), "less the deposit received, INV-1005");
+
+  // Paying the balance: paid in full, the total of every paid invoice.
+  await markSentOp(prisma, "invoice", balance.id, now);
+  await markInvoicePaid(prisma, balance.id, { paidOn: today, userId, now });
+  assert.deepEqual(await leadPayment(lead.id), { amountPaid: "1000.00", status: "PAID_IN_FULL" });
+});
+
+test("real database: Remove record only while no balance invoice that has gone out deducts it; it recalculates, updates drafts and notes it", { skip }, async () => {
+  const lead = await makeLead({ stage: "WON", dealValue: "800.00" });
+  const deposit = await recordOutsideDeposit(prisma, lead.id, recorded("INV-1006", "300.00"), { userId });
+  const balance = await createInvoice(prisma, { leadId: lead.id, type: "BALANCE", data: input("BALANCE", [["Distribution", "800.00"]]) });
+
+  // A sent balance invoice deducts it: refused.
+  await markSentOp(prisma, "invoice", balance.id, now);
+  await assert.rejects(removeRecordedDeposit(prisma, deposit.id, { userId }), new RegExp(`Balance invoice ${balance.number} deducts this deposit\\. Void that first\\.`));
+  // Voided, that balance invoice still shows the deposit it deducted, so the record stays.
+  await voidInvoice(prisma, balance.id, { userId, now });
+  await assert.rejects(removeRecordedDeposit(prisma, deposit.id, { userId }), new RegExp(`Balance invoice ${balance.number}, now void, deducted this deposit`));
+
+  // With only a draft deducting it, it can go.
+  const otherLead = await makeLead({ stage: "WON", dealValue: "800.00" });
+  const mistaken = await recordOutsideDeposit(prisma, otherLead.id, recorded("INV-1007", "350.00"), { userId });
+  const draft = await createInvoice(prisma, { leadId: otherLead.id, type: "BALANCE", data: input("BALANCE", [["Distribution", "800.00"]]) });
+  assert.equal((await prisma.invoice.findUniqueOrThrow({ where: { id: draft.id } })).amountDuePence, 45000);
+  assert.deepEqual(await leadPayment(otherLead.id), { amountPaid: "350.00", status: "DEPOSIT_PAID" });
+
+  await removeRecordedDeposit(prisma, mistaken.id, { userId });
+  assert.equal(await prisma.invoice.count({ where: { id: mistaken.id } }), 0);
+  const after = await prisma.invoice.findUniqueOrThrow({ where: { id: draft.id }, include: { deductions: true } });
+  assert.deepEqual([after.amountDuePence, after.deductions.length], [80000, 0], "the draft no longer deducts it");
+  assert.deepEqual(await leadPayment(otherLead.id), { amountPaid: null, status: "NOT_PAID" });
+  const notes = (await prisma.activity.findMany({ where: { leadId: otherLead.id, type: "NOTE" }, orderBy: { createdAt: "asc" }, select: { detail: true } })).map((n) => n.detail);
+  assert.equal(notes.at(-1), "Invoice INV-1007 record removed: the deposit of £350.00 recorded as paid outside the CRM no longer counts.");
+
+  // Its number is free again, to record it with the right details.
+  await recordOutsideDeposit(prisma, otherLead.id, recorded("INV-1007", "400.00"), { userId });
+  assert.deepEqual(await leadPayment(otherLead.id), { amountPaid: "400.00", status: "DEPOSIT_PAID" });
+  // Only a recorded deposit can be removed.
+  await assert.rejects(removeRecordedDeposit(prisma, draft.id, { userId }), /Only a deposit recorded from outside the CRM can be removed/);
 });

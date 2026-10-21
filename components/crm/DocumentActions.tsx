@@ -5,6 +5,7 @@ import Link from "next/link";
 import { formatPence } from "@/lib/money";
 import {
   DOCUMENT_TYPE_LABELS,
+  RECORDED_OUTSIDE_LABEL,
   STATUS_LABELS,
   canAcceptOrDecline,
   canDelete,
@@ -22,7 +23,8 @@ import {
 
 // The buttons for one quote or invoice, and the small windows they open:
 // download, email to client, accept or decline (quotes), mark paid and void
-// (invoices), and open or delete a draft. Used on the lead's section, the
+// (invoices), and open or delete a draft. A deposit recorded from outside the
+// CRM has only Open and Remove record. Used on the lead's section, the
 // Documents page and the document's own page.
 
 export type DocumentSummary = {
@@ -34,6 +36,9 @@ export type DocumentSummary = {
   business: "FDH" | "LDB";
   totalPence: number;
   amountPence: number;
+  // A deposit issued and paid outside the CRM, recorded here: no PDF, email
+  // or void, only a way to remove a record made by mistake.
+  issuedOutsideCrm?: boolean;
 };
 
 const PILL: Record<string, string> = {
@@ -53,6 +58,15 @@ export function DocumentStatusPill({ status }: { status: string }) {
   );
 }
 
+// Shown beside a deposit recorded from outside the CRM, wherever it is listed.
+export function RecordedOutsideLabel() {
+  return (
+    <span className="inline-flex items-center rounded-full border border-dashed border-gray-400 bg-white px-2 py-px text-[11px] font-medium text-gray-600">
+      {RECORDED_OUTSIDE_LABEL}
+    </span>
+  );
+}
+
 export function documentHref(doc: { kind: string; id: string }) {
   return `/admin/crm/documents/${doc.kind}/${doc.id}`;
 }
@@ -61,7 +75,7 @@ export function pdfHref(doc: { kind: string; id: string }, view = false) {
   return `/api/crm/documents/${doc.kind}/${doc.id}/pdf${view ? "?view=1" : ""}`;
 }
 
-function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
+export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
       <div
@@ -165,6 +179,62 @@ export default function DocumentActions({
     }
     else if (action === "decline") onChanged({ message: `${doc.number} marked declined.`, leadChanged: false });
     else if (action === "void") onChanged({ message: `${doc.number} voided.`, leadChanged: doc.status === "PAID" });
+    else if (action === "remove") {
+      onChanged({
+        message: `The record of ${doc.number} is removed. The lead's amount paid and payment status are updated.`,
+        leadChanged: true,
+        deleted: true,
+      });
+    }
+  }
+
+  if (doc.issuedOutsideCrm) {
+    return (
+      <>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {showOpen && (
+            <Link href={documentHref(doc)} className={BTN_PLAIN}>
+              Open
+            </Link>
+          )}
+          <button
+            type="button"
+            className={BTN_DANGER}
+            onClick={() =>
+              setPending({
+                kind: "confirm",
+                title: `Remove the record of ${doc.number}?`,
+                text: "For a deposit recorded by mistake. The record is removed and no longer counts as paid: the lead's amount paid and payment status are worked out again from its other paid invoices, its draft balance invoices stop deducting it, and a note is added to the lead. You can then record it again with the right details. A balance invoice that has gone out and deducts it has to be voided first.",
+                action: "remove",
+                label: "Remove record",
+                danger: true,
+              })
+            }
+          >
+            Remove record
+          </button>
+        </div>
+        {pending?.kind === "confirm" && (
+          <Modal title={pending.title} onClose={close}>
+            <p className="text-sm text-gray-700">{pending.text}</p>
+            {error && <p className="text-sm text-red-600 mt-3">{error}</p>}
+            <div className="flex gap-2 mt-4">
+              <button type="button" onClick={close} className="flex-1 border border-gray-300 text-gray-700 text-sm font-medium py-2.5 rounded-md">
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => runConfirmed(pending.action)}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2.5 rounded-md disabled:opacity-50"
+              >
+                {busy ? "Working..." : pending.label}
+              </button>
+            </div>
+          </Modal>
+        )}
+      </>
+    );
   }
 
   return (
