@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { findDuplicateLeads } from "@/lib/crm-data";
+import { clearSharedCaches } from "@/lib/shared-cache";
 
 // Called from the public /quote form alongside (not instead of) the
-// existing Web3Forms email notification. Best-effort field mapping —
+// existing Web3Forms email notification. Best-effort field mapping:
 // budget is collected on the form as a range (e.g. "£300 - £500"), not
 // a precise figure, so it is recorded in the note rather than invented
 // as a single numeric dealValue.
@@ -65,10 +66,12 @@ export async function POST(req: Request) {
       },
     });
 
+    // The bell's shared copy, so it shows at the next ask (lib/shared-cache.ts).
+    clearSharedCaches();
     return NextResponse.json({ lead }, { status: 201 });
   } catch (err) {
     // Never let a DB/lead-capture failure break the existing Web3Forms
-    // email flow this is called alongside — the caller ignores this
+    // email flow this is called alongside; the caller ignores this
     // response either way, but log it server-side for visibility.
     console.error("Failed to create lead from quote form submission:", err);
     return NextResponse.json({ error: "Failed to record lead" }, { status: 500 });

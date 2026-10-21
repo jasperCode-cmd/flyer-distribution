@@ -1,6 +1,7 @@
 import PrioritiesView from "@/components/crm/PrioritiesView";
 import { loadPriorityList } from "@/lib/priorities-data";
 import { parseBusinessFilter } from "@/lib/business";
+import { requestChangeId } from "@/lib/crm-change-server";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,7 @@ export default async function PrioritiesPage({
 }: {
   searchParams: Promise<{ business?: string | string[] }>;
 }) {
-  const [initial, params] = await Promise.all([loadPriorityList({ withEmail: false }), searchParams]);
+  const changeId = await requestChangeId();
+  const [initial, params] = await Promise.all([loadPriorityList({ withEmail: false, changeId }), searchParams]);
   return <PrioritiesView initial={initial} initialBusiness={parseBusinessFilter(params.business)} />;
 }

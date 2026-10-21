@@ -3,6 +3,7 @@ import { prisma } from "./prisma";
 import { mapWithConcurrency, withInboxReader } from "./gmail";
 import { unansweredLeadEmails } from "./priorities-email";
 import { QUERY_CONCURRENCY, runLimited } from "./run-limited";
+import { sharedCache } from "./shared-cache";
 import {
   addDays,
   buildPriorities,
@@ -18,12 +19,25 @@ import {
 // shown first; the Gmail part (unanswered emails) is separate, cached for
 // about two minutes, and only ever looks at the most recent inbox
 // conversations. If Gmail isn't connected the rest of the list still works.
+// For showing the list, the database part is shared for a minute (by the
+// Dashboard, the Priorities page and the navigation's count, across every
+// tab and user), and worked out afresh for whoever has just changed
+// something (shared-cache.ts). Actions read it fresh (loadDatabaseFacts).
 
 export const EMAIL_SCAN_THREADS = 50;
 const EMAIL_CACHE_MS = 2 * 60 * 1000;
 const EMAIL_REFRESH_MIN_MS = 10 * 1000;
 
 const LEAD_REF = { id: true, name: true, businessName: true, email: true, phone: true, stage: true, business: true } as const;
+
+export const PRIORITY_FIGURES_TTL_MS = 60 * 1000;
+const factsCache = sharedCache<Omit<PriorityInputs, "emails">>("priority-facts", { ttlMs: PRIORITY_FIGURES_TTL_MS, maxEntries: 2 });
+const emailLeadsCache = sharedCache<EmailFacts[]>("priority-email-leads", { ttlMs: PRIORITY_FIGURES_TTL_MS, maxEntries: 4 });
+
+// The database part, as shared for showing the list (one per UK day).
+export function sharedDatabaseFacts(now: Date, changeId: string | null = null): Promise<Omit<PriorityInputs, "emails">> {
+  return factsCache.get(ukDay(now), () => loadDatabaseFacts(now), { changeId });
+}
 
 export async function loadDatabaseFacts(now: Date): Promise<Omit<PriorityInputs, "emails">> {
   const today = ukDay(now);
@@ -60,7 +74,7 @@ export async function loadDatabaseFacts(now: Date): Promise<Omit<PriorityInputs,
     }),
     () => prisma.distributorApplication.findMany({
       where: { status: "NEW" },
-      select: { id: true, fullName: true, email: true, phone: true, business: true, status: true, receivedAt: true, updatedAt: true },
+      select: { id: true, fullName: true, email: true, phone: true, business: true, status: true, source: true, receivedAt: true, updatedAt: true },
     }),
     () => prisma.task.findMany({
       where: { completed: false },
@@ -169,14 +183,18 @@ async function completeEmailLeads(emails: EmailFacts[]): Promise<EmailFacts[]> {
   return emails.map((e) => ({ ...e, lead: byId.get(e.lead.id) ?? e.lead }));
 }
 
-export async function loadPriorityList(options: { withEmail: boolean; fresh?: boolean }): Promise<PriorityList> {
+// The list as shown. changeId: the change the person asking has just made,
+// if any (crm-change.ts), so they see it straight away.
+export async function loadPriorityList(options: { withEmail: boolean; fresh?: boolean; changeId?: string | null }): Promise<PriorityList> {
   const now = new Date();
+  const changeId = options.changeId ?? null;
   const [facts, scan] = await Promise.all([
-    loadDatabaseFacts(now),
+    sharedDatabaseFacts(now, changeId),
     options.withEmail ? scanUnansweredEmails({ fresh: options.fresh }) : Promise.resolve(null),
   ]);
-  const emails = scan ? await completeEmailLeads(scan.emails) : [];
-  const rows = buildPriorities({ ...facts, emails });
+  const emails = scan ? await emailLeadsCache.get(scan.checkedAt, () => completeEmailLeads(scan.emails), { changeId }) : [];
+  // The rules run at the time of asking, on shared facts up to a minute old.
+  const rows = buildPriorities({ ...facts, now, emails });
   return {
     rows,
     email: scan ? { status: scan.status, limited: scan.limited, scanned: scan.scanned, checkedAt: scan.checkedAt } : null,

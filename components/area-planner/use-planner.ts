@@ -13,6 +13,7 @@ import {
   type PendingChange,
 } from "@/lib/area-planner/optimistic";
 import type { PlannerDistributor, PlannerProject, ProjectTotals } from "@/lib/area-planner/types";
+import { pollTotals } from "@/lib/area-planner/totals-poll";
 import { validateAreaChanges, validateNewArea, type ProjectChanges } from "@/lib/area-planner/validate";
 import type { Business } from "@/lib/business";
 import {
@@ -69,7 +70,7 @@ type Options = {
   onUndone: (change: PendingChange) => void;
 };
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 function withTotals(confirmed: Confirmed, totals: ProjectTotals | null, moved: boolean): Confirmed {
   if (totals) return { ...confirmed, totals, totalsCurrent: true };
@@ -386,7 +387,9 @@ export function usePlanner(options: Options) {
   );
 
   // The totals, asked for again while the server is still working them out,
-  // but only while no change is on its way (its reply brings them).
+  // but only while no change is on its way (its reply brings them), only
+  // while the tab is visible, and never again once they arrive
+  // (lib/area-planner/totals-poll.ts).
   const confirmed = state.confirmed;
   const idle = state.pending.length === 0;
   useEffect(() => {
@@ -394,24 +397,39 @@ export function usePlanner(options: Options) {
     const id = confirmed.project.id;
     const version = confirmed.version;
     let stop = false;
-    void (async () => {
-      for (let tries = 0; !stop; tries++) {
+    let wake: (() => void) | null = null;
+    const shown = () => {
+      if (document.visibilityState === "visible") wake?.();
+    };
+    document.addEventListener("visibilitychange", shown);
+    void pollTotals<ProjectTotals>({
+      ask: async () => {
         const res = await api<TotalsReply>(totalsUrl(id));
-        if (stop) return;
-        const totals = res.ok ? res.data.totals : null;
-        if (totals) {
-          update((s) =>
-            s.confirmed && s.confirmed.project.id === id && s.confirmed.version === version && s.pending.length === 0
-              ? { ...s, confirmed: { ...s.confirmed, totals, totalsCurrent: true } }
-              : s
-          );
-          return;
-        }
-        await sleep(Math.min(5000, 1000 + tries * 500));
-      }
-    })();
+        return res.ok ? { ok: true, totals: res.data.totals } : { ok: false, status: res.status };
+      },
+      sleep,
+      whenVisible: () =>
+        document.visibilityState === "visible" || stop
+          ? Promise.resolve()
+          : new Promise<void>((resolve) => {
+              wake = () => {
+                wake = null;
+                resolve();
+              };
+            }),
+      stopped: () => stop,
+    }).then((totals) => {
+      if (!totals) return;
+      update((s) =>
+        s.confirmed && s.confirmed.project.id === id && s.confirmed.version === version && s.pending.length === 0
+          ? { ...s, confirmed: { ...s.confirmed, totals, totalsCurrent: true } }
+          : s
+      );
+    });
     return () => {
       stop = true;
+      document.removeEventListener("visibilitychange", shown);
+      wake?.();
     };
   }, [confirmed, idle, update]);
 

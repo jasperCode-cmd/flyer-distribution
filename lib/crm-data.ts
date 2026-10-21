@@ -177,21 +177,3 @@ export async function getDueCallbackCount() {
     where: { scrapped: false, stage: "UNCONTACTED", nextCallableAt: { lte: new Date() } },
   });
 }
-
-export async function getFollowUpTasks() {
-  const tasks = await prisma.task.findMany({
-    where: { completed: false },
-    include: { lead: { select: { id: true, name: true } } },
-    orderBy: { dueDate: "asc" },
-  });
-
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
-  const startOfTomorrow = new Date(startOfToday);
-  startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
-
-  const overdue = tasks.filter((t) => t.dueDate < startOfToday);
-  const today = tasks.filter((t) => t.dueDate >= startOfToday && t.dueDate < startOfTomorrow);
-
-  return { overdue, today };
-}

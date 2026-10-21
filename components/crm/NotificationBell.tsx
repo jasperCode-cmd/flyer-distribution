@@ -2,35 +2,23 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { APPLICATIONS_CHANGED_EVENT } from "@/lib/distributor-applications";
-import type { Business } from "@/lib/business";
+import type { Notifications } from "@/lib/notifications";
 import BusinessBadge from "./BusinessBadge";
 
-const POLL_MS = 45000;
-
 // One line of the toast; a Bournemouth enquiry carries the badge.
-type ToastLine = { text: string; business?: Business };
+type ToastLine = { text: string; business?: Notifications["websiteLeads"][number]["business"] };
 
-type Notifications = {
-  count: number;
-  websiteLeads: { id: string; name: string; createdAt: string; business?: Business }[];
-  // Older responses (a deploy mid-session) may not have this yet.
-  newApplications?: { id: string; fullName: string; receivedAt: string; business?: Business }[];
-  dueCallbacks: { id: string; name: string; nextCallableAt: string }[];
-  followUps: { id: string; description: string; leadId: string; leadName: string; overdue: boolean }[];
-};
-
-// Shared identically for both users, not scoped to assignment, and
-// backed by plain polling rather than any real-time infrastructure, which
-// is the appropriate amount of complexity for a two-person internal tool.
+// Shared identically for both users, not scoped to assignment. The shell
+// asks for it with the navigation's counts (CrmShell, lib/status-poll.ts),
+// plain polling rather than any real-time infrastructure, which is the
+// appropriate amount of complexity for a two-person internal tool.
 // Also owns the live inbound-lead toast: a website lead whose id wasn't
-// present on this component's first successful poll, appearing in a later
-// one, is treated as "just arrived" for this browser tab and toasted once.
+// present in the first answer this browser tab got, appearing in a later
+// one, is treated as "just arrived" for this tab and toasted once.
 // New distributor applications from the website form work the same way.
 // menuAlign="left" opens the menu from the bell's left edge, for the side
 // navigation where there's no room to its left.
-export default function NotificationBell({ menuAlign = "right" }: { menuAlign?: "left" | "right" }) {
-  const [data, setData] = useState<Notifications | null>(null);
+export default function NotificationBell({ data, menuAlign = "right" }: { data: Notifications | null; menuAlign?: "left" | "right" }) {
   const [open, setOpen] = useState(false);
   const [toast, setToast] = useState<ToastLine[] | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -38,72 +26,44 @@ export default function NotificationBell({ menuAlign = "right" }: { menuAlign?: 
   const knownApplicationIdsRef = useRef<Set<string> | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function poll() {
-      // A tab in the background doesn't poll; it catches up when shown again.
-      if (document.visibilityState !== "visible") return;
-      try {
-        const res = await fetch("/api/crm/notifications");
-        if (!res.ok || cancelled) return;
-        const next: Notifications = await res.json();
-
-        const incomingIds = new Set(next.websiteLeads.map((l) => l.id));
-        const applications = next.newApplications ?? [];
-        const incomingApplicationIds = new Set(applications.map((a) => a.id));
-        if (knownWebsiteIdsRef.current === null || knownApplicationIdsRef.current === null) {
-          // First poll this tab has ever done, establishes the baseline,
-          // deliberately not toasted, or every pre-existing website lead
-          // would pop up the moment the CRM is opened.
-          knownWebsiteIdsRef.current = incomingIds;
-          knownApplicationIdsRef.current = incomingApplicationIds;
-        } else {
-          const newOnes = next.websiteLeads.filter((l) => !knownWebsiteIdsRef.current!.has(l.id));
-          const newApplications = applications.filter((a) => !knownApplicationIdsRef.current!.has(a.id));
-          const messages: ToastLine[] = [];
-          if (newOnes.length === 1) {
-            messages.push({ text: `New website enquiry: ${newOnes[0].name}`, business: newOnes[0].business });
-          } else if (newOnes.length > 1) {
-            const ldb = newOnes.filter((l) => l.business === "LDB").length;
-            messages.push({
-              text: `${newOnes.length} new website enquiries just came in${ldb > 0 ? `, ${ldb} for Bournemouth` : ""}`,
-            });
-          }
-          if (newApplications.length === 1) {
-            messages.push({
-              text: `New distributor application: ${newApplications[0].fullName}`,
-              business: newApplications[0].business,
-            });
-          } else if (newApplications.length > 1) {
-            const ldb = newApplications.filter((a) => a.business === "LDB").length;
-            messages.push({
-              text: `${newApplications.length} new distributor applications just came in${ldb > 0 ? `, ${ldb} for Bournemouth` : ""}`,
-            });
-          }
-          if (messages.length > 0) setToast(messages);
-          knownWebsiteIdsRef.current = incomingIds;
-          knownApplicationIdsRef.current = incomingApplicationIds;
-        }
-
-        if (!cancelled) setData(next);
-      } catch {
-        // A missed poll just tries again next interval, nothing to show.
-      }
+    if (!data) return;
+    const incomingIds = new Set(data.websiteLeads.map((l) => l.id));
+    const applications = data.newApplications;
+    const incomingApplicationIds = new Set(applications.map((a) => a.id));
+    if (knownWebsiteIdsRef.current === null || knownApplicationIdsRef.current === null) {
+      // The first answer this tab has ever had establishes the baseline,
+      // deliberately not toasted, or every pre-existing website lead
+      // would pop up the moment the CRM is opened.
+      knownWebsiteIdsRef.current = incomingIds;
+      knownApplicationIdsRef.current = incomingApplicationIds;
+      return;
     }
-
-    poll();
-    const interval = setInterval(poll, POLL_MS);
-    // An application approved or moved on from New (one at a time or in
-    // bulk) leaves the bell straight away rather than at the next poll.
-    window.addEventListener(APPLICATIONS_CHANGED_EVENT, poll);
-    document.addEventListener("visibilitychange", poll);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-      window.removeEventListener(APPLICATIONS_CHANGED_EVENT, poll);
-      document.removeEventListener("visibilitychange", poll);
-    };
-  }, []);
+    const newOnes = data.websiteLeads.filter((l) => !knownWebsiteIdsRef.current!.has(l.id));
+    const newApplications = applications.filter((a) => !knownApplicationIdsRef.current!.has(a.id));
+    const messages: ToastLine[] = [];
+    if (newOnes.length === 1) {
+      messages.push({ text: `New website enquiry: ${newOnes[0].name}`, business: newOnes[0].business });
+    } else if (newOnes.length > 1) {
+      const ldb = newOnes.filter((l) => l.business === "LDB").length;
+      messages.push({
+        text: `${newOnes.length} new website enquiries just came in${ldb > 0 ? `, ${ldb} for Bournemouth` : ""}`,
+      });
+    }
+    if (newApplications.length === 1) {
+      messages.push({
+        text: `New distributor application: ${newApplications[0].fullName}`,
+        business: newApplications[0].business,
+      });
+    } else if (newApplications.length > 1) {
+      const ldb = newApplications.filter((a) => a.business === "LDB").length;
+      messages.push({
+        text: `${newApplications.length} new distributor applications just came in${ldb > 0 ? `, ${ldb} for Bournemouth` : ""}`,
+      });
+    }
+    if (messages.length > 0) setToast(messages);
+    knownWebsiteIdsRef.current = incomingIds;
+    knownApplicationIdsRef.current = incomingApplicationIds;
+  }, [data]);
 
   useEffect(() => {
     if (!toast) return;
@@ -173,12 +133,12 @@ export default function NotificationBell({ menuAlign = "right" }: { menuAlign?: 
                     ))}
                   </div>
                 )}
-                {(data!.newApplications ?? []).length > 0 && (
+                {data!.newApplications.length > 0 && (
                   <div>
                     <p className="px-3 pt-2 pb-1 text-[11px] font-semibold text-gray-400 uppercase tracking-wide">
                       New Applications
                     </p>
-                    {data!.newApplications!.map((a) => (
+                    {data!.newApplications.map((a) => (
                       <Link
                         key={a.id}
                         href={`/admin/crm/applications/${a.id}`}

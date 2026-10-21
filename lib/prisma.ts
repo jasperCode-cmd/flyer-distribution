@@ -15,6 +15,7 @@ const DB_CONNECTION_TIMEOUT_MS = 15_000;
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
+  prismaPool: Pool | undefined;
 };
 
 function createPrismaClient() {
@@ -28,6 +29,7 @@ function createPrismaClient() {
   // idle connections, so they aren't left open counting against the limit.
   // Does nothing anywhere else.
   attachDatabasePool(pool);
+  globalForPrisma.prismaPool = pool;
   return new PrismaClient({ adapter: new PrismaPg(pool) });
 }
 
@@ -36,3 +38,14 @@ function createPrismaClient() {
 // otherwise open a pool of its own in the same instance.
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 globalForPrisma.prisma = prisma;
+
+// Waits for one of the pool's connections to be free (opening one if none
+// is), then hands it straight back: how long a query would wait for a
+// connection, found without running a statement (each one counts against
+// the database's monthly operations).
+export async function waitForConnection(): Promise<void> {
+  const pool = globalForPrisma.prismaPool;
+  if (!pool) return;
+  const client = await pool.connect();
+  client.release();
+}

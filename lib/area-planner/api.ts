@@ -1,6 +1,6 @@
 import "server-only";
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { waitForConnection } from "@/lib/prisma";
 import { AreaPlannerError } from "./service";
 import type { ServerTiming } from "./timing";
 
@@ -73,10 +73,10 @@ export async function within<T>(limitMs: number, what: string, run: Promise<T>):
   }
 }
 
-// How long it takes to get a database connection and make one round trip:
-// with a pool of two, this is where waiting for a free one shows up.
+// How long it takes to get a database connection: with a pool of two, this
+// is where waiting for a free one shows up. No statement is run for it.
 export function timeDatabaseWait(timing: ServerTiming): Promise<unknown> {
-  return timing.step("db-wait", () => within(timeLeft(timing, DATABASE_LIMIT_MS), "get a database connection", prisma.$queryRaw`SELECT 1`));
+  return timing.step("db-wait", () => within(timeLeft(timing, DATABASE_LIMIT_MS), "get a database connection", waitForConnection()));
 }
 
 // A JSON reply with the Server-Timing header, logging any slow step.

@@ -5,6 +5,7 @@ import type { ExpenseRecord } from "./expenses";
 import { EXPENSE_ORDER, PROFIT_LEAD_ORDER, PROFIT_LEAD_SELECT, PROFIT_LEAD_WHERE, toExpenseRecord, toProfitJob } from "./profit-data";
 import { filterExpensesByBusiness, leadBusinessWhere, type BusinessFilter } from "./business";
 import { QUERY_CONCURRENCY, runLimited } from "./run-limited";
+import { sharedCache } from "./shared-cache";
 import {
   addDays,
   chartData,
@@ -146,3 +147,14 @@ export async function loadDashboard(db: DashboardDb, period: DashboardPeriod, no
 }
 
 export type DashboardData = Awaited<ReturnType<typeof loadDashboard>>;
+
+export const DASHBOARD_FIGURES_TTL_MS = 60 * 1000;
+const dashboardCache = sharedCache<DashboardData>("dashboard", { ttlMs: DASHBOARD_FIGURES_TTL_MS, maxEntries: 20 });
+
+// The Dashboard's figures as shown: shared for a minute by everyone asking
+// for the same period and business on the same UK day, and worked out
+// afresh for whoever has just changed something (changeId, crm-change.ts).
+export function sharedDashboard(db: DashboardDb, period: DashboardPeriod, now: Date, business: BusinessFilter, changeId: string | null) {
+  const key = JSON.stringify([ukDay(now), period, business]);
+  return dashboardCache.get(key, () => loadDashboard(db, period, now, business), { changeId });
+}

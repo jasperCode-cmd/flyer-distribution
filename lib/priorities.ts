@@ -104,6 +104,8 @@ export type ApplicationFacts = {
   // Which website it came through; missing means FDH.
   business?: Business;
   status: string;
+  // How it reached the CRM: the website form, or a Gmail import (for the bell).
+  source?: "WEBSITE_FORM" | "GMAIL_IMPORT";
   receivedAt: string;
   updatedAt: string;
 };

@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import SearchBar from "./SearchBar";
 import NotificationBell from "./NotificationBell";
 import AccountMenu from "./AccountMenu";
@@ -20,6 +20,9 @@ import {
 } from "@/lib/crm-nav";
 import { APPLICATIONS_CHANGED_EVENT } from "@/lib/distributor-applications";
 import { PRIORITIES_CHANGED_EVENT } from "@/lib/priorities";
+import { installChangeMarker } from "@/lib/crm-change";
+import { createStatusPoller, type StatusPoller } from "@/lib/status-poll";
+import type { CrmStatus } from "@/lib/crm-status";
 
 // The links and their groups come from CRM_NAV_GROUPS in lib/crm-nav.ts.
 // The desktop top bar starts at 1024px (narrower screens use the menu
@@ -79,14 +82,14 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   // Which top bar dropdown is open, if any: only one at a time.
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const [inboxCount, setInboxCount] = useState<{ value: number; more: boolean } | null>(null);
-  const [applicationsCount, setApplicationsCount] = useState<number | null>(null);
-  const [prioritiesCount, setPrioritiesCount] = useState<number | null>(null);
+  // The bell and the counts beside Inbox, Applications and Priorities.
+  const [status, setStatus] = useState<CrmStatus | null>(null);
+  const pollerRef = useRef<StatusPoller | null>(null);
 
   // Desktop navigation position. Layout comes from the data attribute the
   // CRM layout's inline script puts on <html> before first paint; this state
-  // only decides where the single NotificationBell lives (it polls, so it is
-  // never mounted twice) and which toggle label to show.
+  // only decides where the single NotificationBell lives (it toasts new
+  // enquiries, so it is never mounted twice) and which toggle label to show.
   const [navPosition, setNavPosition] = useState<CrmNavPosition>("top");
   const [isDesktop, setIsDesktop] = useState(false);
   const sideActive = navPosition === "side" && isDesktop;
@@ -113,66 +116,71 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
     setOpenMenu(null);
   }
 
-  // Fetched once when the shell mounts (it persists across CRM navigation).
-  // No polling: the badge refreshes on the next full page load.
+  // Every change made from a CRM screen marks itself, so the figures the
+  // server shares for a minute are worked out afresh for this person.
   useEffect(() => {
-    if (pathname === "/admin/crm/login") return;
-    let cancelled = false;
-    fetch("/api/crm/inbox/unread-count")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!cancelled && data?.configured) setInboxCount({ value: data.count ?? 0, more: !!data.more });
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    installChangeMarker();
   }, []);
 
-  // A plain database count, so it is refreshed on every CRM navigation and
-  // goes down as soon as an application is moved on from New.
+  // The bell and the counts come in one answer, asked for when the shell
+  // mounts, then every two minutes while the tab is visible, until nobody
+  // has used the page for 30 minutes (lib/status-poll.ts). The server works
+  // it out at most once a minute for everyone.
+  const onLogin = pathname === "/admin/crm/login";
   useEffect(() => {
-    if (pathname === "/admin/crm/login") return;
+    if (onLogin) return;
     let cancelled = false;
-    function refresh() {
-      fetch("/api/crm/applications/count")
+    let seq = 0;
+    function ask() {
+      const mine = ++seq;
+      fetch("/api/crm/status", { cache: "no-store" })
         .then((r) => (r.ok ? r.json() : null))
-        .then((data) => {
-          if (!cancelled && typeof data?.count === "number") setApplicationsCount(data.count);
+        .then((data: CrmStatus | null) => {
+          // A missed ask just tries again next time; an older answer never replaces a newer one.
+          if (!cancelled && data && mine === seq) setStatus(data);
         })
         .catch(() => {});
     }
-    refresh();
-    window.addEventListener(APPLICATIONS_CHANGED_EVENT, refresh);
+    const poller = createStatusPoller(ask, {
+      now: () => Date.now(),
+      setTimeout: (run, ms) => window.setTimeout(run, ms),
+      clearTimeout: (handle) => window.clearTimeout(handle as number),
+      visible: () => document.visibilityState === "visible",
+    });
+    pollerRef.current = poller;
+    const onActivity = () => poller.activity();
+    const onVisibility = () => poller.visibilityChanged();
+    // An application moved on from New, or a Priorities item done, shows straight away.
+    const onChanged = () => poller.refresh();
+    const ACTIVITY = ["pointerdown", "pointermove", "keydown", "wheel", "touchstart", "scroll"] as const;
+    for (const name of ACTIVITY) window.addEventListener(name, onActivity, { passive: true, capture: true });
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener(APPLICATIONS_CHANGED_EVENT, onChanged);
+    window.addEventListener(PRIORITIES_CHANGED_EVENT, onChanged);
+    poller.start();
     return () => {
       cancelled = true;
-      window.removeEventListener(APPLICATIONS_CHANGED_EVENT, refresh);
+      poller.stop();
+      pollerRef.current = null;
+      for (const name of ACTIVITY) window.removeEventListener(name, onActivity, { capture: true });
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener(APPLICATIONS_CHANGED_EVENT, onChanged);
+      window.removeEventListener(PRIORITIES_CHANGED_EVENT, onChanged);
     };
+  }, [onLogin]);
+
+  // Every CRM navigation asks again, as the counts always did (usually
+  // answered from the server's shared copy).
+  const shownPath = useRef(pathname);
+  useEffect(() => {
+    if (shownPath.current === pathname) return;
+    shownPath.current = pathname;
+    pollerRef.current?.refresh();
   }, [pathname]);
 
-  // Urgent and High items on the Priorities list, refreshed on every CRM
-  // navigation and whenever the list changes.
-  useEffect(() => {
-    if (pathname === "/admin/crm/login") return;
-    let cancelled = false;
-    function refresh() {
-      fetch("/api/crm/priorities/count")
-        .then((r) => (r.ok ? r.json() : null))
-        .then((data) => {
-          if (!cancelled && typeof data?.count === "number") setPrioritiesCount(data.count);
-        })
-        .catch(() => {});
-    }
-    refresh();
-    window.addEventListener(PRIORITIES_CHANGED_EVENT, refresh);
-    window.addEventListener(APPLICATIONS_CHANGED_EVENT, refresh);
-    return () => {
-      cancelled = true;
-      window.removeEventListener(PRIORITIES_CHANGED_EVENT, refresh);
-      window.removeEventListener(APPLICATIONS_CHANGED_EVENT, refresh);
-    };
-  }, [pathname]);
+  const inboxCount = useMemo(() => (status?.inbox ? { value: status.inbox.count, more: status.inbox.more } : null), [status]);
+  const applicationsCount = status?.applications ?? null;
+  const prioritiesCount = status?.priorities ?? null;
 
   // Navigating away should never leave a menu hanging open.
   useEffect(() => {
@@ -220,7 +228,7 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
             />
             <span className="font-bold text-sm tracking-wide">CRM</span>
           </Link>
-          {!forcedChange && sideActive && <NotificationBell menuAlign="left" />}
+          {!forcedChange && sideActive && <NotificationBell data={status?.notifications ?? null} menuAlign="left" />}
         </div>
 
         <div className="flex-1 overflow-y-auto px-3 py-4">
@@ -365,7 +373,7 @@ export default function CrmShell({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-3">
             {!forcedChange && <div className="hidden lg:block"><SearchBar collapsible /></div>}
-            {!forcedChange && !sideActive && <NotificationBell />}
+            {!forcedChange && !sideActive && <NotificationBell data={status?.notifications ?? null} />}
             {session?.user && (
               <span className="hidden sm:inline lg:hidden text-xs text-blue-200 truncate max-w-[160px]">
                 {session.user.name}

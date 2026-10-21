@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { loadPriorityList } from "@/lib/priorities-data";
-import { loadDashboard } from "@/lib/dashboard-data";
+import { sharedDashboard } from "@/lib/dashboard-data";
+import { requestChangeId } from "@/lib/crm-change-server";
 import { parsePeriod, ukDay } from "@/lib/dashboard";
 import TopPriorities from "@/components/crm/TopPriorities";
 import DashboardMoney from "@/components/crm/DashboardMoney";
@@ -29,9 +30,11 @@ export default async function CrmDashboardPage({
   const params = await searchParams;
   const period = parsePeriod(params, ukDay(now));
   const business = parseBusinessFilter(params.business);
+  // Both shared for a minute, and worked out afresh after your own change.
+  const changeId = await requestChangeId();
   const [data, priorities] = await Promise.all([
-    loadDashboard(prisma, period, now, business),
-    loadPriorityList({ withEmail: false }),
+    sharedDashboard(prisma, period, now, business, changeId),
+    loadPriorityList({ withEmail: false, changeId }),
   ]);
 
   return (
