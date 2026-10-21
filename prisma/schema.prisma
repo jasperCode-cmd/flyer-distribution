@@ -733,6 +733,12 @@ model Invoice {
   sentAt   DateTime?
   voidedAt DateTime?
 
+  // A deposit invoice issued and paid outside the CRM, recorded here so
+  // balance invoices deduct it: always a paid deposit, under the number it
+  // was issued with, with no lines (its total and amount due are both the
+  // amount paid), and no PDF, email or void.
+  issuedOutsideCrm Boolean @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
