@@ -128,6 +128,10 @@ test("Your enquiry at a glance lists only what was given, and goes when nothing 
     { label: "Leaflets", value: "25,000+" },
     { label: "Start date", value: "next spring" },
   ]);
+  // The form now sends the plain number; the email shows it with commas.
+  for (const [sent, shown] of [["2000", "2,000"], ["150", "150"], ["1000000", "1,000,000"], ["12500", "12,500"]]) {
+    assert.deepEqual(enquirySummary({ quantity: sent }), [{ label: "Leaflets", value: shown }], sent);
+  }
 
   const some = buildThankYouEmail({ firstName: "Sam", quantity: "25,000+" }, SLOTS);
   const shown = visible(some.html);

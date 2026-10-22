@@ -1,6 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { QUANTITY_MESSAGE, distributionEstimate, parseFlyerQuantity } from "@/lib/quote-quantity";
+
+// How long after the last keystroke the hours estimate updates.
+const ESTIMATE_PAUSE_MS = 600;
 
 export default function QuoteForm() {
   const [serviceType, setServiceType] = useState("");
@@ -9,7 +13,31 @@ export default function QuoteForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(false);
+  const [quantityError, setQuantityError] = useState<string | null>(null);
+  const [estimate, setEstimate] = useState<string | null>(null);
+  const estimateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => () => clearTimeout(estimateTimer.current ?? undefined), []);
+
+  // The hours estimate under the quantity: hidden at once while the number
+  // is empty or invalid, otherwise shown after a pause (or right away when
+  // they leave the field). Display only; it is not a form field.
+  function updateEstimate(value: string, pause: number) {
+    clearTimeout(estimateTimer.current ?? undefined);
+    const line = distributionEstimate(value);
+    if (line === null || pause === 0) setEstimate(line);
+    else estimateTimer.current = setTimeout(() => setEstimate(line), pause);
+  }
+
+  function changeService(service: string) {
+    // A different service, or the form cleared after sending: the quantity
+    // field starts empty again, so nothing about the old one carries over.
+    clearTimeout(estimateTimer.current ?? undefined);
+    setEstimate(null);
+    setQuantityError(null);
+    setServiceType(service);
+  }
 
   const isLeaflet = serviceType === "Leaflet Distribution";
   const isWebDesign = serviceType === "Web Design & SEO";
@@ -17,11 +45,24 @@ export default function QuoteForm() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setIsSubmitting(true);
-    setError(false);
 
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData);
+
+    // A leaflet enquiry needs a number of flyers we can read; it is sent on
+    // as the plain number, so 2,000 or 2k goes as 2000.
+    if (isLeaflet) {
+      const flyers = parseFlyerQuantity(data.quantity);
+      if (flyers === null) {
+        setQuantityError(QUANTITY_MESSAGE);
+        e.currentTarget.querySelector<HTMLInputElement>("#quantity")?.focus();
+        return;
+      }
+      data.quantity = String(flyers);
+    }
+
+    setIsSubmitting(true);
+    setError(false);
 
     try {
       const res = await fetch("https://api.web3forms.com/submit", {
@@ -36,7 +77,7 @@ export default function QuoteForm() {
       if (json.success) {
         setSubmitted(true);
         formRef.current?.reset();
-        setServiceType("");
+        changeService("");
         setIncludePrinting(true);
         setIncludeDesign(false);
 
@@ -183,7 +224,7 @@ export default function QuoteForm() {
             id="service"
             name="service"
             value={serviceType}
-            onChange={(e) => setServiceType(e.target.value)}
+            onChange={(e) => changeService(e.target.value)}
             className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
           >
             <option value="">Select a service...</option>
@@ -220,20 +261,41 @@ export default function QuoteForm() {
                   htmlFor="quantity"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Approximate quantity (flyers)
+                  Approximate quantity (flyers) <span className="text-red-500">*</span>
                 </label>
-                <select
+                <input
+                  type="text"
+                  inputMode="numeric"
                   id="quantity"
                   name="quantity"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                >
-                  <option value="">Select a range...</option>
-                  <option>Under 1,000</option>
-                  <option>1,000 - 5,000</option>
-                  <option>5,000 - 10,000</option>
-                  <option>10,000 - 25,000</option>
-                  <option>25,000+</option>
-                </select>
+                  required
+                  placeholder="e.g. 2,000"
+                  aria-describedby={quantityError ? "quantity-hint quantity-error" : "quantity-hint"}
+                  aria-invalid={quantityError ? true : undefined}
+                  onInvalid={(e) => {
+                    // Our own message under the field, not the browser's bubble.
+                    e.preventDefault();
+                    setQuantityError(QUANTITY_MESSAGE);
+                    e.currentTarget.focus();
+                  }}
+                  onChange={(e) => {
+                    if (quantityError) setQuantityError(null);
+                    updateEstimate(e.target.value, ESTIMATE_PAUSE_MS);
+                  }}
+                  onBlur={(e) => updateEstimate(e.target.value, 0)}
+                  className={`w-full border rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${quantityError ? "border-red-500" : "border-gray-300"}`}
+                />
+                <p id="quantity-hint" className="mt-1.5 text-xs text-gray-500">
+                  Not sure? Your best guess is fine.
+                </p>
+                {quantityError && (
+                  <p id="quantity-error" role="alert" className="mt-1 text-xs text-red-600">
+                    {quantityError}
+                  </p>
+                )}
+                <div id="quantity-estimate" aria-live="polite">
+                  {estimate && <p className="mt-1 text-xs font-medium text-blue-700">{estimate}</p>}
+                </div>
               </div>
               <div>
                 <label

@@ -6,6 +6,7 @@ import { waitUntil } from "@vercel/functions";
 import { senderFor } from "@/lib/email-channel";
 import { sendQuoteThankYou } from "@/lib/quote-thank-you";
 import { enquiryFromQuoteForm } from "@/lib/thank-you-email";
+import { QUANTITY_MESSAGE, parseFlyerQuantity } from "@/lib/quote-quantity";
 
 // Called from the public /quote form alongside (not instead of) the
 // existing Web3Forms email notification. Best-effort field mapping:
@@ -27,6 +28,14 @@ export async function POST(req: Request) {
   if (!name || !data.email) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
+
+  // The number of flyers: required for a leaflet enquiry, read as the form
+  // reads it (2,000 or 2k), and kept as the plain number, such as "2000".
+  const flyers = parseFlyerQuantity(data.quantity);
+  if (data.service === "Leaflet Distribution" && flyers === null) {
+    return NextResponse.json({ error: QUANTITY_MESSAGE }, { status: 400 });
+  }
+  data.quantity = flyers === null ? "" : String(flyers);
 
   const printingIncluded = data["printing-included"] === "yes";
   const designIncluded = data["include-design"] === "yes";

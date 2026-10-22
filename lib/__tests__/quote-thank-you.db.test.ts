@@ -236,7 +236,7 @@ test("real database: the website form still gets its 201 and the lead is saved w
     res = await POST(
       new Request("http://localhost/api/quote-lead", {
         method: "POST",
-        body: JSON.stringify({ "first-name": "Rita", "last-name": "Route", email, service: "Leaflet Distribution", "areas-required": "BH24" }),
+        body: JSON.stringify({ "first-name": "Rita", "last-name": "Route", email, service: "Leaflet Distribution", "areas-required": "BH24", quantity: "2,000" }),
       })
     );
     // The email is tried after the reply; wait for its outcome.

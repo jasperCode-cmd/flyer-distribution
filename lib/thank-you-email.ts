@@ -105,8 +105,9 @@ export function enquirySummary(enquiry: QuoteEnquiry): { label: string; value: s
   const rows: { label: string; value: string }[] = [];
   const areas = areasPhrase(enquiry.targetAreas);
   if (areas) rows.push({ label: "Areas", value: areas });
+  // The form sends a plain number ("2000"), shown as 2,000.
   const quantity = clean(enquiry.quantity);
-  if (quantity) rows.push({ label: "Leaflets", value: quantity });
+  if (quantity) rows.push({ label: "Leaflets", value: /^\d+$/.test(quantity) ? quantity.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : quantity });
   const start = startDateText(enquiry.startDate);
   if (start) rows.push({ label: "Start date", value: start });
   const leaflet = clean(enquiry.service) === LEAFLET_SERVICE;
