@@ -2,6 +2,7 @@ import {
   APPLICATION_BODY_MAX_BYTES,
   saveWebsiteApplication,
   validateWebsiteApplication,
+  type ApplicationFields,
   type SaveApplicationDb,
 } from "./distributor-applications";
 import { APPLICATION_HONEYPOT_FIELD } from "./distributor-application-form";
@@ -33,9 +34,26 @@ export function websiteApplicationsLastHour(db: ApplicationEndpointDb, business:
 // nothing that was stored is ever sent back.
 const OK = { ok: true };
 
+// A new FDH website application, just saved (not a repeat from the same
+// phone, which is only noted on the earlier one).
+export type SavedWebsiteApplication = ApplicationFields & {
+  id: string;
+  business: "FDH";
+  source: "WEBSITE_FORM";
+  receivedAt: Date;
+};
+
 export async function handleApplicationRequest(
   req: Request,
-  deps: { db: ApplicationEndpointDb; allow: (key: string) => boolean; now?: () => Date }
+  deps: {
+    db: ApplicationEndpointDb;
+    allow: (key: string) => boolean;
+    now?: () => Date;
+    // Told about each new application once it's saved, such as to send the
+    // thank-you email. Never awaited, and nothing it does or throws can
+    // change the reply.
+    onSaved?: (application: SavedWebsiteApplication) => void;
+  }
 ): Promise<Response> {
   if (!deps.allow(clientKey(req.headers))) {
     return Response.json({ error: "Too many requests" }, { status: 429 });
@@ -72,7 +90,14 @@ export async function handleApplicationRequest(
     if (lastHour >= APPLICATIONS_PER_HOUR_CAP) {
       return Response.json({ error: "Too many requests" }, { status: 429 });
     }
-    await saveWebsiteApplication(deps.db, result.fields, now);
+    const saved = await saveWebsiteApplication(deps.db, result.fields, now);
+    if (saved.created && deps.onSaved) {
+      try {
+        deps.onSaved({ ...result.fields, id: saved.id, business: "FDH", source: "WEBSITE_FORM", receivedAt: now });
+      } catch {
+        // The application is saved either way.
+      }
+    }
     return Response.json(OK);
   } catch (err) {
     // Only the error's type: a database error's message can echo the values

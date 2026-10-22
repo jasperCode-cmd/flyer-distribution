@@ -476,7 +476,7 @@ function describeChanges(existing: ApplicationFields, incoming: ApplicationField
   return lines;
 }
 
-export type SaveApplicationResult = { created: true } | { created: false; duplicate: true };
+export type SaveApplicationResult = { created: true; id: string } | { created: false; duplicate: true };
 
 // A second application from the same phone number within 7 days isn't saved
 // again, whichever business's website either came through (distributors are
@@ -509,11 +509,11 @@ export async function saveWebsiteApplication(
     return { created: false, duplicate: true };
   }
 
-  await db.distributorApplication.create({
+  const created = await db.distributorApplication.create({
     data: { ...fields, source: "WEBSITE_FORM", business, receivedAt: now },
     select: { id: true },
   });
-  return { created: true };
+  return { created: true, id: created.id };
 }
 
 function yesNoText(value: boolean | null): string {
