@@ -45,7 +45,7 @@ function Logos({ groupId, hidden }: { groupId: string; hidden: boolean }) {
 
 export default function BrandsBar() {
   return (
-    <section className="bg-white py-8">
+    <section className="bg-white py-10 lg:py-14">
       {/* A quiet label between two thin lines; on phones the lines shorten
           and the label stays on one line. */}
       <div className="max-w-[760px] mx-auto px-4 mb-8 flex items-center gap-3 sm:gap-5">
