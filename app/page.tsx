@@ -259,9 +259,6 @@ export default function HomePage() {
 
       <ReviewBand />
 
-      {/* John Lofthouse (New Arts) and Hendonis Salon are in the review band. */}
-      <Testimonials exclude={["new-arts", "hendonis-salon"]} />
-
       <StatsBar />
 
       {/* Trust signals */}
@@ -327,6 +324,9 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* John Lofthouse (New Arts) and Hendonis Salon are in the review band. */}
+      <Testimonials exclude={["new-arts", "hendonis-salon"]} />
 
       {/* Coverage areas */}
       <section className="bg-blue-900 text-white">
