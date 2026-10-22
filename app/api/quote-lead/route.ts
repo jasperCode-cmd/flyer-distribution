@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { findDuplicateLeads } from "@/lib/crm-data";
 import { clearSharedCaches } from "@/lib/shared-cache";
+import { waitUntil } from "@vercel/functions";
+import { senderFor } from "@/lib/email-channel";
+import { sendQuoteThankYou } from "@/lib/quote-thank-you";
+import { enquiryFromQuoteForm } from "@/lib/thank-you-email";
 
 // Called from the public /quote form alongside (not instead of) the
 // existing Web3Forms email notification. Best-effort field mapping:
@@ -68,6 +72,16 @@ export async function POST(req: Request) {
 
     // The bell's shared copy, so it shows at the next ask (lib/shared-cache.ts).
     clearSharedCaches();
+    // The automatic thank-you email (FDH Leaflet Distribution enquiries only),
+    // sent after this reply, best effort: it never changes what the form is
+    // told (lib/quote-thank-you.ts).
+    if (lead.business === "FDH") {
+      waitUntil(
+        sendQuoteThankYou({ db: prisma, lead, enquiry: enquiryFromQuoteForm(data), send: senderFor(lead.business) }).catch(() => {
+          console.error("Quote thank-you email not sent: error");
+        })
+      );
+    }
     return NextResponse.json({ lead }, { status: 201 });
   } catch (err) {
     // Never let a DB/lead-capture failure break the existing Web3Forms

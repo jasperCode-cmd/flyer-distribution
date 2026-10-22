@@ -286,7 +286,9 @@ function base64Lines(content: Uint8Array): string {
 // escaped, so nothing typed can become HTML. Threading headers are exactly
 // as before. With attachments, that same alternative part goes inside a
 // multipart/mixed message, followed by each file; without any, the message
-// is exactly as it always was.
+// is exactly as it always was. A designed email built by the CRM itself
+// (the quote thank-you) passes its own html, sent as it is, with no
+// signature; the body is then its plain-text version.
 export function buildRawMessage(params: {
   from: string;
   to: string;
@@ -297,22 +299,24 @@ export function buildRawMessage(params: {
   boundary?: string;
   attachments?: EmailAttachment[];
   mixedBoundary?: string;
+  html?: string | null;
 }): string {
   const boundary = params.boundary ?? newBoundary();
   const attachments = params.attachments ?? [];
   const mixed = attachments.length > 0 ? params.mixedBoundary ?? newBoundary() : null;
-  const signatureHtml = params.signatureHtml?.trim() || null;
+  const signatureHtml = params.html ? null : params.signatureHtml?.trim() || null;
   const body = params.body.replace(/\r\n|\r/g, "\n");
 
   const plain = signatureHtml ? `${body}\n\n-- \n${signatureToText(signatureHtml)}` : body;
   const htmlBody = escapeHtml(body).replace(/\n/g, "<br>\n");
   const html =
+    params.html ??
     `<div dir="ltr">${htmlBody}` +
-    (signatureHtml
-      ? `<br clear="all"><br>\n<span class="gmail_signature_prefix">-- </span><br>\n` +
-        `<div dir="ltr" class="gmail_signature" data-smartmail="gmail_signature">${signatureHtml}</div>`
-      : "") +
-    `</div>`;
+      (signatureHtml
+        ? `<br clear="all"><br>\n<span class="gmail_signature_prefix">-- </span><br>\n` +
+          `<div dir="ltr" class="gmail_signature" data-smartmail="gmail_signature">${signatureHtml}</div>`
+        : "") +
+      `</div>`;
 
   const lines = [
     `From: ${params.from}`,
@@ -818,6 +822,9 @@ export type SendEmailParams = {
   body: string;
   threadContext?: ThreadContext | null;
   attachments?: EmailAttachment[];
+  // A designed email's own HTML, sent as it is (body is its plain text).
+  // Such an email never carries the signature.
+  html?: string;
 };
 
 // The send itself, given the two Gmail calls it needs, so a test can drive
@@ -829,7 +836,9 @@ export async function sendEmailVia(
   params: SendEmailParams,
   now: number = Date.now()
 ): Promise<GmailResult<{ messageId: string; threadId: string; signature: SignatureOutcome }>> {
-  const signature = await loadSignature(() => api.listSendAs(), senderAddress, now);
+  const signature: SignatureState = params.html
+    ? { status: "none" }
+    : await loadSignature(() => api.listSendAs(), senderAddress, now);
   const raw = buildRawMessage({
     from: senderAddress,
     to: params.to,
@@ -838,6 +847,7 @@ export async function sendEmailVia(
     inReplyTo: params.threadContext?.lastMessageId ?? null,
     signatureHtml: signature.status === "found" ? signature.html : null,
     attachments: params.attachments,
+    html: params.html ?? null,
   });
 
   try {

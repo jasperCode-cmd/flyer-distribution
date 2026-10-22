@@ -404,6 +404,8 @@ test("every note the CRM writes for itself is worded so the follow-up rule ignor
     // Quotes and invoices accepted, declined, paid or voided, all through
     // noteData; documents.test.ts checks each starts "Quote QUO-" or "Invoice INV-".
     "lib/documents/service.ts": "function noteData(",
+    // The automatic thank-you email to a website quote enquiry, written with no user.
+    "lib/quote-thank-you.ts": 'THANK_YOU_NOTE = "Automatic thank-you email sent"',
   };
   assert.deepEqual(writers.sort(), [...typedByPerson, ...Object.keys(systemWording)].sort());
   for (const [file, wording] of Object.entries(systemWording)) {
