@@ -10,18 +10,19 @@ const brands = [
   { name: "Full Shield Security", file: "logo-full-shield-security.webp", width: 780, height: 263 },
   { name: "Elisha's Pampered Paws", file: "logo-elishas-pampered-paws.webp", width: 331, height: 364 },
   { name: "The Healing Hub", file: "logo-the-healing-hub.webp", width: 764, height: 163 },
+  { name: "Kola Construction", file: "logo-kola-construction.webp", width: 566, height: 462 },
 ];
 
 /*
   Same seamless-loop approach as the old area-pill carousel: the track
-  renders all 9 logos 6 times over (2 copies x 3 reps each) so one copy is
+  renders all 10 logos 6 times over (2 copies x 3 reps each) so one copy is
   comfortably wider than any realistic viewport, and .marquee-track moves by
   exactly -50% (one copy's width) via translateX, so the seam never becomes
   visible.
 
   Only the very first repeat carries real alt text. Every other repeat is
   purely visual filler for the scroll, so it gets alt="" and sits inside its
-  own aria-hidden wrapper — otherwise a screen reader would announce each
+  own aria-hidden wrapper; otherwise a screen reader would announce each
   brand's name six times over.
 */
 function Logos({ groupId, hidden }: { groupId: string; hidden: boolean }) {
@@ -51,15 +52,15 @@ export default function BrandsBar() {
         </span>
       </div>
 
-      {/* Animated marquee — hidden under prefers-reduced-motion */}
+      {/* Animated marquee, hidden under prefers-reduced-motion */}
       <div className="marquee-outer marquee-container overflow-hidden">
         <div className="marquee-track flex w-max items-center py-1">
-          {/* First repeat — real alt text, the only copy read by screen readers */}
+          {/* First repeat: real alt text, the only copy read by screen readers */}
           <div className="flex items-center gap-10 pr-10">
             <Logos groupId="rep0" hidden={false} />
           </div>
           {/* Every other repeat (2 more to fill this copy, then 3 for the
-              duplicate copy) — decorative only, alt="" + aria-hidden */}
+              duplicate copy): decorative only, alt="" + aria-hidden */}
           <div className="flex items-center gap-10 pr-10" aria-hidden="true">
             <Logos groupId="rep1" hidden />
           </div>
@@ -78,7 +79,7 @@ export default function BrandsBar() {
         </div>
       </div>
 
-      {/* Reduced-motion fallback: static, centred, wrapping row — no animation, no duplication */}
+      {/* Reduced-motion fallback: static, centred, wrapping row; no animation, no duplication */}
       <div className="brands-static-row flex-wrap items-center justify-center gap-x-10 gap-y-6 max-w-5xl mx-auto px-6">
         {brands.map((b) => (
           <Image
