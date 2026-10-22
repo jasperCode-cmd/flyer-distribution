@@ -1,35 +1,84 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { prefersReducedMotion } from "./SlotCountdown";
 
-function useCountUp(target: number, duration: number, triggered: boolean) {
+// "final": the real figures, as the server renders them and as shown with
+// reduced motion. "waiting": set to zero, off screen, until it scrolls into
+// view. "counting": the count-up, then resting on the real figures.
+type Phase = "final" | "waiting" | "counting";
+
+function useCountUp(target: number, duration: number, phase: Phase) {
   const [count, setCount] = useState(0);
   useEffect(() => {
-    if (!triggered) return;
+    if (phase !== "counting") return;
     let start: number | null = null;
+    let frame = 0;
     const step = (timestamp: number) => {
       if (start === null) start = timestamp;
       const progress = Math.min((timestamp - start) / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       setCount(Math.round(eased * target));
-      if (progress < 1) requestAnimationFrame(step);
+      if (progress < 1) frame = requestAnimationFrame(step);
     };
-    requestAnimationFrame(step);
-  }, [triggered, target, duration]);
-  return count;
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [phase, target, duration]);
+  return phase === "final" ? target : count;
 }
+
+// The real figure is the text in the page (in the server HTML, and what
+// screen readers read). While counting it is kept, invisible, to hold its
+// width, and the counting copy is drawn over it for the eye only.
+function Figure({ value, counting }: { value: string; counting: string | null }) {
+  return (
+    <span className="inline-grid tabular-nums">
+      <span className={`col-start-1 row-start-1 ${counting === null ? "" : "opacity-0"}`}>{value}</span>
+      {counting !== null && (
+        <span aria-hidden="true" className="col-start-1 row-start-1 text-right">
+          {counting}
+        </span>
+      )}
+    </span>
+  );
+}
+
+function House({ lit }: { lit: boolean }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      strokeLinejoin="round"
+      className={`block w-full h-auto transition-colors duration-200 ${
+        lit ? "fill-yellow-400 stroke-yellow-400" : "fill-transparent stroke-blue-300"
+      }`}
+    >
+      <path d="M12 3 2.5 11H5v10h5v-6h4v6h5V11h2.5z" />
+    </svg>
+  );
+}
+
+const HOMES = 25;
+const READING = 23;
 
 export default function StatsBar() {
   const ref = useRef<HTMLDivElement>(null);
-  const [triggered, setTriggered] = useState(false);
+  const [phase, setPhase] = useState<Phase>("final");
 
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
+    if (!el || prefersReducedMotion()) return;
+    // Already on screen when the page wakes up (a reload part-way down): it
+    // has been showing the real figures, so leave them rather than drop to 0.
+    const box = el.getBoundingClientRect();
+    if (box.top < window.innerHeight && box.bottom > 0) return;
+    setPhase("waiting");
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setTriggered(true);
+          setPhase("counting");
           observer.disconnect();
         }
       },
@@ -39,93 +88,74 @@ export default function StatsBar() {
     return () => observer.disconnect();
   }, []);
 
-  const stat92 = useCountUp(92, 1800, triggered);
-  const stat74 = useCountUp(74, 1800, triggered);
-  const stat4 = useCountUp(4, 1600, triggered);
+  const stat92 = useCountUp(92, 1800, phase);
+  const stat74 = useCountUp(74, 1800, phase);
+  const stat4 = useCountUp(4, 1600, phase);
+  const counting = phase !== "final";
+  // The houses light up in step with the 92% counter, all 23 as it lands.
+  const lit = Math.round((stat92 / 92) * READING);
 
   return (
     <section className="bg-blue-900 text-white">
-      <div ref={ref} className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-6 items-start">
-
-          {/* 92% */}
-          <div className="flex flex-col items-center text-center">
-            <div
-              className={`h-14 flex items-end justify-center mb-5 transition-all duration-700 ease-out ${
-                triggered ? "opacity-100 scale-100" : "opacity-0 scale-75"
-              }`}
-              aria-hidden="true"
-            >
-              <svg className="w-14 h-14 text-blue-300 block" viewBox="0 0 24 24" fill="currentColor">
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M12 5C6.5 5 2.36 8.51.46 11.32a1.5 1.5 0 000 1.36C2.36 15.49 6.5 19 12 19s9.64-3.51 11.54-6.32a1.5 1.5 0 000-1.36C21.64 8.51 17.5 5 12 5zm0 11.5a4.5 4.5 0 110-9 4.5 4.5 0 010 9z"
-                  opacity="0.45"
-                />
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-            </div>
-            <p className="text-5xl sm:text-6xl font-bold mb-3 leading-none">
-              {stat92}%
+      <div
+        ref={ref}
+        className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-16 grid grid-cols-1 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] gap-10 lg:gap-16 items-center"
+      >
+        {/* The one big stat */}
+        <div>
+          <p className="text-yellow-400 text-xs sm:text-sm font-bold uppercase tracking-[0.18em] mb-3">
+            Out of every 25 homes
+          </p>
+          <div className="flex items-center gap-4 sm:gap-6 mb-8">
+            <p className="font-heading font-bold leading-none tracking-tight text-[5.25rem] sm:text-[6.5rem] lg:text-[7.5rem] shrink-0">
+              <Figure value="92%" counting={counting ? `${stat92}%` : null} />
             </p>
-            <p className="text-blue-200 text-base leading-relaxed max-w-[13rem]">
+            <p className="text-lg sm:text-xl text-blue-100 leading-snug max-w-[15rem]">
               of people who receive a door drop read it
             </p>
           </div>
-
-          {/* 74% */}
-          <div className="flex flex-col items-center text-center">
-            <div
-              className={`h-14 flex items-end justify-center mb-5 transition-all duration-700 ease-out delay-150 ${
-                triggered ? "opacity-100 scale-100" : "opacity-0 scale-75"
-              }`}
-              aria-hidden="true"
-            >
-              <svg className="w-14 h-14 text-blue-300 block" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z" />
-              </svg>
-            </div>
-            <p className="text-5xl sm:text-6xl font-bold mb-3 leading-none">
-              {stat74}%
-            </p>
-            <p className="text-blue-200 text-base leading-relaxed max-w-[13rem]">
-              of door drops are opened, read, filed or set aside for later
-            </p>
+          <div
+            role="img"
+            aria-label="23 out of 25 homes"
+            className="grid grid-cols-9 sm:grid-cols-13 gap-1.5 sm:gap-2 max-w-xl"
+          >
+            {Array.from({ length: HOMES }, (_, i) => (
+              <House key={i} lit={i < READING && i < lit} />
+            ))}
           </div>
-
-          {/* 4/5 */}
-          <div className="flex flex-col items-center text-center">
-            <div
-              className={`h-14 flex items-end justify-center gap-1 mb-5 transition-all duration-700 ease-out delay-300 ${
-                triggered ? "opacity-100 scale-100" : "opacity-0 scale-75"
-              }`}
-              aria-hidden="true"
-            >
-              {[0, 1, 2, 3, 4].map((i) =>
-                i < 4 ? (
-                  <svg key={i} className="w-9 h-9 text-white block" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" />
-                  </svg>
-                ) : (
-                  <svg key={i} className="w-9 h-9 text-blue-400 block" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                  </svg>
-                )
-              )}
-            </div>
-            <p className="text-5xl sm:text-6xl font-bold mb-3 leading-none">
-              {stat4}/5
-            </p>
-            <p className="text-blue-200 text-base leading-relaxed max-w-[13rem]">
-              of door drop items are engaged with
-            </p>
-          </div>
-
+          <p className="mt-6 text-base sm:text-lg text-blue-100 leading-relaxed">
+            That&apos;s 23 in every 25 households reading what comes through the door.
+          </p>
         </div>
-        <p className="text-center text-blue-300 text-xs mt-6">
-          Source: Royal Mail
-        </p>
+
+        {/* The other two figures and the quote button */}
+        <div className="flex flex-col gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-5">
+            <div className="rounded-2xl border border-blue-300/30 p-6">
+              <p className="font-heading font-bold text-5xl sm:text-6xl leading-none mb-3">
+                <Figure value="74%" counting={counting ? `${stat74}%` : null} />
+              </p>
+              <p className="text-blue-200 leading-relaxed">
+                of door drops are opened, read, filed or set aside for later
+              </p>
+            </div>
+            <div className="rounded-2xl border border-blue-300/30 p-6">
+              <p className="font-heading font-bold text-5xl sm:text-6xl leading-none mb-3">
+                <Figure value="4 in 5" counting={counting ? `${stat4} in 5` : null} />
+              </p>
+              <p className="text-blue-200 leading-relaxed">door drop items are engaged with</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+            <Link
+              href="/quote"
+              className="inline-block bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold px-8 py-3.5 rounded-md text-base transition duration-200 ease-out hover:scale-105 shadow"
+            >
+              Get a Free Quote
+            </Link>
+            <p className="text-blue-300 text-sm">Source: Royal Mail</p>
+          </div>
+        </div>
       </div>
     </section>
   );
