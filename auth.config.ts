@@ -1,6 +1,6 @@
 import type { NextAuthConfig } from "next-auth";
 
-// Edge-safe config used by middleware. No Prisma/bcrypt imports here —
+// Edge-safe config used by middleware. No Prisma/bcrypt imports here:
 // the Edge runtime can't run either, so credential verification lives
 // only in auth.ts (Node runtime), not here.
 export const authConfig = {

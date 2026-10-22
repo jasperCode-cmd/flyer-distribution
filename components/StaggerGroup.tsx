@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// Shared scroll-in stagger used across several card grids on this page —
+// Shared scroll-in stagger used across several card grids on this page:
 // same fade-up-on-enter mechanism as TrustCards on the homepage, just
 // generalised so it isn't copy-pasted per grid. itemClassName carries each
 // item's own layout (e.g. width, for a flex-wrap grid that needs its last

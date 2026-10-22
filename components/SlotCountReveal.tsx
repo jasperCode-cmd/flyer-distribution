@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-// Pops the real current figure in with a bounce once mounted — an honest
+// Pops the real current figure in with a bounce once mounted: an honest
 // reveal of the actual number, not a countdown ticking down from anything.
 export default function SlotCountReveal({
   value,

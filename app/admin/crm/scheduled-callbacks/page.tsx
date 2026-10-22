@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-// Every lead with a future nextCallableAt — not scoped to the dialer's own
+// Every lead with a future nextCallableAt, not scoped to the dialer's own
 // source/tag filter, this is a general utility view of everything pending,
 // including leads currently locked to one user via the Call Back
 // assignment mechanism (shown here so they're never invisible to the

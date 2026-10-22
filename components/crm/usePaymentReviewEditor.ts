@@ -38,7 +38,7 @@ export function usePaymentReviewEditor({
 
   // Picking a status pre-fills the amount from the deal value where there is
   // a sensible share to take (50% deposit, 100% in full). Partial has no
-  // default — the figure is arbitrary, so the user types it. With no deal
+  // default: the figure is arbitrary, so the user types it. With no deal
   // value there is nothing to derive from, so every status just leaves the
   // field open to type into. The pre-filled figure stays editable either way.
   function onPaymentStatusChange(next: string) {

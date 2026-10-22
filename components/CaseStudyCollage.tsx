@@ -7,7 +7,7 @@ interface Photo {
 
 // Hero photo (the most portrait/dramatic of the set) gets a larger tile on
 // the left, spanning the full height, with the rest stacked in a narrower
-// column on the right — proportioned to reflect each photo's real aspect
+// column on the right, proportioned to reflect each photo's real aspect
 // ratio rather than forcing equal-sized tiles. That asymmetric layout only
 // kicks in once the card is wide enough (lg+) to read well; on narrower
 // cards it falls back to a plain even grid instead of squeezing thin

@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 // Case-insensitive header aliases mapped to Lead fields. A real export
 // from the person's Google Sheet may use different column names than
-// these — adjust this map once that file is in hand.
+// these: adjust this map once that file is in hand.
 const FIELD_ALIASES: Record<string, string[]> = {
   name: ["name", "lead name", "full name"],
   phone: ["phone", "phone number", "contact number", "mobile"],

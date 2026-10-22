@@ -307,7 +307,7 @@ function WeekView({
                 className="p-1 space-y-1 min-h-[220px]"
               >
                 {dayEntries.length === 0 ? (
-                  <p className="text-[11px] text-gray-300 text-center pt-2">—</p>
+                  <p className="text-[11px] text-gray-300 text-center pt-2">-</p>
                 ) : (
                   dayEntries.map((e) => <EntryChip key={e.id} entry={e} onEdit={onEdit} />)
                 )}

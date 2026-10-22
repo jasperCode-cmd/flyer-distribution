@@ -26,7 +26,7 @@ export default function CrmLoginPage() {
     setSubmitting(false);
 
     if (res?.error) {
-      // Deliberately generic — never confirms or denies whether the
+      // Deliberately generic: never confirms or denies whether the
       // username exists.
       setError(true);
       return;

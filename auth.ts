@@ -22,7 +22,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!username || !password) return null;
 
         const user = await prisma.user.findUnique({ where: { username } });
-        // Never reveal whether the username exists — same null return either way.
+        // Never reveal whether the username exists: same null return either way.
         if (!user) return null;
 
         const valid = await bcrypt.compare(password, user.passwordHash);

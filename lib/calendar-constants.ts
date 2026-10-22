@@ -1,4 +1,4 @@
-// Pure constants/helpers only — safe to import from Client Components.
+// Pure constants/helpers only: safe to import from Client Components.
 // Anything touching Prisma lives in the page/route files instead, so this
 // file never pulls the Postgres driver into the browser bundle.
 // (Same split as lib/crm-constants.ts.)
@@ -19,14 +19,14 @@ export const CALENDAR_EVENT_TYPE_LABELS: Record<string, string> = {
   GENERAL: "General",
 };
 
-// Entries pulled from Job and Task are read-only on the calendar — they are
+// Entries pulled from Job and Task are read-only on the calendar: they are
 // derived at query time from those models rather than stored as rows here,
 // so they are labelled and coloured distinctly from the editable four.
 export const DERIVED_KINDS = ["JOB_START", "JOB_COMPLETION", "TASK_DUE"] as const;
 
 export const DERIVED_KIND_LABELS: Record<string, string> = {
-  JOB_START: "Job — Campaign Start",
-  JOB_COMPLETION: "Job — Delivery/Completion",
+  JOB_START: "Job: Campaign Start",
+  JOB_COMPLETION: "Job: Delivery/Completion",
   TASK_DUE: "Task Due",
 };
 

@@ -9,7 +9,7 @@ const DAY = 24 * HOUR;
 
 // Notes/Deal value/Quantity/Target area/Printing/Design all map directly to
 // existing Lead columns. "Campaign start date" has no home on Lead (that
-// field only exists on Job, created once a lead reaches Won) — rather than
+// field only exists on Job, created once a lead reaches Won), rather than
 // add a column for a lead that isn't Won yet, it's folded into the logged
 // note text below so it's still on record, just not structured.
 function buildQuickEntryData(body: Record<string, unknown>) {
@@ -162,8 +162,8 @@ export async function POST(
     }
     const detail =
       reason === "OTHER"
-        ? `Dialer: Scrapped — Other: ${note}`
-        : `Dialer: Scrapped — ${SCRAP_REASON_LABELS[reason]}`;
+        ? `Dialer: Scrapped - Other: ${note}`
+        : `Dialer: Scrapped - ${SCRAP_REASON_LABELS[reason]}`;
 
     const [updated] = await prisma.$transaction([
       prisma.lead.update({

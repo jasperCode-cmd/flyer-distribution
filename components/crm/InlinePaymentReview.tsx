@@ -21,7 +21,7 @@ const PAYMENT_PILL: Record<string, string> = {
 const PAYMENT_SHOWS_AMOUNT = new Set(["DEPOSIT_PAID", "PARTIAL_PAID"]);
 
 // Review has no "nothing to show" state here (unlike the plain read-only
-// badge elsewhere used before this was made editable) — every state needs
+// badge elsewhere used before this was made editable): every state needs
 // its own visible pill so Not Requested is still clickable to set, same as
 // the payment pill always showing even at its Not Paid default.
 const REVIEW_PILL: Record<string, string> = {
@@ -36,7 +36,7 @@ const COMPACT_SELECT =
   "text-[10px] leading-none font-medium px-1.5 py-0.5 rounded-full border-0 bg-gray-100 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-400";
 
 // Editable version of the payment/review pills shown on Won and Completed
-// Kanban cards — two independent pills, each collapsed by default at the
+// Kanban cards: two independent pills, each collapsed by default at the
 // same small footprint as the old read-only badges, only growing (and only
 // its own pill, not both) on click.
 export default function InlinePaymentReview({
@@ -73,8 +73,8 @@ export default function InlinePaymentReview({
   });
 
   // mousedown (which drives the outside-click collapse below) always fires
-  // before the input's own blur, so without this ref the listener — set up
-  // once per expandedField transition, not per keystroke — would close over
+  // before the input's own blur, so without this ref the listener - set up
+  // once per expandedField transition, not per keystroke - would close over
   // a stale commitAmountPaid from before the user finished typing and never
   // see the value actually save. The ref always holds the latest render's
   // closure regardless of when the listener itself was attached.
@@ -96,7 +96,7 @@ export default function InlinePaymentReview({
     // OS-level popup rather than in-page like Chrome, and combined with
     // autoFocus firing the instant the select mounts, it can emit its own
     // focus/mousedown handling as a side effect of that same click that
-    // opened this editor — observed in Firefox only (never Chrome) as the
+    // opened this editor, observed in Firefox only (never Chrome) as the
     // editor flashing open and immediately collapsing again. Deferring the
     // listener past the current call stack means any such same-click,
     // browser-internal event has already happened before we start listening,
@@ -117,30 +117,30 @@ export default function InlinePaymentReview({
     <div
       ref={containerRef}
       // The card is a Link, and on the Kanban board it also sits inside a
-      // draggable wrapper — preventDefault/stopPropagation on click keeps
+      // draggable wrapper: preventDefault/stopPropagation on click keeps
       // every interaction in here (trigger or expanded controls alike) from
       // firing the Link's navigation.
       //
       // Reinstated after a round-trip: a version of this guard without
       // mousedown/touchstart stopPropagation (to let a card be picked up by
       // grabbing directly on a pill) shipped briefly, and broke BOTH pills
-      // in Firefox — where before, only the review pill had a Firefox
+      // in Firefox, where before, only the review pill had a Firefox
       // problem and payment (which has always had this exact guard) was
       // fine. That points at dnd-kit's MouseSensor itself: once mousedown
       // reaches it, it starts "pending" a possible drag and keeps
       // document-level listeners attached for up to 50ms after mouseup even
       // if the distance threshold is never crossed (confirmed by reading
-      // dnd-kit's source — AbstractPointerSensor.detach() delays removing
+      // dnd-kit's source: AbstractPointerSensor.detach() delays removing
       // them). Opening a native <select> with autoFocus the instant this
       // click's onClick fires is exactly the kind of thing Firefox is
       // already known (from the review-pill investigation) to handle with
-      // extra, differently-timed internal events around a native popup —
+      // extra, differently-timed internal events around a native popup:
       // if any of that lands inside that leftover window, it's plausible
       // dnd-kit mistakes it for continued pointer movement and activates a
       // drag retroactively, which would explain a flash-open-then-close on
       // both pills, Firefox only. Restoring the guard keeps mousedown from
       // ever reaching the sensor for a pill click at all, removing that
-      // window entirely — matching payment's original, still-correct
+      // window entirely, matching payment's original, still-correct
       // behaviour. This does mean a card can't be picked up by grabbing
       // directly on a pill, same trade-off as before; that turned out to
       // be a real but likely unrelated bug, not the actual cause of the
@@ -162,7 +162,7 @@ export default function InlinePaymentReview({
           className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
             PAYMENT_PILL[paymentStatus] ?? PAYMENT_PILL.NOT_PAID
           }`}
-          title={`Payment: ${PAYMENT_STATUS_LABELS[paymentStatus] ?? paymentStatus} — click to edit`}
+          title={`Payment: ${PAYMENT_STATUS_LABELS[paymentStatus] ?? paymentStatus}, click to edit`}
         >
           {PAYMENT_STATUS_LABELS[paymentStatus] ?? paymentStatus}
           {paymentNeedsAmount && paidAmount !== null && <> · {formatCurrency(paidAmount)}</>}
@@ -191,7 +191,7 @@ export default function InlinePaymentReview({
               inputMode="decimal"
               value={amountPaid}
               onChange={(e) => setAmountPaid(e.target.value)}
-              // Commits on blur (e.g. tabbing away) but doesn't collapse —
+              // Commits on blur (e.g. tabbing away) but doesn't collapse:
               // that stays the outside-click handler's job, so clicking
               // over to the status select right beside this input doesn't
               // yank the editor closed mid-adjustment.
@@ -212,13 +212,13 @@ export default function InlinePaymentReview({
           className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${
             REVIEW_PILL[reviewStatus] ?? REVIEW_PILL.NOT_REQUESTED
           }`}
-          title={`Review: ${REVIEW_STATUS_LABELS[reviewStatus] ?? reviewStatus} — click to edit`}
+          title={`Review: ${REVIEW_STATUS_LABELS[reviewStatus] ?? reviewStatus}, click to edit`}
         >
           {REVIEW_STATUS_LABELS[reviewStatus] ?? reviewStatus}
         </button>
       ) : (
-        // Wrapped the same way as the payment select above — even though
-        // review never has a sibling input — for structural parity, on the
+        // Wrapped the same way as the payment select above - even though
+        // review never has a sibling input - for structural parity, on the
         // chance the difference itself (a bare <select> as a direct flex
         // child vs. one nested inside a span) is what's letting Firefox's
         // native-popup behaviour reach the outside-click check differently

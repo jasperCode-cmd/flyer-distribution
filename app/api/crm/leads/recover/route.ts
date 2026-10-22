@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
-// Fully resets a scrapped lead back to a fresh Uncontacted state — no
+// Fully resets a scrapped lead back to a fresh Uncontacted state: no
 // memory of the scrap. The ASKED_NOT_TO_CONTACT "don't do this casually"
 // warning is enforced client-side (the bin shows an extra confirmation
 // before ever calling this for such a lead individually, and Recover All

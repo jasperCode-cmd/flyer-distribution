@@ -6,7 +6,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-// Placeholder passwords only — both users must change these after first
+// Placeholder passwords only: both users must change these after first
 // login. Never reuse these in a real deployment beyond that first login.
 const SEED_USERS = [
   {
