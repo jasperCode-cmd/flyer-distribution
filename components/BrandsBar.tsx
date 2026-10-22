@@ -46,10 +46,14 @@ function Logos({ groupId, hidden }: { groupId: string; hidden: boolean }) {
 export default function BrandsBar() {
   return (
     <section className="bg-white py-8">
-      <div className="flex justify-center mb-8">
-        <span className="inline-block bg-yellow-400 text-blue-900 text-sm font-bold uppercase tracking-wide px-4 py-1.5 rounded-full">
-          Brands We&apos;ve Worked With
-        </span>
+      {/* A quiet label between two thin lines; on phones the lines shorten
+          and the label stays on one line. */}
+      <div className="max-w-[760px] mx-auto px-4 mb-8 flex items-center gap-3 sm:gap-5">
+        <span aria-hidden="true" className="h-px flex-1 bg-[#cbd5e1]" />
+        <p className="shrink-0 whitespace-nowrap text-[13px] font-bold uppercase tracking-[0.16em] text-[#475569]">
+          Brands we&apos;ve worked with
+        </p>
+        <span aria-hidden="true" className="h-px flex-1 bg-[#cbd5e1]" />
       </div>
 
       {/* Animated marquee, hidden under prefers-reduced-motion */}

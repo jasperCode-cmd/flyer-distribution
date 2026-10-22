@@ -207,26 +207,27 @@ const testimonials: Testimonial[] = [
   },
 ];
 
-const COUNT = testimonials.length;
 const AUTOPLAY_MS = 4500;
 const SWIPE_THRESHOLD = 40;
 
 /** Shortest signed circular distance from `index` to `i`, e.g. for 5 items: -2..2 */
-function circularDiff(i: number, index: number) {
-  const n = COUNT;
+function circularDiff(i: number, index: number, n: number) {
   let d = ((i - index) % n + n) % n;
   if (d > n / 2) d -= n;
   return d;
 }
 
-export default function Testimonials() {
+// `exclude`: ids of reviews a page shows elsewhere, left out of its carousel.
+export default function Testimonials({ exclude = [] }: { exclude?: string[] }) {
+  const slides = testimonials.filter((t) => !exclude.includes(t.id));
+  const count = slides.length;
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
   const goTo = useCallback((i: number) => {
-    setIndex(((i % COUNT) + COUNT) % COUNT);
-  }, []);
+    setIndex(((i % count) + count) % count);
+  }, [count]);
 
   const next = useCallback(() => goTo(index + 1), [index, goTo]);
   const prev = useCallback(() => goTo(index - 1), [index, goTo]);
@@ -234,10 +235,10 @@ export default function Testimonials() {
   useEffect(() => {
     if (paused) return;
     const t = setTimeout(() => {
-      setIndex((i) => (i + 1) % COUNT);
+      setIndex((i) => (i + 1) % count);
     }, AUTOPLAY_MS);
     return () => clearTimeout(t);
-  }, [index, paused]);
+  }, [index, paused, count]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -269,8 +270,8 @@ export default function Testimonials() {
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
-            {testimonials.map((t, i) => {
-              const diff = circularDiff(i, index);
+            {slides.map((t, i) => {
+              const diff = circularDiff(i, index, count);
               const abs = Math.abs(diff);
               const isCenter = diff === 0;
               const scale = isCenter ? 1 : abs === 1 ? 0.86 : 0.72;
@@ -338,7 +339,7 @@ export default function Testimonials() {
 
         {/* Dots */}
         <div className="flex justify-center gap-2 mt-8">
-          {testimonials.map((t, i) => (
+          {slides.map((t, i) => (
             <button
               key={t.id}
               type="button"

@@ -4,7 +4,7 @@ import Link from "next/link";
 import Testimonials from "@/components/Testimonials";
 import StatsBar from "@/components/StatsBar";
 import BrandsBar from "@/components/BrandsBar";
-import TrustBar from "@/components/TrustBar";
+import ReviewBand from "@/components/ReviewBand";
 import TrustCards from "@/components/TrustCards";
 import StaggerGroup from "@/components/StaggerGroup";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -255,11 +255,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      <TrustBar />
-
       <BrandsBar />
 
-      <Testimonials />
+      <ReviewBand />
+
+      {/* John Lofthouse (New Arts) and Hendonis Salon are in the review band. */}
+      <Testimonials exclude={["new-arts", "hendonis-salon"]} />
 
       <StatsBar />
 
