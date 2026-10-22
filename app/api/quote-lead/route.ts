@@ -13,6 +13,20 @@ import { QUANTITY_MESSAGE, parseFlyerQuantity } from "@/lib/quote-quantity";
 // budget is collected on the form as a range (e.g. "£300 - £500"), not
 // a precise figure, so it is recorded in the note rather than invented
 // as a single numeric dealValue.
+
+// The leaflet campaign budgets the form offers, word for word. A leaflet
+// enquiry with any other budget (such as one the form no longer offers)
+// is refused.
+const LEAFLET_BUDGETS = [
+  "Under £300",
+  "£300 - £500",
+  "£500 - £1,000",
+  "£1,000 - £2,000",
+  "£2,000 - £4,000",
+  "£4,000+",
+];
+const BUDGET_MESSAGE = "Please choose a campaign budget from the list";
+
 export async function POST(req: Request) {
   let data: Record<string, string>;
   try {
@@ -36,6 +50,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: QUANTITY_MESSAGE }, { status: 400 });
   }
   data.quantity = flyers === null ? "" : String(flyers);
+
+  if (data.service === "Leaflet Distribution" && data.budget && !LEAFLET_BUDGETS.includes(data.budget)) {
+    return NextResponse.json({ error: BUDGET_MESSAGE }, { status: 400 });
+  }
 
   const printingIncluded = data["printing-included"] === "yes";
   const designIncluded = data["include-design"] === "yes";

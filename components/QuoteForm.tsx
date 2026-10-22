@@ -422,11 +422,12 @@ export default function QuoteForm() {
                 className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
                 <option value="">Select a range...</option>
-                <option>£150 - £300</option>
+                <option>Under £300</option>
                 <option>£300 - £500</option>
                 <option>£500 - £1,000</option>
                 <option>£1,000 - £2,000</option>
-                <option>£2,000+</option>
+                <option>£2,000 - £4,000</option>
+                <option>£4,000+</option>
               </select>
             </div>
 
