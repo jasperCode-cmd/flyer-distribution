@@ -31,7 +31,6 @@ const navLinks = [
   { href: "/areas", label: "Areas" },
   { href: "/case-studies", label: "Case Studies" },
   { href: "/about", label: "About" },
-  { href: "/faq", label: "FAQ" },
 ];
 
 export default function Header() {
