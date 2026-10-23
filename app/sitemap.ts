@@ -33,6 +33,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/services/hand-to-hand-distribution",
     "/services/b2b-distribution",
     "/privacy-policy",
+    "/before-you-book",
   ]; // /blog excluded: noindex
 
   return routes.map((route) => ({

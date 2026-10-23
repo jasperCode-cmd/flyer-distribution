@@ -19,6 +19,7 @@ const companyLinks = [
   { href: "/areas", label: "Areas" },
   { href: "/case-studies", label: "Case Studies" },
   { href: "/about", label: "About" },
+  { href: "/before-you-book", label: "Before You Book" },
   { href: "/faq", label: "FAQ" },
   { href: "/leaflet-distribution-jobs", label: "Work With Us" },
   { href: "/quote", label: "Get a Quote" },
