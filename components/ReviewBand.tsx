@@ -34,7 +34,7 @@ export default function ReviewBand() {
             </p>
             <div className="flex items-center gap-4 mb-4">
               <p className="font-heading font-bold text-[64px] leading-none text-[#1e3a8a]">5.0</p>
-              <svg role="img" aria-label="5 out of 5 stars" viewBox="0 0 120 24" className="h-7 w-auto fill-[#d47406]">
+              <svg role="img" aria-label="5 out of 5 stars" viewBox="0 0 120 24" className="h-7 w-auto fill-[#b45309]">
                 {[0, 1, 2, 3, 4].map((i) => (
                   <path key={i} d={STAR} transform={`translate(${i * 24} 0)`} />
                 ))}
