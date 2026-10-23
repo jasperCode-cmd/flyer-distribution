@@ -97,6 +97,10 @@ const services = [
   },
 ];
 
+// Our Google Business Profile, as in the footer and the schema below.
+const GOOGLE_PROFILE = "https://share.google/RVxyPi4TzXAzkt1Am";
+const HERO_STAR = "M12 2.5l2.9 6.06 6.6.87-4.83 4.6 1.24 6.6L12 17.5l-5.91 3.13 1.24-6.6-4.83-4.6 6.6-.87L12 2.5z";
+
 const localBusinessSchema = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
@@ -185,32 +189,67 @@ export default function HomePage() {
         {/* Dark overlay */}
         <div className="absolute inset-0 bg-blue-950/80" />
 
-        {/* Desktop-only full-bleed image panel: spans the right portion of
-            the section edge to edge, independent of the centered text
-            container below, so it isn't boxed in like an inset photo. The
-            left edge is clipped on a diagonal (narrower at the top, full
-            width at the bottom) rather than a plain vertical split. */}
+        {/* Desktop-only full-bleed image panel: spans the right 48% of the
+            section edge to edge, independent of the centered text container
+            below, so it isn't boxed in like an inset photo. On wide screens it
+            stops at the photo's own width: the photo is square and as tall as
+            the hero, so the panel is square at most (aspect-square, with 48%
+            as the cap), and the blue side takes the rest. The left edge is
+            clipped on a diagonal (narrower at the top, full width at the
+            bottom) at a fixed angle, 12.22 degrees from upright: its run is a
+            share of the panel's height (100cqh), so the angle holds however
+            tall the hero is. The photo is shown at the hero's full height and
+            its natural width, against the panel's right edge, so the leaflet
+            is never zoomed and the photo's own left side fills the panel up
+            to the diagonal. A yellow strip just behind it, 6px to the left,
+            edges the diagonal, and a soft shadow falls to its left. */}
         <div
-          className="hidden lg:block absolute inset-y-0 right-0 w-[36%]"
-          style={{ clipPath: "polygon(31% 0%, 100% 0%, 100% 100%, 0% 100%)" }}
+          className="hidden lg:block absolute inset-y-0 right-0 aspect-square max-w-[48%] [container-type:size]"
+          style={{ filter: "drop-shadow(-18px 0 30px rgba(0,0,0,0.35))" }}
         >
-          <Image
-            src="/Leaflet going through door with our branding cropped.webp"
-            alt="Branded leaflet being delivered through a letterbox"
-            fill
-            sizes="36vw"
-            quality={90}
-            className="object-cover"
-            style={{ objectPosition: "center 35%" }}
-            priority
+          <div
+            aria-hidden="true"
+            className="absolute inset-y-0 right-0 -left-[6px] bg-yellow-400"
+            style={{ clipPath: "polygon(calc(100cqh * 0.2166) 0%, calc(100cqh * 0.2166 + 6px) 0%, 6px 100%, 0% 100%)" }}
           />
+          <div
+            className="absolute inset-0 overflow-hidden"
+            style={{ clipPath: "polygon(calc(100cqh * 0.2166) 0%, 100% 0%, 100% 100%, 0% 100%)" }}
+          >
+            <Image
+              src="/Leaflet going through door with our branding.webp"
+              alt="Branded leaflet being delivered through a letterbox"
+              width={1054}
+              height={1054}
+              sizes="(min-width: 1024px) 1054px, 1px"
+              quality={90}
+              className="absolute top-0 right-0 h-full w-auto max-w-none"
+              priority
+            />
+          </div>
         </div>
 
         {/* Content */}
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-8">
           <div className="flex flex-col gap-10">
             {/* Text, constrained to keep clear of the full-bleed image at desktop */}
-            <div className="lg:max-w-[52%]">
+            <div className="lg:max-w-[49%]">
+              {/* Our Google rating, linking to the reviews */}
+              <a
+                href={GOOGLE_PROFILE}
+                target="_blank"
+                rel="noopener"
+                className="inline-flex flex-wrap items-center gap-x-2 gap-y-0.5 max-w-full rounded-2xl sm:rounded-full bg-white/10 border border-white/20 px-3.5 py-1.5 mb-5 text-xs sm:text-sm hover:bg-white/15 transition-colors"
+              >
+                <svg role="img" aria-label="5 out of 5 stars" viewBox="0 0 120 24" className="h-3.5 w-auto fill-yellow-400 shrink-0">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <path key={i} d={HERO_STAR} transform={`translate(${i * 24} 0)`} />
+                  ))}
+                </svg>
+                <span className="font-bold text-white whitespace-nowrap">5.0 on Google</span>
+                <span className="text-[#bfdbfe] whitespace-nowrap">from local businesses</span>
+                <span className="sr-only"> (opens in a new tab)</span>
+              </a>
               <p className="text-blue-300 text-sm font-semibold uppercase tracking-widest mb-4">
                 Hampshire &amp; Dorset
               </p>
