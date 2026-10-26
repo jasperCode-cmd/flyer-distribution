@@ -274,7 +274,7 @@ export default function ServicesPage() {
                     {pkg.desc}
                   </p>
                   <Link
-                    href="/quote"
+                    href="/quote?service=leaflet"
                     className="inline-block bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-5 py-2.5 rounded-md transition duration-200 ease-out hover:scale-105"
                   >
                     Get a Quote
@@ -415,7 +415,7 @@ export default function ServicesPage() {
             .
           </p>
           <Link
-            href="/quote"
+            href="/quote?service=leaflet"
             className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-8 py-4 rounded-md transition duration-200 ease-out hover:scale-105"
           >
             Get a Free Quote

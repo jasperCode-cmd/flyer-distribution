@@ -145,3 +145,21 @@ body {
     animation: none;
   }
 }
+
+/* ── Quote form fold-out ──
+   Once a service card is chosen, the rest of the form fades and slides
+   in gently. With reduced motion it appears at once. */
+@keyframes quote-fold-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.quote-fold-in {
+  animation: quote-fold-in 0.35s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quote-fold-in {
+    animation: none;
+  }
+}

@@ -140,7 +140,7 @@ export default function WebDesignSeoPage() {
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link
-                  href="/quote"
+                  href="/quote?service=web"
                   className="inline-block bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold px-8 py-4 rounded-md text-base transition duration-200 ease-out hover:scale-105 shadow-lg"
                 >
                   Book a Free Call
@@ -323,7 +323,7 @@ export default function WebDesignSeoPage() {
               </p>
             </div>
             <Link
-              href="/quote"
+              href="/quote?service=web"
               className="inline-block shrink-0 bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold px-10 py-5 rounded-md transition duration-200 ease-out hover:scale-105 text-lg"
             >
               Book a Free Call
@@ -350,7 +350,7 @@ export default function WebDesignSeoPage() {
             We&apos;ll come back to you with a clear proposal and no obligation.
           </p>
           <Link
-            href="/quote"
+            href="/quote?service=web"
             className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-10 py-4 rounded-md text-base transition duration-200 ease-out hover:scale-105 shadow"
           >
             Get in Touch
