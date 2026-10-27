@@ -99,6 +99,9 @@ const services = [
 
 // Our Google Business Profile, as in the footer and the schema below.
 const GOOGLE_PROFILE = "https://share.google/RVxyPi4TzXAzkt1Am";
+
+// The blue bar after the brands: four reasons to choose us.
+const sellingPoints = ["Local Hampshire and Dorset team", "Postcode targeting", "GPS tracked delivery", "Quote within 24 hours"];
 const HERO_STAR = "M12 2.5l2.9 6.06 6.6.87-4.83 4.6 1.24 6.6L12 17.5l-5.91 3.13 1.24-6.6-4.83-4.6 6.6-.87L12 2.5z";
 
 const localBusinessSchema = {
@@ -295,6 +298,28 @@ export default function HomePage() {
       </section>
 
       <BrandsBar />
+
+      <section aria-label="Why local businesses choose us" className="bg-[#1e3a8a] text-white">
+        <ul className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-[18px] flex flex-wrap justify-center gap-x-10 gap-y-3">
+          {sellingPoints.map((point) => (
+            <li key={point} className="flex items-center gap-2 text-base font-bold">
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="w-5 h-5 shrink-0 text-[#facc15]"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2.75}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M5 12.5l4.5 4.5L19 7.5" />
+              </svg>
+              {point}
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <ReviewBand />
 

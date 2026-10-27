@@ -29,51 +29,6 @@ export type AreaSlug =
   | "brockenhurst"
 ;
 
-export type ReviewId = "kola" | "new-arts" | "auriel" | "victoria" | "hendonis" | "cozy" | "homebites";
-
-export type Review = { quote: string; name: string; business?: string; label: "Google Review" | "Client review" };
-
-// Real reviews from our testimonials, word for word (Hendonis Salon's without its emoji).
-export const REVIEWS: Record<ReviewId, Review> = {
-  "kola": {
-    quote: "Excellent flyer distribution service from start to finish. The team was professional, reliable, and kept us updated throughout the campaign.",
-    name: "Kola Construction",
-    label: "Google Review",
-  },
-  "new-arts": {
-    quote: "Outstanding service! Great communication; reasonably priced; excellent job! I would highly recommend these guys. I will be taking them again.",
-    name: "John Lofthouse",
-    business: "New Arts",
-    label: "Google Review",
-  },
-  "auriel": {
-    quote: "Really pleased with the service! Everything was handled efficiently, and the flyers were distributed exactly within the area I wanted to target. Communication was great throughout, and the pricing was very reasonable compared with other distributors I contacted. The whole process was straightforward and reliable, and I'd definitely use the service again. Highly recommend!",
-    name: "Auriel Cochrane",
-    business: "The Relocation Specialists, The Healing Hub and Elisha's Pampered Paws",
-    label: "Google Review",
-  },
-  "victoria": {
-    quote: "Great communication from the start. Very polite competitive prices will definitely be using again. Thank you",
-    name: "Body by Victoria",
-    label: "Google Review",
-  },
-  "hendonis": {
-    quote: "Incredible service from start to finish, these guys deal with you in a really professional way and get the job done fast. Would really recommend",
-    name: "Hendonis Salon",
-    label: "Google Review",
-  },
-  "cozy": {
-    quote: "Fast and reliable team service all around",
-    name: "Cozy Stoves",
-    label: "Client review",
-  },
-  "homebites": {
-    quote: "10/10 service for my cake business! Very professional, would definitely recommend.",
-    name: "Homebites Bakery",
-    label: "Google Review",
-  },
-};
-
 export type AreaPageData = {
   slug: AreaSlug;
   // As a label (breadcrumb, cards, pills) and in a sentence ("the New Forest").
@@ -87,7 +42,6 @@ export type AreaPageData = {
   nearby: AreaSlug[];
   // A photo of the place itself (its own photo or a landmark) for the About section; most pages have none.
   photo?: { src: string; alt: string };
-  review: ReviewId;
   // Its own copy: paragraphs of text and links to other pages on the site.
   copy: (string | { href: string; text: string })[][];
   // Answers to: which parts we cover, one or two postcodes, other towns in one campaign, and how they know.
@@ -118,7 +72,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 107_500,
     nearby: ["hedge-end", "totton", "hythe", "eastleigh", "romsey", "winchester", "new-forest"],
-    review: "kola",
     copy: [
       [
         "Southampton is Hampshire's largest city, home to around 250,000 residents across diverse neighbourhoods. Our distribution teams cover all major postcodes including SO14, SO15, SO16, SO17, SO18, SO19, and surrounding areas.",
@@ -165,7 +118,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     homes: 86_500,
     nearby: ["poole", "christchurch", "dorset"],
     photo: { src: "https://images.pexels.com/photos/29030837/pexels-photo-29030837.jpeg?auto=compress&cs=tinysrgb&w=800", alt: "Bournemouth pier and ferris wheel" },
-    review: "auriel",
     copy: [
       [
         "Bournemouth is one of Dorset's largest towns, known for its beaches, vibrant town centre, and large student population. We cover BH1 through BH11 and surrounding postcodes, reaching residential areas across all neighbourhoods, backed by our full range of ",
@@ -207,7 +159,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 67_500,
     nearby: ["bournemouth", "dorset", "ringwood"],
-    review: "new-arts",
     copy: [
       [
         "Poole is one of the most affluent towns in Dorset, with prestigious areas like Sandbanks, Canford Cliffs, and Branksome Park attracting high-income households. Our distributors cover BH12 through BH18 and surrounding postcodes as part of ",
@@ -250,7 +201,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     homes: 44_500,
     nearby: ["eastleigh", "southampton", "romsey", "new-forest"],
     photo: { src: "https://images.pexels.com/photos/11167778/pexels-photo-11167778.jpeg?auto=compress&cs=tinysrgb&w=800", alt: "Winchester Cathedral" },
-    review: "homebites",
     copy: [
       [
         "Winchester is Hampshire's historic county town, consistently ranked among the best places to live in the UK. With high average household incomes and a thriving independent business scene, leaflet distribution here reaches an engaged, local audience.",
@@ -293,7 +243,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 80_000,
     nearby: ["brockenhurst", "hythe", "totton", "ringwood", "southampton", "bournemouth"],
-    review: "hendonis",
     copy: [
       [
         "The New Forest is a unique area covering a wide spread of market towns, villages, and residential communities across southern Hampshire. Key towns include Lyndhurst, ",
@@ -332,7 +281,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 11_000,
     nearby: ["new-forest", "bournemouth", "poole"],
-    review: "victoria",
     copy: [
       [
         "Ringwood is a busy market town on the edge of the New Forest, well positioned between Bournemouth and Salisbury and serving a broad mix of residential roads, rural properties, and a strong town centre. We cover BH24 and surrounding postcodes, delivering directly through letterboxes across the town and into the surrounding villages.",
@@ -366,7 +314,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 25_000,
     nearby: ["bournemouth", "poole", "ringwood", "dorset"],
-    review: "cozy",
     copy: [
       [
         "Christchurch sits on the Dorset coast between ",
@@ -431,7 +378,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 293_500,
     nearby: ["bournemouth", "poole", "christchurch"],
-    review: "kola",
     copy: [
       [
         "Dorset is one of the most varied counties for leaflet distribution, ranging from the busy urban centres of Bournemouth and Poole through to the quieter market towns and coastal villages further west. If you are running a campaign that needs to reach audiences across the county rather than a single town, a Dorset-wide campaign is the most effective way to do it.",
@@ -467,7 +413,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     homes: 21_500,
     nearby: ["chandlers-ford", "hedge-end"],
     photo: { src: "/Street%20Image%20when%20distributing%20flyers.webp", alt: "Street scene during leaflet distribution in Eastleigh" },
-    review: "new-arts",
     copy: [
       [
         "Eastleigh is one of Hampshire's largest towns, home to around 50,000 residents across a mix of residential neighbourhoods and commercial areas. We cover SO50 and surrounding postcodes, delivering directly through letterboxes across the town.",
@@ -505,7 +450,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 13_000,
     nearby: ["southampton", "totton", "winchester"],
-    review: "auriel",
     copy: [
       [
         "Romsey is a historic market town in the Test Valley, sitting between Southampton and Salisbury with a well-loved, independent town centre. We cover SO51 and the surrounding villages, delivering door to door across the town centre, the newer residential estates, and the rural properties just outside it.",
@@ -543,7 +487,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 15_000,
     nearby: ["totton", "new-forest", "brockenhurst", "southampton"],
-    review: "new-arts",
     copy: [
       [
         "Hythe sits on the Waterside, looking out over Southampton Water with a small marina at its heart and a ferry crossing to Southampton itself. We cover SO45 and the wider Waterside area, delivering door to door through Hythe's town centre, the marina, and the residential roads that spread out from the village centre.",
@@ -581,7 +524,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 17_500,
     nearby: ["southampton", "hythe", "romsey", "new-forest"],
-    review: "cozy",
     copy: [
       [
         "Totton grew from a cluster of smaller villages, Testwood, Calmore and Hammonds Green among them, into one of the largest towns on the edge of the New Forest. We cover SO40 and the surrounding area, delivering door to door across the town centre, its residential estates, and the villages that now form part of it.",
@@ -621,7 +563,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 14_000,
     nearby: ["eastleigh", "chandlers-ford", "southampton"],
-    review: "hendonis",
     copy: [
       [
         "Hedge End sits just east of Southampton, a residential town that's grown up alongside the retail park that now draws shoppers from across the area. We cover SO30 and the surrounding roads, delivering door to door across Hedge End's housing estates and into the neighbouring communities nearby, including ",
@@ -659,7 +600,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 13_000,
     nearby: ["eastleigh", "hedge-end", "southampton"],
-    review: "victoria",
     copy: [
       [
         "Chandler's Ford is a largely residential part of the Eastleigh borough, made up of established neighbourhoods like Hiltingbury and Valley Park around the shops at Fryern. We cover SO53 and the surrounding roads, delivering door to door across its estates and into the smaller pockets of housing nearby, including neighbouring ",
@@ -697,7 +637,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 2_000,
     nearby: ["new-forest", "hythe", "southampton"],
-    review: "homebites",
     copy: [
       [
         "Brockenhurst is one of the New Forest's best-known villages, with New Forest ponies wandering along Brookley Road and a mainline railway station at its centre. We cover SO42 and the surrounding area, delivering door to door across the village and into the smaller hamlets and residential roads nearby.",

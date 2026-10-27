@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import Breadcrumb from "@/components/Breadcrumb";
-import { AREA_PAGES, REVIEWS, coverageMapAlt, coverageMapSrc, type AreaPageData } from "@/lib/area-pages";
+import ReviewBand from "@/components/ReviewBand";
+import { AREA_PAGES, coverageMapAlt, coverageMapSrc, type AreaPageData } from "@/lib/area-pages";
 import { formatPostcodeRanges } from "@/lib/postcode-ranges";
 
 // The shared template for the area pages (/areas/leaflet-distribution-[area]).
@@ -26,7 +27,6 @@ const thousands = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
 export default function AreaPage({ area }: { area: AreaPageData }) {
   const each = area.wide ? "each" : "every";
   const codes = area.postcodes.map((p) => p.code);
-  const review = REVIEWS[area.review];
   const article = /^[AEIOU]/.test(area.name) ? "an" : "a";
   const questions = [
     `Which parts of ${area.inName} do you cover?`,
@@ -251,45 +251,8 @@ export default function AreaPage({ area }: { area: AreaPageData }) {
         </div>
       </section>
 
-      {/* 7. Review band: the rating and one real review */}
-      <section className="bg-[#eef4fc] border-y border-[#dbe4f0] py-14 text-[#334155]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.6fr)] gap-8 lg:gap-12 items-center">
-          <div>
-            <p className="text-[#1d4ed8] text-xs sm:text-sm font-bold uppercase tracking-[0.16em] mb-3">What our clients say</p>
-            <div className="flex items-center gap-4 mb-3">
-              <p className="font-heading font-bold text-[56px] leading-none text-[#1e3a8a]">5.0</p>
-              <svg role="img" aria-label="5 out of 5 stars" viewBox="0 0 120 24" className="h-7 w-auto fill-[#b45309]">
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <path key={i} d={STAR} transform={`translate(${i * 24} 0)`} />
-                ))}
-              </svg>
-            </div>
-            <p className="leading-relaxed max-w-sm mb-4">Rated 5 stars on Google by local businesses across Hampshire and Dorset</p>
-            <a
-              href={GOOGLE_PROFILE}
-              target="_blank"
-              rel="noopener"
-              className="inline-flex items-center gap-1.5 font-bold text-[#1d4ed8] hover:text-[#1e3a8a] underline-offset-4 hover:underline transition-colors duration-200"
-            >
-              Read our reviews
-              <span className="sr-only"> (opens in a new tab)</span>
-              <svg aria-hidden="true" viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.25} strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14M13 6l6 6-6 6" />
-              </svg>
-            </a>
-          </div>
-          <figure className="rounded-2xl bg-white border border-[#dbe4f0] shadow-[0_1px_3px_rgba(15,23,42,0.06)] p-6 sm:p-8">
-            <blockquote className="text-[#1f2937] text-lg leading-relaxed">&ldquo;{review.quote}&rdquo;</blockquote>
-            <figcaption className="mt-4 text-sm">
-              <span className="font-bold text-[#1e3a8a]">
-                {review.name}
-                {review.business ? `, ${review.business}` : ""}
-              </span>
-              <span className="ml-2 text-[#475569]">{review.label}</span>
-            </figcaption>
-          </figure>
-        </div>
-      </section>
+      {/* 7. The rating snapshot, shared with the homepage */}
+      <ReviewBand />
 
       {/* 8. Questions, answered from the page's own facts (no FAQ schema) */}
       <section className="bg-white py-16">

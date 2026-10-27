@@ -3,12 +3,12 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { findPostcode } from "@/lib/area-planner/data";
-import { AREA_PAGES, REVIEWS, coverageMapAlt, coverageMapSrc, type AreaPageData, type AreaSlug } from "@/lib/area-pages";
+import { AREA_PAGES, coverageMapAlt, coverageMapSrc, type AreaPageData, type AreaSlug } from "@/lib/area-pages";
 import { formatPostcodeRanges } from "@/lib/postcode-ranges";
 
 // The 15 area pages' shared template data: the confirmed postcode lists and
 // neighbourhood names, homes from the Area Planner's Census 2021 figures,
-// nearby pages, one real review each (never the same as a neighbour's),
+// nearby pages, the shared rating snapshot in place of a review of its own,
 // four answers written for that page, and the wording rules (no banned
 // words; New Forest and Dorset never say "every" or "all of"), its coverage
 // map as the hero, and a photo only where it shows the place itself.
@@ -97,25 +97,18 @@ test("nearby pages are real pages, and Southampton and Eastleigh link to the one
   assert.deepEqual(AREA_PAGES.eastleigh.nearby, ["chandlers-ford", "hedge-end"]);
 });
 
-test("reviews are real, word for word, spread so no two neighbouring pages share one", () => {
-  const source = readFileSync("components/Testimonials.tsx", "utf8");
-  for (const [id, review] of Object.entries(REVIEWS)) {
-    // Hendonis Salon's appears without its emoji; everything else is exact.
-    assert.ok(source.includes(JSON.stringify(review.quote).slice(1, -1)), id);
-    assert.ok(source.includes(`name: "${review.name}"`), id);
-    assert.ok(source.includes(`label: "${review.label}"`), id);
-  }
-  assert.ok(!REVIEWS.hendonis.quote.includes("🙌"));
-  assert.equal(REVIEWS.cozy.label, "Client review");
-  assert.ok(!Object.values(REVIEWS).some((r) => r.name === "Coastline Print"));
-  // All seven used, and never the same as a neighbour (either way round).
-  assert.deepEqual(new Set(pages.map((p) => p.review)), new Set(Object.keys(REVIEWS)));
-  for (const page of pages) {
-    for (const other of pages) {
-      const neighbours = page.nearby.includes(other.slug) || other.nearby.includes(page.slug);
-      if (neighbours) assert.notEqual(page.review, other.review, `${page.slug} and ${other.slug}`);
-    }
-  }
+test("each page shows the shared rating snapshot where its review was, and no full review", () => {
+  const template = readFileSync("components/AreaPage.tsx", "utf8");
+  const howItWorks = template.indexOf("{/* 6. How a campaign works */}");
+  const snapshot = template.indexOf("<ReviewBand />");
+  const questions = template.indexOf("{/* 8. Questions");
+  assert.ok(howItWorks > 0 && howItWorks < snapshot && snapshot < questions, `${howItWorks} ${snapshot} ${questions}`);
+  assert.equal(template.split("<ReviewBand />").length - 1, 1);
+  assert.match(template, /import ReviewBand from "@\/components\/ReviewBand";/);
+  assert.doesNotMatch(template, /<blockquote|REVIEWS|What our clients say|#eef4fc/);
+  // No page keeps a review of its own.
+  for (const page of pages) assert.ok(!("review" in page), page.slug);
+  assert.doesNotMatch(readFileSync("lib/area-pages.ts", "utf8"), /REVIEWS|ReviewId|review:/);
 });
 
 test("four answers per page, all different, each about that page", () => {
@@ -145,8 +138,7 @@ test("four answers per page, all different, each about that page", () => {
 const BANNED = [/\bstreet/i, /live tracked/i, /see where every flyer goes/i, /£/, /\bprices? from\b/i];
 
 function visibleText(page: AreaPageData): string {
-  const review = REVIEWS[page.review];
-  return [squash(textOf(page.copy)), ...page.faqs, page.question3 ?? "", page.eyebrow, ...page.postcodes.flatMap((p) => p.places), review.quote].join("\n");
+  return [squash(textOf(page.copy)), ...page.faqs, page.question3 ?? "", page.eyebrow, ...page.postcodes.flatMap((p) => p.places)].join("\n");
 }
 
 test("no banned words, and no links off the site, in any page's own text", () => {
