@@ -6,17 +6,17 @@ import PopulationCounter from "@/components/PopulationCounter";
 import { areas } from "@/lib/areas-data";
 
 export const metadata: Metadata = {
-  title: "Flyer Distribution Winchester",
+  title: "Flyer Distribution New Forest",
   description:
-    "Leaflet and flyer distribution across Winchester, Hampshire. Professional door-to-door delivery in the county town and surrounding villages.",
+    "Leaflet and flyer distribution across the New Forest, Hampshire. Door-to-door delivery to households in New Forest towns and villages.",
   alternates: {
-    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/winchester",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-new-forest",
   },
   openGraph: {
-    title: "Flyer Distribution Winchester",
+    title: "Flyer Distribution New Forest",
     description:
-      "Leaflet and flyer distribution across Winchester, Hampshire. Professional door-to-door delivery in the county town and surrounding villages.",
-    url: "https://www.flyerdistributionhampshire.co.uk/areas/winchester",
+      "Leaflet and flyer distribution across the New Forest, Hampshire. Door-to-door delivery to households in New Forest towns and villages.",
+    url: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-new-forest",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -31,9 +31,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Flyer Distribution Winchester",
+    title: "Flyer Distribution New Forest",
     description:
-      "Leaflet and flyer distribution across Winchester, Hampshire. Professional door-to-door delivery in the county town and surrounding villages.",
+      "Leaflet and flyer distribution across the New Forest, Hampshire. Door-to-door delivery to households in New Forest towns and villages.",
     images: [
       "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
     ],
@@ -59,15 +59,15 @@ const breadcrumbSchema = {
     {
       "@type": "ListItem",
       position: 3,
-      name: "Winchester",
-      item: "https://www.flyerdistributionhampshire.co.uk/areas/winchester",
+      name: "New Forest",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-new-forest",
     },
   ],
 };
 
-const areaData = areas.find((a) => a.href === "/areas/winchester")!;
+const areaData = areas.find((a) => a.href === "/areas/leaflet-distribution-new-forest")!;
 
-export default function WinchesterPage() {
+export default function NewForestPage() {
   return (
     <>
       <script
@@ -80,19 +80,19 @@ export default function WinchesterPage() {
             items={[
               { label: "Home", href: "/" },
               { label: "Areas", href: "/areas" },
-              { label: "Winchester" },
+              { label: "New Forest" },
             ]}
           />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            Leaflet Distribution Winchester
+            Leaflet Distribution New Forest
           </h1>
           <p className="text-blue-200 text-xl max-w-xl">
-            Professional leaflet delivery across Winchester city and surrounding
-            Hampshire villages, reaching the affluent households of the county
-            town.
+            Professional leaflet delivery across New Forest towns and villages,
+            reaching households throughout one of Hampshire&apos;s most
+            distinctive areas.
           </p>
         </div>
       </section>
@@ -101,7 +101,7 @@ export default function WinchesterPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div>
             <h2 className="text-2xl font-bold text-blue-900 mb-4">
-              About Our Winchester Coverage
+              About Our New Forest Coverage
             </h2>
             <PopulationCounter
               population={areaData.population}
@@ -109,49 +109,54 @@ export default function WinchesterPage() {
               className="mb-4"
             />
             <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              Winchester is Hampshire&apos;s historic county town, consistently
-              ranked among the best places to live in the UK. With high average
-              household incomes and a thriving independent business scene,
-              leaflet distribution here reaches an engaged, local audience.
+              The New Forest is a unique area covering a wide spread of market
+              towns, villages, and residential communities across southern
+              Hampshire. Key towns include Lyndhurst,{" "}
+              <Link href="/areas/leaflet-distribution-brockenhurst" className="text-blue-700 hover:underline font-medium">
+                Brockenhurst
+              </Link>
+              , Fordingbridge, and{" "}
+              <Link href="/areas/leaflet-distribution-hythe" className="text-blue-700 hover:underline font-medium">
+                Hythe
+              </Link>
+              , alongside a network of smaller villages with loyal,
+              locally-minded residents.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              We cover SO21, SO22, SO23, and surrounding postcode areas
-              including the city centre, St Cross, Badger Farm, Harestock, and
-              the outlying villages such as Colden Common and Bishopstoke.
-              We&apos;ve run campaigns as far out as Micheldever too, part of{" "}
-              <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
-                our recent work
-              </Link>
-              .
+              We cover SO40, SO41, SO42, SO43, and surrounding postcode areas,
+              delivering to households across the district. The New Forest
+              demographic tends to be established and community-focused, making it
+              well suited to local services, home improvement businesses, and
+              independent retailers.
             </p>
             <p className="text-gray-600 leading-relaxed text-lg">
-              Winchester&apos;s county town professional base makes it
-              particularly effective for premium services such as home
-              improvements, fine dining, private schools, and specialist
-              professional services, all delivered through{" "}
+              Vehicle{" "}
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
-                our full leaflet distribution service
-              </Link>
-              . For reaching other businesses directly, we also offer{" "}
-              <Link href="/services/b2b-distribution" className="text-blue-700 hover:underline font-medium">
-                B2B leaflet distribution
+                leaflet distribution
               </Link>{" "}
-              around Winchester&apos;s business parks and professional
-              quarters, alongside our standard door-to-door rounds.
+              is also available in car parks and high-footfall locations
+              across New Forest towns for businesses looking to reach
+              visitors and day-trippers as well as residents. We&apos;ve also
+              delivered statutory notice work here, including a road closure
+              campaign around Lyndhurst that&apos;s part of{" "}
+              <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
+                our portfolio of work
+              </Link>
+              .
             </p>
             <div className="mt-8">
               <Link
                 href="/quote"
                 className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition duration-200 ease-out hover:scale-105"
               >
-                Get a Winchester Quote
+                Get a New Forest Quote
               </Link>
             </div>
           </div>
           <div>
             <Image
-              src="https://images.pexels.com/photos/11167778/pexels-photo-11167778.jpeg?auto=compress&cs=tinysrgb&w=800"
-              alt="Winchester Cathedral"
+              src="https://images.pexels.com/photos/33881640/pexels-photo-33881640.jpeg?auto=compress&cs=tinysrgb&w=800"
+              alt="New Forest village street in summer"
               width={700}
               height={500}
               className="rounded-lg w-full object-cover"
@@ -163,10 +168,10 @@ export default function WinchesterPage() {
       <section className="bg-white py-12 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-xl font-bold text-blue-900 mb-4">
-            Winchester Postcodes We Cover
+            New Forest Postcodes We Cover
           </h2>
           <div className="flex flex-wrap gap-2">
-            {["SO21", "SO22", "SO23", "SO24", "SO32"].map((pc) => (
+            {["SO40", "SO41", "SO42", "SO43", "SO45", "BH24", "BH25"].map((pc) => (
               <span
                 key={pc}
                 className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full font-medium"
@@ -185,15 +190,15 @@ export default function WinchesterPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Link
-              href="/areas/eastleigh"
+              href="/areas/leaflet-distribution-ringwood"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Eastleigh</h3>
-              <p className="text-gray-600 text-sm mb-3">One of Hampshire&apos;s largest towns, covering SO50 postcodes.</p>
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Ringwood</h3>
+              <p className="text-gray-600 text-sm mb-3">Market town on the New Forest edge, close to the Dorset border.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
-              href="/areas/southampton"
+              href="/areas/leaflet-distribution-southampton"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Southampton</h3>
@@ -201,19 +206,35 @@ export default function WinchesterPage() {
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
-              href="/areas/new-forest"
+              href="/areas/leaflet-distribution-bournemouth"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">New Forest</h3>
-              <p className="text-gray-600 text-sm mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Bournemouth</h3>
+              <p className="text-gray-600 text-sm mb-3">Major Dorset resort town with strong consumer footfall.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
-              href="/areas/romsey"
+              href="/areas/leaflet-distribution-brockenhurst"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Romsey</h3>
-              <p className="text-gray-600 text-sm mb-3">Historic market town a short drive southwest of Winchester.</p>
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Brockenhurst</h3>
+              <p className="text-gray-600 text-sm mb-3">One of the New Forest&apos;s best-known villages.</p>
+              <span className="text-blue-600 text-xs font-semibold">View area →</span>
+            </Link>
+            <Link
+              href="/areas/leaflet-distribution-hythe"
+              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
+            >
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Hythe</h3>
+              <p className="text-gray-600 text-sm mb-3">Waterside village looking out over Southampton Water.</p>
+              <span className="text-blue-600 text-xs font-semibold">View area →</span>
+            </Link>
+            <Link
+              href="/areas/leaflet-distribution-totton"
+              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
+            >
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Totton</h3>
+              <p className="text-gray-600 text-sm mb-3">Large town on the New Forest&apos;s eastern edge.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

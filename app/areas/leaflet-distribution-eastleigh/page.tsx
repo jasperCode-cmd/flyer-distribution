@@ -6,17 +6,17 @@ import PopulationCounter from "@/components/PopulationCounter";
 import { areas } from "@/lib/areas-data";
 
 export const metadata: Metadata = {
-  title: "Leaflet Distribution Brockenhurst",
+  title: "Leaflet Distribution Eastleigh",
   description:
-    "Leaflet and flyer distribution across Brockenhurst and SO42 postcodes. Door-to-door delivery across this well-known New Forest village.",
+    "Targeted leaflet and flyer distribution across Eastleigh and SO50 postcodes. Door-to-door delivery for local businesses in one of Hampshire's largest towns.",
   alternates: {
-    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/brockenhurst",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-eastleigh",
   },
   openGraph: {
-    title: "Leaflet Distribution Brockenhurst",
+    title: "Leaflet Distribution Eastleigh",
     description:
-      "Leaflet and flyer distribution across Brockenhurst and SO42 postcodes. Door-to-door delivery across this well-known New Forest village.",
-    url: "https://www.flyerdistributionhampshire.co.uk/areas/brockenhurst",
+      "Targeted leaflet and flyer distribution across Eastleigh and SO50 postcodes. Door-to-door delivery for local businesses in one of Hampshire's largest towns.",
+    url: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-eastleigh",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -31,9 +31,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Leaflet Distribution Brockenhurst",
+    title: "Leaflet Distribution Eastleigh",
     description:
-      "Leaflet and flyer distribution across Brockenhurst and SO42 postcodes. Door-to-door delivery across this well-known New Forest village.",
+      "Targeted leaflet and flyer distribution across Eastleigh and SO50 postcodes. Door-to-door delivery for local businesses in one of Hampshire's largest towns.",
     images: [
       "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
     ],
@@ -59,15 +59,15 @@ const breadcrumbSchema = {
     {
       "@type": "ListItem",
       position: 3,
-      name: "Brockenhurst",
-      item: "https://www.flyerdistributionhampshire.co.uk/areas/brockenhurst",
+      name: "Eastleigh",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-eastleigh",
     },
   ],
 };
 
-const areaData = areas.find((a) => a.href === "/areas/brockenhurst")!;
+const areaData = areas.find((a) => a.href === "/areas/leaflet-distribution-eastleigh")!;
 
-export default function BrockenhurstPage() {
+export default function EastleighPage() {
   return (
     <>
       <script
@@ -80,18 +80,18 @@ export default function BrockenhurstPage() {
             items={[
               { label: "Home", href: "/" },
               { label: "Areas", href: "/areas" },
-              { label: "Brockenhurst" },
+              { label: "Eastleigh" },
             ]}
           />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            Leaflet Distribution Brockenhurst
+            Leaflet Distribution Eastleigh
           </h1>
           <p className="text-blue-200 text-xl max-w-xl">
-            Door-to-door leaflet delivery across Brockenhurst and SO42
-            postcodes, reaching households across this New Forest village.
+            Targeted door-to-door leaflet delivery across Eastleigh and
+            surrounding SO50 postcodes.
           </p>
         </div>
       </section>
@@ -100,7 +100,7 @@ export default function BrockenhurstPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div>
             <h2 className="text-2xl font-bold text-blue-900 mb-4">
-              About Our Brockenhurst Coverage
+              About Our Eastleigh Coverage
             </h2>
             <PopulationCounter
               population={areaData.population}
@@ -108,50 +108,55 @@ export default function BrockenhurstPage() {
               className="mb-4"
             />
             <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              Brockenhurst is one of the New Forest&apos;s best-known
-              villages, with New Forest ponies wandering along Brookley
-              Road and a mainline railway station at its centre. We cover
-              SO42 and the surrounding area, delivering door to door across
-              the village and into the smaller hamlets and residential
-              roads nearby.
+              Eastleigh is one of Hampshire&apos;s largest towns, home to around
+              50,000 residents across a mix of residential neighbourhoods and
+              commercial areas. We cover SO50 and surrounding postcodes,
+              delivering directly through letterboxes across the town.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              Brookley Road mixes independent shops, tearooms and pubs
-              with a steady flow of visitors alongside its residents, so
-              campaigns here can reach a genuinely wide audience. Local
-              hospitality, retail and trades businesses all find a
-              receptive crowd, whether they&apos;re targeting residents or
-              visitors to the wider{" "}
-              <Link href="/areas/new-forest" className="text-blue-700 hover:underline font-medium">
-                New Forest
+              Whether you&apos;re targeting the town centre or nearby{" "}
+              <Link href="/areas/leaflet-distribution-chandlers-ford" className="text-blue-700 hover:underline font-medium">
+                Chandler&apos;s Ford
+              </Link>
+              , our experienced distributors know these routes well. The same
+              goes for{" "}
+              <Link href="/areas/leaflet-distribution-hedge-end" className="text-blue-700 hover:underline font-medium">
+                Hedge End
+              </Link>{" "}
+              and the surrounding villages. Many campaigns here also pair
+              naturally with nearby{" "}
+              <Link href="/areas/leaflet-distribution-winchester" className="text-blue-700 hover:underline font-medium">
+                Winchester
               </Link>
               .
             </p>
             <p className="text-gray-600 leading-relaxed text-lg">
-              Vehicle campaigns are also available around Brockenhurst&apos;s
-              Brookley Road and station car parks, part of{" "}
-              <Link href="/services" className="text-blue-700 hover:underline font-medium">
-                the services we provide
+              Eastleigh&apos;s proximity to Southampton Airport and strong
+              commuter population also makes it well suited to targeted
+              postcode campaigns for local service businesses. We&apos;ve also
+              delivered statutory notice work out towards Fair Oak, part of a
+              Hampshire-wide road closure campaign you can find among{" "}
+              <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
+                our past campaigns
               </Link>
-              , a useful way to reach visitors as well as the village&apos;s
-              own residents.
+              .
             </p>
             <div className="mt-8">
               <Link
                 href="/quote"
                 className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition duration-200 ease-out hover:scale-105"
               >
-                Get a Brockenhurst Quote
+                Get an Eastleigh Quote
               </Link>
             </div>
           </div>
-          <div className="max-w-sm mx-auto lg:mx-0 aspect-square overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
+          <div className="aspect-square overflow-hidden rounded-lg">
             <Image
-              src="/Overhead-shot-residential-areas.webp"
-              alt="Overhead view of a residential street with houses and gardens, typical of the neighbourhoods we cover"
-              width={999}
-              height={999}
-              className="w-full h-full object-cover"
+              src="/Street%20Image%20when%20distributing%20flyers.webp"
+              alt="Street scene during leaflet distribution in Eastleigh"
+              width={1200}
+              height={1600}
+              className="w-full h-full object-cover object-center"
             />
           </div>
         </div>
@@ -160,10 +165,10 @@ export default function BrockenhurstPage() {
       <section className="bg-white py-12 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-xl font-bold text-blue-900 mb-4">
-            Brockenhurst Postcodes We Cover
+            Eastleigh Postcodes We Cover
           </h2>
           <div className="flex flex-wrap gap-2">
-            {["SO42"].map((pc) => (
+            {["SO50", "SO53"].map((pc) => (
               <span
                 key={pc}
                 className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full font-medium"
@@ -182,7 +187,23 @@ export default function BrockenhurstPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Link
-              href="/areas/new-forest"
+              href="/areas/leaflet-distribution-southampton"
+              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
+            >
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Southampton</h3>
+              <p className="text-gray-600 text-sm mb-3">Hampshire&apos;s largest city with residential coverage across all major postcodes.</p>
+              <span className="text-blue-600 text-xs font-semibold">View area →</span>
+            </Link>
+            <Link
+              href="/areas/leaflet-distribution-winchester"
+              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
+            >
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Winchester</h3>
+              <p className="text-gray-600 text-sm mb-3">Historic cathedral city and prosperous Hampshire county town.</p>
+              <span className="text-blue-600 text-xs font-semibold">View area →</span>
+            </Link>
+            <Link
+              href="/areas/leaflet-distribution-new-forest"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">New Forest</h3>
@@ -190,19 +211,19 @@ export default function BrockenhurstPage() {
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
-              href="/areas/southampton"
+              href="/areas/leaflet-distribution-hedge-end"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Southampton</h3>
-              <p className="text-gray-600 text-sm mb-3">Hampshire&apos;s largest city, a short train ride from Brockenhurst.</p>
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Hedge End</h3>
+              <p className="text-gray-600 text-sm mb-3">Residential town on the eastern side of Eastleigh borough.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
-              href="/areas/hythe"
+              href="/areas/leaflet-distribution-chandlers-ford"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Hythe</h3>
-              <p className="text-gray-600 text-sm mb-3">Waterside village on the eastern edge of the New Forest.</p>
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Chandler&apos;s Ford</h3>
+              <p className="text-gray-600 text-sm mb-3">Residential community forming most of Eastleigh&apos;s urban area.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

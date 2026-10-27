@@ -6,17 +6,17 @@ import PopulationCounter from "@/components/PopulationCounter";
 import { areas } from "@/lib/areas-data";
 
 export const metadata: Metadata = {
-  title: "Flyer Distribution Southampton",
+  title: "Flyer Distribution Winchester",
   description:
-    "Leaflet and flyer distribution across Southampton. Targeted postcode delivery for businesses reaching Hampshire's largest city.",
+    "Leaflet and flyer distribution across Winchester, Hampshire. Professional door-to-door delivery in the county town and surrounding villages.",
   alternates: {
-    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/southampton",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-winchester",
   },
   openGraph: {
-    title: "Flyer Distribution Southampton",
+    title: "Flyer Distribution Winchester",
     description:
-      "Leaflet and flyer distribution across Southampton. Targeted postcode delivery for businesses reaching Hampshire's largest city.",
-    url: "https://www.flyerdistributionhampshire.co.uk/areas/southampton",
+      "Leaflet and flyer distribution across Winchester, Hampshire. Professional door-to-door delivery in the county town and surrounding villages.",
+    url: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-winchester",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -31,9 +31,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Flyer Distribution Southampton",
+    title: "Flyer Distribution Winchester",
     description:
-      "Leaflet and flyer distribution across Southampton. Targeted postcode delivery for businesses reaching Hampshire's largest city.",
+      "Leaflet and flyer distribution across Winchester, Hampshire. Professional door-to-door delivery in the county town and surrounding villages.",
     images: [
       "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
     ],
@@ -59,15 +59,15 @@ const breadcrumbSchema = {
     {
       "@type": "ListItem",
       position: 3,
-      name: "Southampton",
-      item: "https://www.flyerdistributionhampshire.co.uk/areas/southampton",
+      name: "Winchester",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-winchester",
     },
   ],
 };
 
-const areaData = areas.find((a) => a.href === "/areas/southampton")!;
+const areaData = areas.find((a) => a.href === "/areas/leaflet-distribution-winchester")!;
 
-export default function SouthamptonPage() {
+export default function WinchesterPage() {
   return (
     <>
       <script
@@ -80,18 +80,19 @@ export default function SouthamptonPage() {
             items={[
               { label: "Home", href: "/" },
               { label: "Areas", href: "/areas" },
-              { label: "Southampton" },
+              { label: "Winchester" },
             ]}
           />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            Leaflet Distribution Southampton
+            Leaflet Distribution Winchester
           </h1>
           <p className="text-blue-200 text-xl max-w-xl">
-            Reach households and businesses across Hampshire&apos;s largest city
-            with targeted door-to-door leaflet delivery.
+            Professional leaflet delivery across Winchester city and surrounding
+            Hampshire villages, reaching the affluent households of the county
+            town.
           </p>
         </div>
       </section>
@@ -100,7 +101,7 @@ export default function SouthamptonPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div>
             <h2 className="text-2xl font-bold text-blue-900 mb-4">
-              About Our Southampton Coverage
+              About Our Winchester Coverage
             </h2>
             <PopulationCounter
               population={areaData.population}
@@ -108,55 +109,49 @@ export default function SouthamptonPage() {
               className="mb-4"
             />
             <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              Southampton is Hampshire&apos;s largest city, home to over 250,000
-              residents across diverse neighbourhoods. Our distribution teams
-              cover all major postcodes including SO14, SO15, SO16, SO17, SO18,
-              SO19, and surrounding areas.
+              Winchester is Hampshire&apos;s historic county town, consistently
+              ranked among the best places to live in the UK. With high average
+              household incomes and a thriving independent business scene,
+              leaflet distribution here reaches an engaged, local audience.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              Whether you&apos;re targeting the city centre, Shirley, Portswood,
-              Bitterne, or the waterfront areas, we deliver your flyers reliably
-              and efficiently to the right letterboxes. Campaigns here often
-              extend out to{" "}
-              <Link href="/areas/romsey" className="text-blue-700 hover:underline font-medium">
-                Romsey
-              </Link>{" "}
-              too.
+              We cover SO21, SO22, SO23, and surrounding postcode areas
+              including the city centre, St Cross, Badger Farm, Harestock, and
+              the outlying villages such as Colden Common and Bishopstoke.
+              We&apos;ve run campaigns as far out as Micheldever too, part of{" "}
+              <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
+                our recent work
+              </Link>
+              .
             </p>
             <p className="text-gray-600 leading-relaxed text-lg">
-              We work with restaurants, tradespeople, estate agents, gyms,
-              retailers, and many other local businesses to help them grow
-              their customer base through our full range of{" "}
+              Winchester&apos;s county town professional base makes it
+              particularly effective for premium services such as home
+              improvements, fine dining, private schools, and specialist
+              professional services, all delivered through{" "}
               <Link href="/services" className="text-blue-700 hover:underline font-medium">
-                leaflet distribution services
+                our full leaflet distribution service
               </Link>
-              . We also run{" "}
-              <Link href="/services/hand-to-hand-distribution" className="text-blue-700 hover:underline font-medium">
-                hand-to-hand distribution
+              . For reaching other businesses directly, we also offer{" "}
+              <Link href="/services/b2b-distribution" className="text-blue-700 hover:underline font-medium">
+                B2B leaflet distribution
               </Link>{" "}
-              at Westquay Shopping Centre, putting leaflets straight into
-              shoppers&apos; hands.
+              around Winchester&apos;s business parks and professional
+              quarters, alongside our standard door-to-door rounds.
             </p>
             <div className="mt-8">
               <Link
                 href="/quote"
                 className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition duration-200 ease-out hover:scale-105"
               >
-                Get a Southampton Quote
+                Get a Winchester Quote
               </Link>
             </div>
-            <p className="text-gray-500 text-base mt-4">
-              Live locally and want to deliver for us instead?{" "}
-              <Link href="/leaflet-distribution-jobs" className="text-blue-700 hover:underline font-medium">
-                See our distributor jobs
-              </Link>
-              .
-            </p>
           </div>
           <div>
             <Image
-              src="https://images.pexels.com/photos/19916593/pexels-photo-19916593.jpeg?auto=compress&cs=tinysrgb&w=800"
-              alt="Southampton city centre shopping mall"
+              src="https://images.pexels.com/photos/11167778/pexels-photo-11167778.jpeg?auto=compress&cs=tinysrgb&w=800"
+              alt="Winchester Cathedral"
               width={700}
               height={500}
               className="rounded-lg w-full object-cover"
@@ -168,19 +163,17 @@ export default function SouthamptonPage() {
       <section className="bg-white py-12 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-xl font-bold text-blue-900 mb-4">
-            Southampton Postcodes We Cover
+            Winchester Postcodes We Cover
           </h2>
           <div className="flex flex-wrap gap-2">
-            {["SO14", "SO15", "SO16", "SO17", "SO18", "SO19", "SO30", "SO31", "SO40", "SO45"].map(
-              (pc) => (
-                <span
-                  key={pc}
-                  className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full font-medium"
-                >
-                  {pc}
-                </span>
-              )
-            )}
+            {["SO21", "SO22", "SO23", "SO24", "SO32"].map((pc) => (
+              <span
+                key={pc}
+                className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full font-medium"
+              >
+                {pc}
+              </span>
+            ))}
           </div>
         </div>
       </section>
@@ -192,7 +185,7 @@ export default function SouthamptonPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Link
-              href="/areas/eastleigh"
+              href="/areas/leaflet-distribution-eastleigh"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Eastleigh</h3>
@@ -200,15 +193,15 @@ export default function SouthamptonPage() {
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
-              href="/areas/winchester"
+              href="/areas/leaflet-distribution-southampton"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Winchester</h3>
-              <p className="text-gray-600 text-sm mb-3">Historic cathedral city and prosperous Hampshire county town.</p>
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Southampton</h3>
+              <p className="text-gray-600 text-sm mb-3">Hampshire&apos;s largest city with residential coverage across all major postcodes.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
-              href="/areas/new-forest"
+              href="/areas/leaflet-distribution-new-forest"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">New Forest</h3>
@@ -216,27 +209,11 @@ export default function SouthamptonPage() {
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
-              href="/areas/totton"
-              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
-            >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Totton</h3>
-              <p className="text-gray-600 text-sm mb-3">New Forest edge town bordering Southampton to the west.</p>
-              <span className="text-blue-600 text-xs font-semibold">View area →</span>
-            </Link>
-            <Link
-              href="/areas/hedge-end"
-              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
-            >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Hedge End</h3>
-              <p className="text-gray-600 text-sm mb-3">Residential town just east of Southampton.</p>
-              <span className="text-blue-600 text-xs font-semibold">View area →</span>
-            </Link>
-            <Link
-              href="/areas/romsey"
+              href="/areas/leaflet-distribution-romsey"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Romsey</h3>
-              <p className="text-gray-600 text-sm mb-3">Historic market town a short drive northwest of Southampton.</p>
+              <p className="text-gray-600 text-sm mb-3">Historic market town a short drive southwest of Winchester.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

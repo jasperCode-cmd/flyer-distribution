@@ -461,10 +461,10 @@ export default function PublicNoticeLeafletingPage() {
           </p>
           <div className="flex flex-wrap gap-3 mb-10">
             {[
-              { name: "Southampton", href: "/areas/southampton" },
-              { name: "Winchester", href: "/areas/winchester" },
-              { name: "Eastleigh", href: "/areas/eastleigh" },
-              { name: "New Forest", href: "/areas/new-forest" },
+              { name: "Southampton", href: "/areas/leaflet-distribution-southampton" },
+              { name: "Winchester", href: "/areas/leaflet-distribution-winchester" },
+              { name: "Eastleigh", href: "/areas/leaflet-distribution-eastleigh" },
+              { name: "New Forest", href: "/areas/leaflet-distribution-new-forest" },
             ].map((area) => (
               <Link
                 key={area.name}

@@ -110,21 +110,21 @@ export default function FaqPage() {
               <p className="text-gray-600 text-base leading-relaxed">
                 We cover the Hampshire and Dorset corridor, offering flyer distribution and leaflet
                 distribution across{" "}
-                <Link href="/areas/southampton" className={a}>Southampton</Link>,{" "}
-                <Link href="/areas/bournemouth" className={a}>Bournemouth</Link>,{" "}
-                <Link href="/areas/poole" className={a}>Poole</Link>,{" "}
-                <Link href="/areas/winchester" className={a}>Winchester</Link>,{" "}
-                <Link href="/areas/eastleigh" className={a}>Eastleigh</Link>, the{" "}
-                <Link href="/areas/new-forest" className={a}>New Forest</Link>,{" "}
-                <Link href="/areas/romsey" className={a}>Romsey</Link>,{" "}
-                <Link href="/areas/ringwood" className={a}>Ringwood</Link>,{" "}
-                <Link href="/areas/christchurch" className={a}>Christchurch</Link>, and{" "}
-                <Link href="/areas/dorset" className={a}>Dorset</Link> more widely, along with{" "}
-                <Link href="/areas/hythe" className={a}>Hythe</Link>,{" "}
-                <Link href="/areas/totton" className={a}>Totton</Link>,{" "}
-                <Link href="/areas/hedge-end" className={a}>Hedge End</Link>,{" "}
-                <Link href="/areas/chandlers-ford" className={a}>Chandler&apos;s Ford</Link>, and{" "}
-                <Link href="/areas/brockenhurst" className={a}>Brockenhurst</Link>. See our full{" "}
+                <Link href="/areas/leaflet-distribution-southampton" className={a}>Southampton</Link>,{" "}
+                <Link href="/areas/leaflet-distribution-bournemouth" className={a}>Bournemouth</Link>,{" "}
+                <Link href="/areas/leaflet-distribution-poole" className={a}>Poole</Link>,{" "}
+                <Link href="/areas/leaflet-distribution-winchester" className={a}>Winchester</Link>,{" "}
+                <Link href="/areas/leaflet-distribution-eastleigh" className={a}>Eastleigh</Link>, the{" "}
+                <Link href="/areas/leaflet-distribution-new-forest" className={a}>New Forest</Link>,{" "}
+                <Link href="/areas/leaflet-distribution-romsey" className={a}>Romsey</Link>,{" "}
+                <Link href="/areas/leaflet-distribution-ringwood" className={a}>Ringwood</Link>,{" "}
+                <Link href="/areas/leaflet-distribution-christchurch" className={a}>Christchurch</Link>, and{" "}
+                <Link href="/areas/leaflet-distribution-dorset" className={a}>Dorset</Link> more widely, along with{" "}
+                <Link href="/areas/leaflet-distribution-hythe" className={a}>Hythe</Link>,{" "}
+                <Link href="/areas/leaflet-distribution-totton" className={a}>Totton</Link>,{" "}
+                <Link href="/areas/leaflet-distribution-hedge-end" className={a}>Hedge End</Link>,{" "}
+                <Link href="/areas/leaflet-distribution-chandlers-ford" className={a}>Chandler&apos;s Ford</Link>, and{" "}
+                <Link href="/areas/leaflet-distribution-brockenhurst" className={a}>Brockenhurst</Link>. See our full{" "}
                 <Link href="/areas" className={a}>coverage areas</Link> for details, and if
                 your target area isn&apos;t listed,{" "}
                 <Link href="/quote" className={a}>get in touch</Link>, as we can often

@@ -362,15 +362,15 @@ export default function ServicesPage() {
           </p>
           <div className="flex flex-wrap gap-3 mb-8">
             {[
-              { name: "Southampton", href: "/areas/southampton" },
-              { name: "Bournemouth", href: "/areas/bournemouth" },
-              { name: "Poole", href: "/areas/poole" },
-              { name: "Winchester", href: "/areas/winchester" },
-              { name: "New Forest", href: "/areas/new-forest" },
-              { name: "Ringwood", href: "/areas/ringwood" },
-              { name: "Christchurch", href: "/areas/christchurch" },
-              { name: "Dorset", href: "/areas/dorset" },
-              { name: "Eastleigh", href: "/areas/eastleigh" },
+              { name: "Southampton", href: "/areas/leaflet-distribution-southampton" },
+              { name: "Bournemouth", href: "/areas/leaflet-distribution-bournemouth" },
+              { name: "Poole", href: "/areas/leaflet-distribution-poole" },
+              { name: "Winchester", href: "/areas/leaflet-distribution-winchester" },
+              { name: "New Forest", href: "/areas/leaflet-distribution-new-forest" },
+              { name: "Ringwood", href: "/areas/leaflet-distribution-ringwood" },
+              { name: "Christchurch", href: "/areas/leaflet-distribution-christchurch" },
+              { name: "Dorset", href: "/areas/leaflet-distribution-dorset" },
+              { name: "Eastleigh", href: "/areas/leaflet-distribution-eastleigh" },
             ].map((area) => (
               <Link
                 key={area.name}

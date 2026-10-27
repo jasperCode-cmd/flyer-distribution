@@ -6,17 +6,17 @@ import PopulationCounter from "@/components/PopulationCounter";
 import { areas } from "@/lib/areas-data";
 
 export const metadata: Metadata = {
-  title: "Leaflet Distribution Eastleigh",
+  title: "Leaflet Distribution Romsey",
   description:
-    "Targeted leaflet and flyer distribution across Eastleigh and SO50 postcodes. Door-to-door delivery for local businesses in one of Hampshire's largest towns.",
+    "Leaflet and flyer distribution across Romsey and SO51 postcodes. Targeted door-to-door delivery in this historic Hampshire market town.",
   alternates: {
-    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/eastleigh",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-romsey",
   },
   openGraph: {
-    title: "Leaflet Distribution Eastleigh",
+    title: "Leaflet Distribution Romsey",
     description:
-      "Targeted leaflet and flyer distribution across Eastleigh and SO50 postcodes. Door-to-door delivery for local businesses in one of Hampshire's largest towns.",
-    url: "https://www.flyerdistributionhampshire.co.uk/areas/eastleigh",
+      "Leaflet and flyer distribution across Romsey and SO51 postcodes. Targeted door-to-door delivery in this historic Hampshire market town.",
+    url: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-romsey",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -31,9 +31,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Leaflet Distribution Eastleigh",
+    title: "Leaflet Distribution Romsey",
     description:
-      "Targeted leaflet and flyer distribution across Eastleigh and SO50 postcodes. Door-to-door delivery for local businesses in one of Hampshire's largest towns.",
+      "Leaflet and flyer distribution across Romsey and SO51 postcodes. Targeted door-to-door delivery in this historic Hampshire market town.",
     images: [
       "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
     ],
@@ -59,15 +59,15 @@ const breadcrumbSchema = {
     {
       "@type": "ListItem",
       position: 3,
-      name: "Eastleigh",
-      item: "https://www.flyerdistributionhampshire.co.uk/areas/eastleigh",
+      name: "Romsey",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-romsey",
     },
   ],
 };
 
-const areaData = areas.find((a) => a.href === "/areas/eastleigh")!;
+const areaData = areas.find((a) => a.href === "/areas/leaflet-distribution-romsey")!;
 
-export default function EastleighPage() {
+export default function RomseyPage() {
   return (
     <>
       <script
@@ -80,18 +80,18 @@ export default function EastleighPage() {
             items={[
               { label: "Home", href: "/" },
               { label: "Areas", href: "/areas" },
-              { label: "Eastleigh" },
+              { label: "Romsey" },
             ]}
           />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            Leaflet Distribution Eastleigh
+            Leaflet Distribution Romsey
           </h1>
           <p className="text-blue-200 text-xl max-w-xl">
-            Targeted door-to-door leaflet delivery across Eastleigh and
-            surrounding SO50 postcodes.
+            Door-to-door leaflet delivery across Romsey and SO51 postcodes,
+            reaching households in this historic Hampshire market town.
           </p>
         </div>
       </section>
@@ -100,7 +100,7 @@ export default function EastleighPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div>
             <h2 className="text-2xl font-bold text-blue-900 mb-4">
-              About Our Eastleigh Coverage
+              About Our Romsey Coverage
             </h2>
             <PopulationCounter
               population={areaData.population}
@@ -108,36 +108,39 @@ export default function EastleighPage() {
               className="mb-4"
             />
             <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              Eastleigh is one of Hampshire&apos;s largest towns, home to around
-              50,000 residents across a mix of residential neighbourhoods and
-              commercial areas. We cover SO50 and surrounding postcodes,
-              delivering directly through letterboxes across the town.
+              Romsey is a historic market town in the Test Valley, sitting
+              between Southampton and Salisbury with a well-loved,
+              independent town centre. We cover SO51 and the
+              surrounding villages, delivering door to door across the town
+              centre, the newer residential estates, and the rural
+              properties just outside it.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              Whether you&apos;re targeting the town centre or nearby{" "}
-              <Link href="/areas/chandlers-ford" className="text-blue-700 hover:underline font-medium">
-                Chandler&apos;s Ford
-              </Link>
-              , our experienced distributors know these routes well. The same
-              goes for{" "}
-              <Link href="/areas/hedge-end" className="text-blue-700 hover:underline font-medium">
-                Hedge End
+              The pedestrianised town centre around Romsey Abbey draws a
+              loyal local crowd, and that same audience responds well to
+              print marketing for independent shops, cafes, trades and
+              professional services. Many of our Romsey campaigns pair the
+              town itself with nearby{" "}
+              <Link href="/areas/leaflet-distribution-southampton" className="text-blue-700 hover:underline font-medium">
+                Southampton
               </Link>{" "}
-              and the surrounding villages. Many campaigns here also pair
-              naturally with nearby{" "}
-              <Link href="/areas/winchester" className="text-blue-700 hover:underline font-medium">
-                Winchester
-              </Link>
-              .
+              or{" "}
+              <Link href="/areas/leaflet-distribution-totton" className="text-blue-700 hover:underline font-medium">
+                Totton
+              </Link>{" "}
+              for businesses wanting wider reach across the Test Valley.
             </p>
             <p className="text-gray-600 leading-relaxed text-lg">
-              Eastleigh&apos;s proximity to Southampton Airport and strong
-              commuter population also makes it well suited to targeted
-              postcode campaigns for local service businesses. We&apos;ve also
-              delivered statutory notice work out towards Fair Oak, part of a
-              Hampshire-wide road closure campaign you can find among{" "}
+              Vehicle campaigns are also part of{" "}
+              <Link href="/services" className="text-blue-700 hover:underline font-medium">
+                our leaflet distribution options
+              </Link>{" "}
+              around Romsey&apos;s car parks and retail areas, useful for
+              reaching visitors to the Abbey and Sir Harold Hillier Gardens
+              alongside residents. We&apos;ve also completed
+              residential rounds out towards West Wellow, where you can{" "}
               <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
-                our past campaigns
+                see the results
               </Link>
               .
             </p>
@@ -146,17 +149,17 @@ export default function EastleighPage() {
                 href="/quote"
                 className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition duration-200 ease-out hover:scale-105"
               >
-                Get an Eastleigh Quote
+                Get a Romsey Quote
               </Link>
             </div>
           </div>
-          <div className="aspect-square overflow-hidden rounded-lg">
+          <div className="max-w-sm mx-auto lg:mx-0 aspect-square overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
             <Image
-              src="/Street%20Image%20when%20distributing%20flyers.webp"
-              alt="Street scene during leaflet distribution in Eastleigh"
-              width={1200}
-              height={1600}
-              className="w-full h-full object-cover object-center"
+              src="/Overhead-shot-residential-areas.webp"
+              alt="Overhead view of a residential street with houses and gardens, typical of the neighbourhoods we cover"
+              width={999}
+              height={999}
+              className="w-full h-full object-cover"
             />
           </div>
         </div>
@@ -165,10 +168,10 @@ export default function EastleighPage() {
       <section className="bg-white py-12 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-xl font-bold text-blue-900 mb-4">
-            Eastleigh Postcodes We Cover
+            Romsey Postcodes We Cover
           </h2>
           <div className="flex flex-wrap gap-2">
-            {["SO50", "SO53"].map((pc) => (
+            {["SO51"].map((pc) => (
               <span
                 key={pc}
                 className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full font-medium"
@@ -187,43 +190,27 @@ export default function EastleighPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Link
-              href="/areas/southampton"
+              href="/areas/leaflet-distribution-southampton"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Southampton</h3>
-              <p className="text-gray-600 text-sm mb-3">Hampshire&apos;s largest city with residential coverage across all major postcodes.</p>
+              <p className="text-gray-600 text-sm mb-3">Hampshire&apos;s largest city, a short drive from Romsey.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
-              href="/areas/winchester"
+              href="/areas/leaflet-distribution-winchester"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Winchester</h3>
-              <p className="text-gray-600 text-sm mb-3">Historic cathedral city and prosperous Hampshire county town.</p>
+              <p className="text-gray-600 text-sm mb-3">Hampshire&apos;s county town, a short drive northeast of Romsey.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
-              href="/areas/new-forest"
+              href="/areas/leaflet-distribution-totton"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">New Forest</h3>
-              <p className="text-gray-600 text-sm mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
-              <span className="text-blue-600 text-xs font-semibold">View area →</span>
-            </Link>
-            <Link
-              href="/areas/hedge-end"
-              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
-            >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Hedge End</h3>
-              <p className="text-gray-600 text-sm mb-3">Residential town on the eastern side of Eastleigh borough.</p>
-              <span className="text-blue-600 text-xs font-semibold">View area →</span>
-            </Link>
-            <Link
-              href="/areas/chandlers-ford"
-              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
-            >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Chandler&apos;s Ford</h3>
-              <p className="text-gray-600 text-sm mb-3">Residential community forming most of Eastleigh&apos;s urban area.</p>
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Totton</h3>
+              <p className="text-gray-600 text-sm mb-3">New Forest edge town between Romsey and Southampton.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

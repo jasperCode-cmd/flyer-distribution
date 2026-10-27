@@ -6,17 +6,17 @@ import PopulationCounter from "@/components/PopulationCounter";
 import { areas } from "@/lib/areas-data";
 
 export const metadata: Metadata = {
-  title: "Leaflet Distribution Dorset",
+  title: "Leaflet Distribution Totton",
   description:
-    "County-wide leaflet and flyer distribution across Dorset. Covering Bournemouth, Poole, Christchurch, Weymouth and surrounding towns.",
+    "Leaflet and flyer distribution across Totton and SO40 postcodes. Door-to-door delivery across this New Forest edge town near Southampton.",
   alternates: {
-    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/dorset",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-totton",
   },
   openGraph: {
-    title: "Leaflet Distribution Dorset",
+    title: "Leaflet Distribution Totton",
     description:
-      "County-wide leaflet and flyer distribution across Dorset. Covering Bournemouth, Poole, Christchurch, Weymouth and surrounding towns.",
-    url: "https://www.flyerdistributionhampshire.co.uk/areas/dorset",
+      "Leaflet and flyer distribution across Totton and SO40 postcodes. Door-to-door delivery across this New Forest edge town near Southampton.",
+    url: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-totton",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -31,9 +31,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Leaflet Distribution Dorset",
+    title: "Leaflet Distribution Totton",
     description:
-      "County-wide leaflet and flyer distribution across Dorset. Covering Bournemouth, Poole, Christchurch, Weymouth and surrounding towns.",
+      "Leaflet and flyer distribution across Totton and SO40 postcodes. Door-to-door delivery across this New Forest edge town near Southampton.",
     images: [
       "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
     ],
@@ -59,15 +59,15 @@ const breadcrumbSchema = {
     {
       "@type": "ListItem",
       position: 3,
-      name: "Dorset",
-      item: "https://www.flyerdistributionhampshire.co.uk/areas/dorset",
+      name: "Totton",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-totton",
     },
   ],
 };
 
-const areaData = areas.find((a) => a.href === "/areas/dorset")!;
+const areaData = areas.find((a) => a.href === "/areas/leaflet-distribution-totton")!;
 
-export default function DorsetPage() {
+export default function TottonPage() {
   return (
     <>
       <script
@@ -80,18 +80,18 @@ export default function DorsetPage() {
             items={[
               { label: "Home", href: "/" },
               { label: "Areas", href: "/areas" },
-              { label: "Dorset" },
+              { label: "Totton" },
             ]}
           />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            Leaflet Distribution Dorset
+            Leaflet Distribution Totton
           </h1>
           <p className="text-blue-200 text-xl max-w-xl">
-            County-wide leaflet delivery across Dorset, from Bournemouth and
-            Poole in the east to Weymouth and beyond.
+            Door-to-door leaflet delivery across Totton and SO40 postcodes,
+            reaching households across this New Forest edge town.
           </p>
         </div>
       </section>
@@ -100,7 +100,7 @@ export default function DorsetPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div>
             <h2 className="text-2xl font-bold text-blue-900 mb-4">
-              About Our Dorset Coverage
+              About Our Totton Coverage
             </h2>
             <PopulationCounter
               population={areaData.population}
@@ -108,59 +108,63 @@ export default function DorsetPage() {
               className="mb-4"
             />
             <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              Dorset is one of the most varied counties for leaflet distribution,
-              covering everything from the busy urban centres of Bournemouth and
-              Poole through to the quieter market towns and coastal villages
-              further west. If you are running a campaign that needs to reach
-              audiences across the county rather than a single town, a
-              Dorset-wide campaign is the most effective way to do it.
+              Totton grew from a cluster of smaller villages, Testwood,
+              Calmore and Hammonds Green among them, into one of the largest
+              towns on the edge of the New Forest. We cover SO40 and the
+              surrounding area, delivering door to door across the town
+              centre, its residential estates, and the villages that now
+              form part of it.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              We cover all major Dorset postcode areas including BH1 through
-              BH25, DT1 and surrounding Dorchester postcodes, and the coastal
-              and rural areas in between. This makes us the right partner for
-              businesses with a broad Dorset audience, including regional service
-              providers, national brands running local activations, charities
-              covering the county, and event promoters reaching across multiple
-              towns at once.
+              With the River Test on one side and the New Forest on the
+              other, Totton has a genuinely mixed audience, from young
+              families in newer developments to long-established residents
+              near Eling. Campaigns here often pair naturally with nearby{" "}
+              <Link href="/areas/leaflet-distribution-hythe" className="text-blue-700 hover:underline font-medium">
+                Hythe
+              </Link>{" "}
+              too. That mix suits a wide range of campaigns, from
+              trades and home services to local retail and food businesses,
+              and it sits naturally alongside{" "}
+              <Link href="/areas/leaflet-distribution-romsey" className="text-blue-700 hover:underline font-medium">
+                Romsey
+              </Link>{" "}
+              and{" "}
+              <Link href="/areas/leaflet-distribution-southampton" className="text-blue-700 hover:underline font-medium">
+                Southampton
+              </Link>{" "}
+              campaigns for businesses covering the wider area.
             </p>
             <p className="text-gray-600 leading-relaxed text-lg">
-              Where you need coverage in a specific town such as{" "}
-              <Link href="/areas/poole" className="text-blue-700 hover:underline font-medium">
-                Poole
+              We also offer vehicle campaigns around Totton&apos;s retail
+              areas and car parks, part of{" "}
+              <Link href="/services" className="text-blue-700 hover:underline font-medium">
+                the full range of services
               </Link>{" "}
-              or Bournemouth, we also offer targeted campaigns for each area
-              individually. The same goes for{" "}
-              <Link href="/areas/christchurch" className="text-blue-700 hover:underline font-medium">
-                Christchurch
+              we provide, a good option for reaching shoppers heading to the
+              shops near Eling Tide Mill and the town centre. West Wellow
+              campaigns, among our{" "}
+              <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
+                recent projects
               </Link>
-              . County-wide and multi-town campaigns are priced and planned
-              as a single campaign, so you get one point of contact and one
-              coordinated delivery.
+              , often route through here too.
             </p>
             <div className="mt-8">
               <Link
                 href="/quote"
                 className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition duration-200 ease-out hover:scale-105"
               >
-                Get a Dorset Quote
+                Get a Totton Quote
               </Link>
             </div>
-            <p className="text-gray-500 text-base mt-4">
-              Live in Dorset and want to deliver for us instead?{" "}
-              <Link href="/leaflet-distribution-jobs" className="text-blue-700 hover:underline font-medium">
-                See our distributor jobs
-              </Link>
-              .
-            </p>
           </div>
-          <div className="aspect-square overflow-hidden rounded-lg">
+          <div className="max-w-sm mx-auto lg:mx-0 aspect-square overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
             <Image
-              src="https://images.pexels.com/photos/20814980/pexels-photo-20814980.jpeg?auto=compress&cs=tinysrgb&w=800"
-              alt="Dorset coastal town"
-              width={700}
-              height={700}
-              className="w-full h-full object-cover object-center"
+              src="/Overhead-shot-residential-areas.webp"
+              alt="Overhead view of a residential street with houses and gardens, typical of the estates we cover"
+              width={999}
+              height={999}
+              className="w-full h-full object-cover"
             />
           </div>
         </div>
@@ -169,15 +173,10 @@ export default function DorsetPage() {
       <section className="bg-white py-12 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-xl font-bold text-blue-900 mb-4">
-            Dorset Postcodes We Cover
+            Totton Postcodes We Cover
           </h2>
           <div className="flex flex-wrap gap-2">
-            {[
-              "BH1", "BH2", "BH3", "BH4", "BH5", "BH6", "BH7", "BH8",
-              "BH9", "BH10", "BH11", "BH12", "BH13", "BH14", "BH15",
-              "BH16", "BH17", "BH18", "BH21", "BH22", "BH23", "BH24",
-              "DT1", "DT2", "DT3", "DT4", "DT9", "DT11",
-            ].map((pc) => (
+            {["SO40"].map((pc) => (
               <span
                 key={pc}
                 className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full font-medium"
@@ -196,27 +195,27 @@ export default function DorsetPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Link
-              href="/areas/bournemouth"
+              href="/areas/leaflet-distribution-new-forest"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Bournemouth</h3>
-              <p className="text-gray-600 text-sm mb-3">Major Dorset resort town with strong consumer footfall.</p>
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">New Forest</h3>
+              <p className="text-gray-600 text-sm mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
-              href="/areas/poole"
+              href="/areas/leaflet-distribution-southampton"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Poole</h3>
-              <p className="text-gray-600 text-sm mb-3">Affluent harbour town with excellent residential distribution routes.</p>
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Southampton</h3>
+              <p className="text-gray-600 text-sm mb-3">Hampshire&apos;s largest city, bordering Totton to the east.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
-              href="/areas/christchurch"
+              href="/areas/leaflet-distribution-romsey"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Christchurch</h3>
-              <p className="text-gray-600 text-sm mb-3">Coastal market town covering BH23 postcodes on the Dorset border.</p>
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Romsey</h3>
+              <p className="text-gray-600 text-sm mb-3">Historic market town a short drive north of Totton.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

@@ -18,7 +18,7 @@ export const regions: Region[] = ["Hampshire", "Dorset"];
 export const areas: AreaEntry[] = [
   {
     name: "Southampton",
-    href: "/areas/southampton",
+    href: "/areas/leaflet-distribution-southampton",
     desc: "Hampshire's largest city. Residential coverage across all major postcode areas.",
     region: "Hampshire",
     population: 248922,
@@ -26,7 +26,7 @@ export const areas: AreaEntry[] = [
   },
   {
     name: "Bournemouth",
-    href: "/areas/bournemouth",
+    href: "/areas/leaflet-distribution-bournemouth",
     desc: "Major Dorset resort town with strong consumer footfall.",
     region: "Dorset",
     population: 196455,
@@ -34,7 +34,7 @@ export const areas: AreaEntry[] = [
   },
   {
     name: "Poole",
-    href: "/areas/poole",
+    href: "/areas/leaflet-distribution-poole",
     desc: "Affluent harbour town with excellent residential distribution routes.",
     region: "Dorset",
     population: 144800,
@@ -42,7 +42,7 @@ export const areas: AreaEntry[] = [
   },
   {
     name: "Winchester",
-    href: "/areas/winchester",
+    href: "/areas/leaflet-distribution-winchester",
     desc: "Historic cathedral city and prosperous Hampshire county town.",
     region: "Hampshire",
     population: 48478,
@@ -50,7 +50,7 @@ export const areas: AreaEntry[] = [
   },
   {
     name: "New Forest",
-    href: "/areas/new-forest",
+    href: "/areas/leaflet-distribution-new-forest",
     desc: "Towns and villages across one of Hampshire's most distinctive districts.",
     region: "Hampshire",
     population: 175800,
@@ -58,7 +58,7 @@ export const areas: AreaEntry[] = [
   },
   {
     name: "Ringwood",
-    href: "/areas/ringwood",
+    href: "/areas/leaflet-distribution-ringwood",
     desc: "Market town on the New Forest edge, close to the Dorset border.",
     region: "Hampshire",
     population: 14618,
@@ -66,7 +66,7 @@ export const areas: AreaEntry[] = [
   },
   {
     name: "Christchurch",
-    href: "/areas/christchurch",
+    href: "/areas/leaflet-distribution-christchurch",
     desc: "Coastal market town on the Dorset border, with strong residential coverage across BH23 postcodes.",
     region: "Dorset",
     population: 31372,
@@ -74,7 +74,7 @@ export const areas: AreaEntry[] = [
   },
   {
     name: "Eastleigh",
-    href: "/areas/eastleigh",
+    href: "/areas/leaflet-distribution-eastleigh",
     desc: "One of Hampshire's largest towns with strong residential coverage across SO50 postcodes.",
     region: "Hampshire",
     population: 24011,
@@ -82,7 +82,7 @@ export const areas: AreaEntry[] = [
   },
   {
     name: "Dorset",
-    href: "/areas/dorset",
+    href: "/areas/leaflet-distribution-dorset",
     desc: "County-wide coverage across Dorset including Bournemouth, Poole, Christchurch, Weymouth and surrounding towns.",
     region: "Dorset",
     population: 781401,
@@ -90,7 +90,7 @@ export const areas: AreaEntry[] = [
   },
   {
     name: "Romsey",
-    href: "/areas/romsey",
+    href: "/areas/leaflet-distribution-romsey",
     desc: "Historic market town in the Test Valley, between Southampton and Salisbury.",
     region: "Hampshire",
     population: 14442,
@@ -98,7 +98,7 @@ export const areas: AreaEntry[] = [
   },
   {
     name: "Hythe",
-    href: "/areas/hythe",
+    href: "/areas/leaflet-distribution-hythe",
     desc: "Waterside village looking out over Southampton Water, with a working marina.",
     region: "Hampshire",
     population: 20526,
@@ -106,7 +106,7 @@ export const areas: AreaEntry[] = [
   },
   {
     name: "Totton",
-    href: "/areas/totton",
+    href: "/areas/leaflet-distribution-totton",
     desc: "One of the largest towns on the edge of the New Forest, near the River Test.",
     region: "Hampshire",
     population: 28094,
@@ -114,7 +114,7 @@ export const areas: AreaEntry[] = [
   },
   {
     name: "Hedge End",
-    href: "/areas/hedge-end",
+    href: "/areas/leaflet-distribution-hedge-end",
     desc: "Residential town east of Southampton, home to a well-known retail park.",
     region: "Hampshire",
     population: 22527,
@@ -122,7 +122,7 @@ export const areas: AreaEntry[] = [
   },
   {
     name: "Chandler's Ford",
-    href: "/areas/chandlers-ford",
+    href: "/areas/leaflet-distribution-chandlers-ford",
     desc: "Residential part of the Eastleigh borough, with established neighbourhoods like Hiltingbury and Valley Park.",
     region: "Hampshire",
     population: 23918,
@@ -130,7 +130,7 @@ export const areas: AreaEntry[] = [
   },
   {
     name: "Brockenhurst",
-    href: "/areas/brockenhurst",
+    href: "/areas/leaflet-distribution-brockenhurst",
     desc: "One of the New Forest's best-known villages, with ponies wandering along Brookley Road.",
     region: "Hampshire",
     population: 3488,

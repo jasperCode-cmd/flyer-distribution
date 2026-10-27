@@ -77,7 +77,7 @@ const caseStudies = [
         households throughout the village.
       </>
     ),
-    linkHref: "/areas/romsey",
+    linkHref: "/areas/leaflet-distribution-romsey",
     linkLabel: "See our Romsey coverage",
     collage: {
       hero: {
@@ -106,7 +106,7 @@ const caseStudies = [
         requirements for a Nationally Significant Infrastructure Project,
         distributed across the project-defined area, taking in locations
         from Lyndhurst to{" "}
-        <Link href="/areas/eastleigh" className="text-blue-700 hover:underline font-medium">
+        <Link href="/areas/leaflet-distribution-eastleigh" className="text-blue-700 hover:underline font-medium">
           Fair Oak
         </Link>
         , rather than a standard postcode round.
@@ -174,7 +174,7 @@ const caseStudies = [
         households and local businesses within a defined round.
       </>
     ),
-    linkHref: "/areas/winchester",
+    linkHref: "/areas/leaflet-distribution-winchester",
     linkLabel: "See our Winchester coverage",
     collage: {
       hero: {
@@ -206,7 +206,7 @@ const caseStudies = [
         consultation work in the wider Eastleigh borough.
       </>
     ),
-    linkHref: "/areas/eastleigh",
+    linkHref: "/areas/leaflet-distribution-eastleigh",
     linkLabel: "See our Eastleigh coverage",
     collage: {
       hero: {

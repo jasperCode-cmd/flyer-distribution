@@ -377,7 +377,7 @@ export default function HomePage() {
               </h2>
               <p className="text-blue-200 max-w-xl mb-10 text-lg">
                 We cover the Hampshire and Dorset corridor, from{" "}
-                <Link href="/areas/winchester" className="text-white underline underline-offset-2 hover:text-blue-200">
+                <Link href="/areas/leaflet-distribution-winchester" className="text-white underline underline-offset-2 hover:text-blue-200">
                   Winchester
                 </Link>{" "}
                 in the north to Poole in the west, and everywhere in

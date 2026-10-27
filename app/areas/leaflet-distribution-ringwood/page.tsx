@@ -6,17 +6,17 @@ import PopulationCounter from "@/components/PopulationCounter";
 import { areas } from "@/lib/areas-data";
 
 export const metadata: Metadata = {
-  title: "Flyer Distribution Bournemouth",
+  title: "Flyer Distribution Ringwood",
   description:
-    "Leaflet and flyer distribution across Bournemouth. Targeted door-to-door delivery for local businesses in Dorset.",
+    "Leaflet and flyer distribution across Ringwood and surrounding areas in Hampshire. Targeted delivery to local households.",
   alternates: {
-    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/bournemouth",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-ringwood",
   },
   openGraph: {
-    title: "Flyer Distribution Bournemouth",
+    title: "Flyer Distribution Ringwood",
     description:
-      "Leaflet and flyer distribution across Bournemouth. Targeted door-to-door delivery for local businesses in Dorset.",
-    url: "https://www.flyerdistributionhampshire.co.uk/areas/bournemouth",
+      "Leaflet and flyer distribution across Ringwood and surrounding areas in Hampshire. Targeted delivery to local households.",
+    url: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-ringwood",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -31,9 +31,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Flyer Distribution Bournemouth",
+    title: "Flyer Distribution Ringwood",
     description:
-      "Leaflet and flyer distribution across Bournemouth. Targeted door-to-door delivery for local businesses in Dorset.",
+      "Leaflet and flyer distribution across Ringwood and surrounding areas in Hampshire. Targeted delivery to local households.",
     images: [
       "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
     ],
@@ -59,15 +59,15 @@ const breadcrumbSchema = {
     {
       "@type": "ListItem",
       position: 3,
-      name: "Bournemouth",
-      item: "https://www.flyerdistributionhampshire.co.uk/areas/bournemouth",
+      name: "Ringwood",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-ringwood",
     },
   ],
 };
 
-const areaData = areas.find((a) => a.href === "/areas/bournemouth")!;
+const areaData = areas.find((a) => a.href === "/areas/leaflet-distribution-ringwood")!;
 
-export default function BournemouthPage() {
+export default function RingwoodPage() {
   return (
     <>
       <script
@@ -80,18 +80,18 @@ export default function BournemouthPage() {
             items={[
               { label: "Home", href: "/" },
               { label: "Areas", href: "/areas" },
-              { label: "Bournemouth" },
+              { label: "Ringwood" },
             ]}
           />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            Leaflet Distribution Bournemouth
+            Leaflet Distribution Ringwood
           </h1>
           <p className="text-blue-200 text-xl max-w-xl">
-            Reach residents and visitors across Bournemouth with professional
-            door-to-door leaflet distribution.
+            Professional leaflet delivery across Ringwood and the surrounding
+            Hampshire countryside, reaching local households effectively.
           </p>
         </div>
       </section>
@@ -100,7 +100,7 @@ export default function BournemouthPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div>
             <h2 className="text-2xl font-bold text-blue-900 mb-4">
-              About Our Bournemouth Coverage
+              About Our Ringwood Coverage
             </h2>
             <PopulationCounter
               population={areaData.population}
@@ -108,53 +108,50 @@ export default function BournemouthPage() {
               className="mb-4"
             />
             <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              Bournemouth is one of Dorset&apos;s largest towns, known for its
-              beaches, vibrant town centre, and large student population.
-              We cover BH1 through BH12 and surrounding postcodes, reaching
-              residential areas across all neighbourhoods, backed by our
-              full range of{" "}
-              <Link href="/services" className="text-blue-700 hover:underline font-medium">
-                distribution services
-              </Link>
-              .
+              Ringwood is a busy market town on the edge of the New Forest, well
+              positioned between Bournemouth and Salisbury and serving a broad
+              mix of residential roads, rural properties, and a strong town
+              centre. We cover BH24 and surrounding postcodes, delivering
+              directly through letterboxes across the town and into the
+              surrounding villages.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              Whether you need to reach the Westbourne boutique area,
-              Boscombe, Winton, or the leafy suburbs, our experienced
-              distributors know these routes well. Many campaigns here run
-              alongside neighbouring{" "}
-              <Link href="/areas/poole" className="text-blue-700 hover:underline font-medium">
-                Poole
-              </Link>
-              .{" "}
-              <Link href="/areas/christchurch" className="text-blue-700 hover:underline font-medium">
-                Christchurch
-              </Link>
-              , just along the coast, is another popular pairing.
+              The town has a loyal local customer base that engages well with
+              print marketing, particularly for home services, food and drink,
+              and community events. Its rural-residential mix also means a
+              single campaign can reach both village households and town centre
+              addresses in one round.
             </p>
             <p className="text-gray-600 leading-relaxed text-lg">
-              Bournemouth&apos;s large student population and year-round tourism
-              also make it one of the most responsive areas for campaign
-              testing: high footfall, high density, and a wide mix of
-              demographics within a compact postcode range.
+              Vehicle{" "}
+              <Link href="/services" className="text-blue-700 hover:underline font-medium">
+                leaflet distribution
+              </Link>{" "}
+              is also available across Ringwood&apos;s car parks and retail
+              areas for businesses looking to reach people already out and
+              spending locally. We also handle statutory{" "}
+              <Link href="/services/public-notice-leafleting" className="text-blue-700 hover:underline font-medium">
+                Public Notice Leafleting
+              </Link>{" "}
+              for infrastructure projects reaching into this part of
+              Hampshire.
             </p>
             <div className="mt-8">
               <Link
                 href="/quote"
                 className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition duration-200 ease-out hover:scale-105"
               >
-                Get a Bournemouth Quote
+                Get a Ringwood Quote
               </Link>
             </div>
           </div>
-          <div className="relative h-80 w-full overflow-hidden rounded-lg">
+          <div>
             <Image
-              src="https://images.pexels.com/photos/29030837/pexels-photo-29030837.jpeg?auto=compress&cs=tinysrgb&w=800"
-              alt="Bournemouth pier and ferris wheel"
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
-              style={{ objectPosition: "center" }}
+              src="https://images.pexels.com/photos/5784675/pexels-photo-5784675.jpeg?auto=compress&cs=tinysrgb&w=800"
+              alt="Green fields near Ringwood"
+              width={700}
+              height={500}
+              className="rounded-lg w-full object-cover"
             />
           </div>
         </div>
@@ -163,19 +160,17 @@ export default function BournemouthPage() {
       <section className="bg-white py-12 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-xl font-bold text-blue-900 mb-4">
-            Bournemouth Postcodes We Cover
+            Ringwood Postcodes We Cover
           </h2>
           <div className="flex flex-wrap gap-2">
-            {["BH1", "BH2", "BH3", "BH4", "BH5", "BH6", "BH7", "BH8", "BH9", "BH10", "BH11", "BH12"].map(
-              (pc) => (
-                <span
-                  key={pc}
-                  className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full font-medium"
-                >
-                  {pc}
-                </span>
-              )
-            )}
+            {["BH24", "BH21", "BH31"].map((pc) => (
+              <span
+                key={pc}
+                className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full font-medium"
+              >
+                {pc}
+              </span>
+            ))}
           </div>
         </div>
       </section>
@@ -187,27 +182,27 @@ export default function BournemouthPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Link
-              href="/areas/poole"
+              href="/areas/leaflet-distribution-new-forest"
+              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
+            >
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">New Forest</h3>
+              <p className="text-gray-600 text-sm mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
+              <span className="text-blue-600 text-xs font-semibold">View area →</span>
+            </Link>
+            <Link
+              href="/areas/leaflet-distribution-bournemouth"
+              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
+            >
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Bournemouth</h3>
+              <p className="text-gray-600 text-sm mb-3">Major Dorset resort town with strong consumer footfall.</p>
+              <span className="text-blue-600 text-xs font-semibold">View area →</span>
+            </Link>
+            <Link
+              href="/areas/leaflet-distribution-poole"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
               <h3 className="text-sm font-semibold text-blue-900 mb-1">Poole</h3>
               <p className="text-gray-600 text-sm mb-3">Affluent harbour town with excellent residential distribution routes.</p>
-              <span className="text-blue-600 text-xs font-semibold">View area →</span>
-            </Link>
-            <Link
-              href="/areas/christchurch"
-              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
-            >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Christchurch</h3>
-              <p className="text-gray-600 text-sm mb-3">Coastal market town covering BH23 postcodes on the Dorset border.</p>
-              <span className="text-blue-600 text-xs font-semibold">View area →</span>
-            </Link>
-            <Link
-              href="/areas/dorset"
-              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
-            >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Dorset</h3>
-              <p className="text-gray-600 text-sm mb-3">County-wide coverage across Bournemouth, Poole and surrounding towns.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>

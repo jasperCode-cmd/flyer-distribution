@@ -185,11 +185,11 @@ export default function HandToHandDistributionPage() {
             <p className="text-lg">
               We&apos;ve run hand-to-hand campaigns at Westquay Shopping
               Centre in{" "}
-              <Link href="/areas/southampton" className="text-blue-700 hover:underline font-medium">
+              <Link href="/areas/leaflet-distribution-southampton" className="text-blue-700 hover:underline font-medium">
                 Southampton
               </Link>
               , Festival Place in Basingstoke, and{" "}
-              <Link href="/areas/bournemouth" className="text-blue-700 hover:underline font-medium">
+              <Link href="/areas/leaflet-distribution-bournemouth" className="text-blue-700 hover:underline font-medium">
                 Bournemouth
               </Link>{" "}
               Town Centre, reaching shoppers and commuters at busy times of

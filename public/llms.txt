@@ -21,21 +21,21 @@ Website: https://www.flyerdistributionhampshire.co.uk
 ## Areas
 
 - [Coverage Areas](https://www.flyerdistributionhampshire.co.uk/areas): Overview of everywhere we cover across Hampshire and Dorset.
-- [Southampton](https://www.flyerdistributionhampshire.co.uk/areas/southampton)
-- [Bournemouth](https://www.flyerdistributionhampshire.co.uk/areas/bournemouth)
-- [Poole](https://www.flyerdistributionhampshire.co.uk/areas/poole)
-- [Winchester](https://www.flyerdistributionhampshire.co.uk/areas/winchester)
-- [New Forest](https://www.flyerdistributionhampshire.co.uk/areas/new-forest)
-- [Ringwood](https://www.flyerdistributionhampshire.co.uk/areas/ringwood)
-- [Christchurch](https://www.flyerdistributionhampshire.co.uk/areas/christchurch)
-- [Dorset](https://www.flyerdistributionhampshire.co.uk/areas/dorset)
-- [Eastleigh](https://www.flyerdistributionhampshire.co.uk/areas/eastleigh)
-- [Romsey](https://www.flyerdistributionhampshire.co.uk/areas/romsey)
-- [Hythe](https://www.flyerdistributionhampshire.co.uk/areas/hythe)
-- [Totton](https://www.flyerdistributionhampshire.co.uk/areas/totton)
-- [Hedge End](https://www.flyerdistributionhampshire.co.uk/areas/hedge-end)
-- [Chandler's Ford](https://www.flyerdistributionhampshire.co.uk/areas/chandlers-ford)
-- [Brockenhurst](https://www.flyerdistributionhampshire.co.uk/areas/brockenhurst)
+- [Southampton](https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-southampton)
+- [Bournemouth](https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-bournemouth)
+- [Poole](https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-poole)
+- [Winchester](https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-winchester)
+- [New Forest](https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-new-forest)
+- [Ringwood](https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-ringwood)
+- [Christchurch](https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-christchurch)
+- [Dorset](https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-dorset)
+- [Eastleigh](https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-eastleigh)
+- [Romsey](https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-romsey)
+- [Hythe](https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-hythe)
+- [Totton](https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-totton)
+- [Hedge End](https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-hedge-end)
+- [Chandler's Ford](https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-chandlers-ford)
+- [Brockenhurst](https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-brockenhurst)
 
 ## About
 

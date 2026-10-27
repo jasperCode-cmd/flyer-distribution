@@ -6,17 +6,17 @@ import PopulationCounter from "@/components/PopulationCounter";
 import { areas } from "@/lib/areas-data";
 
 export const metadata: Metadata = {
-  title: "Leaflet Distribution Chandler's Ford",
+  title: "Flyer Distribution Poole",
   description:
-    "Leaflet and flyer distribution across Chandler's Ford and SO53 postcodes. Targeted door-to-door delivery across this Eastleigh borough community.",
+    "Professional leaflet and flyer distribution across Poole, Dorset. Targeted delivery to residential areas around Poole Harbour.",
   alternates: {
-    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/chandlers-ford",
+    canonical: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-poole",
   },
   openGraph: {
-    title: "Leaflet Distribution Chandler's Ford",
+    title: "Flyer Distribution Poole",
     description:
-      "Leaflet and flyer distribution across Chandler's Ford and SO53 postcodes. Targeted door-to-door delivery across this Eastleigh borough community.",
-    url: "https://www.flyerdistributionhampshire.co.uk/areas/chandlers-ford",
+      "Professional leaflet and flyer distribution across Poole, Dorset. Targeted delivery to residential areas around Poole Harbour.",
+    url: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-poole",
     siteName: "Flyer Distribution Hampshire",
     images: [
       {
@@ -31,9 +31,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Leaflet Distribution Chandler's Ford",
+    title: "Flyer Distribution Poole",
     description:
-      "Leaflet and flyer distribution across Chandler's Ford and SO53 postcodes. Targeted door-to-door delivery across this Eastleigh borough community.",
+      "Professional leaflet and flyer distribution across Poole, Dorset. Targeted delivery to residential areas around Poole Harbour.",
     images: [
       "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
     ],
@@ -59,15 +59,15 @@ const breadcrumbSchema = {
     {
       "@type": "ListItem",
       position: 3,
-      name: "Chandler's Ford",
-      item: "https://www.flyerdistributionhampshire.co.uk/areas/chandlers-ford",
+      name: "Poole",
+      item: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-poole",
     },
   ],
 };
 
-const areaData = areas.find((a) => a.href === "/areas/chandlers-ford")!;
+const areaData = areas.find((a) => a.href === "/areas/leaflet-distribution-poole")!;
 
-export default function ChandlersFordPage() {
+export default function PooléPage() {
   return (
     <>
       <script
@@ -80,19 +80,18 @@ export default function ChandlersFordPage() {
             items={[
               { label: "Home", href: "/" },
               { label: "Areas", href: "/areas" },
-              { label: "Chandler's Ford" },
+              { label: "Poole" },
             ]}
           />
           <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
             Coverage Area
           </p>
           <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            Leaflet Distribution Chandler&apos;s Ford
+            Leaflet Distribution Poole
           </h1>
           <p className="text-blue-200 text-xl max-w-xl">
-            Door-to-door leaflet delivery across Chandler&apos;s Ford and
-            SO53 postcodes, reaching households across this residential
-            community.
+            Door-to-door leaflet delivery across Poole, covering affluent
+            residential areas and harbour-side communities in Dorset.
           </p>
         </div>
       </section>
@@ -101,7 +100,7 @@ export default function ChandlersFordPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           <div>
             <h2 className="text-2xl font-bold text-blue-900 mb-4">
-              About Our Chandler&apos;s Ford Coverage
+              About Our Poole Coverage
             </h2>
             <PopulationCounter
               population={areaData.population}
@@ -109,58 +108,55 @@ export default function ChandlersFordPage() {
               className="mb-4"
             />
             <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              Chandler&apos;s Ford is a largely residential part of the
-              Eastleigh borough, made up of established neighbourhoods like
-              Hiltingbury and Valley Park around the shops at Fryern. We
-              cover SO53 and the surrounding roads, delivering door to
-              door across its estates and into the smaller pockets of
-              housing nearby, including neighbouring{" "}
-              <Link href="/areas/hedge-end" className="text-blue-700 hover:underline font-medium">
-                Hedge End
-              </Link>
-              .
+              Poole is one of the most affluent towns in Dorset, with
+              prestigious areas like Sandbanks, Canford Cliffs, and Branksome
+              Park attracting high-income households. Our distributors cover
+              BH13 through BH17 and surrounding postcodes as part of{" "}
+              <Link href="/services" className="text-blue-700 hover:underline font-medium">
+                the service we offer
+              </Link>{" "}
+              across the wider area.
             </p>
             <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              It&apos;s firmly a commuter area, with residents travelling
-              into{" "}
-              <Link href="/areas/southampton" className="text-blue-700 hover:underline font-medium">
-                Southampton
+              For businesses targeting higher-income demographics, Poole&apos;s
+              waterfront and marina postcodes offer some of the highest-value
+              residential distribution in Dorset, particularly for luxury
+              services, premium restaurants, and home improvement. We also
+              run county-wide{" "}
+              <Link href="/areas/leaflet-distribution-dorset" className="text-blue-700 hover:underline font-medium">
+                Dorset campaigns
               </Link>{" "}
-              and beyond for work, which makes evenings and weekends the
-              times campaigns here tend to land best. Trades, home
-              services, and family-focused businesses do particularly well
-              reaching this audience directly through their letterboxes,
-              often alongside{" "}
-              <Link href="/areas/eastleigh" className="text-blue-700 hover:underline font-medium">
-                Eastleigh
-              </Link>{" "}
-              itself.
+              for businesses wanting broader reach.
             </p>
             <p className="text-gray-600 leading-relaxed text-lg">
-              We can also run vehicle campaigns around the shops at Fryern
-              and the wider Chandler&apos;s Ford area, part of{" "}
-              <Link href="/services" className="text-blue-700 hover:underline font-medium">
-                our service list
+              We also cover Parkstone, Upton, Hamworthy, and the wider
+              residential areas around the harbour. Many campaigns here
+              extend naturally into neighbouring{" "}
+              <Link href="/areas/leaflet-distribution-bournemouth" className="text-blue-700 hover:underline font-medium">
+                Bournemouth
               </Link>
-              , putting your materials in front of people already out and
-              about locally.
+              . Others reach further, across the county boundary into{" "}
+              <Link href="/areas/leaflet-distribution-ringwood" className="text-blue-700 hover:underline font-medium">
+                Ringwood
+              </Link>
+              .
             </p>
             <div className="mt-8">
               <Link
                 href="/quote"
                 className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition duration-200 ease-out hover:scale-105"
               >
-                Get a Chandler&apos;s Ford Quote
+                Get a Poole Quote
               </Link>
             </div>
           </div>
-          <div className="max-w-sm mx-auto lg:mx-0 aspect-square overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
+          <div>
             <Image
-              src="/Overhead-shot-residential-areas.webp"
-              alt="Overhead view of a residential street with houses and gardens, typical of the estates we cover"
-              width={999}
-              height={999}
-              className="w-full h-full object-cover"
+              src="https://images.pexels.com/photos/32385939/pexels-photo-32385939.jpeg?auto=compress&cs=tinysrgb&w=800"
+              alt="Poole waterfront architecture"
+              width={700}
+              height={500}
+              className="rounded-lg w-full object-cover"
             />
           </div>
         </div>
@@ -169,10 +165,10 @@ export default function ChandlersFordPage() {
       <section className="bg-white py-12 border-t border-gray-100">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-xl font-bold text-blue-900 mb-4">
-            Chandler&apos;s Ford Postcodes We Cover
+            Poole Postcodes We Cover
           </h2>
           <div className="flex flex-wrap gap-2">
-            {["SO53"].map((pc) => (
+            {["BH12", "BH13", "BH14", "BH15", "BH16", "BH17", "BH18"].map((pc) => (
               <span
                 key={pc}
                 className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full font-medium"
@@ -191,27 +187,27 @@ export default function ChandlersFordPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Link
-              href="/areas/eastleigh"
+              href="/areas/leaflet-distribution-bournemouth"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Eastleigh</h3>
-              <p className="text-gray-600 text-sm mb-3">One of Hampshire&apos;s largest towns, bordering Chandler&apos;s Ford.</p>
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Bournemouth</h3>
+              <p className="text-gray-600 text-sm mb-3">Major Dorset resort town with strong consumer footfall.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
-              href="/areas/southampton"
+              href="/areas/leaflet-distribution-dorset"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Southampton</h3>
-              <p className="text-gray-600 text-sm mb-3">Hampshire&apos;s largest city, within easy reach of Chandler&apos;s Ford.</p>
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Dorset</h3>
+              <p className="text-gray-600 text-sm mb-3">County-wide coverage across Bournemouth, Poole and surrounding towns.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
             <Link
-              href="/areas/hedge-end"
+              href="/areas/leaflet-distribution-ringwood"
               className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
             >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Hedge End</h3>
-              <p className="text-gray-600 text-sm mb-3">Residential town on the other side of Eastleigh borough.</p>
+              <h3 className="text-sm font-semibold text-blue-900 mb-1">Ringwood</h3>
+              <p className="text-gray-600 text-sm mb-3">Market town on the New Forest edge, close to the Dorset border.</p>
               <span className="text-blue-600 text-xs font-semibold">View area →</span>
             </Link>
           </div>
