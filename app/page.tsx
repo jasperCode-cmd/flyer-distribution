@@ -9,6 +9,7 @@ import TrustCards from "@/components/TrustCards";
 import StaggerGroup from "@/components/StaggerGroup";
 import ScrollReveal from "@/components/ScrollReveal";
 import HeroCaseStudyTeaser from "@/components/HeroCaseStudyTeaser";
+import LeafletServices from "@/components/LeafletServices";
 import AdditionalServiceCard from "@/components/AdditionalServiceCard";
 import BrowserMockup from "@/components/BrowserMockup";
 import { areas, regions } from "@/lib/areas-data";
@@ -48,54 +49,6 @@ export const metadata: Metadata = {
   },
 };
 
-
-const services = [
-  {
-    title: "Design, Print and Deliver",
-    desc: "Our full end-to-end service. We handle everything from design and printing in A6, A5, A4 or DL through to full distribution across your chosen areas.",
-    href: "/services",
-  },
-  {
-    title: "Print and Deliver",
-    desc: "Already have your design ready? We handle the printing in A6, A5, A4 or DL and deliver your leaflets directly through letterboxes across Hampshire and Dorset.",
-    href: "/services",
-  },
-  {
-    title: "Leaflet Distribution",
-    desc: "Door-to-door delivery to households across your chosen areas. Your printed materials posted directly through letterboxes across Hampshire and Dorset.",
-    href: "/services",
-  },
-  {
-    title: "Targeted Postcode Campaigns",
-    desc: "We use postcode data to focus your distribution on the areas most likely to respond to your campaign. Rather than blanket coverage, we put your leaflets where your potential customers actually live.",
-    href: "/services",
-  },
-  {
-    title: "Vehicle Leaflet Distribution",
-    desc: "Leaflets placed on parked cars in car parks, retail areas, and high-footfall locations across Hampshire and Dorset.",
-    href: "/services",
-  },
-  {
-    title: "Campaign Planning",
-    desc: "Not sure where to start? We sit down with you to understand your business, your customers and your goals. Then we build a campaign plan around your budget and timeline.",
-    href: "/services",
-  },
-  {
-    title: "Public Notice Leafleting",
-    desc: "Statutory door-to-door distribution for Nationally Significant Infrastructure Projects across Hampshire, meeting Section 47 and Section 48 Planning Act 2008 requirements.",
-    href: "/services/public-notice-leafleting",
-  },
-  {
-    title: "Hand-to-Hand Leaflet Distribution",
-    desc: "Direct, face-to-face handouts at shopping centres, town centres and events across Hampshire and Dorset for immediate brand exposure.",
-    href: "/services/hand-to-hand-distribution",
-  },
-  {
-    title: "B2B Leaflet Distribution",
-    desc: "Direct marketing to business owners and decision-makers at offices, business parks and commercial areas across Hampshire and Dorset.",
-    href: "/services/b2b-distribution",
-  },
-];
 
 // Our Google Business Profile, as in the footer and the schema below.
 const GOOGLE_PROFILE = "https://share.google/RVxyPi4TzXAzkt1Am";
@@ -347,50 +300,7 @@ export default function HomePage() {
       </section>
 
       {/* Services overview */}
-      <section className="bg-slate-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="mb-10">
-            <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-3">
-              Leaflet Services
-            </h2>
-            <p className="text-gray-600 max-w-xl text-lg">
-              From door-to-door delivery to targeted postcode campaigns, we
-              have a service to suit every budget and campaign goal. We also
-              handle statutory{" "}
-              <Link href="/services/public-notice-leafleting" className="text-blue-700 hover:underline font-medium">
-                Public Notice Leafleting
-              </Link>{" "}
-              for infrastructure projects across Hampshire.
-            </p>
-          </div>
-          <StaggerGroup
-            className="flex flex-wrap justify-center gap-6"
-            itemClassName="w-full sm:w-[calc(50%-0.75rem)]"
-          >
-            {services.map((svc) => (
-              <Link
-                key={svc.title}
-                href={svc.href}
-                className="group relative bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:border-blue-300 hover:scale-[1.02] hover:shadow-lg transition-all duration-300 ease-out block h-full"
-              >
-                <div className="absolute top-0 left-0 right-0 h-[3px] rounded-t-lg bg-blue-200 group-hover:bg-blue-500 transition-colors duration-300" aria-hidden="true" />
-                <h3 className="text-base font-semibold text-blue-900 mb-2">
-                  {svc.title}
-                </h3>
-                <p className="text-gray-600 text-base leading-relaxed">{svc.desc}</p>
-              </Link>
-            ))}
-          </StaggerGroup>
-          <div className="mt-8">
-            <Link
-              href="/services"
-              className="text-blue-700 hover:text-blue-900 font-semibold text-sm underline underline-offset-2"
-            >
-              View all services →
-            </Link>
-          </div>
-        </div>
-      </section>
+      <LeafletServices />
 
       {/* Coverage areas */}
       <section className="bg-blue-900 text-white">
