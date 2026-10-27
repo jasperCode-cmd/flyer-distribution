@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
-import Breadcrumb from "@/components/Breadcrumb";
-import PopulationCounter from "@/components/PopulationCounter";
-import { areas } from "@/lib/areas-data";
+import AreaPage from "@/components/AreaPage";
+import { AREA_PAGES } from "@/lib/area-pages";
 
 export const metadata: Metadata = {
   title: "Flyer Distribution Ringwood",
@@ -65,8 +62,6 @@ const breadcrumbSchema = {
   ],
 };
 
-const areaData = areas.find((a) => a.href === "/areas/leaflet-distribution-ringwood")!;
-
 export default function RingwoodPage() {
   return (
     <>
@@ -74,140 +69,7 @@ export default function RingwoodPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-      <section className="bg-blue-900 text-white py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Breadcrumb
-            items={[
-              { label: "Home", href: "/" },
-              { label: "Areas", href: "/areas" },
-              { label: "Ringwood" },
-            ]}
-          />
-          <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
-            Coverage Area
-          </p>
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            Leaflet Distribution Ringwood
-          </h1>
-          <p className="text-blue-200 text-xl max-w-xl">
-            Professional leaflet delivery across Ringwood and the surrounding
-            Hampshire countryside, reaching local households effectively.
-          </p>
-        </div>
-      </section>
-
-      <section className="bg-slate-50 py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          <div>
-            <h2 className="text-2xl font-bold text-blue-900 mb-4">
-              About Our Ringwood Coverage
-            </h2>
-            <PopulationCounter
-              population={areaData.population}
-              label={areaData.populationLabel}
-              className="mb-4"
-            />
-            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              Ringwood is a busy market town on the edge of the New Forest, well
-              positioned between Bournemouth and Salisbury and serving a broad
-              mix of residential roads, rural properties, and a strong town
-              centre. We cover BH24 and surrounding postcodes, delivering
-              directly through letterboxes across the town and into the
-              surrounding villages.
-            </p>
-            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              The town has a loyal local customer base that engages well with
-              print marketing, particularly for home services, food and drink,
-              and community events. Its rural-residential mix also means a
-              single campaign can reach both village households and town centre
-              addresses in one round.
-            </p>
-            <p className="text-gray-600 leading-relaxed text-lg">
-              Vehicle{" "}
-              <Link href="/services" className="text-blue-700 hover:underline font-medium">
-                leaflet distribution
-              </Link>{" "}
-              is also available across Ringwood&apos;s car parks and retail
-              areas for businesses looking to reach people already out and
-              spending locally. We also handle statutory{" "}
-              <Link href="/services/public-notice-leafleting" className="text-blue-700 hover:underline font-medium">
-                Public Notice Leafleting
-              </Link>{" "}
-              for infrastructure projects reaching into this part of
-              Hampshire.
-            </p>
-            <div className="mt-8">
-              <Link
-                href="/quote"
-                className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition duration-200 ease-out hover:scale-105"
-              >
-                Get a Ringwood Quote
-              </Link>
-            </div>
-          </div>
-          <div>
-            <Image
-              src="https://images.pexels.com/photos/5784675/pexels-photo-5784675.jpeg?auto=compress&cs=tinysrgb&w=800"
-              alt="Green fields near Ringwood"
-              width={700}
-              height={500}
-              className="rounded-lg w-full object-cover"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-white py-12 border-t border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-xl font-bold text-blue-900 mb-4">
-            Ringwood Postcodes We Cover
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {["BH24", "BH21", "BH31"].map((pc) => (
-              <span
-                key={pc}
-                className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full font-medium"
-              >
-                {pc}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-slate-50 py-12 border-t border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-xl font-bold text-blue-900 mb-6">
-            Other Areas Nearby
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Link
-              href="/areas/leaflet-distribution-new-forest"
-              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
-            >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">New Forest</h3>
-              <p className="text-gray-600 text-sm mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
-              <span className="text-blue-600 text-xs font-semibold">View area →</span>
-            </Link>
-            <Link
-              href="/areas/leaflet-distribution-bournemouth"
-              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
-            >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Bournemouth</h3>
-              <p className="text-gray-600 text-sm mb-3">Major Dorset resort town with strong consumer footfall.</p>
-              <span className="text-blue-600 text-xs font-semibold">View area →</span>
-            </Link>
-            <Link
-              href="/areas/leaflet-distribution-poole"
-              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
-            >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Poole</h3>
-              <p className="text-gray-600 text-sm mb-3">Affluent harbour town with excellent residential distribution routes.</p>
-              <span className="text-blue-600 text-xs font-semibold">View area →</span>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <AreaPage area={AREA_PAGES["ringwood"]} />
     </>
   );
 }

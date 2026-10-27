@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
-import Breadcrumb from "@/components/Breadcrumb";
-import PopulationCounter from "@/components/PopulationCounter";
-import { areas } from "@/lib/areas-data";
+import AreaPage from "@/components/AreaPage";
+import { AREA_PAGES } from "@/lib/area-pages";
 
 export const metadata: Metadata = {
   title: "Leaflet Distribution Totton",
@@ -65,8 +62,6 @@ const breadcrumbSchema = {
   ],
 };
 
-const areaData = areas.find((a) => a.href === "/areas/leaflet-distribution-totton")!;
-
 export default function TottonPage() {
   return (
     <>
@@ -74,153 +69,7 @@ export default function TottonPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-      <section className="bg-blue-900 text-white py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Breadcrumb
-            items={[
-              { label: "Home", href: "/" },
-              { label: "Areas", href: "/areas" },
-              { label: "Totton" },
-            ]}
-          />
-          <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
-            Coverage Area
-          </p>
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            Leaflet Distribution Totton
-          </h1>
-          <p className="text-blue-200 text-xl max-w-xl">
-            Door-to-door leaflet delivery across Totton and SO40 postcodes,
-            reaching households across this New Forest edge town.
-          </p>
-        </div>
-      </section>
-
-      <section className="bg-slate-50 py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          <div>
-            <h2 className="text-2xl font-bold text-blue-900 mb-4">
-              About Our Totton Coverage
-            </h2>
-            <PopulationCounter
-              population={areaData.population}
-              label={areaData.populationLabel}
-              className="mb-4"
-            />
-            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              Totton grew from a cluster of smaller villages, Testwood,
-              Calmore and Hammonds Green among them, into one of the largest
-              towns on the edge of the New Forest. We cover SO40 and the
-              surrounding area, delivering door to door across the town
-              centre, its residential estates, and the villages that now
-              form part of it.
-            </p>
-            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              With the River Test on one side and the New Forest on the
-              other, Totton has a genuinely mixed audience, from young
-              families in newer developments to long-established residents
-              near Eling. Campaigns here often pair naturally with nearby{" "}
-              <Link href="/areas/leaflet-distribution-hythe" className="text-blue-700 hover:underline font-medium">
-                Hythe
-              </Link>{" "}
-              too. That mix suits a wide range of campaigns, from
-              trades and home services to local retail and food businesses,
-              and it sits naturally alongside{" "}
-              <Link href="/areas/leaflet-distribution-romsey" className="text-blue-700 hover:underline font-medium">
-                Romsey
-              </Link>{" "}
-              and{" "}
-              <Link href="/areas/leaflet-distribution-southampton" className="text-blue-700 hover:underline font-medium">
-                Southampton
-              </Link>{" "}
-              campaigns for businesses covering the wider area.
-            </p>
-            <p className="text-gray-600 leading-relaxed text-lg">
-              We also offer vehicle campaigns around Totton&apos;s retail
-              areas and car parks, part of{" "}
-              <Link href="/services" className="text-blue-700 hover:underline font-medium">
-                the full range of services
-              </Link>{" "}
-              we provide, a good option for reaching shoppers heading to the
-              shops near Eling Tide Mill and the town centre. West Wellow
-              campaigns, among our{" "}
-              <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
-                recent projects
-              </Link>
-              , often route through here too.
-            </p>
-            <div className="mt-8">
-              <Link
-                href="/quote"
-                className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition duration-200 ease-out hover:scale-105"
-              >
-                Get a Totton Quote
-              </Link>
-            </div>
-          </div>
-          <div className="max-w-sm mx-auto lg:mx-0 aspect-square overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
-            <Image
-              src="/Overhead-shot-residential-areas.webp"
-              alt="Overhead view of a residential street with houses and gardens, typical of the estates we cover"
-              width={999}
-              height={999}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-white py-12 border-t border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-xl font-bold text-blue-900 mb-4">
-            Totton Postcodes We Cover
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {["SO40"].map((pc) => (
-              <span
-                key={pc}
-                className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full font-medium"
-              >
-                {pc}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-slate-50 py-12 border-t border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-xl font-bold text-blue-900 mb-6">
-            Other Areas Nearby
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Link
-              href="/areas/leaflet-distribution-new-forest"
-              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
-            >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">New Forest</h3>
-              <p className="text-gray-600 text-sm mb-3">Towns and villages across one of Hampshire&apos;s most distinctive districts.</p>
-              <span className="text-blue-600 text-xs font-semibold">View area →</span>
-            </Link>
-            <Link
-              href="/areas/leaflet-distribution-southampton"
-              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
-            >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Southampton</h3>
-              <p className="text-gray-600 text-sm mb-3">Hampshire&apos;s largest city, bordering Totton to the east.</p>
-              <span className="text-blue-600 text-xs font-semibold">View area →</span>
-            </Link>
-            <Link
-              href="/areas/leaflet-distribution-romsey"
-              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
-            >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Romsey</h3>
-              <p className="text-gray-600 text-sm mb-3">Historic market town a short drive north of Totton.</p>
-              <span className="text-blue-600 text-xs font-semibold">View area →</span>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <AreaPage area={AREA_PAGES["totton"]} />
     </>
   );
 }

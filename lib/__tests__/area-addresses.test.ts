@@ -69,7 +69,8 @@ test("each area page's canonical, Open Graph address and breadcrumb point at its
     assert.match(page, new RegExp(`canonical: "${own}"`), name);
     assert.match(page, new RegExp(`url: "${own}"`), name);
     assert.match(page, new RegExp(`item: "${own}"`), name);
-    assert.match(page, new RegExp(`areas\\.find\\(\\(a\\) => a\\.href === "/areas/${name}"\\)`), name);
+    // And it draws its own entry from the shared template's data.
+    assert.match(page, new RegExp(`<AreaPage area=\\{AREA_PAGES\\["${name.slice(PREFIX.length)}"\\]\\} />`), name);
   }
 });
 

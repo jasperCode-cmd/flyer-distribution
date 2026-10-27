@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
-import Breadcrumb from "@/components/Breadcrumb";
-import PopulationCounter from "@/components/PopulationCounter";
-import { areas } from "@/lib/areas-data";
+import AreaPage from "@/components/AreaPage";
+import { AREA_PAGES } from "@/lib/area-pages";
 
 export const metadata: Metadata = {
   title: "Flyer Distribution Bournemouth",
@@ -65,8 +62,6 @@ const breadcrumbSchema = {
   ],
 };
 
-const areaData = areas.find((a) => a.href === "/areas/leaflet-distribution-bournemouth")!;
-
 export default function BournemouthPage() {
   return (
     <>
@@ -74,145 +69,7 @@ export default function BournemouthPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-      <section className="bg-blue-900 text-white py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Breadcrumb
-            items={[
-              { label: "Home", href: "/" },
-              { label: "Areas", href: "/areas" },
-              { label: "Bournemouth" },
-            ]}
-          />
-          <p className="text-blue-300 text-sm uppercase tracking-widest mb-2">
-            Coverage Area
-          </p>
-          <h1 className="text-3xl sm:text-4xl font-bold mb-3">
-            Leaflet Distribution Bournemouth
-          </h1>
-          <p className="text-blue-200 text-xl max-w-xl">
-            Reach residents and visitors across Bournemouth with professional
-            door-to-door leaflet distribution.
-          </p>
-        </div>
-      </section>
-
-      <section className="bg-slate-50 py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          <div>
-            <h2 className="text-2xl font-bold text-blue-900 mb-4">
-              About Our Bournemouth Coverage
-            </h2>
-            <PopulationCounter
-              population={areaData.population}
-              label={areaData.populationLabel}
-              className="mb-4"
-            />
-            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              Bournemouth is one of Dorset&apos;s largest towns, known for its
-              beaches, vibrant town centre, and large student population.
-              We cover BH1 through BH12 and surrounding postcodes, reaching
-              residential areas across all neighbourhoods, backed by our
-              full range of{" "}
-              <Link href="/services" className="text-blue-700 hover:underline font-medium">
-                distribution services
-              </Link>
-              .
-            </p>
-            <p className="text-gray-600 mb-4 leading-relaxed text-lg">
-              Whether you need to reach the Westbourne boutique area,
-              Boscombe, Winton, or the leafy suburbs, our experienced
-              distributors know these routes well. Many campaigns here run
-              alongside neighbouring{" "}
-              <Link href="/areas/leaflet-distribution-poole" className="text-blue-700 hover:underline font-medium">
-                Poole
-              </Link>
-              .{" "}
-              <Link href="/areas/leaflet-distribution-christchurch" className="text-blue-700 hover:underline font-medium">
-                Christchurch
-              </Link>
-              , just along the coast, is another popular pairing.
-            </p>
-            <p className="text-gray-600 leading-relaxed text-lg">
-              Bournemouth&apos;s large student population and year-round tourism
-              also make it one of the most responsive areas for campaign
-              testing: high footfall, high density, and a wide mix of
-              demographics within a compact postcode range.
-            </p>
-            <div className="mt-8">
-              <Link
-                href="/quote"
-                className="inline-block bg-blue-700 hover:bg-blue-800 text-white font-bold px-7 py-3.5 rounded-md transition duration-200 ease-out hover:scale-105"
-              >
-                Get a Bournemouth Quote
-              </Link>
-            </div>
-          </div>
-          <div className="relative h-80 w-full overflow-hidden rounded-lg">
-            <Image
-              src="https://images.pexels.com/photos/29030837/pexels-photo-29030837.jpeg?auto=compress&cs=tinysrgb&w=800"
-              alt="Bournemouth pier and ferris wheel"
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
-              style={{ objectPosition: "center" }}
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-white py-12 border-t border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-xl font-bold text-blue-900 mb-4">
-            Bournemouth Postcodes We Cover
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {["BH1", "BH2", "BH3", "BH4", "BH5", "BH6", "BH7", "BH8", "BH9", "BH10", "BH11", "BH12"].map(
-              (pc) => (
-                <span
-                  key={pc}
-                  className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-1.5 rounded-full font-medium"
-                >
-                  {pc}
-                </span>
-              )
-            )}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-slate-50 py-12 border-t border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-xl font-bold text-blue-900 mb-6">
-            Other Areas Nearby
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Link
-              href="/areas/leaflet-distribution-poole"
-              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
-            >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Poole</h3>
-              <p className="text-gray-600 text-sm mb-3">Affluent harbour town with excellent residential distribution routes.</p>
-              <span className="text-blue-600 text-xs font-semibold">View area →</span>
-            </Link>
-            <Link
-              href="/areas/leaflet-distribution-christchurch"
-              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
-            >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Christchurch</h3>
-              <p className="text-gray-600 text-sm mb-3">Coastal market town covering BH23 postcodes on the Dorset border.</p>
-              <span className="text-blue-600 text-xs font-semibold">View area →</span>
-            </Link>
-            <Link
-              href="/areas/leaflet-distribution-dorset"
-              className="bg-white border border-gray-200 rounded-lg p-5 hover:border-blue-400 hover:shadow-md transition-all block"
-            >
-              <h3 className="text-sm font-semibold text-blue-900 mb-1">Dorset</h3>
-              <p className="text-gray-600 text-sm mb-3">County-wide coverage across Bournemouth, Poole and surrounding towns.</p>
-              <span className="text-blue-600 text-xs font-semibold">View area →</span>
-            </Link>
-          </div>
-        </div>
-      </section>
+      <AreaPage area={AREA_PAGES["bournemouth"]} />
     </>
   );
 }
