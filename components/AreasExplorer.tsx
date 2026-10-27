@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Breadcrumb from "@/components/Breadcrumb";
-import { AREA_REGIONS, START, chooseRegion, searchFor, visibleAreas, type ExplorerState, type OverviewCard, type RegionId } from "@/lib/area-search";
+import { AREA_REGIONS, START, chooseRegion, queryFromSearch, searchFor, visibleAreas, type ExplorerState, type OverviewCard, type RegionId } from "@/lib/area-search";
 
 // The /areas overview's hero, search, region chips and cards. Every card is
 // in the server-rendered HTML; searching and the chips only hide cards in the
-// browser, so with JavaScript off all of them show.
+// browser, so with JavaScript off all of them show. Arriving with ?q= (from
+// the homepage's "Check if we cover you") runs that search straight away.
 
 const ASK_HREF = "/quote?service=leaflet";
 const YELLOW_BUTTON =
@@ -16,6 +17,11 @@ const TICKS = ["Hundreds of postcodes covered", "Several towns in one campaign",
 
 export default function AreasExplorer({ cards }: { cards: OverviewCard[] }) {
   const [state, setState] = useState<ExplorerState>(START);
+
+  useEffect(() => {
+    const q = queryFromSearch(window.location.search);
+    if (q) setState((s) => searchFor(s, q));
+  }, []);
 
   return (
     <>

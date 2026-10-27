@@ -250,7 +250,7 @@ test("each page's hero is its own coverage map, 1320 by 990, described in full a
   assert.equal((hero.match(/<Image\b/g) ?? []).length, 1);
 });
 
-test("only photos of the place itself sit beside the About copy, and no page uses the aerial image", () => {
+test("only photos of the place itself sit beside the About copy, and nothing uses the aerial image", () => {
   const withPhoto = pages.filter((p) => p.photo).map((p) => p.slug).sort();
   assert.deepEqual(withPhoto, ["bournemouth", "eastleigh", "winchester"]);
   assert.equal(AREA_PAGES.eastleigh.photo!.src, "/Street%20Image%20when%20distributing%20flyers.webp");
@@ -264,7 +264,7 @@ test("only photos of the place itself sit beside the About copy, and no page use
   for (const slug of slugs) {
     assert.doesNotMatch(readFileSync(join("app/areas", `leaflet-distribution-${slug}`, "page.tsx"), "utf8"), aerial, slug);
   }
-  // The homepage still uses it, so the file stays.
-  assert.match(readFileSync("app/page.tsx", "utf8"), aerial);
-  assert.ok(existsSync("public/Overhead-shot-residential-areas.webp"));
+  // Nor does the homepage any more, so the file is gone.
+  for (const file of ["app/page.tsx", "components/HomeAreas.tsx"]) assert.doesNotMatch(readFileSync(file, "utf8"), aerial, file);
+  assert.ok(!existsSync("public/Overhead-shot-residential-areas.webp"));
 });

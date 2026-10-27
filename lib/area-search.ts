@@ -86,6 +86,15 @@ export function matchAreas<T extends SearchableArea>(areas: readonly T[], query:
   return [...found.filter((a) => !a.wide), ...found.filter((a) => a.wide)];
 }
 
+// A search from another page, such as the homepage's "Check if we cover you":
+// /areas?q=BH14, or plain /areas when nothing was typed. The explorer reads
+// the same q back when it opens.
+export const areasSearchHref = (query: string) => {
+  const q = query.trim();
+  return q ? `/areas?${new URLSearchParams({ q })}` : "/areas";
+};
+export const queryFromSearch = (search: string) => (new URLSearchParams(search).get("q") ?? "").trim();
+
 // What the page shows: a search looks across every region, otherwise the
 // chosen region (or all of them). Typing a search moves the chips back to
 // All areas, and choosing a region clears the search.

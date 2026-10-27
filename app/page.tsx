@@ -7,12 +7,11 @@ import BrandsBar from "@/components/BrandsBar";
 import ReviewBand from "@/components/ReviewBand";
 import TrustCards from "@/components/TrustCards";
 import StaggerGroup from "@/components/StaggerGroup";
-import ScrollReveal from "@/components/ScrollReveal";
 import HeroCaseStudyTeaser from "@/components/HeroCaseStudyTeaser";
 import LeafletServices from "@/components/LeafletServices";
+import HomeAreas from "@/components/HomeAreas";
 import AdditionalServiceCard from "@/components/AdditionalServiceCard";
 import BrowserMockup from "@/components/BrowserMockup";
-import { areas, regions } from "@/lib/areas-data";
 
 export const metadata: Metadata = {
   title: "Flyer Distribution Hampshire | Local Leaflet & Flyer Delivery",
@@ -303,68 +302,7 @@ export default function HomePage() {
       <LeafletServices />
 
       {/* Coverage areas */}
-      <section className="bg-blue-900 text-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-10 lg:gap-16 items-start">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-bold mb-3">
-                Areas We Cover
-              </h2>
-              <p className="text-blue-200 max-w-xl mb-10 text-lg">
-                We cover the Hampshire and Dorset corridor, from{" "}
-                <Link href="/areas/leaflet-distribution-winchester" className="text-white underline underline-offset-2 hover:text-blue-200">
-                  Winchester
-                </Link>{" "}
-                in the north to Poole in the west, and everywhere in
-                between.
-              </p>
-              {regions.map((region) => {
-                const regionAreas = areas
-                  .filter((area) => area.region === region)
-                  .sort((a, b) => a.name.localeCompare(b.name));
-                return (
-                  <div key={region}>
-                    <p className="text-blue-400 text-xs font-semibold uppercase tracking-wide mb-3">
-                      {region}
-                    </p>
-                    <div className="flex flex-wrap gap-3 mb-8">
-                      {regionAreas.map((area) => (
-                        <Link
-                          key={area.name}
-                          href={area.href}
-                          className="bg-blue-800 hover:bg-blue-700 border border-blue-700 text-white text-sm font-medium px-5 py-2.5 rounded-md transition-colors"
-                        >
-                          {area.name}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-              <Link
-                href="/areas"
-                className="text-blue-300 hover:text-white font-semibold text-sm underline underline-offset-2"
-              >
-                See all coverage areas →
-              </Link>
-            </div>
-            <div className="flex justify-center lg:justify-end">
-              <ScrollReveal>
-                <div className="w-full max-w-xs sm:max-w-sm lg:max-w-none mx-auto lg:mx-0 aspect-square overflow-hidden rounded-lg shadow-lg ring-1 ring-black/5">
-                  <Image
-                    src="/Overhead-shot-residential-areas.webp"
-                    alt="Overhead view of a residential street with houses and gardens, the kind of area covered door to door"
-                    width={999}
-                    height={999}
-                    sizes="(max-width: 640px) 320px, (max-width: 1024px) 384px, 400px"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </ScrollReveal>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HomeAreas />
 
       {/* Additional Services */}
       <section className="bg-slate-50">

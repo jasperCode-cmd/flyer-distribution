@@ -1,5 +1,5 @@
-import { AREA_PAGES } from "@/lib/area-pages";
-import { AREA_REGIONS, type OverviewCard } from "@/lib/area-search";
+import { AREA_PAGES, type AreaSlug } from "@/lib/area-pages";
+import { AREA_REGIONS, type OverviewCard, type RegionId } from "@/lib/area-search";
 import { areas } from "@/lib/areas-data";
 import { formatPostcodeRanges } from "@/lib/postcode-ranges";
 
@@ -35,4 +35,20 @@ export function overviewCards(): OverviewCard[] {
       };
     })
   );
+}
+
+// The homepage's Areas We Cover columns: the same regions, names and links
+// as the cards, each led by the town its region is named after (New Forest
+// heads New Forest & Waterside), then the rest in the regions' own order.
+export function regionColumns(): { id: RegionId; label: string; areas: { slug: AreaSlug; name: string; href: string }[] }[] {
+  const cards = overviewCards();
+  return AREA_REGIONS.map((region) => {
+    const own = cards.filter((c) => c.regionId === region.id);
+    const lead = own.filter((c) => region.label.startsWith(c.name));
+    return {
+      id: region.id,
+      label: region.label,
+      areas: [...lead, ...own.filter((c) => !lead.includes(c))].map(({ slug, name, href }) => ({ slug, name, href })),
+    };
+  });
 }
