@@ -10,9 +10,10 @@ import { THANK_YOU_NOTE, sendQuoteThankYou } from "@/lib/quote-thank-you";
 import { enquiryFromQuoteForm } from "@/lib/thank-you-email";
 import type { SendEmailParams } from "@/lib/gmail";
 
-// The quote form's start: three service cards, then the questions for the
-// one chosen. The service values it sends, the ?service= words links use,
-// the start state as it renders (no fields until a card is chosen), and the
+// The quote form's start: three service cards, then the contact details,
+// then the chosen service's questions once the contact number has 10 digits.
+// The service values it sends, the ?service= words links use, the start
+// state as it renders (no fields until a card is chosen), and the
 // form keeping what it sends as it was: the service sent where the dropdown
 // was, Company first after the service heading, each service's fields in
 // their old order, and the print and design Yes/No sending what the ticked
@@ -136,9 +137,12 @@ test("each service shows its own fields after Company, in their old order", () =
   ]);
 });
 
-test("print and design: Yes sends \"yes\" as the ticked boxes did, No sends nothing, with the old defaults", () => {
-  assert.match(form, /const \[includePrinting, setIncludePrinting\] = useState\(true\);/);
+test("print and design: Yes sends \"yes\" as the ticked boxes did, No sends nothing, and both start on No", () => {
+  // Print starts on No, so the size and sides stay hidden until Yes is chosen.
+  assert.match(form, /const \[includePrinting, setIncludePrinting\] = useState\(false\);/);
   assert.match(form, /const \[includeDesign, setIncludeDesign\] = useState\(false\);/);
+  // And back to No after a quote is sent.
+  assert.match(form, /formRef\.current\?\.reset\(\);\s*changeService\(""\);\s*setIncludePrinting\(false\);\s*setIncludeDesign\(false\);/);
   assert.doesNotMatch(form, /type="checkbox"\s+id="(printing-included|include-design)"/, "the tick boxes are gone");
   // Print Yes folds out the size and sides, with the field it used to send first.
   assert.match(
@@ -154,6 +158,38 @@ test("print and design: Yes sends \"yes\" as the ticked boxes did, No sends noth
   assert.match(pills, /type="button"\s+aria-pressed=\{value === answer\}/);
   assert.doesNotMatch(pills, /\bname=/);
   assert.match(pills, /focus-visible:ring-2/);
+});
+
+test("the service's questions stay hidden until the contact number has 10 digits, with a hint until then", () => {
+  assert.match(form, /const PHONE_DIGITS_TO_CONTINUE = 10;/);
+  // Checked as they type: the number's digits, whatever spaces or + are typed with them.
+  const phone = between('name="phone"', "</div>");
+  assert.match(phone, /onChange=\{\(e\) => \{[\s\S]*?e\.target\.value\.replace\(\/\\D\/g, ""\)\.length >= PHONE_DIGITS_TO_CONTINUE[\s\S]*?setShowQuestions\(true\);/);
+  assert.doesNotMatch(phone, /onBlur/);
+  // The hint, in the grey helper style, tied to the field until the questions show.
+  assert.match(
+    phone,
+    /\{!showQuestions && \(\s*<p id="phone-hint" className="mt-1\.5 text-xs text-gray-500">\s*Enter your number to continue\s*<\/p>\s*\)\}/
+  );
+  assert.match(phone, /aria-describedby=\{showQuestions \? undefined : "phone-hint"\}/);
+  // Everything after the number folds in together: the service's heading,
+  // Company, its fields, the newsletter box and the send button.
+  const questions = between('{showQuestions && (\n            <div className="quote-fold-in space-y-5">', "        </form>");
+  for (const piece of ["?.heading}", 'name="company"', 'name="service"', "{isLeaflet && (", "{isWebDesign && (", "{isScreenHire && (", 'name="newsletter"', 'type="submit"', "Send Quote Request"]) {
+    assert.ok(questions.includes(piece), piece);
+  }
+  // The details come before it and are always there once a card is chosen.
+  const details = between('<form ref={formRef}', '{showQuestions && (\n            <div className="quote-fold-in');
+  assert.deepEqual(namesIn(details), ["access_key", "subject", "first-name", "last-name", "email", "phone"]);
+});
+
+test("once shown, the service's questions stay for the visit, through number edits and service changes", () => {
+  // Only ever switched on, so editing or clearing the number, or choosing
+  // another card, never hides what was typed.
+  assert.deepEqual(form.match(/setShowQuestions\([^)]*\)/g), ["setShowQuestions(true)"]);
+  assert.match(form, /const \[showQuestions, setShowQuestions\] = useState\(false\);/);
+  const change = between("function changeService(", "\n  }\n");
+  assert.ok(!change.includes("showQuestions"), "choosing another card leaves it as it is");
 });
 
 test("switching service keeps the details and sends only the shown service's fields", () => {

@@ -6,10 +6,15 @@ import { QUOTE_SERVICES, serviceFromParam, type QuoteService } from "@/lib/quote
 
 // How long after the last keystroke the hours estimate updates.
 const ESTIMATE_PAUSE_MS = 600;
+// How many digits the contact number needs before the service's questions show.
+const PHONE_DIGITS_TO_CONTINUE = 10;
 
 export default function QuoteForm() {
   const [serviceType, setServiceType] = useState("");
-  const [includePrinting, setIncludePrinting] = useState(true);
+  // The service's questions, once the contact number has enough digits.
+  // They then stay for the visit, even if the number is changed or cleared.
+  const [showQuestions, setShowQuestions] = useState(false);
+  const [includePrinting, setIncludePrinting] = useState(false);
   const [includeDesign, setIncludeDesign] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -85,7 +90,7 @@ export default function QuoteForm() {
         setSubmitted(true);
         formRef.current?.reset();
         changeService("");
-        setIncludePrinting(true);
+        setIncludePrinting(false);
         setIncludeDesign(false);
 
         // Best-effort CRM lead capture, alongside the Web3Forms email
@@ -255,409 +260,425 @@ export default function QuoteForm() {
               id="phone"
               name="phone"
               required
+              aria-describedby={showQuestions ? undefined : "phone-hint"}
+              onChange={(e) => {
+                // Checked as they type, not only when they leave the field.
+                if (!showQuestions && e.target.value.replace(/\D/g, "").length >= PHONE_DIGITS_TO_CONTINUE) {
+                  setShowQuestions(true);
+                }
+              }}
               className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
+            {!showQuestions && (
+              <p id="phone-hint" className="mt-1.5 text-xs text-gray-500">
+                Enter your number to continue
+              </p>
+            )}
           </div>
 
-          {/* The chosen service's questions. Company stays put when the
-              service changes, so what was typed in it is kept. */}
-          <div className="border-t border-gray-200 pt-6">
-            <h3 className="text-lg font-bold text-blue-900">
-              {QUOTE_SERVICES.find((s) => s.value === serviceType)?.heading}
-            </h3>
-          </div>
+          {showQuestions && (
+            <div className="quote-fold-in space-y-5">
+              {/* The chosen service's questions. Company stays put when the
+                  service changes, so what was typed in it is kept. */}
+              <div className="border-t border-gray-200 pt-6">
+                <h3 className="text-lg font-bold text-blue-900">
+                  {QUOTE_SERVICES.find((s) => s.value === serviceType)?.heading}
+                </h3>
+              </div>
 
-          {/* Company */}
-          <div>
-            <label
-              htmlFor="company"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Company / Organisation
-            </label>
-            <input
-              type="text"
-              id="company"
-              name="company"
-              className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          {/* Service type, from the card chosen above: sent in the same place
-              and with the same words as the old dropdown. */}
-          <input type="hidden" name="service" value={serviceType} />
-
-          {/* ── Leaflet Distribution fields ── */}
-          {isLeaflet && (
-            <>
-              {/* Areas required */}
+              {/* Company */}
               <div>
                 <label
-                  htmlFor="areas-required"
+                  htmlFor="company"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Areas required / target postcodes
+                  Company / Organisation
                 </label>
                 <input
                   type="text"
-                  id="areas-required"
-                  name="areas-required"
-                  placeholder="e.g. Southampton SO15, SO16"
+                  id="company"
+                  name="company"
                   className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
-              {/* Quantity + Campaign start date */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <div>
-                  <label
-                    htmlFor="quantity"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Approximate quantity (flyers) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    id="quantity"
-                    name="quantity"
-                    required
-                    placeholder="e.g. 2,000"
-                    aria-describedby={quantityError ? "quantity-hint quantity-error" : "quantity-hint"}
-                    aria-invalid={quantityError ? true : undefined}
-                    onInvalid={(e) => {
-                      // Our own message under the field, not the browser's bubble.
-                      e.preventDefault();
-                      setQuantityError(QUANTITY_MESSAGE);
-                      e.currentTarget.focus();
-                    }}
-                    onChange={(e) => {
-                      if (quantityError) setQuantityError(null);
-                      updateEstimate(e.target.value, ESTIMATE_PAUSE_MS);
-                    }}
-                    onBlur={(e) => updateEstimate(e.target.value, 0)}
-                    className={`w-full border rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${quantityError ? "border-red-500" : "border-gray-300"}`}
-                  />
-                  <p id="quantity-hint" className="mt-1.5 text-xs text-gray-500">
-                    Not sure? Your best guess is fine.
-                  </p>
-                  {quantityError && (
-                    <p id="quantity-error" role="alert" className="mt-1 text-xs text-red-600">
-                      {quantityError}
-                    </p>
-                  )}
-                  <div id="quantity-estimate" aria-live="polite">
-                    {estimate && <p className="mt-1 text-xs font-medium text-blue-700">{estimate}</p>}
+              {/* Service type, from the card chosen above: sent in the same place
+                  and with the same words as the old dropdown. */}
+              <input type="hidden" name="service" value={serviceType} />
+
+              {/* ── Leaflet Distribution fields ── */}
+              {isLeaflet && (
+                <>
+                  {/* Areas required */}
+                  <div>
+                    <label
+                      htmlFor="areas-required"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Areas required / target postcodes
+                    </label>
+                    <input
+                      type="text"
+                      id="areas-required"
+                      name="areas-required"
+                      placeholder="e.g. Southampton SO15, SO16"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
                   </div>
-                </div>
-                <div>
-                  <label
-                    htmlFor="campaign-start-date"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Campaign start date
-                  </label>
-                  <input
-                    type="date"
-                    id="campaign-start-date"
-                    name="campaign-start-date"
-                    className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
 
-              {/* Printing. Yes sends printing-included as "yes", as the ticked
-                  box did; No sends nothing for it. */}
-              <div className="border border-gray-200 rounded-md px-4 py-3 bg-gray-50">
-                <YesNo
-                  id="printing-question"
-                  question="Would you like us to print?"
-                  value={includePrinting}
-                  onChange={setIncludePrinting}
-                />
-                <p className="mt-2 text-xs text-gray-500">
-                  Choose No if you already have your materials printed and just need
-                  distribution.
-                </p>
-
-                {includePrinting && (
-                  <div className="mt-3 space-y-3">
-                    <input type="hidden" name="printing-included" value="yes" />
+                  {/* Quantity + Campaign start date */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
                       <label
-                        htmlFor="item-size"
+                        htmlFor="quantity"
                         className="block text-sm font-medium text-gray-700 mb-1"
                       >
-                        Item size
+                        Approximate quantity (flyers) <span className="text-red-500">*</span>
                       </label>
-                      <select
-                        id="item-size"
-                        name="item-size"
-                        defaultValue="A5"
-                        className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                      >
-                        <option value="A5">A5 (most popular)</option>
-                        <option value="A4">A4</option>
-                        <option value="A6">A6</option>
-                        <option value="DL">DL</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <p className="text-sm font-medium text-gray-700 mb-2">
-                        Print sides
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        id="quantity"
+                        name="quantity"
+                        required
+                        placeholder="e.g. 2,000"
+                        aria-describedby={quantityError ? "quantity-hint quantity-error" : "quantity-hint"}
+                        aria-invalid={quantityError ? true : undefined}
+                        onInvalid={(e) => {
+                          // Our own message under the field, not the browser's bubble.
+                          e.preventDefault();
+                          setQuantityError(QUANTITY_MESSAGE);
+                          e.currentTarget.focus();
+                        }}
+                        onChange={(e) => {
+                          if (quantityError) setQuantityError(null);
+                          updateEstimate(e.target.value, ESTIMATE_PAUSE_MS);
+                        }}
+                        onBlur={(e) => updateEstimate(e.target.value, 0)}
+                        className={`w-full border rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${quantityError ? "border-red-500" : "border-gray-300"}`}
+                      />
+                      <p id="quantity-hint" className="mt-1.5 text-xs text-gray-500">
+                        Not sure? Your best guess is fine.
                       </p>
-                      <div className="flex gap-6">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="print-sides"
-                            value="Single sided"
-                            defaultChecked
-                            className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span className="text-sm text-gray-700">Single sided</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="print-sides"
-                            value="Double sided"
-                            className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span className="text-sm text-gray-700">Double sided</span>
-                        </label>
+                      {quantityError && (
+                        <p id="quantity-error" role="alert" className="mt-1 text-xs text-red-600">
+                          {quantityError}
+                        </p>
+                      )}
+                      <div id="quantity-estimate" aria-live="polite">
+                        {estimate && <p className="mt-1 text-xs font-medium text-blue-700">{estimate}</p>}
                       </div>
                     </div>
+                    <div>
+                      <label
+                        htmlFor="campaign-start-date"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
+                        Campaign start date
+                      </label>
+                      <input
+                        type="date"
+                        id="campaign-start-date"
+                        name="campaign-start-date"
+                        className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
                   </div>
-                )}
+
+                  {/* Printing. Yes sends printing-included as "yes", as the ticked
+                      box did; No sends nothing for it. */}
+                  <div className="border border-gray-200 rounded-md px-4 py-3 bg-gray-50">
+                    <YesNo
+                      id="printing-question"
+                      question="Would you like us to print?"
+                      value={includePrinting}
+                      onChange={setIncludePrinting}
+                    />
+                    <p className="mt-2 text-xs text-gray-500">
+                      Choose No if you already have your materials printed and just need
+                      distribution.
+                    </p>
+
+                    {includePrinting && (
+                      <div className="mt-3 space-y-3">
+                        <input type="hidden" name="printing-included" value="yes" />
+                        <div>
+                          <label
+                            htmlFor="item-size"
+                            className="block text-sm font-medium text-gray-700 mb-1"
+                          >
+                            Item size
+                          </label>
+                          <select
+                            id="item-size"
+                            name="item-size"
+                            defaultValue="A5"
+                            className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                          >
+                            <option value="A5">A5 (most popular)</option>
+                            <option value="A4">A4</option>
+                            <option value="A6">A6</option>
+                            <option value="DL">DL</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <p className="text-sm font-medium text-gray-700 mb-2">
+                            Print sides
+                          </p>
+                          <div className="flex gap-6">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="print-sides"
+                                value="Single sided"
+                                defaultChecked
+                                className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                              />
+                              <span className="text-sm text-gray-700">Single sided</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="print-sides"
+                                value="Double sided"
+                                className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                              />
+                              <span className="text-sm text-gray-700">Double sided</span>
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Design. Yes sends include-design as "yes", as the ticked box
+                      did; No sends nothing for it. */}
+                  <div className="border border-gray-200 rounded-md px-4 py-3 bg-gray-50">
+                    <YesNo
+                      id="design-question"
+                      question="Would you like us to design it?"
+                      value={includeDesign}
+                      onChange={setIncludeDesign}
+                    />
+                    <p className="mt-2 text-xs text-gray-500">
+                      Choose No if you already have your artwork ready.
+                    </p>
+                    {includeDesign && <input type="hidden" name="include-design" value="yes" />}
+                  </div>
+
+                  {/* Budget (leaflet) */}
+                  <div>
+                    <label
+                      htmlFor="budget"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Approximate campaign budget <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="budget"
+                      name="budget"
+                      required
+                      className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                    >
+                      <option value="">Select a range...</option>
+                      <option>Under £300</option>
+                      <option>£300 - £500</option>
+                      <option>£500 - £1,000</option>
+                      <option>£1,000 - £2,000</option>
+                      <option>£2,000 - £4,000</option>
+                      <option>£4,000+</option>
+                    </select>
+                  </div>
+
+                  {/* Additional details (leaflet) */}
+                  <div>
+                    <label
+                      htmlFor="message"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Additional details
+                    </label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      rows={4}
+                      placeholder="Tell us about your campaign, timing, or any special requirements..."
+                      className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* ── Web Design & SEO fields ── */}
+              {isWebDesign && (
+                <>
+                  <div>
+                    <label
+                      htmlFor="business-type"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Business type
+                    </label>
+                    <input
+                      type="text"
+                      id="business-type"
+                      name="business-type"
+                      placeholder="e.g. Restaurant, Trades, Charity"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="web-budget"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Approximate budget <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="web-budget"
+                      name="budget"
+                      required
+                      className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                    >
+                      <option value="">Select a range...</option>
+                      <option>Under £500</option>
+                      <option>£500 - £1,000</option>
+                      <option>£1,000 - £2,500</option>
+                      <option>£2,500+</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="web-message"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Additional details
+                    </label>
+                    <textarea
+                      id="web-message"
+                      name="message"
+                      rows={4}
+                      placeholder="Tell us about your project, what you need, or any questions you have..."
+                      className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* ── Screen Hire fields ── */}
+              {isScreenHire && (
+                <>
+                  <div>
+                    <label
+                      htmlFor="event-date"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Event date
+                    </label>
+                    <input
+                      type="date"
+                      id="event-date"
+                      name="event-date"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="event-location"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Event location
+                    </label>
+                    <input
+                      type="text"
+                      id="event-location"
+                      name="event-location"
+                      placeholder="e.g. Southampton City Centre"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="event-duration"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Approximate duration
+                    </label>
+                    <select
+                      id="event-duration"
+                      name="event-duration"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                    >
+                      <option value="">Select a duration...</option>
+                      <option>Half day</option>
+                      <option>Full day</option>
+                      <option>2-3 days</option>
+                      <option>Longer</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="screen-message"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Additional details
+                    </label>
+                    <textarea
+                      id="screen-message"
+                      name="message"
+                      rows={4}
+                      placeholder="Tell us about your event, what you need the screen for, or any questions..."
+                      className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Newsletter opt-in */}
+              <div>
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    id="newsletter"
+                    name="newsletter"
+                    value="yes"
+                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
+                  />
+                  <span className="text-sm text-gray-600">
+                    Keep me updated with tips and offers from Flyer Distribution Hampshire
+                  </span>
+                </label>
               </div>
 
-              {/* Design. Yes sends include-design as "yes", as the ticked box
-                  did; No sends nothing for it. */}
-              <div className="border border-gray-200 rounded-md px-4 py-3 bg-gray-50">
-                <YesNo
-                  id="design-question"
-                  question="Would you like us to design it?"
-                  value={includeDesign}
-                  onChange={setIncludeDesign}
-                />
-                <p className="mt-2 text-xs text-gray-500">
-                  Choose No if you already have your artwork ready.
+              {/* Error message */}
+              {error && (
+                <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-4 py-3">
+                  Something went wrong. Please try again or email us at{" "}
+                  <a
+                    href="mailto:flyerdistributionhampshire@gmail.com"
+                    className="underline"
+                  >
+                    flyerdistributionhampshire@gmail.com
+                  </a>
+                  .
                 </p>
-                {includeDesign && <input type="hidden" name="include-design" value="yes" />}
-              </div>
+              )}
 
-              {/* Budget (leaflet) */}
-              <div>
-                <label
-                  htmlFor="budget"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Approximate campaign budget <span className="text-red-500">*</span>
-                </label>
-                <select
-                  id="budget"
-                  name="budget"
-                  required
-                  className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                >
-                  <option value="">Select a range...</option>
-                  <option>Under £300</option>
-                  <option>£300 - £500</option>
-                  <option>£500 - £1,000</option>
-                  <option>£1,000 - £2,000</option>
-                  <option>£2,000 - £4,000</option>
-                  <option>£4,000+</option>
-                </select>
-              </div>
-
-              {/* Additional details (leaflet) */}
-              <div>
-                <label
-                  htmlFor="message"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Additional details
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  rows={4}
-                  placeholder="Tell us about your campaign, timing, or any special requirements..."
-                  className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                />
-              </div>
-            </>
-          )}
-
-          {/* ── Web Design & SEO fields ── */}
-          {isWebDesign && (
-            <>
-              <div>
-                <label
-                  htmlFor="business-type"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Business type
-                </label>
-                <input
-                  type="text"
-                  id="business-type"
-                  name="business-type"
-                  placeholder="e.g. Restaurant, Trades, Charity"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="web-budget"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Approximate budget <span className="text-red-500">*</span>
-                </label>
-                <select
-                  id="web-budget"
-                  name="budget"
-                  required
-                  className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                >
-                  <option value="">Select a range...</option>
-                  <option>Under £500</option>
-                  <option>£500 - £1,000</option>
-                  <option>£1,000 - £2,500</option>
-                  <option>£2,500+</option>
-                </select>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="web-message"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Additional details
-                </label>
-                <textarea
-                  id="web-message"
-                  name="message"
-                  rows={4}
-                  placeholder="Tell us about your project, what you need, or any questions you have..."
-                  className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                />
-              </div>
-            </>
-          )}
-
-          {/* ── Screen Hire fields ── */}
-          {isScreenHire && (
-            <>
-              <div>
-                <label
-                  htmlFor="event-date"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Event date
-                </label>
-                <input
-                  type="date"
-                  id="event-date"
-                  name="event-date"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="event-location"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Event location
-                </label>
-                <input
-                  type="text"
-                  id="event-location"
-                  name="event-location"
-                  placeholder="e.g. Southampton City Centre"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="event-duration"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Approximate duration
-                </label>
-                <select
-                  id="event-duration"
-                  name="event-duration"
-                  className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                >
-                  <option value="">Select a duration...</option>
-                  <option>Half day</option>
-                  <option>Full day</option>
-                  <option>2-3 days</option>
-                  <option>Longer</option>
-                </select>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="screen-message"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Additional details
-                </label>
-                <textarea
-                  id="screen-message"
-                  name="message"
-                  rows={4}
-                  placeholder="Tell us about your event, what you need the screen for, or any questions..."
-                  className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                />
-              </div>
-            </>
-          )}
-
-          {/* Newsletter opt-in */}
-          <div>
-            <label className="flex items-start gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                id="newsletter"
-                name="newsletter"
-                value="yes"
-                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 shrink-0"
-              />
-              <span className="text-sm text-gray-600">
-                Keep me updated with tips and offers from Flyer Distribution Hampshire
-              </span>
-            </label>
-          </div>
-
-          {/* Error message */}
-          {error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-4 py-3">
-              Something went wrong. Please try again or email us at{" "}
-              <a
-                href="mailto:flyerdistributionhampshire@gmail.com"
-                className="underline"
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-blue-700 hover:bg-blue-800 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-md transition duration-200 ease-out hover:scale-105 text-sm"
               >
-                flyerdistributionhampshire@gmail.com
-              </a>
-              .
-            </p>
+                {isSubmitting ? "Sending..." : "Send Quote Request"}
+              </button>
+            </div>
           )}
-
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-blue-700 hover:bg-blue-800 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-md transition duration-200 ease-out hover:scale-105 text-sm"
-          >
-            {isSubmitting ? "Sending..." : "Send Quote Request"}
-          </button>
         </form>
       )}
     </div>
