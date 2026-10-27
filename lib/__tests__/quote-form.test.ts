@@ -226,6 +226,8 @@ test("the services pages' quote links choose their service; every other quote li
     if (links.length) chosen[file] = links;
   }
   assert.deepEqual(chosen, {
+    // The areas overview's closing band asks about leaflets too.
+    [join("app", "areas", "page.tsx")]: ["/quote?service=leaflet"],
     [join("app", "services", "page.tsx")]: ["/quote?service=leaflet", "/quote?service=leaflet"],
     [join("app", "services", "screen-hire", "page.tsx")]: ["/quote?service=screen"],
     [join("app", "services", "web-design-seo", "page.tsx")]: ["/quote?service=web", "/quote?service=web", "/quote?service=web"],

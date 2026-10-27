@@ -83,7 +83,7 @@ export const areas: AreaEntry[] = [
   {
     name: "Dorset",
     href: "/areas/leaflet-distribution-dorset",
-    desc: "County-wide coverage across Dorset including Bournemouth, Poole, Christchurch, Weymouth and surrounding towns.",
+    desc: "Coverage across Dorset, including Bournemouth, Poole, Christchurch and surrounding towns.",
     region: "Dorset",
     population: 781401,
     populationLabel: "Residents across Dorset (2021 Census)",
