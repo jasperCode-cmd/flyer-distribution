@@ -1,14 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import Breadcrumb from "@/components/Breadcrumb";
-import { AREA_PAGES, REVIEWS, type AreaPageData } from "@/lib/area-pages";
+import { AREA_PAGES, REVIEWS, coverageMapAlt, coverageMapSrc, type AreaPageData } from "@/lib/area-pages";
 import { formatPostcodeRanges } from "@/lib/postcode-ranges";
 
 // The shared template for the area pages (/areas/leaflet-distribution-[area]).
 // Each page's details come from lib/area-pages.tsx; the page file keeps its
 // own metadata and BreadcrumbList schema. New Forest and Dorset are "wide":
 // their postcodes are ones "we deliver to", and they never say "every" or
-// "all of". The only link off the site is our Google reviews.
+// "all of". The hero is the page's coverage map, whose credits are printed in
+// the image. The only link off the site is our Google reviews.
 
 const GOOGLE_PROFILE = "https://share.google/RVxyPi4TzXAzkt1Am";
 const STAR = "M12 2.5l2.9 6.06 6.6.87-4.83 4.6 1.24 6.6L12 17.5l-5.91 3.13 1.24-6.6-4.83-4.6 6.6-.87L12 2.5z";
@@ -90,17 +91,22 @@ export default function AreaPage({ area }: { area: AreaPageData }) {
               </Link>
             </div>
           </div>
-          {/* The page's image for now; its coverage map replaces it later. Never a link. */}
-          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-2xl shadow-black/30 ring-1 ring-white/10">
-            <Image
-              src={area.image.src}
-              alt={area.image.alt}
-              fill
-              priority
-              sizes="(min-width: 1152px) 540px, (min-width: 1024px) 46vw, 100vw"
-              className="object-cover"
-            />
-          </div>
+          {/* The page's coverage map, its main image. Never a link. */}
+          <figure>
+            <div className="overflow-hidden rounded-2xl shadow-2xl shadow-black/30 ring-1 ring-white/10">
+              <Image
+                src={coverageMapSrc(area.slug)}
+                alt={coverageMapAlt(area)}
+                width={1320}
+                height={990}
+                priority
+                fetchPriority="high"
+                sizes="(min-width: 1152px) 540px, (min-width: 1024px) 46vw, 100vw"
+                className="block w-full h-auto"
+              />
+            </div>
+            <figcaption className="mt-3 text-center text-sm text-blue-200">The {area.name} postcodes we deliver to</figcaption>
+          </figure>
         </div>
       </section>
 
@@ -116,9 +122,11 @@ export default function AreaPage({ area }: { area: AreaPageData }) {
         </ul>
       </section>
 
-      {/* 3. About our coverage: the page's own copy */}
+      {/* 3. About our coverage: the page's own copy, beside a photo of the place itself if it has one */}
       <section className="bg-slate-50 py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          className={`max-w-6xl mx-auto px-4 sm:px-6 lg:px-8${area.photo ? " grid grid-cols-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] gap-10 lg:gap-14 items-center" : ""}`}
+        >
           <div className="max-w-3xl">
             <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-5">About our {area.name} coverage</h2>
             {area.copy.map((para, i) => (
@@ -138,6 +146,17 @@ export default function AreaPage({ area }: { area: AreaPageData }) {
               </p>
             ))}
           </div>
+          {area.photo && (
+            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-xl shadow-black/10 ring-1 ring-black/5">
+              <Image
+                src={area.photo.src}
+                alt={area.photo.alt}
+                fill
+                sizes="(min-width: 1152px) 470px, (min-width: 1024px) 41vw, 100vw"
+                className="object-cover"
+              />
+            </div>
+          )}
         </div>
       </section>
 

@@ -1,16 +1,17 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { findPostcode } from "@/lib/area-planner/data";
-import { AREA_PAGES, REVIEWS, type AreaPageData, type AreaSlug } from "@/lib/area-pages";
+import { AREA_PAGES, REVIEWS, coverageMapAlt, coverageMapSrc, type AreaPageData, type AreaSlug } from "@/lib/area-pages";
 import { formatPostcodeRanges } from "@/lib/postcode-ranges";
 
 // The 15 area pages' shared template data: the confirmed postcode lists and
 // neighbourhood names, homes from the Area Planner's Census 2021 figures,
 // nearby pages, one real review each (never the same as a neighbour's),
 // four answers written for that page, and the wording rules (no banned
-// words; New Forest and Dorset never say "every" or "all of").
+// words; New Forest and Dorset never say "every" or "all of"), its coverage
+// map as the hero, and a photo only where it shows the place itself.
 
 const pages = Object.values(AREA_PAGES);
 const slugs = Object.keys(AREA_PAGES) as AreaSlug[];
@@ -208,4 +209,70 @@ test("each page file renders the template and keeps its own metadata and schema"
     assert.ok(page.includes(`<AreaPage area={AREA_PAGES["${slug}"]} />`), slug);
     assert.doesNotMatch(page, /Other Areas Nearby|PopulationCounter|<h1/, slug);
   }
+});
+
+// A lossy WebP's size, from its VP8 frame header.
+function webpSize(file: string): { width: number; height: number } {
+  const b = readFileSync(file);
+  assert.equal(b.toString("ascii", 0, 4), "RIFF", file);
+  assert.equal(b.toString("ascii", 8, 16), "WEBPVP8 ", file);
+  return { width: b.readUInt16LE(26) & 0x3fff, height: b.readUInt16LE(28) & 0x3fff };
+}
+
+test("each page's hero is its own coverage map, 1320 by 990, described in full and never a link", () => {
+  // One map per page, and nothing else in the folder.
+  assert.deepEqual(readdirSync("public/area-maps").sort(), slugs.map((slug) => `area-map-${slug}.webp`).sort());
+  for (const slug of slugs) {
+    assert.equal(coverageMapSrc(slug), `/area-maps/area-map-${slug}.webp`);
+    assert.deepEqual(webpSize(join("public", coverageMapSrc(slug))), { width: 1320, height: 990 }, slug);
+  }
+  assert.equal(
+    coverageMapAlt(AREA_PAGES.southampton),
+    "Map of the Southampton postcodes we deliver to: SO14 to SO19, with neighbouring postcodes shown around them"
+  );
+  assert.equal(
+    coverageMapAlt(AREA_PAGES.winchester),
+    "Map of the Winchester postcodes we deliver to: SO21 to SO24 and SO32, with neighbouring postcodes shown around them"
+  );
+  assert.equal(
+    coverageMapAlt(AREA_PAGES["new-forest"]),
+    "Map of the New Forest postcodes we deliver to: SO40 to SO43, SO45, BH24, BH25 and SP6, with neighbouring postcodes shown around them"
+  );
+  assert.equal(
+    coverageMapAlt(AREA_PAGES.dorset),
+    "Map of the Dorset postcodes we deliver to: BH1 to BH18, BH21 to BH24, DT1 to DT4, DT9 and DT11, with neighbouring postcodes shown around them"
+  );
+  assert.equal(
+    coverageMapAlt(AREA_PAGES["chandlers-ford"]),
+    "Map of the Chandler's Ford postcodes we deliver to: SO53, with neighbouring postcodes shown around them"
+  );
+  // The template shows it at its own size, loaded first, with its caption, and not inside a link.
+  const template = readFileSync("components/AreaPage.tsx", "utf8");
+  const hero = template.slice(template.indexOf("{/* 1. Hero */}"), template.indexOf("{/* 2. Quick facts */}"));
+  const figure = hero.slice(hero.indexOf("<figure>"), hero.indexOf("</figure>"));
+  for (const prop of ["src={coverageMapSrc(area.slug)}", "alt={coverageMapAlt(area)}", "width={1320}", "height={990}", "priority", 'fetchPriority="high"']) {
+    assert.ok(figure.includes(prop), prop);
+  }
+  assert.match(figure, /<figcaption[^>]*>The \{area\.name\} postcodes we deliver to<\/figcaption>/);
+  assert.doesNotMatch(figure, /<a\b|<Link\b/);
+  assert.equal((hero.match(/<Image\b/g) ?? []).length, 1);
+});
+
+test("only photos of the place itself sit beside the About copy, and no page uses the aerial image", () => {
+  const withPhoto = pages.filter((p) => p.photo).map((p) => p.slug).sort();
+  assert.deepEqual(withPhoto, ["bournemouth", "eastleigh", "winchester"]);
+  assert.equal(AREA_PAGES.eastleigh.photo!.src, "/Street%20Image%20when%20distributing%20flyers.webp");
+  assert.equal(AREA_PAGES.winchester.photo!.alt, "Winchester Cathedral");
+  assert.equal(AREA_PAGES.bournemouth.photo!.alt, "Bournemouth pier and ferris wheel");
+  const template = readFileSync("components/AreaPage.tsx", "utf8");
+  assert.match(template, /\{area\.photo && \(/);
+  const aerial = /Overhead-shot-residential-areas/;
+  assert.doesNotMatch(readFileSync("lib/area-pages.ts", "utf8"), aerial);
+  assert.doesNotMatch(template, aerial);
+  for (const slug of slugs) {
+    assert.doesNotMatch(readFileSync(join("app/areas", `leaflet-distribution-${slug}`, "page.tsx"), "utf8"), aerial, slug);
+  }
+  // The homepage still uses it, so the file stays.
+  assert.match(readFileSync("app/page.tsx", "utf8"), aerial);
+  assert.ok(existsSync("public/Overhead-shot-residential-areas.webp"));
 });

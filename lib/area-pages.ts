@@ -6,7 +6,10 @@
 // Forest copy (SP6 is in its postcodes instead). Its postcodes and
 // neighbourhood names are as confirmed, and its homes figure is the Census
 // 2021 households in those postcode districts, from the Area Planner's data,
-// rounded to the nearest 500.
+// rounded to the nearest 500. Its hero is its coverage map, and a photo sits
+// beside its About copy only when it clearly shows the place itself.
+
+import { formatPostcodeRanges } from "@/lib/postcode-ranges";
 
 export type AreaSlug =
   | "southampton"
@@ -82,7 +85,8 @@ export type AreaPageData = {
   postcodes: { code: string; places: string[] }[];
   homes: number;
   nearby: AreaSlug[];
-  image: { src: string; alt: string };
+  // A photo of the place itself (its own photo or a landmark) for the About section; most pages have none.
+  photo?: { src: string; alt: string };
   review: ReviewId;
   // Its own copy: paragraphs of text and links to other pages on the site.
   copy: (string | { href: string; text: string })[][];
@@ -90,6 +94,12 @@ export type AreaPageData = {
   faqs: [string, string, string, string];
   question3?: string;
 };
+
+// Each page's coverage map, in public/area-maps: 1320 by 990, with the map
+// credits printed in the image itself.
+export const coverageMapSrc = (slug: AreaSlug) => `/area-maps/area-map-${slug}.webp`;
+export const coverageMapAlt = (area: AreaPageData) =>
+  `Map of the ${area.name} postcodes we deliver to: ${formatPostcodeRanges(area.postcodes.map((p) => p.code))}, with neighbouring postcodes shown around them`;
 
 export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
   "southampton": {
@@ -108,7 +118,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 107_500,
     nearby: ["hedge-end", "totton", "hythe", "eastleigh", "romsey", "winchester", "new-forest"],
-    image: { src: "https://images.pexels.com/photos/19916593/pexels-photo-19916593.jpeg?auto=compress&cs=tinysrgb&w=800", alt: "Southampton city centre shopping mall" },
     review: "kola",
     copy: [
       [
@@ -155,7 +164,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 86_500,
     nearby: ["poole", "christchurch", "dorset"],
-    image: { src: "https://images.pexels.com/photos/29030837/pexels-photo-29030837.jpeg?auto=compress&cs=tinysrgb&w=800", alt: "Bournemouth pier and ferris wheel" },
+    photo: { src: "https://images.pexels.com/photos/29030837/pexels-photo-29030837.jpeg?auto=compress&cs=tinysrgb&w=800", alt: "Bournemouth pier and ferris wheel" },
     review: "auriel",
     copy: [
       [
@@ -198,7 +207,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 67_500,
     nearby: ["bournemouth", "dorset", "ringwood"],
-    image: { src: "https://images.pexels.com/photos/32385939/pexels-photo-32385939.jpeg?auto=compress&cs=tinysrgb&w=800", alt: "Poole waterfront architecture" },
     review: "new-arts",
     copy: [
       [
@@ -241,7 +249,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 44_500,
     nearby: ["eastleigh", "southampton", "romsey", "new-forest"],
-    image: { src: "https://images.pexels.com/photos/11167778/pexels-photo-11167778.jpeg?auto=compress&cs=tinysrgb&w=800", alt: "Winchester Cathedral" },
+    photo: { src: "https://images.pexels.com/photos/11167778/pexels-photo-11167778.jpeg?auto=compress&cs=tinysrgb&w=800", alt: "Winchester Cathedral" },
     review: "homebites",
     copy: [
       [
@@ -285,7 +293,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 80_000,
     nearby: ["brockenhurst", "hythe", "totton", "ringwood", "southampton", "bournemouth"],
-    image: { src: "https://images.pexels.com/photos/33881640/pexels-photo-33881640.jpeg?auto=compress&cs=tinysrgb&w=800", alt: "New Forest village street in summer" },
     review: "hendonis",
     copy: [
       [
@@ -325,7 +332,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 11_000,
     nearby: ["new-forest", "bournemouth", "poole"],
-    image: { src: "https://images.pexels.com/photos/5784675/pexels-photo-5784675.jpeg?auto=compress&cs=tinysrgb&w=800", alt: "Green fields near Ringwood" },
     review: "victoria",
     copy: [
       [
@@ -360,7 +366,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 25_000,
     nearby: ["bournemouth", "poole", "ringwood", "dorset"],
-    image: { src: "https://images.pexels.com/photos/38210415/pexels-photo-38210415.jpeg?auto=compress&cs=tinysrgb&w=800", alt: "Christchurch harbour and waterfront" },
     review: "cozy",
     copy: [
       [
@@ -426,7 +431,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 293_500,
     nearby: ["bournemouth", "poole", "christchurch"],
-    image: { src: "https://images.pexels.com/photos/20814980/pexels-photo-20814980.jpeg?auto=compress&cs=tinysrgb&w=800", alt: "Dorset coastal town" },
     review: "kola",
     copy: [
       [
@@ -462,7 +466,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 21_500,
     nearby: ["chandlers-ford", "hedge-end"],
-    image: { src: "/Street%20Image%20when%20distributing%20flyers.webp", alt: "Street scene during leaflet distribution in Eastleigh" },
+    photo: { src: "/Street%20Image%20when%20distributing%20flyers.webp", alt: "Street scene during leaflet distribution in Eastleigh" },
     review: "new-arts",
     copy: [
       [
@@ -501,7 +505,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 13_000,
     nearby: ["southampton", "totton", "winchester"],
-    image: { src: "/Overhead-shot-residential-areas.webp", alt: "Overhead view of a residential street with houses and gardens, typical of the neighbourhoods we cover" },
     review: "auriel",
     copy: [
       [
@@ -540,7 +543,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 15_000,
     nearby: ["totton", "new-forest", "brockenhurst", "southampton"],
-    image: { src: "/Overhead-shot-residential-areas.webp", alt: "Overhead view of a residential street with houses and gardens, the kind of area covered door to door" },
     review: "new-arts",
     copy: [
       [
@@ -579,7 +581,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 17_500,
     nearby: ["southampton", "hythe", "romsey", "new-forest"],
-    image: { src: "/Overhead-shot-residential-areas.webp", alt: "Overhead view of a residential street with houses and gardens, typical of the estates we cover" },
     review: "cozy",
     copy: [
       [
@@ -620,7 +621,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 14_000,
     nearby: ["eastleigh", "chandlers-ford", "southampton"],
-    image: { src: "/Overhead-shot-residential-areas.webp", alt: "Overhead view of a residential street with houses and gardens, the kind of neighbourhood we cover door to door" },
     review: "hendonis",
     copy: [
       [
@@ -659,7 +659,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 13_000,
     nearby: ["eastleigh", "hedge-end", "southampton"],
-    image: { src: "/Overhead-shot-residential-areas.webp", alt: "Overhead view of a residential street with houses and gardens, typical of the estates we cover" },
     review: "victoria",
     copy: [
       [
@@ -698,7 +697,6 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     ],
     homes: 2_000,
     nearby: ["new-forest", "hythe", "southampton"],
-    image: { src: "/Overhead-shot-residential-areas.webp", alt: "Overhead view of a residential street with houses and gardens, typical of the neighbourhoods we cover" },
     review: "homebites",
     copy: [
       [
