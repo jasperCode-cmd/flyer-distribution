@@ -4,7 +4,7 @@ import StaggerGroup from "@/components/StaggerGroup";
 // The homepage's "Leaflet Services" section: the two print packages as large
 // cards, three core services as smaller cards, and the rest as one line of
 // links. Every description is the homepage's own, word for word; services
-// with a page of their own link to it, the rest to /services.
+// with a page of their own link to it, the rest to their card on /services.
 
 type Icon = "pen" | "printer" | "mail" | "target" | "hand";
 
@@ -12,14 +12,14 @@ export const PACKAGES = [
   {
     title: "Design, Print and Deliver",
     desc: "Our full end-to-end service. We handle everything from design and printing in A6, A5, A4 or DL through to full distribution across your chosen areas.",
-    href: "/services",
+    href: "/services#design-print-deliver",
     icon: "pen" as Icon,
     tags: ["Design", "Print", "Deliver"],
   },
   {
     title: "Print and Deliver",
     desc: "Already have your design ready? We handle the printing in A6, A5, A4 or DL and deliver your leaflets directly through letterboxes across Hampshire and Dorset.",
-    href: "/services",
+    href: "/services#print-and-deliver",
     icon: "printer" as Icon,
     tags: ["Print", "Deliver"],
   },
@@ -29,13 +29,13 @@ export const CORE_SERVICES = [
   {
     title: "Leaflet Distribution",
     desc: "Door-to-door delivery to households across your chosen areas. Your printed materials posted directly through letterboxes across Hampshire and Dorset.",
-    href: "/services",
+    href: "/services#leaflet-distribution",
     icon: "mail" as Icon,
   },
   {
     title: "Targeted Postcode Campaigns",
     desc: "We use postcode data to focus your distribution on the areas most likely to respond to your campaign. Rather than blanket coverage, we put your leaflets where your potential customers actually live.",
-    href: "/services",
+    href: "/services#targeted-postcode-campaigns",
     icon: "target" as Icon,
   },
   {
@@ -47,8 +47,8 @@ export const CORE_SERVICES = [
 ];
 
 export const MORE_SERVICES = [
-  { title: "Campaign Planning", href: "/services" },
-  { title: "Vehicle Leaflet Distribution", href: "/services" },
+  { title: "Campaign Planning", href: "/services#campaign-planning" },
+  { title: "Vehicle Leaflet Distribution", href: "/services#vehicle-leaflet-distribution" },
   { title: "Public Notice Leafleting", href: "/services/public-notice-leafleting" },
   { title: "B2B Leaflet Distribution", href: "/services/b2b-distribution" },
 ];

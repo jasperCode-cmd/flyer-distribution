@@ -40,8 +40,11 @@ export const metadata: Metadata = {
   },
 };
 
+// Each card has an id other pages link to (for example /services#print-and-deliver),
+// and a scroll margin so the sticky header never covers it.
 const packages = [
   {
+    id: "design-print-deliver",
     title: "Design, Print and Deliver",
     badge: "Most Popular",
     desc: "Our full end-to-end service. We work with you from the initial design right through to delivery. Bring us your idea and we handle everything including design, printing in A6, A5, A4 or DL, and full distribution across your chosen areas in Hampshire and Dorset.",
@@ -49,6 +52,7 @@ const packages = [
     alt: "Designer working on creative artwork at a desk",
   },
   {
+    id: "print-and-deliver",
     title: "Print and Deliver",
     badge: null,
     desc: "Already have your design ready? We handle the printing in A6, A5, A4 or DL and deliver your leaflets directly through letterboxes across Hampshire and Dorset.",
@@ -59,30 +63,35 @@ const packages = [
 
 const supportingServices = [
   {
+    id: "leaflet-distribution",
     title: "Leaflet Distribution",
     desc: "Standard door-to-door leaflet delivery to households across your chosen areas in Hampshire and Dorset. We handle the rounds so your printed materials land directly through letterboxes.",
     image: "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=800",
     alt: "Leaflets being delivered through a letterbox",
   },
   {
+    id: "targeted-postcode-campaigns",
     title: "Targeted Postcode Campaigns",
     desc: "We use postcode data to focus your distribution on the areas most likely to respond to your campaign. Rather than blanket coverage, we put your leaflets where your potential customers actually live.",
     image: "https://images.pexels.com/photos/17144737/pexels-photo-17144737.jpeg?auto=compress&cs=tinysrgb&w=800",
     alt: "Residential area targeted for leaflet distribution in Hampshire",
   },
   {
+    id: "campaign-planning",
     title: "Campaign Planning",
     desc: "Not sure where to start? We sit down with you to understand your business, your customers and your goals. Then we build a campaign plan around your budget and timeline.",
     image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80",
     alt: "Person reviewing campaign planning notes at a desk",
   },
   {
+    id: "vehicle-leaflet-distribution",
     title: "Vehicle Leaflet Distribution",
     desc: "Place leaflets on parked cars in car parks, retail areas, and high-footfall locations across Hampshire and Dorset. An effective way to reach people already out and spending locally.",
     image: "https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=800&q=80",
     alt: "Parked cars in a car park where leaflets can be distributed",
   },
   {
+    id: "public-notice-leafleting",
     title: "Public Notice Leafleting",
     desc: "Statutory door-to-door distribution supporting Section 47 and Section 48 Planning Act 2008 consultation requirements for Nationally Significant Infrastructure Projects across Hampshire.",
     image: "https://images.pexels.com/photos/17144737/pexels-photo-17144737.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -90,6 +99,7 @@ const supportingServices = [
     href: "/services/public-notice-leafleting",
   },
   {
+    id: "hand-to-hand-leaflet-distribution",
     title: "Hand-to-Hand Leaflet Distribution",
     desc: "Direct, face-to-face handouts at shopping centres, town centres and events, putting your leaflets straight into people's hands for immediate exposure.",
     image: "https://images.pexels.com/photos/19843566/pexels-photo-19843566.jpeg?auto=compress&cs=tinysrgb&w=800",
@@ -97,6 +107,7 @@ const supportingServices = [
     href: "/services/hand-to-hand-distribution",
   },
   {
+    id: "b2b-leaflet-distribution",
     title: "B2B Leaflet Distribution",
     desc: "Direct marketing to business owners and decision-makers at offices, business parks and commercial areas across Hampshire and Dorset.",
     image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&q=80",
@@ -250,7 +261,8 @@ export default function ServicesPage() {
             {packages.map((pkg) => (
               <div
                 key={pkg.title}
-                className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-lg transition-all"
+                id={pkg.id}
+                className="scroll-mt-24 bg-white rounded-xl border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-lg transition-all"
               >
                 <div className="relative">
                   <Image
@@ -308,7 +320,7 @@ export default function ServicesPage() {
           >
             {supportingServices.map((svc) => {
               const cardClass =
-                "group bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-md transition-all block h-full";
+                "scroll-mt-24 group bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-md transition-all block h-full";
               const content = (
                 <>
                   <Image
@@ -332,11 +344,11 @@ export default function ServicesPage() {
                 </>
               );
               return svc.href ? (
-                <Link key={svc.title} href={svc.href} className={cardClass}>
+                <Link key={svc.title} id={svc.id} href={svc.href} className={cardClass}>
                   {content}
                 </Link>
               ) : (
-                <div key={svc.title} className={cardClass}>
+                <div key={svc.title} id={svc.id} className={cardClass}>
                   {content}
                 </div>
               );

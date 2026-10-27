@@ -28,26 +28,27 @@ const textOf = (html: string) =>
     .replace(/\s+/g, " ")
     .trim();
 
-// The homepage's nine services as they were, word for word, and where each went.
+// The homepage's nine services, word for word, and where each goes: its own
+// page if it has one, otherwise its card on /services.
 const BEFORE: Record<string, { desc: string; href: string }> = {
   "Design, Print and Deliver": {
     desc: "Our full end-to-end service. We handle everything from design and printing in A6, A5, A4 or DL through to full distribution across your chosen areas.",
-    href: "/services",
+    href: "/services#design-print-deliver",
   },
   "Print and Deliver": {
     desc: "Already have your design ready? We handle the printing in A6, A5, A4 or DL and deliver your leaflets directly through letterboxes across Hampshire and Dorset.",
-    href: "/services",
+    href: "/services#print-and-deliver",
   },
   "Leaflet Distribution": {
     desc: "Door-to-door delivery to households across your chosen areas. Your printed materials posted directly through letterboxes across Hampshire and Dorset.",
-    href: "/services",
+    href: "/services#leaflet-distribution",
   },
   "Targeted Postcode Campaigns": {
     desc: "We use postcode data to focus your distribution on the areas most likely to respond to your campaign. Rather than blanket coverage, we put your leaflets where your potential customers actually live.",
-    href: "/services",
+    href: "/services#targeted-postcode-campaigns",
   },
-  "Vehicle Leaflet Distribution": { desc: "", href: "/services" },
-  "Campaign Planning": { desc: "", href: "/services" },
+  "Vehicle Leaflet Distribution": { desc: "", href: "/services#vehicle-leaflet-distribution" },
+  "Campaign Planning": { desc: "", href: "/services#campaign-planning" },
   "Public Notice Leafleting": { desc: "", href: "/services/public-notice-leafleting" },
   "Hand-to-Hand Leaflet Distribution": {
     desc: "Direct, face-to-face handouts at shopping centres, town centres and events across Hampshire and Dorset for immediate brand exposure.",
@@ -56,7 +57,7 @@ const BEFORE: Record<string, { desc: string; href: string }> = {
   "B2B Leaflet Distribution": { desc: "", href: "/services/b2b-distribution" },
 };
 
-test("every service is still there, with its description word for word and the same link", () => {
+test("every service is still there, with its description word for word and its link", () => {
   const { PACKAGES, CORE_SERVICES, MORE_SERVICES } = render();
   const shown = [...PACKAGES, ...CORE_SERVICES, ...MORE_SERVICES];
   assert.deepEqual(shown.map((s) => s.title).sort(), Object.keys(BEFORE).sort());
@@ -109,9 +110,21 @@ test("the section renders the header, two packages, three cards and the Also lin
     [...also.matchAll(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/g)].map((m) => [m[1], textOf(m[2])]),
     [...MORE_SERVICES.map((s) => [s.href, s.title]), ["/services", "View all services"]]
   );
-  // Every old link target is kept, and nothing leaves the site.
+  // Every service keeps its page, View all services stays /services, and nothing leaves the site.
   const hrefs = new Set([...html.matchAll(/href="([^"]*)"/g)].map((m) => m[1]));
-  assert.deepEqual([...hrefs].sort(), ["/services", "/services/b2b-distribution", "/services/hand-to-hand-distribution", "/services/public-notice-leafleting"]);
+  assert.deepEqual([...hrefs].sort(), [
+    "/services",
+    "/services#campaign-planning",
+    "/services#design-print-deliver",
+    "/services#leaflet-distribution",
+    "/services#print-and-deliver",
+    "/services#targeted-postcode-campaigns",
+    "/services#vehicle-leaflet-distribution",
+    "/services/b2b-distribution",
+    "/services/hand-to-hand-distribution",
+    "/services/public-notice-leafleting",
+  ]);
+  assert.equal([...html.matchAll(/href="\/services">View all services/g)].length, 2);
   // House rules.
   assert.doesNotMatch(html, /[\u2013\u2014]/);
   for (const word of [/\bstreet/i, /£/, /\bprices?\b/i]) assert.doesNotMatch(text, word);
@@ -125,4 +138,30 @@ test("the homepage shows the section in the same place, and nothing else of it i
   assert.ok(caseStudies > 0 && caseStudies < section && section < coverage, `${caseStudies} ${section} ${coverage}`);
   assert.equal(page.split("<LeafletServices />").length - 1, 1);
   assert.doesNotMatch(page, /const services = \[|services\.map/);
+});
+
+test("every /services card has a stable id and a scroll margin, and each homepage anchor lands on one", () => {
+  const source = readFileSync("app/services/page.tsx", "utf8");
+  const ids = [...source.matchAll(/^    id: "([a-z0-9-]+)",\n    title: "([^"]+)",$/gm)].map((m) => [m[1], m[2]]);
+  assert.deepEqual(ids, [
+    ["design-print-deliver", "Design, Print and Deliver"],
+    ["print-and-deliver", "Print and Deliver"],
+    ["leaflet-distribution", "Leaflet Distribution"],
+    ["targeted-postcode-campaigns", "Targeted Postcode Campaigns"],
+    ["campaign-planning", "Campaign Planning"],
+    ["vehicle-leaflet-distribution", "Vehicle Leaflet Distribution"],
+    ["public-notice-leafleting", "Public Notice Leafleting"],
+    ["hand-to-hand-leaflet-distribution", "Hand-to-Hand Leaflet Distribution"],
+    ["b2b-leaflet-distribution", "B2B Leaflet Distribution"],
+  ]);
+  // Every card carries its id and clears the 65px sticky header with room to spare.
+  assert.match(source, /id=\{pkg\.id\}\n\s+className="scroll-mt-24 /);
+  assert.match(source, /"scroll-mt-24 group bg-white rounded-lg/);
+  assert.equal(source.split("id={svc.id}").length - 1, 2);
+  // Each homepage anchor names a real card, for the service it is about.
+  const { PACKAGES, CORE_SERVICES, MORE_SERVICES } = render();
+  const byId = new Map(ids.map(([id, title]) => [id, title]));
+  const anchored = [...PACKAGES, ...CORE_SERVICES, ...MORE_SERVICES].filter((s) => s.href.startsWith("/services#"));
+  assert.equal(anchored.length, 6);
+  for (const s of anchored) assert.equal(byId.get(s.href.slice("/services#".length)), s.title, s.href);
 });
