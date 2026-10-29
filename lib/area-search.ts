@@ -21,7 +21,7 @@ export type OverviewCard = {
   regionId: RegionId;
   regionLabel: string;
   blurb: string;
-  // "SO14 to SO19" and "About 107,500 homes".
+  // "SO14 to SO19" (for New Forest and Dorset, "22 postcodes") and "About 107,500 homes".
   range: string;
   homes: string;
   // The page's postcode districts and the places it lists under them.

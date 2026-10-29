@@ -26,7 +26,8 @@ export function overviewCards(): OverviewCard[] {
         regionId: region.id,
         regionLabel: region.label,
         blurb: entry.desc,
-        range: formatPostcodeRanges(codes),
+        // New Forest and Dorset give their count, as their quick facts do.
+        range: page.wide ? `${codes.length} postcodes` : formatPostcodeRanges(codes),
         homes: `About ${thousands(page.homes)} homes`,
         codes,
         // Its places, less the bare "Town centre" and "City centre", which name no town.

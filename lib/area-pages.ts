@@ -1,7 +1,9 @@
 // The 15 area pages' own details, drawn by components/AreaPage.tsx. Each
 // page's copy is its existing copy, word for word, as text and links, with
 // only the corrections asked for: Poole's, Dorset's and Bournemouth's
-// postcode ranges, Dorset's "covering everything" now "ranging",
+// postcode ranges, Dorset's "covering everything" now "ranging", Dorset
+// narrowed to its 22 real districts (with the sentences that named or
+// implied places beyond them reworded),
 // Southampton's "around 250,000 residents", and Fordingbridge out of the New
 // Forest copy (SP6 is in its postcodes instead). Its postcodes and
 // neighbourhood names are as confirmed, and its homes figure is the Census
@@ -38,6 +40,10 @@ export type AreaPageData = {
   // New Forest and Dorset: postcodes "we deliver to", never "every" or "all of".
   wide: boolean;
   postcodes: { code: string; places: string[] }[];
+  // New Forest and Dorset show their postcodes grouped by town instead of one
+  // card each: a name, its postcodes, a line of key places, and the area
+  // pages it links to.
+  groups?: { name: string; codes: string[]; places: string[]; pages: AreaSlug[] }[];
   homes: number;
   nearby: AreaSlug[];
   // A photo of the place itself (its own photo or a landmark) for the About section; most pages have none.
@@ -54,6 +60,9 @@ export type AreaPageData = {
 export const coverageMapSrc = (slug: AreaSlug) => `/area-maps/area-map-${slug}.webp`;
 export const coverageMapAlt = (area: AreaPageData) =>
   `Map of the ${area.name} postcodes we deliver to: ${formatPostcodeRanges(area.postcodes.map((p) => p.code))}, with neighbouring postcodes shown around them`;
+
+// "BH", 1, 3 as BH1, BH2 and BH3.
+const range = (prefix: string, from: number, to: number) => Array.from({ length: to - from + 1 }, (_, i) => `${prefix}${from + i}`);
 
 export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
   "southampton": {
@@ -166,7 +175,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
         " across the wider area.",
       ],
       [
-        "For businesses targeting higher-income demographics, Poole's waterfront and marina postcodes offer some of the highest-value residential distribution in Dorset, particularly for luxury services, premium restaurants, and home improvement. We also run county-wide ",
+        "For businesses targeting higher-income demographics, Poole's waterfront and marina postcodes offer some of the highest-value residential distribution in Dorset, particularly for luxury services, premium restaurants, and home improvement. We also run ",
         { href: "/areas/leaflet-distribution-dorset", text: "Dorset campaigns" },
         " for businesses wanting broader reach.",
       ],
@@ -240,6 +249,12 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
       { code: "BH24", places: ["Ringwood", "St Leonards", "St Ives", "Ellingham", "Burley"] },
       { code: "BH25", places: ["New Milton", "Barton on Sea", "Ashley"] },
       { code: "SP6", places: ["Fordingbridge"] },
+    ],
+    groups: [
+      { name: "Totton and Waterside", codes: ["SO40", "SO45"], places: ["Totton", "Marchwood", "Hythe", "Dibden Purlieu", "Fawley"], pages: ["totton", "hythe"] },
+      { name: "Lyndhurst and Brockenhurst", codes: ["SO42", "SO43"], places: ["Lyndhurst", "Brockenhurst", "Beaulieu"], pages: ["brockenhurst"] },
+      { name: "Lymington and New Milton", codes: ["SO41", "BH25"], places: ["Lymington", "Milford on Sea", "New Milton", "Barton on Sea"], pages: [] },
+      { name: "Ringwood and Fordingbridge", codes: ["BH24", "SP6"], places: ["Ringwood", "Burley", "Fordingbridge"], pages: ["ringwood"] },
     ],
     homes: 80_000,
     nearby: ["brockenhurst", "hythe", "totton", "ringwood", "southampton", "bournemouth"],
@@ -368,35 +383,36 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
       { code: "BH21", places: ["Wimborne Minster", "Colehill", "Ferndown", "Holt", "Corfe Mullen"] },
       { code: "BH22", places: ["Ferndown", "West Moors", "West Parley"] },
       { code: "BH23", places: ["Christchurch", "Highcliffe", "Mudeford", "Burton", "Bransgore", "Hurn"] },
-      { code: "BH24", places: ["Ringwood", "St Leonards", "St Ives", "Ellingham", "Burley"] },
-      { code: "DT1", places: ["Dorchester", "Poundbury"] },
-      { code: "DT2", places: ["Puddletown", "Crossways", "Charminster"] },
-      { code: "DT3", places: ["Upwey", "Broadwey", "Preston", "Chickerell", "Abbotsbury"] },
-      { code: "DT4", places: ["Weymouth", "Wyke Regis", "Westham"] },
-      { code: "DT9", places: ["Sherborne and surrounding villages"] },
-      { code: "DT11", places: ["Blandford Forum and surrounding villages"] },
+      { code: "BH31", places: ["Verwood"] },
     ],
-    homes: 293_500,
+    groups: [
+      { name: "Bournemouth", codes: range("BH", 1, 11), places: ["Boscombe", "Southbourne", "Winton", "Kinson", "Westbourne"], pages: ["bournemouth"] },
+      { name: "Poole", codes: range("BH", 12, 18), places: ["Parkstone", "Canford Cliffs", "Hamworthy", "Broadstone", "Upton"], pages: ["poole"] },
+      { name: "Christchurch", codes: ["BH23"], places: ["Highcliffe", "Mudeford", "Bransgore"], pages: ["christchurch"] },
+      { name: "Wimborne and Ferndown", codes: ["BH21", "BH22"], places: ["Wimborne Minster", "Colehill", "Corfe Mullen", "Ferndown", "West Moors", "West Parley"], pages: [] },
+      { name: "Verwood", codes: ["BH31"], places: ["Verwood"], pages: [] },
+    ],
+    homes: 216_000,
     nearby: ["bournemouth", "poole", "christchurch"],
     copy: [
       [
-        "Dorset is one of the most varied counties for leaflet distribution, ranging from the busy urban centres of Bournemouth and Poole through to the quieter market towns and coastal villages further west. If you are running a campaign that needs to reach audiences across the county rather than a single town, a Dorset-wide campaign is the most effective way to do it.",
+        "Dorset is one of the most varied counties for leaflet distribution, ranging from the busy urban centres of Bournemouth and Poole through to the smaller towns around them. If you are running a campaign that needs to reach audiences across the area rather than a single town, a campaign across Bournemouth, Poole and the surrounding towns is the most effective way to do it.",
       ],
       [
-        "We cover all major Dorset postcode areas including BH1 through BH18, BH21 through BH24, DT1 and surrounding Dorchester postcodes, and the coastal and rural areas in between. This makes us the right partner for businesses with a broad Dorset audience, including regional service providers, national brands running local activations, charities covering the county, and event promoters reaching across multiple towns at once.",
+        "We cover the main postcode areas around Bournemouth, Poole and Christchurch, including BH1 through BH18, BH21 through BH23 and BH31, and the coastal and rural areas in between. This makes us the right partner for businesses with a broad Dorset audience, including regional service providers, national brands running local activations, charities covering the county, and event promoters reaching across multiple towns at once.",
       ],
       [
         "Where you need coverage in a specific town such as ",
         { href: "/areas/leaflet-distribution-poole", text: "Poole" },
         " or Bournemouth, we also offer targeted campaigns for each area individually. The same goes for ",
         { href: "/areas/leaflet-distribution-christchurch", text: "Christchurch" },
-        ". County-wide and multi-town campaigns are priced and planned as a single campaign, so you get one point of contact and one coordinated delivery.",
+        ". Multi-town campaigns are priced and planned as a single campaign, so you get one point of contact and one coordinated delivery.",
       ],
     ],
     faqs: [
-      "Our Dorset coverage is built around Bournemouth and Poole (BH1 to BH18), Wimborne Minster and Ferndown (BH21 and BH22), Christchurch (BH23), Ringwood (BH24), Dorchester, Weymouth and the villages around them (DT1 to DT4), Sherborne (DT9) and Blandford Forum (DT11).",
-      "Yes. There's no need to go county-wide: you can choose one or two districts, such as DT4 for Weymouth or BH21 for Wimborne Minster, and narrow them to specific sectors.",
-      "Yes. You could combine Bournemouth, Poole and Christchurch, or pair Dorchester with Weymouth, and the whole campaign is planned and quoted together.",
+      "Our Dorset coverage is built around Bournemouth and Poole (BH1 to BH18), Wimborne Minster and Ferndown (BH21 and BH22), Christchurch (BH23) and Verwood (BH31).",
+      "Yes. There's no need to cover the whole area at once: you can choose one or two districts, such as BH31 for Verwood or BH21 for Wimborne Minster, and narrow them to specific sectors.",
+      "Yes. You could combine Bournemouth, Poole and Christchurch, or pair Wimborne Minster with Ferndown, and the whole campaign is planned and quoted together.",
       "Each Dorset round is GPS tracked, in the towns and the rural districts alike, and at the end we send one route report for the whole campaign.",
     ],
     question3: "Can you deliver to several Dorset towns in one campaign?",

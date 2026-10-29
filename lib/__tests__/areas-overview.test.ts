@@ -43,16 +43,18 @@ test("one card per area page, in region order, with its old blurb, postcodes and
     assert.equal(card.name, page.name);
     assert.equal(card.blurb, areas.find((a) => a.href === card.href)!.desc, card.slug);
     assert.deepEqual(card.codes, page.postcodes.map((p) => p.code));
-    assert.equal(card.range, formatPostcodeRanges(card.codes));
+    // New Forest and Dorset give their count; the rest their range.
+    assert.equal(card.range, page.wide ? `${card.codes.length} postcodes` : formatPostcodeRanges(card.codes), card.slug);
     assert.equal(card.wide, page.wide);
     assert.equal(card.regionLabel, AREA_REGIONS.find((r) => r.id === card.regionId)!.label);
   }
   const bySlug = Object.fromEntries(cards.map((c) => [c.slug, c]));
   assert.equal(bySlug.southampton.homes, "About 107,500 homes");
   assert.equal(bySlug.brockenhurst.homes, "About 2,000 homes");
-  assert.equal(bySlug.dorset.homes, "About 293,500 homes");
+  assert.equal(bySlug.dorset.homes, "About 216,000 homes");
   assert.equal(bySlug.winchester.range, "SO21 to SO24 and SO32");
-  assert.equal(bySlug.dorset.range, "BH1 to BH18, BH21 to BH24, DT1 to DT4, DT9 and DT11");
+  assert.equal(bySlug.dorset.range, "22 postcodes");
+  assert.equal(bySlug["new-forest"].range, "8 postcodes");
   assert.equal(bySlug.poole.blurb, "Affluent harbour town with excellent residential distribution routes.");
   // Dorset's card claims only what its page covers; the page itself is unchanged.
   assert.equal(bySlug.dorset.blurb, "Coverage across Dorset, including Bournemouth, Poole, Christchurch and surrounding towns.");
@@ -68,7 +70,10 @@ test("postcodes find the pages that list their district, in any case and with or
   assert.deepEqual(find("bh23"), ["christchurch", "dorset"]);
   assert.deepEqual(find("SP6"), ["new-forest"]);
   // Town pages first, then New Forest and Dorset.
-  assert.deepEqual(find("BH24"), ["ringwood", "new-forest", "dorset"]);
+  assert.deepEqual(find("BH24"), ["ringwood", "new-forest"]);
+  assert.deepEqual(find("BH31"), ["dorset"]);
+  // Dorset's DT postcodes are gone: none of them, nor the letters alone, find it.
+  for (const q of ["DT1", "DT4 7AA", "dt11", "DT9", "DT"]) assert.deepEqual(find(q), [], q);
   assert.deepEqual(find("SO42 7AA"), ["brockenhurst", "new-forest"]);
   // The district a search names.
   assert.equal(postcodeDistrict("BH14"), "BH14");
@@ -97,7 +102,9 @@ test("town names find their page, from the start of any word, in any case", () =
   assert.deepEqual(find("Eastleigh"), ["eastleigh"]);
   // The places each page lists under its postcodes count too.
   assert.deepEqual(find("Lymington"), ["new-forest"]);
-  assert.deepEqual(find("Weymouth"), ["dorset"]);
+  assert.deepEqual(find("Verwood"), ["dorset"]);
+  // Places we no longer cover find nothing.
+  for (const q of ["Weymouth", "Dorchester", "Sherborne", "Blandford", "Swanage", "Wareham"]) assert.deepEqual(find(q), [], q);
   assert.deepEqual(find("Totton"), ["totton", "new-forest"]);
   assert.deepEqual(find("Poole"), ["poole", "dorset"]);
   // Bare "Town centre" and "City centre" are not towns.

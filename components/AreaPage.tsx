@@ -1,8 +1,9 @@
+import { Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Breadcrumb from "@/components/Breadcrumb";
 import ReviewBand from "@/components/ReviewBand";
-import { AREA_PAGES, coverageMapAlt, coverageMapSrc, type AreaPageData } from "@/lib/area-pages";
+import { AREA_PAGES, coverageMapAlt, coverageMapSrc, type AreaPageData, type AreaSlug } from "@/lib/area-pages";
 import { formatPostcodeRanges } from "@/lib/postcode-ranges";
 
 // The shared template for the area pages (/areas/leaflet-distribution-[area]).
@@ -20,6 +21,27 @@ const YELLOW_BUTTON =
   "inline-block bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold px-7 py-3.5 rounded-md transition duration-200 ease-out hover:scale-105 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-blue-900";
 const PILL =
   "inline-block rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-800 hover:border-blue-400 hover:bg-blue-50 transition-colors";
+
+// A group's name or one of its places, with the first mention of each of the
+// group's area pages ("Totton", "Hythe") as a link to that page.
+function withPageLinks(text: string, pages: AreaSlug[], linked: Set<AreaSlug>): React.ReactNode {
+  for (const slug of pages) {
+    const name = AREA_PAGES[slug].name;
+    const at = linked.has(slug) ? -1 : text.indexOf(name);
+    if (at < 0) continue;
+    linked.add(slug);
+    return (
+      <>
+        {text.slice(0, at)}
+        <Link href={`/areas/leaflet-distribution-${slug}`} className="text-blue-700 underline underline-offset-2 hover:text-blue-900">
+          {name}
+        </Link>
+        {withPageLinks(text.slice(at + name.length), pages, linked)}
+      </>
+    );
+  }
+  return text;
+}
 
 // 107500 as "107,500".
 const thousands = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -166,14 +188,45 @@ export default function AreaPage({ area }: { area: AreaPageData }) {
           <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-6">
             {area.wide ? `${area.name} postcodes we deliver to` : `Every ${area.name} postcode we deliver to`}
           </h2>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {area.postcodes.map((p) => (
-              <li key={p.code} className="rounded-xl border border-gray-200 bg-slate-50 p-5">
-                <h3 className="text-lg font-bold text-blue-900">{p.code}</h3>
-                <p className="mt-1 text-sm text-gray-600 leading-relaxed">{p.places.join(", ")}</p>
-              </li>
-            ))}
-          </ul>
+          {area.groups ? (
+            // New Forest and Dorset: one row per town, its postcodes as tags.
+            <ul className="divide-y divide-gray-200 rounded-2xl border border-gray-200 bg-slate-50">
+              {area.groups.map((group) => {
+                const linked = new Set<AreaSlug>();
+                return (
+                  <li key={group.name} className="flex flex-col gap-3 p-5 sm:p-6 md:flex-row md:items-start md:justify-between md:gap-8">
+                    <div className="md:max-w-xl">
+                      <h3 className="text-lg font-bold text-blue-900">{withPageLinks(group.name, group.pages, linked)}</h3>
+                      <p className="mt-1 text-sm text-gray-600 leading-relaxed">
+                        {group.places.map((place, i) => (
+                          <Fragment key={place}>
+                            {i > 0 && ", "}
+                            {withPageLinks(place, group.pages, linked)}
+                          </Fragment>
+                        ))}
+                      </p>
+                    </div>
+                    <ul aria-label={`${group.name} postcodes`} className="flex flex-wrap gap-1.5 md:max-w-sm md:justify-end">
+                      {group.codes.map((code) => (
+                        <li key={code} className="rounded-full border border-blue-100 bg-white px-2.5 py-0.5 text-xs font-semibold text-blue-800">
+                          {code}
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {area.postcodes.map((p) => (
+                <li key={p.code} className="rounded-xl border border-gray-200 bg-slate-50 p-5">
+                  <h3 className="text-lg font-bold text-blue-900">{p.code}</h3>
+                  <p className="mt-1 text-sm text-gray-600 leading-relaxed">{p.places.join(", ")}</p>
+                </li>
+              ))}
+            </ul>
+          )}
           <p className="mt-6 text-gray-600 text-lg">
             {area.wide ? "" : `We cover all of ${area.inName}. `}Choose whole postcodes or just the sectors that suit your business.
           </p>

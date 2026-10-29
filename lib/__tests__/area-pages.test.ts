@@ -39,7 +39,7 @@ test("the postcode lists are the confirmed ones, each with its neighbourhood nam
     "new-forest": ["SO40", "SO41", "SO42", "SO43", "SO45", "BH24", "BH25", "SP6"],
     ringwood: ["BH24"],
     christchurch: ["BH23"],
-    dorset: [...range("BH", 1, 18), ...range("BH", 21, 24), ...range("DT", 1, 4), "DT9", "DT11"],
+    dorset: [...range("BH", 1, 18), "BH21", "BH22", "BH23", "BH31"],
     eastleigh: ["SO50"],
     romsey: ["SO51"],
     hythe: ["SO45"],
@@ -52,7 +52,10 @@ test("the postcode lists are the confirmed ones, each with its neighbourhood nam
     assert.deepEqual(page.postcodes.map((p) => p.code), expected[page.slug], page.slug);
     for (const p of page.postcodes) assert.ok(p.places.length > 0 && p.places.every((x) => x.trim()), `${page.slug} ${p.code}`);
   }
-  assert.equal(AREA_PAGES.dorset.postcodes.length, 28);
+  assert.equal(AREA_PAGES.dorset.postcodes.length, 22);
+  // Our real Dorset coverage: no DT postcode anywhere, and BH24 only on Ringwood and New Forest.
+  for (const page of pages) assert.ok(!page.postcodes.some((p) => p.code.startsWith("DT")), page.slug);
+  assert.deepEqual(pages.filter((p) => p.postcodes.some((c) => c.code === "BH24")).map((p) => p.slug).sort(), ["new-forest", "ringwood"]);
   // A postcode shared between pages has the same names on each.
   const names = new Map<string, string>();
   for (const page of pages)
@@ -63,7 +66,7 @@ test("the postcode lists are the confirmed ones, each with its neighbourhood nam
     }
   assert.equal(names.get("SO14"), "City centre, Bevois");
   assert.equal(names.get("BH25"), "New Milton, Barton on Sea, Ashley");
-  assert.equal(names.get("DT11"), "Blandford Forum and surrounding villages");
+  assert.equal(names.get("BH31"), "Verwood");
   assert.equal(names.get("SP6"), "Fordingbridge");
   // SO31 is nowhere.
   assert.doesNotMatch(readFileSync("lib/area-pages.ts", "utf8"), /SO31/);
@@ -138,7 +141,8 @@ test("four answers per page, all different, each about that page", () => {
 const BANNED = [/\bstreet/i, /live tracked/i, /see where every flyer goes/i, /£/, /\bprices? from\b/i];
 
 function visibleText(page: AreaPageData): string {
-  return [squash(textOf(page.copy)), ...page.faqs, page.question3 ?? "", page.eyebrow, ...page.postcodes.flatMap((p) => p.places)].join("\n");
+  const groups = (page.groups ?? []).flatMap((g) => [g.name, ...g.places]);
+  return [squash(textOf(page.copy)), ...page.faqs, page.question3 ?? "", page.eyebrow, ...page.postcodes.flatMap((p) => p.places), ...groups].join("\n");
 }
 
 test("no banned words, and no links off the site, in any page's own text", () => {
@@ -173,9 +177,12 @@ test("New Forest and Dorset never say \"every\" or \"all of\"", () => {
 test("the copy is the old copy, with only the corrections asked for", () => {
   assert.match(squash(textOf(AREA_PAGES.poole.copy)), /Our distributors cover BH12 through BH18 and surrounding postcodes/);
   const dorset = squash(textOf(AREA_PAGES.dorset.copy));
-  assert.match(dorset, /including BH1 through BH18, BH21 through BH24, DT1 and surrounding Dorchester postcodes/);
-  assert.match(dorset, /ranging from the busy urban centres/);
-  assert.match(dorset, /are priced and planned as a single campaign/);
+  assert.match(dorset, /ranging from the busy urban centres of Bournemouth and Poole through to the smaller towns around them\./);
+  assert.match(dorset, /a campaign across Bournemouth, Poole and the surrounding towns is the most effective way to do it/);
+  assert.match(dorset, /We cover the main postcode areas around Bournemouth, Poole and Christchurch, including BH1 through BH18, BH21 through BH23 and BH31/);
+  assert.match(dorset, /Multi-town campaigns are priced and planned as a single campaign/);
+  assert.match(AREA_PAGES.dorset.faqs[1], /There's no need to cover the whole area at once/);
+  assert.match(squash(textOf(AREA_PAGES.poole.copy)), /We also run Dorset campaigns for businesses wanting broader reach\./);
   assert.match(squash(textOf(AREA_PAGES.bournemouth.copy)), /We cover BH1 through BH11 and surrounding postcodes/);
   assert.match(squash(textOf(AREA_PAGES.southampton.copy)), /home to around 250,000 residents/);
   const forest = squash(textOf(AREA_PAGES["new-forest"].copy));
@@ -187,7 +194,7 @@ test("postcode ranges read naturally", () => {
   assert.equal(formatPostcodeRanges(range("SO", 14, 19)), "SO14 to SO19");
   assert.equal(formatPostcodeRanges(["SO21", "SO22", "SO23", "SO24", "SO32"]), "SO21 to SO24 and SO32");
   assert.equal(formatPostcodeRanges(["SO40", "SO41", "SO42", "SO43", "SO45", "BH24", "BH25"]), "SO40 to SO43, SO45, BH24 and BH25");
-  assert.equal(formatPostcodeRanges(AREA_PAGES.dorset.postcodes.map((p) => p.code)), "BH1 to BH18, BH21 to BH24, DT1 to DT4, DT9 and DT11");
+  assert.equal(formatPostcodeRanges(AREA_PAGES.dorset.postcodes.map((p) => p.code)), "BH1 to BH18, BH21 to BH23 and BH31");
   assert.equal(formatPostcodeRanges(["SO51"]), "SO51");
   assert.equal(formatPostcodeRanges(AREA_PAGES["new-forest"].postcodes.map((p) => p.code)), "SO40 to SO43, SO45, BH24, BH25 and SP6");
 });
@@ -232,7 +239,7 @@ test("each page's hero is its own coverage map, 1320 by 990, described in full a
   );
   assert.equal(
     coverageMapAlt(AREA_PAGES.dorset),
-    "Map of the Dorset postcodes we deliver to: BH1 to BH18, BH21 to BH24, DT1 to DT4, DT9 and DT11, with neighbouring postcodes shown around them"
+    "Map of the Dorset postcodes we deliver to: BH1 to BH18, BH21 to BH23 and BH31, with neighbouring postcodes shown around them"
   );
   assert.equal(
     coverageMapAlt(AREA_PAGES["chandlers-ford"]),
@@ -267,4 +274,52 @@ test("only photos of the place itself sit beside the About copy, and nothing use
   // Nor does the homepage any more, so the file is gone.
   for (const file of ["app/page.tsx", "components/HomeAreas.tsx"]) assert.doesNotMatch(readFileSync(file, "utf8"), aerial, file);
   assert.ok(!existsSync("public/Overhead-shot-residential-areas.webp"));
+});
+
+test("nowhere claims Dorset coverage beyond our 22 districts", () => {
+  const dropped = /Dorchester|Weymouth|Sherborne|Blandford|Swanage|Wareham|county-wide|Dorset-wide|further west|all major Dorset/i;
+  for (const page of pages) assert.doesNotMatch(visibleText(page), dropped, page.slug);
+  const file = readFileSync("app/areas/leaflet-distribution-dorset/page.tsx", "utf8");
+  const description = "Leaflet and flyer distribution across Dorset. Covering Bournemouth, Poole, Christchurch, Wimborne, Ferndown and surrounding towns.";
+  assert.equal(file.split(`"${description}"`).length - 1, 3, "meta, Open Graph and Twitter");
+  assert.doesNotMatch(file, dropped);
+  assert.equal(AREA_PAGES.dorset.faqs[0], "Our Dorset coverage is built around Bournemouth and Poole (BH1 to BH18), Wimborne Minster and Ferndown (BH21 and BH22), Christchurch (BH23) and Verwood (BH31).");
+  assert.match(AREA_PAGES.dorset.faqs[1], /such as BH31 for Verwood or BH21 for Wimborne Minster/);
+  assert.match(AREA_PAGES.dorset.faqs[2], /or pair Wimborne Minster with Ferndown/);
+});
+
+test("New Forest and Dorset group their postcodes by town; every other page keeps a card per postcode", () => {
+  assert.deepEqual(pages.filter((p) => p.groups).map((p) => p.slug).sort(), ["dorset", "new-forest"]);
+  const expected: Record<string, [string, string[], string[], AreaSlug[]][]> = {
+    dorset: [
+      ["Bournemouth", range("BH", 1, 11), ["Boscombe", "Southbourne", "Winton", "Kinson", "Westbourne"], ["bournemouth"]],
+      ["Poole", range("BH", 12, 18), ["Parkstone", "Canford Cliffs", "Hamworthy", "Broadstone", "Upton"], ["poole"]],
+      ["Christchurch", ["BH23"], ["Highcliffe", "Mudeford", "Bransgore"], ["christchurch"]],
+      ["Wimborne and Ferndown", ["BH21", "BH22"], ["Wimborne Minster", "Colehill", "Corfe Mullen", "Ferndown", "West Moors", "West Parley"], []],
+      ["Verwood", ["BH31"], ["Verwood"], []],
+    ],
+    "new-forest": [
+      ["Totton and Waterside", ["SO40", "SO45"], ["Totton", "Marchwood", "Hythe", "Dibden Purlieu", "Fawley"], ["totton", "hythe"]],
+      ["Lyndhurst and Brockenhurst", ["SO42", "SO43"], ["Lyndhurst", "Brockenhurst", "Beaulieu"], ["brockenhurst"]],
+      ["Lymington and New Milton", ["SO41", "BH25"], ["Lymington", "Milford on Sea", "New Milton", "Barton on Sea"], []],
+      ["Ringwood and Fordingbridge", ["BH24", "SP6"], ["Ringwood", "Burley", "Fordingbridge"], ["ringwood"]],
+    ],
+  };
+  for (const slug of ["dorset", "new-forest"] as const) {
+    const page = AREA_PAGES[slug];
+    assert.deepEqual(page.groups!.map((g) => [g.name, g.codes, g.places, g.pages]), expected[slug], slug);
+    // Every postcode in exactly one group, and each group's places from its own postcodes.
+    assert.deepEqual(page.groups!.flatMap((g) => g.codes).sort(), page.postcodes.map((p) => p.code).sort(), slug);
+    for (const g of page.groups!) {
+      const own = new Set(page.postcodes.filter((p) => g.codes.includes(p.code)).flatMap((p) => p.places));
+      for (const place of g.places) assert.ok(own.has(place), `${slug} ${g.name}: ${place}`);
+      // Each linked page is named in the group, so it has something to link.
+      for (const linked of g.pages) assert.ok([g.name, ...g.places].some((t) => t.includes(AREA_PAGES[linked].name)), `${g.name} names ${linked}`);
+    }
+  }
+  // The template draws groups where a page has them, and the old card grid otherwise.
+  const template = readFileSync("components/AreaPage.tsx", "utf8");
+  assert.match(template, /\{area\.groups \? \(/);
+  assert.match(template, /area\.postcodes\.map\(\(p\) => \(\n\s+<li key=\{p\.code\} className="rounded-xl border border-gray-200 bg-slate-50 p-5">/);
+  assert.match(template, /area\.wide \? `\$\{area\.name\} postcodes we deliver to`/);
 });

@@ -5,14 +5,14 @@ import { AREA_PAGES } from "@/lib/area-pages";
 export const metadata: Metadata = {
   title: "Leaflet Distribution Dorset",
   description:
-    "County-wide leaflet and flyer distribution across Dorset. Covering Bournemouth, Poole, Christchurch, Weymouth and surrounding towns.",
+    "Leaflet and flyer distribution across Dorset. Covering Bournemouth, Poole, Christchurch, Wimborne, Ferndown and surrounding towns.",
   alternates: {
     canonical: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-dorset",
   },
   openGraph: {
     title: "Leaflet Distribution Dorset",
     description:
-      "County-wide leaflet and flyer distribution across Dorset. Covering Bournemouth, Poole, Christchurch, Weymouth and surrounding towns.",
+      "Leaflet and flyer distribution across Dorset. Covering Bournemouth, Poole, Christchurch, Wimborne, Ferndown and surrounding towns.",
     url: "https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-dorset",
     siteName: "Flyer Distribution Hampshire",
     images: [
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Leaflet Distribution Dorset",
     description:
-      "County-wide leaflet and flyer distribution across Dorset. Covering Bournemouth, Poole, Christchurch, Weymouth and surrounding towns.",
+      "Leaflet and flyer distribution across Dorset. Covering Bournemouth, Poole, Christchurch, Wimborne, Ferndown and surrounding towns.",
     images: [
       "https://images.pexels.com/photos/35110918/pexels-photo-35110918.jpeg?auto=compress&cs=tinysrgb&w=1200",
     ],
