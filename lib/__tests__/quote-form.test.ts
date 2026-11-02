@@ -86,6 +86,46 @@ test("the cards are one keyboard-reachable choice outside the form, and the drop
   assert.ok(!form.includes("Select a service..."));
 });
 
+test("Leaflet Distribution leads: wider, dark blue, badged, and plainly selected; the other two as before", () => {
+  const cards = between("<fieldset", "</fieldset>");
+  // Wider on desktop, first and full width when they stack, in the same order.
+  assert.match(cards, /grid grid-cols-1 sm:grid-cols-\[1\.3fr_1fr_1fr\] gap-3/);
+  assert.deepEqual(QUOTE_SERVICES.map((s) => s.param), ["leaflet", "web", "screen"]);
+  // Dark blue with a soft shadow; a 3px yellow ring when chosen; focus shows white then yellow.
+  assert.match(cards, /const featured = s\.param === "leaflet";/);
+  assert.match(cards, /border-\[#1e3a8a\] bg-\[#1e3a8a\] shadow-\[/);
+  assert.match(cards, /chosen \? "ring-\[3px\] ring-\[#facc15\]" : ""/);
+  assert.match(cards, /has-\[:focus-visible\]:ring-\[3px\] has-\[:focus-visible\]:ring-\[#facc15\] has-\[:focus-visible\]:ring-offset-2 has-\[:focus-visible\]:ring-offset-white/);
+  // White title, light blue line, yellow icon.
+  assert.match(cards, /featured \? "text-white" : "text-gray-900"/);
+  assert.match(cards, /featured \? "text-\[#dbeafe\]" : "text-gray-600"/);
+  assert.match(cards, /featured \? "text-\[#facc15\]" : chosen \? "text-blue-700" : "text-gray-500"/);
+  // "Start here" becomes "Selected", seen but not read out: the radio already says it.
+  assert.match(cards, /<span aria-hidden="true"[^>]*text-\[#facc15\]">\s+\{chosen \? \(\s+<>\s+Selected/);
+  assert.match(cards, /\) : \(\s+<>\s+Start here/);
+  // The other two keep their look: white, a light border, blue and light blue when chosen.
+  assert.match(cards, /"border-blue-700 bg-blue-50 shadow-\[0_0_0_4px_rgba\(29,78,216,0\.12\),0_8px_20px_-6px_rgba\(29,78,216,0\.35\)\]"/);
+  assert.match(cards, /"border-gray-200 bg-white hover:border-gray-300"/);
+  assert.match(cards, /has-\[:focus-visible\]:ring-2 has-\[:focus-visible\]:ring-blue-500 has-\[:focus-visible\]:ring-offset-2/);
+
+  // As first shown: the badge and "Start here" on the leaflet card only, and
+  // the badge read as part of its description.
+  const run = spawnSync(process.execPath, ["--import", "tsx", "lib/__tests__/render-quote-form.ts"], { encoding: "utf8" });
+  assert.equal(run.status, 0, run.stderr);
+  const labels = [...run.stdout.matchAll(/<label class="([^"]*)">([\s\S]*?)<\/label>/g)];
+  assert.equal(labels.length, 3);
+  const [leaflet, web, screen] = labels;
+  assert.match(leaflet[1], /bg-\[#1e3a8a\]/);
+  assert.match(leaflet[2], /aria-describedby="quote-service-leaflet-line quote-service-leaflet-badge"/);
+  assert.match(leaflet[2], /<span id="quote-service-leaflet-badge"[^>]*>Most popular<\/span>/);
+  assert.match(leaflet[2], /<span aria-hidden="true"[^>]*>Start here<svg/);
+  for (const card of [web, screen]) {
+    assert.match(card[1], /border-gray-200 bg-white/);
+    assert.doesNotMatch(card[2], /Most popular|Start here|Selected/);
+    assert.match(card[2], /aria-describedby="quote-service-(web|screen)-line"/);
+  }
+});
+
 test("the details come first, then the service heading, Company, and the service where the dropdown was", () => {
   const order = [
     ">Your details</h3>",

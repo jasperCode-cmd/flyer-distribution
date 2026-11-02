@@ -126,17 +126,27 @@ export default function QuoteForm() {
         <legend className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-gray-500">
           What do you need?
         </legend>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* Leaflet Distribution leads: wider on desktop and first when they stack. */}
+        <div className="grid grid-cols-1 sm:grid-cols-[1.3fr_1fr_1fr] gap-3">
           {QUOTE_SERVICES.map((s) => {
             const chosen = serviceType === s.value;
-            return (
-              <label
-                key={s.param}
-                className={`relative flex sm:flex-col items-start gap-3 sm:gap-2.5 rounded-xl border-2 p-4 cursor-pointer transition-[border-color,background-color,box-shadow] duration-200 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500 has-[:focus-visible]:ring-offset-2 ${
+            // The leaflet card: dark blue, a "Most popular" badge, and a yellow
+            // ring when chosen. Its focus ring is white then yellow, so it
+            // shows against the dark card and the white page alike.
+            const featured = s.param === "leaflet";
+            const look = featured
+              ? `border-[#1e3a8a] bg-[#1e3a8a] shadow-[0_12px_28px_-10px_rgba(30,58,138,0.65)] has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-[#facc15] has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-white ${
+                  chosen ? "ring-[3px] ring-[#facc15]" : ""
+                }`
+              : `has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500 has-[:focus-visible]:ring-offset-2 ${
                   chosen
                     ? "border-blue-700 bg-blue-50 shadow-[0_0_0_4px_rgba(29,78,216,0.12),0_8px_20px_-6px_rgba(29,78,216,0.35)]"
                     : "border-gray-200 bg-white hover:border-gray-300"
-                }`}
+                }`;
+            return (
+              <label
+                key={s.param}
+                className={`relative flex sm:flex-col items-start gap-3 sm:gap-2.5 rounded-xl border-2 p-4 cursor-pointer transition-[border-color,background-color,box-shadow] duration-200 ${look}`}
               >
                 <input
                   type="radio"
@@ -145,17 +155,56 @@ export default function QuoteForm() {
                   checked={chosen}
                   onChange={() => setServiceType(s.value)}
                   aria-labelledby={`quote-service-${s.param}`}
-                  aria-describedby={`quote-service-${s.param}-line`}
+                  aria-describedby={
+                    featured ? `quote-service-${s.param}-line quote-service-${s.param}-badge` : `quote-service-${s.param}-line`
+                  }
                   className="sr-only"
                 />
-                <ServiceIcon param={s.param} className={chosen ? "text-blue-700" : "text-gray-500"} />
-                <span>
-                  <span id={`quote-service-${s.param}`} className="block font-bold text-gray-900 leading-snug">
+                {featured && (
+                  <span
+                    id={`quote-service-${s.param}-badge`}
+                    className="absolute -top-2.5 left-3 rounded-full bg-[#facc15] px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-[#1e3a8a] leading-none"
+                  >
+                    Most popular
+                  </span>
+                )}
+                <ServiceIcon
+                  param={s.param}
+                  className={featured ? "text-[#facc15]" : chosen ? "text-blue-700" : "text-gray-500"}
+                />
+                <span className="flex flex-col sm:flex-1">
+                  <span
+                    id={`quote-service-${s.param}`}
+                    className={`block font-bold leading-snug ${featured ? "text-white" : "text-gray-900"}`}
+                  >
                     {s.title}
                   </span>
-                  <span id={`quote-service-${s.param}-line`} className="mt-0.5 block text-sm text-gray-600 leading-snug">
+                  <span
+                    id={`quote-service-${s.param}-line`}
+                    className={`mt-0.5 block text-sm leading-snug ${featured ? "text-[#dbeafe]" : "text-gray-600"}`}
+                  >
                     {s.line}
                   </span>
+                  {featured && (
+                    // Seen only: the radio already says whether it is chosen.
+                    <span aria-hidden="true" className="mt-2.5 sm:mt-auto sm:pt-2.5 inline-flex items-center gap-1 text-sm font-bold text-[#facc15]">
+                      {chosen ? (
+                        <>
+                          Selected
+                          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M5 12.5l4.5 4.5L19 7.5" />
+                          </svg>
+                        </>
+                      ) : (
+                        <>
+                          Start here
+                          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M5 12h14M13 6l6 6-6 6" />
+                          </svg>
+                        </>
+                      )}
+                    </span>
+                  )}
                 </span>
               </label>
             );
