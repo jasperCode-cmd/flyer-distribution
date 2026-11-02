@@ -79,22 +79,6 @@ export default function AreaPage({ area }: { area: AreaPageData }) {
                 { label: area.name },
               ]}
             />
-            {/* Our Google rating, as on the homepage, linking to the reviews */}
-            <a
-              href={GOOGLE_PROFILE}
-              target="_blank"
-              rel="noopener"
-              className="inline-flex flex-wrap items-center gap-x-2 gap-y-0.5 max-w-full rounded-2xl sm:rounded-full bg-white/10 border border-white/20 px-3.5 py-1.5 mb-5 text-xs sm:text-sm hover:bg-white/15 transition-colors"
-            >
-              <svg role="img" aria-label="5 out of 5 stars" viewBox="0 0 120 24" className="h-3.5 w-auto fill-yellow-400 shrink-0">
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <path key={i} d={STAR} transform={`translate(${i * 24} 0)`} />
-                ))}
-              </svg>
-              <span className="font-bold text-white whitespace-nowrap">5.0 on Google</span>
-              <span className="text-[#bfdbfe] whitespace-nowrap">from local businesses</span>
-              <span className="sr-only"> (opens in a new tab)</span>
-            </a>
             <p className="text-blue-300 text-sm font-semibold uppercase tracking-widest mb-3">{area.eyebrow}</p>
             <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight mb-5">Leaflet Distribution in {area.inName}</h1>
             <p className="text-blue-100 text-lg sm:text-xl leading-relaxed mb-8">
@@ -112,6 +96,22 @@ export default function AreaPage({ area }: { area: AreaPageData }) {
                 See Our Case Studies
               </Link>
             </div>
+            {/* Our Google rating as a plain line under the buttons, as on the
+                homepage, linking to the reviews, with a tap area at least 44px tall. */}
+            <a
+              href={GOOGLE_PROFILE}
+              target="_blank"
+              rel="noopener"
+              className="mt-2 flex w-fit max-w-full min-h-11 items-center gap-2 rounded-sm text-sm text-[#dbeafe] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#facc15]"
+            >
+              <svg role="img" aria-label="5 out of 5 stars" viewBox="0 0 120 24" className="h-3.5 w-auto fill-[#facc15] shrink-0">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <path key={i} d={STAR} transform={`translate(${i * 24} 0)`} />
+                ))}
+              </svg>
+              <span>Rated 5.0 on Google by local businesses</span>
+              <span className="sr-only"> (opens in a new tab)</span>
+            </a>
           </div>
           {/* The page's coverage map, its main image. Never a link. */}
           <figure>

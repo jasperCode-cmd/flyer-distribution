@@ -2,62 +2,51 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-// The homepage hero's Google rating: the pill above the eyebrow from 640px,
-// and on phones a plain line under the two buttons instead. Only one of the
-// two is ever displayed, so a screen reader meets it once. Checked on the
-// source; the browser run checks both widths.
+// The Google rating in the homepage and area page heroes: one plain line
+// under the two buttons at every width, with no frosted pill anywhere. Five
+// yellow stars read out once, "Rated 5.0 on Google by local businesses" in
+// light blue, a link to our Google reviews in a new tab that says so, and a
+// tap area at least 44px tall with a visible focus outline. Checked on the
+// source; the browser run checks the pages at 1440, 1024 and 390.
 
 const GOOGLE_PROFILE = "https://share.google/RVxyPi4TzXAzkt1Am";
-const page = readFileSync("app/page.tsx", "utf8");
-const hero = page.slice(page.indexOf('<section id="hero"'), page.indexOf("</section>", page.indexOf('<section id="hero"')));
+const LINE_CLASSES = [
+  "mt-2", "flex", "w-fit", "max-w-full", "min-h-11", "items-center", "gap-2", "rounded-sm", "text-sm", "text-[#dbeafe]",
+  "focus-visible:outline-2", "focus-visible:outline-offset-2", "focus-visible:outline-[#facc15]",
+];
 
-// Each link to the Google reviews in the hero: its classes and contents.
-const links = [...hero.matchAll(/<a\s+href=\{GOOGLE_PROFILE\}\s+target="_blank"\s+rel="noopener"\s+className="([^"]*)"\s*>([\s\S]*?)<\/a>/g)].map((m) => ({
-  classes: m[1].split(/\s+/),
-  body: m[2],
-  at: m.index!,
-}));
+const HEROES = [
+  { file: "app/page.tsx", start: '<section id="hero"', star: "HERO_STAR", after: "See Our Case Studies</span>\n                </Link>\n              </div>", before: "<HeroCaseStudyTeaser />" },
+  { file: "components/AreaPage.tsx", start: "{/* 1. Hero */}", star: "STAR", after: "See Our Case Studies\n              </Link>\n            </div>", before: "{/* The page's coverage map" },
+];
 
-test("two links to the Google reviews, both opening a new tab and saying so", () => {
-  assert.match(page, new RegExp(`const GOOGLE_PROFILE = "${GOOGLE_PROFILE.replace(/[./]/g, "\\$&")}";`));
-  assert.equal(links.length, 2);
-  for (const l of links) assert.match(l.body, /<span className="sr-only"> \(opens in a new tab\)<\/span>/);
-});
+for (const h of HEROES) {
+  const source = readFileSync(h.file, "utf8");
+  const hero = source.slice(source.indexOf(h.start), source.indexOf("</section>", source.indexOf(h.start)));
+  const links = [...hero.matchAll(/<a\s+href=\{GOOGLE_PROFILE\}\s+target="_blank"\s+rel="noopener"\s+className="([^"]*)"\s*>([\s\S]*?)<\/a>/g)];
 
-test("from 640px: the pill above the eyebrow, exactly as before", () => {
-  const pill = links[0];
-  assert.ok(pill.at < hero.indexOf("Hampshire &amp; Dorset"), "above the eyebrow");
-  assert.deepEqual(pill.classes, [
-    "hidden", "sm:inline-flex", "flex-wrap", "items-center", "gap-x-2", "gap-y-0.5", "max-w-full", "rounded-2xl", "sm:rounded-full",
-    "bg-white/10", "border", "border-white/20", "px-3.5", "py-1.5", "mb-5", "text-xs", "sm:text-sm", "hover:bg-white/15", "transition-colors",
-  ]);
-  assert.match(pill.body, /<svg role="img" aria-label="5 out of 5 stars" viewBox="0 0 120 24" className="h-3\.5 w-auto fill-yellow-400 shrink-0">/);
-  assert.match(pill.body, /<span className="font-bold text-white whitespace-nowrap">5\.0 on Google<\/span>/);
-  assert.match(pill.body, /<span className="text-\[#bfdbfe\] whitespace-nowrap">from local businesses<\/span>/);
-});
+  test(`${h.file}: one rating link in the hero, the plain line under the buttons at every width`, () => {
+    assert.match(source, new RegExp(`const GOOGLE_PROFILE = "${GOOGLE_PROFILE.replace(/[./]/g, "\\$&")}";`));
+    assert.equal(links.length, 1, "only one rating link");
+    const [m] = links;
+    const at = m.index!;
+    assert.ok(hero.indexOf(h.after) > 0 && at > hero.indexOf(h.after), "straight after the buttons");
+    assert.ok(at < hero.indexOf(h.before), "before what follows the buttons");
+    assert.deepEqual(m[1].split(/\s+/), LINE_CLASSES);
+    // Shown at every width: no breakpoint hides it.
+    assert.ok(!m[1].split(/\s+/).some((c) => /^(?:sm|md|lg|xl):/.test(c) || c === "hidden"));
+    // One star graphic, read out once, then the words, then the new tab note.
+    const body = m[2];
+    assert.match(body, new RegExp(`^\\s*<svg role="img" aria-label="5 out of 5 stars" viewBox="0 0 120 24" className="h-3\\.5 w-auto fill-\\[#facc15\\] shrink-0">\\s*\\{\\[0, 1, 2, 3, 4\\]\\.map\\(\\(i\\) => \\(\\s*<path key=\\{i\\} d=\\{${h.star}\\}`));
+    assert.equal((body.match(/<svg/g) ?? []).length, 1);
+    assert.equal((body.match(/role="img"/g) ?? []).length, 1);
+    assert.match(body, /<\/svg>\s+<span>Rated 5\.0 on Google by local businesses<\/span>\s+<span className="sr-only"> \(opens in a new tab\)<\/span>\s*$/);
+  });
 
-test("on phones: a plain line straight under the two buttons, with no box, a 44px tap area and a focus outline", () => {
-  const line = links[1];
-  const buttonsEnd = hero.indexOf("See Our Case Studies</span>\n                </Link>\n              </div>");
-  assert.ok(buttonsEnd > 0 && line.at > buttonsEnd, "after the buttons");
-  assert.ok(line.at < hero.indexOf("<HeroCaseStudyTeaser />"), "before the case study teaser");
-  for (const c of ["sm:hidden", "min-h-11", "items-center", "text-sm", "text-[#dbeafe]", "focus-visible:outline-2", "focus-visible:outline-offset-2", "focus-visible:outline-[#facc15]"]) {
-    assert.ok(line.classes.includes(c), c);
-  }
-  // No background, border or rounded box.
-  assert.ok(!line.classes.some((c) => /^(?:sm:)?(?:bg-|border|rounded-(?!sm$)|px-|py-|shadow)/.test(c)), line.classes.join(" "));
-  // One star graphic, read out once, then the words.
-  assert.match(line.body, /<svg role="img" aria-label="5 out of 5 stars" viewBox="0 0 120 24" className="[^"]*fill-\[#facc15\][^"]*">/);
-  assert.equal((line.body.match(/<svg/g) ?? []).length, 1);
-  assert.equal((line.body.match(/role="img"/g) ?? []).length, 1);
-  assert.match(line.body, /<\/svg>\s+<span>Rated 5\.0 on Google by local businesses<\/span>/);
-});
-
-test("only one of the two is displayed at any width", () => {
-  // The pill is display:none below 640px and the line from 640px.
-  assert.equal(links[0].classes[0], "hidden");
-  assert.ok(links[0].classes.includes("sm:inline-flex"));
-  assert.ok(links[1].classes.includes("sm:hidden"));
-  assert.ok(!links[1].classes.some((c) => c.startsWith("sm:") && c !== "sm:hidden"));
-  assert.doesNotMatch(hero, /[\u2013\u2014]/);
-});
+  test(`${h.file}: the frosted pill is gone`, () => {
+    for (const gone of ["5.0 on Google</span>", "from local businesses</span>", "bg-white/10 border border-white/20", "hover:bg-white/15", "fill-yellow-400"]) {
+      assert.ok(!source.includes(gone), gone);
+    }
+    assert.doesNotMatch(source, /[\u2013\u2014]/);
+  });
+}
