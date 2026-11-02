@@ -248,7 +248,15 @@ test("real database: a Bournemouth project's links are off until switched on, an
   await assert.rejects(createShareLink(prisma, projectId, ids.sam), (e: AreaPlannerError) => e.status === 409 && /switched off/.test(e.message));
   const view = await shareViewForDistributor(prisma, projectId, ids.sam);
   assert.equal(view.business, "LDB", "the image is still available");
-  assert.equal(view.title, "Leaflet delivery, October 2026");
+  // Titled with the month the project was made (its lead's job has no campaign start), in UK time.
+  const made = await prisma.areaProject.findUniqueOrThrow({
+    where: { id: projectId },
+    select: { createdAt: true, lead: { select: { job: { select: { campaignStartDate: true } } } } },
+  });
+  assert.equal(made.lead?.job?.campaignStartDate ?? null, null);
+  const month = new Intl.DateTimeFormat("en-GB", { month: "long", year: "numeric", timeZone: "Europe/London" }).format(made.createdAt);
+  assert.match(month, /^[A-Z][a-z]+ \d{4}$/);
+  assert.equal(view.title, `Leaflet delivery, ${month}`);
   assert.ok(!JSON.stringify(view).includes("Bournemouth Job"), "no client name");
 
   await updateProject(prisma, projectId, { ldbLinksEnabled: true });
