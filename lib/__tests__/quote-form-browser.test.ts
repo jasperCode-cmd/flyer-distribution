@@ -274,3 +274,37 @@ test("print and design side by side when the form is at least 240px wide, stacke
     }
   }
 });
+
+test("the panel shows one heading, Get Your Free Quote, first, and is still named Get a Quote; /quote is unchanged", { skip }, async () => {
+  for (const screen of SCREENS) {
+    const o = await open(screen, "the Get a Quote panel");
+    try {
+      const r = await o.root.evaluate((el: Element) => {
+        const box = el.querySelector(":scope > div")!;
+        const scroller = box.querySelector(".overflow-y-auto")!;
+        const close = box.querySelector('button[aria-label="Close"]')!.getBoundingClientRect();
+        const b = box.getBoundingClientRect();
+        return {
+          headings: [...box.querySelectorAll("h1, h2, h3")].filter((h) => (h as HTMLElement).offsetParent !== null).map((h) => (h.textContent ?? "").trim()),
+          first: (scroller.querySelector("h1, h2, h3")?.textContent ?? "").trim(),
+          line: (scroller.querySelector("h2 + p")?.textContent ?? "").trim(),
+          close: [Math.round(close.width), Math.round(close.height), Math.round(b.right - close.right), Math.round(b.bottom - close.bottom)],
+        };
+      });
+      assert.equal(r.first, "Get Your Free Quote", `${screen.name}: the first heading`);
+      assert.ok(!r.headings.includes("Get a Quote"), `${screen.name}: no "Get a Quote" heading`);
+      assert.equal(r.line, "Free, with no obligation. We'll be in touch within 24 hours.");
+      assert.equal(await o.page.getByRole("region", { name: "Get a Quote" }).count(), 1, `${screen.name}: named for screen readers`);
+      assert.deepEqual(r.close, [44, 44, 16, 16], `${screen.name}: close button 44px, bottom right`);
+    } finally {
+      await o.ctx.close();
+    }
+    const q = await open(screen, "/quote");
+    try {
+      assert.equal(await q.page.getByRole("region", { name: "Get a Quote" }).count(), 0, "/quote has no panel");
+      assert.equal(await q.root.getByRole("heading", { name: "Get Your Free Quote" }).count(), 1);
+    } finally {
+      await q.ctx.close();
+    }
+  }
+});
