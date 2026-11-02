@@ -29,6 +29,8 @@ const between = (from: string, to: string) => {
   return form.slice(start, end);
 };
 const namesIn = (source: string) => [...source.matchAll(/\bname="([^"]+)"/g)].map((m) => m[1]);
+// The start of the leaflet fields after Company (the quantity is asked before Company).
+const LEAFLET_FIELDS = "{/* \u2500\u2500 Leaflet Distribution fields \u2500\u2500 */}\n                  {isLeaflet && (";
 
 test("the three services send the words the old dropdown sent, with the cards' copy", () => {
   assert.deepEqual(
@@ -134,9 +136,11 @@ test("the details come first, then the service heading, Company, and the service
     'name="email"',
     'name="phone"',
     "?.heading}",
+    // Leaflet Distribution's quantity, before the rest of its section.
+    'id="quantity"',
     'name="company"',
     '<input type="hidden" name="service" value={serviceType} />',
-    "{isLeaflet && (",
+    LEAFLET_FIELDS,
     'name="newsletter"',
     "Send Quote Request",
   ];
@@ -156,7 +160,8 @@ test("the details come first, then the service heading, Company, and the service
 });
 
 test("each service shows its own fields after Company, in their old order", () => {
-  assert.deepEqual(namesIn(between("{isLeaflet && (", "{isWebDesign && (")), [
+  // The leaflet quantity is still sent from here, where its dropdown used to be.
+  assert.deepEqual(namesIn(between(LEAFLET_FIELDS, "{isWebDesign && (")), [
     "areas-required",
     "quantity",
     "printing-included",
@@ -237,7 +242,7 @@ test("switching service keeps the details and sends only the shown service's fie
   assert.match(form, /const isWebDesign = serviceType === "Web Design & SEO";/);
   assert.match(form, /const isScreenHire = serviceType === "Screen Hire";/);
   // The details and Company sit outside those parts, so they stay as typed.
-  const leafletAndAfter = form.slice(form.indexOf("{isLeaflet && ("));
+  const leafletAndAfter = form.slice(form.indexOf(LEAFLET_FIELDS));
   for (const name of ["first-name", "last-name", "email", "phone", "company"]) {
     assert.ok(!leafletAndAfter.includes(`name="${name}"`), name);
   }

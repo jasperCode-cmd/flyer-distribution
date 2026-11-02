@@ -32,7 +32,9 @@ test("the form asks with a required dropdown from the shared list, with no typed
   const form = readFileSync("components/QuoteForm.tsx", "utf8");
   const field = form.slice(form.indexOf('htmlFor="quantity"'), form.indexOf("</select>", form.indexOf('htmlFor="quantity"')));
   assert.match(field, /Approximate quantity \(flyers\) <span className="text-red-500">\*<\/span>/);
-  assert.match(field, /<select\s+id="quantity"\s+name="quantity"\s+required\s+defaultValue=""/);
+  // Asked first, and sent from a hidden field where the dropdown used to be.
+  assert.match(field, /<select\s+id="quantity"\s+required\s+value=\{quantity\}/);
+  assert.match(form, /<input type="hidden" name="quantity" value=\{quantity\} \/>/);
   assert.match(field, /<option value="">\{QUANTITY_PLACEHOLDER\}<\/option>\s+\{QUANTITY_RANGES\.map\(\(range\) => \(\s+<option key=\{range\} value=\{range\}>/);
   assert.match(form, /import \{ QUANTITY_PLACEHOLDER, QUANTITY_RANGES \} from "@\/lib\/quote-quantity";/);
   // Only on the leaflet form.
