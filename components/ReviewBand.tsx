@@ -16,23 +16,23 @@ const STAR = "M12 2.5l2.9 6.06 6.6.87-4.83 4.6 1.24 6.6L12 17.5l-5.91 3.13 1.24-
 export default function ReviewBand() {
   return (
     <section className="bg-white border-y border-[#e2e8f0] text-[#334155]">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)] gap-10 lg:gap-12 items-center">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-14">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.6fr)] gap-5 sm:gap-10 lg:gap-12 items-center">
           {/* The rating */}
           <div>
-            <h2 className="text-[#1d4ed8] text-xs sm:text-sm font-bold uppercase tracking-[0.16em] mb-4">Rated by local businesses</h2>
-            <div className="flex items-center gap-4 mb-4">
-              <p className="font-heading font-bold text-[72px] leading-none text-[#1e3a8a]">5.0</p>
+            <h2 className="text-[#1d4ed8] text-xs sm:text-sm font-bold uppercase tracking-[0.16em] mb-2 sm:mb-4">Rated by local businesses</h2>
+            <div className="flex items-center gap-3 sm:gap-4 mb-2 sm:mb-4">
+              <p className="font-heading font-bold text-[56px] sm:text-[72px] leading-none text-[#1e3a8a]">5.0</p>
               <div>
-                <svg role="img" aria-label="5 out of 5 stars" viewBox="0 0 120 24" className="h-7 w-auto fill-[#b45309]">
+                <svg role="img" aria-label="5 out of 5 stars" viewBox="0 0 120 24" className="h-6 sm:h-7 w-auto fill-[#b45309]">
                   {[0, 1, 2, 3, 4].map((i) => (
                     <path key={i} d={STAR} transform={`translate(${i * 24} 0)`} />
                   ))}
                 </svg>
-                <p className="mt-1.5 font-semibold text-[#334155]">on Google</p>
+                <p className="mt-1 sm:mt-1.5 font-semibold text-[#334155]">on Google</p>
               </div>
             </div>
-            <p className="leading-relaxed max-w-sm mb-5">Rated five stars on Google by local businesses across Hampshire and Dorset.</p>
+            <p className="leading-snug sm:leading-relaxed max-w-sm mb-2.5 sm:mb-5">Rated five stars on Google by local businesses across Hampshire and Dorset.</p>
             <a
               href={GOOGLE_PROFILE}
               target="_blank"
@@ -56,12 +56,12 @@ export default function ReviewBand() {
             </a>
           </div>
 
-          {/* Four highlights, 2 by 2 */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+          {/* Four highlights, 2 by 2, and smaller on phones */}
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-5">
             {HIGHLIGHTS.map((h) => (
-              <figure key={h.name} className="rounded-2xl bg-white border border-[#e2e8f0] p-6">
-                <blockquote className="font-heading font-bold text-xl leading-snug text-[#1e3a8a]">&ldquo;{h.quote}&rdquo;</blockquote>
-                <figcaption className="mt-3 text-sm text-[#475569]">{h.name}</figcaption>
+              <figure key={h.name} className="rounded-xl sm:rounded-2xl bg-white border border-[#e2e8f0] p-3.5 sm:p-6">
+                <blockquote className="font-heading font-bold text-[15px] sm:text-xl leading-snug text-[#1e3a8a]">&ldquo;{h.quote}&rdquo;</blockquote>
+                <figcaption className="mt-1.5 sm:mt-3 text-xs sm:text-sm text-[#475569]">{h.name}</figcaption>
               </figure>
             ))}
           </div>

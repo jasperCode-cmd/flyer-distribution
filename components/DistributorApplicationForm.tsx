@@ -152,6 +152,7 @@ export default function DistributorApplicationForm() {
             id="dist-name"
             name="name"
             required
+            autoComplete="name"
             className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
@@ -166,6 +167,8 @@ export default function DistributorApplicationForm() {
             id="dist-phone"
             name="phone"
             required
+            autoComplete="tel"
+            inputMode="tel"
             className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <p className="mt-1 text-xs text-gray-500">We&apos;ll most likely reach out on WhatsApp.</p>
@@ -180,6 +183,7 @@ export default function DistributorApplicationForm() {
             type="email"
             id="dist-email"
             name="email"
+            autoComplete="email"
             className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
@@ -194,6 +198,7 @@ export default function DistributorApplicationForm() {
             id="dist-area"
             name="area"
             required
+            autoComplete="postal-code"
             value={area}
             onChange={(e) => setArea(e.target.value)}
             placeholder="e.g. Southampton, SO15"

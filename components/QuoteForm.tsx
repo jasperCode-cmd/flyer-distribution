@@ -250,6 +250,7 @@ export default function QuoteForm() {
                 id="first-name"
                 name="first-name"
                 required
+                autoComplete="given-name"
                 className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -264,6 +265,7 @@ export default function QuoteForm() {
                 type="text"
                 id="last-name"
                 name="last-name"
+                autoComplete="family-name"
                 className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -282,6 +284,7 @@ export default function QuoteForm() {
               id="email"
               name="email"
               required
+              autoComplete="email"
               className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -299,6 +302,8 @@ export default function QuoteForm() {
               id="phone"
               name="phone"
               required
+              autoComplete="tel"
+              inputMode="tel"
               aria-describedby={showQuestions ? undefined : "phone-hint"}
               onChange={(e) => {
                 // Checked as they type, not only when they leave the field.
@@ -337,6 +342,7 @@ export default function QuoteForm() {
                   type="text"
                   id="company"
                   name="company"
+                  autoComplete="organization"
                   className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>

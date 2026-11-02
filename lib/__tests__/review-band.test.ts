@@ -54,7 +54,7 @@ test("the snapshot: the rating, the stars, the line, the Google link and four hi
   const html = render();
   assert.match(html, /^<section class="bg-white /);
   assert.match(html, /<h2[^>]*>Rated by local businesses<\/h2>/);
-  assert.match(html, /<p class="[^"]*text-\[72px\][^"]*text-\[#1e3a8a\][^"]*">5\.0<\/p>/);
+  assert.match(html, /<p class="[^"]*text-\[56px\] sm:text-\[72px\][^"]*text-\[#1e3a8a\][^"]*">5\.0<\/p>/);
   // One star graphic, read out once.
   assert.equal((html.match(/role="img"/g) ?? []).length, 1);
   assert.match(html, /<svg role="img" aria-label="5 out of 5 stars" viewBox="0 0 120 24" class="[^"]*fill-\[#b45309\]">/);
@@ -75,21 +75,47 @@ test("the snapshot: the rating, the stars, the line, the Google link and four hi
   for (const f of figures) {
     assert.match(f[1], /bg-white/);
     assert.match(f[1], /border-\[#e2e8f0\]/);
-    assert.match(f[1], /rounded-2xl/);
+    assert.match(f[1], /rounded-xl sm:rounded-2xl/);
+    assert.match(f[1], /p-3\.5 sm:p-6/);
     assert.match(f[2], /font-heading/);
-    assert.match(f[2], /text-xl/);
+    assert.match(f[2], /text-\[15px\] sm:text-xl/);
     assert.match(f[2], /text-\[#1e3a8a\]/);
-    assert.match(f[4], /text-\[#475569\]/);
+    assert.match(f[4], /mt-1\.5 sm:mt-3 text-xs sm:text-sm text-\[#475569\]/);
   }
   assert.equal((html.match(/<blockquote/g) ?? []).length, 4);
   assert.doesNotMatch(html, /Great communication|these guys deal with you|Everything was handled|Very professional/);
-  assert.match(html, /grid-cols-1 sm:grid-cols-2/);
+  // 2 by 2 at every width.
+  assert.match(html, /class="grid grid-cols-2 gap-2\.5 sm:gap-5"/);
   // The selling points have moved to the homepage's blue bar.
   assert.doesNotMatch(html, /Postcode targeting|GPS tracked delivery/);
   // Its only link off the site is the Google reviews.
   const source = readFileSync("components/ReviewBand.tsx", "utf8");
   assert.deepEqual([...new Set(source.match(/https?:\/\/[^"]+/g))], [GOOGLE_PROFILE]);
   assert.doesNotMatch(html, /[\u2013\u2014]/);
+});
+
+test("compact on phones, and from 640px every size and space exactly as before", () => {
+  const html = render();
+  // Each phone class, then the desktop one it hands over to at sm (640px).
+  for (const pair of [
+    "py-8 sm:py-14",
+    "gap-5 sm:gap-10 lg:gap-12",
+    "mb-2 sm:mb-4",
+    "gap-3 sm:gap-4 mb-2 sm:mb-4",
+    "text-[56px] sm:text-[72px]",
+    "h-6 sm:h-7",
+    "mt-1 sm:mt-1.5",
+    "leading-snug sm:leading-relaxed max-w-sm mb-2.5 sm:mb-5",
+    "gap-2.5 sm:gap-5",
+    "rounded-xl sm:rounded-2xl",
+    "p-3.5 sm:p-6",
+    "text-[15px] sm:text-xl",
+    "mt-1.5 sm:mt-3 text-xs sm:text-sm",
+  ]) {
+    assert.ok(html.includes(pair), pair);
+  }
+  // The colours are the ones checked for contrast before: unchanged.
+  for (const colour of ["text-[#1d4ed8]", "text-[#1e3a8a]", "fill-[#b45309]", "text-[#334155]", "text-[#475569]"]) assert.ok(html.includes(colour), colour);
 });
 
 test("the homepage: brands bar, the blue bar, the snapshot, the stats, then the carousel as it was", () => {
