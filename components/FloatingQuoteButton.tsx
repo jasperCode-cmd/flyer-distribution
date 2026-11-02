@@ -167,13 +167,13 @@ export default function FloatingQuoteButton() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.3, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            className="origin-bottom-right relative bg-white rounded-2xl shadow-2xl w-[calc(100vw-32px)] sm:w-[460px]"
+            className="origin-bottom-right relative bg-white rounded-2xl shadow-2xl w-[calc(100vw-32px)] sm:w-[460px] lg:w-[min(560px,92vw)]"
           >
             <div className="max-h-[85vh] overflow-y-auto rounded-2xl p-6 pb-20">
               <h2 className="text-xl font-bold text-blue-900 mb-4">
                 Get a Quote
               </h2>
-              <QuoteForm />
+              <QuoteForm inPanel />
             </div>
             <button
               type="button"

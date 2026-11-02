@@ -62,7 +62,8 @@ export default function QuotePage() {
       </section>
 
       <section className="bg-slate-50 py-16">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6">
+        {/* About 768px wide from 1024px up, so the form isn't cramped. */}
+        <div className="max-w-2xl lg:max-w-3xl mx-auto px-4 sm:px-6">
           <QuoteForm />
         </div>
       </section>

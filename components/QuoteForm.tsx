@@ -8,7 +8,10 @@ import { QUOTE_SERVICES, serviceFromParam, type QuoteService } from "@/lib/quote
 // How many digits the contact number needs before the service's questions show.
 const PHONE_DIGITS_TO_CONTINUE = 10;
 
-export default function QuoteForm() {
+// inPanel: the form is in the floating Get a Quote panel. From 1024px up the
+// panel itself is the card there, so the form drops its own border and
+// padding and has the panel's full width; below that it looks as on /quote.
+export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
   const [serviceType, setServiceType] = useState("");
   // The service's questions, once the contact number has enough digits.
   // They then stay for the visit, even if the number is changed or cleared.
@@ -130,7 +133,7 @@ export default function QuoteForm() {
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-8">
+    <div className={`bg-white rounded-lg border border-gray-200 p-8${inPanel ? " lg:border-0 lg:p-0" : ""}`}>
       <h2 className="text-xl font-bold text-blue-900">Get Your Free Quote</h2>
       <p className="mt-1 text-gray-600">
         Free, with no obligation. We&apos;ll be in touch within 24 hours.
