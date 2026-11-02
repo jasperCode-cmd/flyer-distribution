@@ -59,7 +59,6 @@ export type QuoteEnquiry = {
   service?: string | null;
   targetAreas?: string | null;
   quantity?: string | null;
-  startDate?: string | null;
   // The form's checkboxes: "yes" when ticked, missing when not.
   printingIncluded?: string | null;
   designIncluded?: string | null;
@@ -73,7 +72,6 @@ export function enquiryFromQuoteForm(data: Record<string, unknown>): QuoteEnquir
     service: field("service"),
     targetAreas: field("areas-required"),
     quantity: field("quantity"),
-    startDate: field("campaign-start-date"),
     printingIncluded: field("printing-included"),
     designIncluded: field("include-design"),
   };
@@ -92,28 +90,15 @@ function areasPhrase(value: string | null | undefined): string {
   return clean(value).replace(/[\s.,;:]+$/, "");
 }
 
-const LONG_DATE = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
-
-// "2026-11-03" from the date picker as "3 November 2026"; anything else as typed.
-function startDateText(value: string | null | undefined): string {
-  const v = clean(value);
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
-  if (!m) return v;
-  const date = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
-  return Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== v ? v : LONG_DATE.format(date);
-}
-
 // "Your enquiry at a glance": only what they gave. The two checkboxes are
 // only on the leaflet form, where unticked means no.
 export function enquirySummary(enquiry: QuoteEnquiry): { label: string; value: string }[] {
   const rows: { label: string; value: string }[] = [];
   const areas = areasPhrase(enquiry.targetAreas);
   if (areas) rows.push({ label: "Areas", value: areas });
-  // The form sends a plain number ("2000"), shown as 2,000.
+  // The range chosen on the form, as written ("1,000 to 2,500", "Not sure yet").
   const quantity = clean(enquiry.quantity);
-  if (quantity) rows.push({ label: "Leaflets", value: /^\d+$/.test(quantity) ? quantity.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : quantity });
-  const start = startDateText(enquiry.startDate);
-  if (start) rows.push({ label: "Start date", value: start });
+  if (quantity) rows.push({ label: "Leaflets", value: quantity });
   const leaflet = clean(enquiry.service) === LEAFLET_SERVICE;
   const ticked = (v: string | null | undefined) => clean(v).toLowerCase() === "yes";
   if (leaflet || ticked(enquiry.printingIncluded)) rows.push({ label: "Printing included", value: ticked(enquiry.printingIncluded) ? "Yes" : "No" });

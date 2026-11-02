@@ -1,11 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { QUANTITY_MESSAGE, distributionEstimate, parseFlyerQuantity } from "@/lib/quote-quantity";
+import { QUANTITY_PLACEHOLDER, QUANTITY_RANGES } from "@/lib/quote-quantity";
 import { QUOTE_SERVICES, serviceFromParam, type QuoteService } from "@/lib/quote-services";
 
-// How long after the last keystroke the hours estimate updates.
-const ESTIMATE_PAUSE_MS = 600;
 // How many digits the contact number needs before the service's questions show.
 const PHONE_DIGITS_TO_CONTINUE = 10;
 
@@ -19,37 +17,13 @@ export default function QuoteForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(false);
-  const [quantityError, setQuantityError] = useState<string | null>(null);
-  const [estimate, setEstimate] = useState<string | null>(null);
-  const estimateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
-
-  useEffect(() => () => clearTimeout(estimateTimer.current ?? undefined), []);
 
   // A link can choose the service: /quote?service=leaflet, web or screen.
   useEffect(() => {
     const chosen = serviceFromParam(new URLSearchParams(window.location.search).get("service"));
     if (chosen) setServiceType(chosen);
   }, []);
-
-  // The hours estimate under the quantity: hidden at once while the number
-  // is empty or invalid, otherwise shown after a pause (or right away when
-  // they leave the field). Display only; it is not a form field.
-  function updateEstimate(value: string, pause: number) {
-    clearTimeout(estimateTimer.current ?? undefined);
-    const line = distributionEstimate(value);
-    if (line === null || pause === 0) setEstimate(line);
-    else estimateTimer.current = setTimeout(() => setEstimate(line), pause);
-  }
-
-  function changeService(service: string) {
-    // A different service, or the form cleared after sending: the quantity
-    // field starts empty again, so nothing about the old one carries over.
-    clearTimeout(estimateTimer.current ?? undefined);
-    setEstimate(null);
-    setQuantityError(null);
-    setServiceType(service);
-  }
 
   const isLeaflet = serviceType === "Leaflet Distribution";
   const isWebDesign = serviceType === "Web Design & SEO";
@@ -60,18 +34,6 @@ export default function QuoteForm() {
 
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData);
-
-    // A leaflet enquiry needs a number of flyers we can read; it is sent on
-    // as the plain number, so 2,000 or 2k goes as 2000.
-    if (isLeaflet) {
-      const flyers = parseFlyerQuantity(data.quantity);
-      if (flyers === null) {
-        setQuantityError(QUANTITY_MESSAGE);
-        e.currentTarget.querySelector<HTMLInputElement>("#quantity")?.focus();
-        return;
-      }
-      data.quantity = String(flyers);
-    }
 
     setIsSubmitting(true);
     setError(false);
@@ -89,7 +51,7 @@ export default function QuoteForm() {
       if (json.success) {
         setSubmitted(true);
         formRef.current?.reset();
-        changeService("");
+        setServiceType("");
         setIncludePrinting(false);
         setIncludeDesign(false);
 
@@ -153,7 +115,7 @@ export default function QuoteForm() {
                   name="quote-service"
                   value={s.value}
                   checked={chosen}
-                  onChange={() => changeService(s.value)}
+                  onChange={() => setServiceType(s.value)}
                   aria-labelledby={`quote-service-${s.param}`}
                   aria-describedby={`quote-service-${s.param}-line`}
                   className="sr-only"
@@ -326,63 +288,32 @@ export default function QuoteForm() {
                     />
                   </div>
 
-                  {/* Quantity + Campaign start date */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div>
-                      <label
-                        htmlFor="quantity"
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                      >
-                        Approximate quantity (flyers) <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        id="quantity"
-                        name="quantity"
-                        required
-                        placeholder="e.g. 2,000"
-                        aria-describedby={quantityError ? "quantity-hint quantity-error" : "quantity-hint"}
-                        aria-invalid={quantityError ? true : undefined}
-                        onInvalid={(e) => {
-                          // Our own message under the field, not the browser's bubble.
-                          e.preventDefault();
-                          setQuantityError(QUANTITY_MESSAGE);
-                          e.currentTarget.focus();
-                        }}
-                        onChange={(e) => {
-                          if (quantityError) setQuantityError(null);
-                          updateEstimate(e.target.value, ESTIMATE_PAUSE_MS);
-                        }}
-                        onBlur={(e) => updateEstimate(e.target.value, 0)}
-                        className={`w-full border rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${quantityError ? "border-red-500" : "border-gray-300"}`}
-                      />
-                      <p id="quantity-hint" className="mt-1.5 text-xs text-gray-500">
-                        Not sure? Your best guess is fine.
-                      </p>
-                      {quantityError && (
-                        <p id="quantity-error" role="alert" className="mt-1 text-xs text-red-600">
-                          {quantityError}
-                        </p>
-                      )}
-                      <div id="quantity-estimate" aria-live="polite">
-                        {estimate && <p className="mt-1 text-xs font-medium text-blue-700">{estimate}</p>}
-                      </div>
-                    </div>
-                    <div>
-                      <label
-                        htmlFor="campaign-start-date"
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                      >
-                        Campaign start date
-                      </label>
-                      <input
-                        type="date"
-                        id="campaign-start-date"
-                        name="campaign-start-date"
-                        className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
+                  {/* Quantity: one of the ranges, sent as it reads ("1,000 to 2,500") */}
+                  <div>
+                    <label
+                      htmlFor="quantity"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Approximate quantity (flyers) <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="quantity"
+                      name="quantity"
+                      required
+                      defaultValue=""
+                      aria-describedby="quantity-hint"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                    >
+                      <option value="">{QUANTITY_PLACEHOLDER}</option>
+                      {QUANTITY_RANGES.map((range) => (
+                        <option key={range} value={range}>
+                          {range}
+                        </option>
+                      ))}
+                    </select>
+                    <p id="quantity-hint" className="mt-1.5 text-xs text-gray-500">
+                      Not sure? Your best guess is fine.
+                    </p>
                   </div>
 
                   {/* Printing. Yes sends printing-included as "yes", as the ticked

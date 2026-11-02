@@ -16,8 +16,7 @@ const SAMPLE: QuoteEnquiry = {
   firstName: "Sarah",
   service: "Leaflet Distribution",
   targetAreas: "Ringwood, Ferndown and BH24",
-  quantity: "5,000 - 10,000",
-  startDate: "2026-11-16",
+  quantity: "5,000 to 10,000",
   printingIncluded: "yes",
   designIncluded: null,
 };
@@ -77,7 +76,7 @@ export default async function ThankYouEmailPreviewPage() {
         <dd className="text-gray-900">{email.preheader}</dd>
         <dt className="text-gray-500">Sample</dt>
         <dd className="text-gray-900">
-          {SAMPLE.firstName}, {SAMPLE.targetAreas}, {SAMPLE.quantity} leaflets, starting {SAMPLE.startDate}, printing included
+          {SAMPLE.firstName}, {SAMPLE.targetAreas}, {SAMPLE.quantity} leaflets, printing included
         </dd>
       </dl>
       <div className="flex flex-wrap items-start gap-6">

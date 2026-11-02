@@ -6,7 +6,7 @@ import { waitUntil } from "@vercel/functions";
 import { senderFor } from "@/lib/email-channel";
 import { sendQuoteThankYou } from "@/lib/quote-thank-you";
 import { enquiryFromQuoteForm } from "@/lib/thank-you-email";
-import { QUANTITY_MESSAGE, parseFlyerQuantity } from "@/lib/quote-quantity";
+import { QUANTITY_MESSAGE, isQuantityRange } from "@/lib/quote-quantity";
 
 // Called from the public /quote form alongside (not instead of) the
 // existing Web3Forms email notification. Best-effort field mapping:
@@ -43,13 +43,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  // The number of flyers: required for a leaflet enquiry, read as the form
-  // reads it (2,000 or 2k), and kept as the plain number, such as "2000".
-  const flyers = parseFlyerQuantity(data.quantity);
-  if (data.service === "Leaflet Distribution" && flyers === null) {
+  // The quantity: required for a leaflet enquiry, and only one of the form's
+  // own ranges (lib/quote-quantity.ts), kept as it reads, such as "1,000 to 2,500".
+  const validQuantity = isQuantityRange(data.quantity);
+  if (data.service === "Leaflet Distribution" && !validQuantity) {
     return NextResponse.json({ error: QUANTITY_MESSAGE }, { status: 400 });
   }
-  data.quantity = flyers === null ? "" : String(flyers);
+  if (!validQuantity) data.quantity = "";
 
   if (data.service === "Leaflet Distribution" && data.budget && !LEAFLET_BUDGETS.includes(data.budget)) {
     return NextResponse.json({ error: BUDGET_MESSAGE }, { status: 400 });
@@ -60,7 +60,6 @@ export async function POST(req: Request) {
 
   const noteLines = [`Service type: ${data.service || "Unspecified"}`];
   if (data.budget) noteLines.push(`Budget range: ${data.budget}`);
-  if (data["campaign-start-date"]) noteLines.push(`Requested start date: ${data["campaign-start-date"]}`);
   if (data["business-type"]) noteLines.push(`Business type: ${data["business-type"]}`);
   if (data["event-date"]) noteLines.push(`Event date: ${data["event-date"]}`);
   if (data["event-location"]) noteLines.push(`Event location: ${data["event-location"]}`);

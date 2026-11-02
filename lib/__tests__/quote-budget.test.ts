@@ -95,7 +95,7 @@ async function submit(fields: Record<string, string>) {
 
 test("real database: each budget the form offers is accepted and saved as sent", { skip }, async () => {
   for (const budget of optionsOf("budget")) {
-    const { res, lead } = await submit({ service: "Leaflet Distribution", quantity: "2000", budget });
+    const { res, lead } = await submit({ service: "Leaflet Distribution", quantity: "1,000 to 2,500", budget });
     assert.equal(res.status, 201, budget);
     assert.ok(lead?.activities.some((a) => a.detail.split("\n").includes(`Budget range: ${budget}`)), budget);
   }
@@ -103,7 +103,7 @@ test("real database: each budget the form offers is accepted and saved as sent",
 
 test("real database: a leaflet budget the form no longer offers is refused, and nothing is saved", { skip }, async () => {
   for (const budget of [...REMOVED, "£150\u2013£300", "£2,000 to £4,000", "£1,000,000+"]) {
-    const { res, body, lead } = await submit({ service: "Leaflet Distribution", quantity: "2000", budget });
+    const { res, body, lead } = await submit({ service: "Leaflet Distribution", quantity: "1,000 to 2,500", budget });
     assert.equal(res.status, 400, budget);
     assert.deepEqual(body, { error: MESSAGE });
     assert.equal(lead, null, "no lead saved");

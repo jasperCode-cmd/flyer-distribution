@@ -119,7 +119,6 @@ test("each service shows its own fields after Company, in their old order", () =
   assert.deepEqual(namesIn(between("{isLeaflet && (", "{isWebDesign && (")), [
     "areas-required",
     "quantity",
-    "campaign-start-date",
     "printing-included",
     "item-size",
     "print-sides",
@@ -142,7 +141,7 @@ test("print and design: Yes sends \"yes\" as the ticked boxes did, No sends noth
   assert.match(form, /const \[includePrinting, setIncludePrinting\] = useState\(false\);/);
   assert.match(form, /const \[includeDesign, setIncludeDesign\] = useState\(false\);/);
   // And back to No after a quote is sent.
-  assert.match(form, /formRef\.current\?\.reset\(\);\s*changeService\(""\);\s*setIncludePrinting\(false\);\s*setIncludeDesign\(false\);/);
+  assert.match(form, /formRef\.current\?\.reset\(\);\s*setServiceType\(""\);\s*setIncludePrinting\(false\);\s*setIncludeDesign\(false\);/);
   assert.doesNotMatch(form, /type="checkbox"\s+id="(printing-included|include-design)"/, "the tick boxes are gone");
   // Print Yes folds out the size and sides, with the field it used to send first.
   assert.match(
@@ -188,8 +187,7 @@ test("once shown, the service's questions stay for the visit, through number edi
   // another card, never hides what was typed.
   assert.deepEqual(form.match(/setShowQuestions\([^)]*\)/g), ["setShowQuestions(true)"]);
   assert.match(form, /const \[showQuestions, setShowQuestions\] = useState\(false\);/);
-  const change = between("function changeService(", "\n  }\n");
-  assert.ok(!change.includes("showQuestions"), "choosing another card leaves it as it is");
+  assert.match(form, /onChange=\{\(\) => setServiceType\(s\.value\)\}/, "choosing another card only changes the service");
 });
 
 test("switching service keeps the details and sends only the shown service's fields", () => {
@@ -293,8 +291,7 @@ test("real database: a blank last name is saved under the first name, and the th
       company: "",
       service: "Leaflet Distribution",
       "areas-required": "SO15",
-      quantity: "2000",
-      "campaign-start-date": "",
+      quantity: "1,000 to 2,500",
       "printing-included": "yes",
       "item-size": "A5",
       "print-sides": "Single sided",
@@ -323,7 +320,7 @@ test("real database: a blank last name is saved under the first name, and the th
     assert.equal(lead.name, "Bea", "the first name alone, with no trailing space");
     assert.equal(lead.business, "FDH");
     assert.equal(lead.source, "WEBSITE_QUOTE_FORM");
-    assert.equal(lead.leafletQuantity, "2000");
+    assert.equal(lead.leafletQuantity, "1,000 to 2,500");
     assert.equal(lead.printingIncluded, true);
 
     // The thank-you email goes by the first name only.

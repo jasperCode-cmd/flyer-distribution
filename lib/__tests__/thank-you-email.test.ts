@@ -24,8 +24,7 @@ const FULL: QuoteEnquiry = {
   firstName: "sarah",
   service: "Leaflet Distribution",
   targetAreas: "Ringwood, Ferndown and BH24.",
-  quantity: "5,000 - 10,000",
-  startDate: "2026-11-16",
+  quantity: "5,000 to 10,000",
   printingIncluded: "yes",
   designIncluded: null,
 };
@@ -117,21 +116,18 @@ test("no em or en dashes, no Sales Director, no prices and none of the barred ph
 test("Your enquiry at a glance lists only what was given, and goes when nothing was", () => {
   assert.deepEqual(enquirySummary(FULL), [
     { label: "Areas", value: "Ringwood, Ferndown and BH24" },
-    { label: "Leaflets", value: "5,000 - 10,000" },
-    { label: "Start date", value: "16 November 2026" },
+    { label: "Leaflets", value: "5,000 to 10,000" },
     { label: "Printing included", value: "Yes" },
     { label: "Design needed", value: "No" },
   ]);
   // Blank and missing fields are left out; the checkboxes only belong to the leaflet form.
-  assert.deepEqual(enquirySummary({ service: "Screen Hire", targetAreas: "  ", quantity: "", startDate: null }), []);
-  assert.deepEqual(enquirySummary({ quantity: "25,000+", startDate: "next spring" }), [
-    { label: "Leaflets", value: "25,000+" },
-    { label: "Start date", value: "next spring" },
-  ]);
-  // The form now sends the plain number; the email shows it with commas.
-  for (const [sent, shown] of [["2000", "2,000"], ["150", "150"], ["1000000", "1,000,000"], ["12500", "12,500"]]) {
-    assert.deepEqual(enquirySummary({ quantity: sent }), [{ label: "Leaflets", value: shown }], sent);
+  assert.deepEqual(enquirySummary({ service: "Screen Hire", targetAreas: "  ", quantity: "" }), []);
+  // The range chosen on the form, as written, and no start date row.
+  for (const range of ["Under 1,000", "1,000 to 2,500", "2,500 to 5,000", "5,000 to 10,000", "10,000 to 25,000", "25,000+", "Not sure yet"]) {
+    assert.deepEqual(enquirySummary({ quantity: range }), [{ label: "Leaflets", value: range }], range);
   }
+  const fromForm = enquirySummary(enquiryFromQuoteForm({ quantity: "Not sure yet", "campaign-start-date": "2026-12-01" }));
+  assert.deepEqual(fromForm, [{ label: "Leaflets", value: "Not sure yet" }]);
 
   const some = buildThankYouEmail({ firstName: "Sam", quantity: "25,000+" }, SLOTS);
   const shown = visible(some.html);
@@ -244,12 +240,11 @@ test("the form's fields as the email reads them", () => {
       "last-name": "Example",
       service: "Leaflet Distribution",
       "areas-required": "BH24",
-      quantity: "1,000 - 5,000",
-      "campaign-start-date": "2026-12-01",
+      quantity: "1,000 to 2,500",
       "printing-included": "yes",
       message: "Hi",
     }),
-    { firstName: "Sarah", service: "Leaflet Distribution", targetAreas: "BH24", quantity: "1,000 - 5,000", startDate: "2026-12-01", printingIncluded: "yes", designIncluded: null }
+    { firstName: "Sarah", service: "Leaflet Distribution", targetAreas: "BH24", quantity: "1,000 to 2,500", printingIncluded: "yes", designIncluded: null }
   );
 });
 

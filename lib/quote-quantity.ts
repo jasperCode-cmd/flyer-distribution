@@ -1,34 +1,24 @@
-// The quote form's "Approximate quantity (flyers)": a whole number of flyers
-// typed in, read the same way in the browser and in /api/quote-lead. Accepts
-// 2000, 2,000, 2 000 and 2k (or 2.5k), between 100 and 1,000,000. Also the
-// rough hours of distribution shown under the field (display only, never
-// sent). No server imports.
+// The quote form's "Approximate quantity (flyers)": a required dropdown of
+// ranges, and the same list /api/quote-lead accepts, so the two can't
+// disagree. The chosen text is sent as it reads ("1,000 to 2,500") and saved
+// as the lead's leafletQuantity. No server imports.
 
-export const MIN_FLYERS = 100;
-export const MAX_FLYERS = 1_000_000;
-export const QUANTITY_MESSAGE = "Please enter a number of flyers, for example 2,000";
-// The distribution rate behind the estimate under the field.
-export const LEAFLETS_PER_HOUR = 100;
+export const QUANTITY_PLACEHOLDER = "Select a range...";
 
-// The number of flyers, or null if it isn't one we accept.
-export function parseFlyerQuantity(value: unknown): number | null {
-  if (typeof value !== "string" && typeof value !== "number") return null;
-  // Spaces (including the narrow and non-breaking kinds) and commas group thousands.
-  const text = String(value).trim().replace(/[\s  ,]/g, "");
-  let count: number;
-  const k = /^(\d+(?:\.\d+)?)k$/i.exec(text);
-  if (k) count = Math.round(Number(k[1]) * 1000);
-  else if (/^\d+$/.test(text)) count = Number(text);
-  else return null;
-  return Number.isSafeInteger(count) && count >= MIN_FLYERS && count <= MAX_FLYERS ? count : null;
-}
+export const QUANTITY_RANGES = [
+  "Under 1,000",
+  "1,000 to 2,500",
+  "2,500 to 5,000",
+  "5,000 to 10,000",
+  "10,000 to 25,000",
+  "25,000+",
+  "Not sure yet",
+] as const;
 
-// "Approximately 11 hours of distribution" for what was typed, rounded up to
-// a whole hour, or null while it isn't a quantity we accept.
-export function distributionEstimate(value: unknown): string | null {
-  const flyers = parseFlyerQuantity(value);
-  if (flyers === null) return null;
-  const hours = Math.ceil(flyers / LEAFLETS_PER_HOUR);
-  const shown = String(hours).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return `Approximately ${shown} ${hours === 1 ? "hour" : "hours"} of distribution`;
+export type QuantityRange = (typeof QUANTITY_RANGES)[number];
+
+export const QUANTITY_MESSAGE = "Please choose an approximate quantity from the list";
+
+export function isQuantityRange(value: unknown): value is QuantityRange {
+  return typeof value === "string" && (QUANTITY_RANGES as readonly string[]).includes(value);
 }
