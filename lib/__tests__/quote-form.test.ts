@@ -191,12 +191,14 @@ test("print and design: Yes sends \"yes\" as the ticked boxes did, No sends noth
   // And back to No after a quote is sent.
   assert.match(form, /formRef\.current\?\.reset\(\);\s*setServiceType\(""\);\s*setIncludePrinting\(false\);\s*setIncludeDesign\(false\);/);
   assert.doesNotMatch(form, /type="checkbox"\s+id="(printing-included|include-design)"/, "the tick boxes are gone");
-  // Print Yes folds out the size and sides, with the field it used to send first.
+  // Print Yes folds out the size and sides, full width under both questions,
+  // with the field it used to send first; the design field comes after them,
+  // so the fields are sent in the same order as before.
   assert.match(
     form,
-    /\{includePrinting && \(\s*<div className="mt-3 space-y-3">\s*<input type="hidden" name="printing-included" value="yes" \/>\s*<div>\s*<label\s+htmlFor="item-size"/
+    /\{includePrinting && \(\s*<div className="mt-2 space-y-3 border border-gray-200 rounded-md px-4 py-3 bg-gray-50">\s*<input type="hidden" name="printing-included" value="yes" \/>\s*<div>\s*<label\s+htmlFor="item-size"/
   );
-  assert.match(form, /\{includeDesign && <input type="hidden" name="include-design" value="yes" \/>\}/);
+  assert.match(form, /<\/div>\s*\)\}\s*\{includeDesign && <input type="hidden" name="include-design" value="yes" \/>\}\s*<\/div>/);
   assert.match(form, /question="Would you like us to print\?"\s+value=\{includePrinting\}/);
   assert.match(form, /question="Would you like us to design it\?"\s+value=\{includeDesign\}/);
   // The pills are buttons that say which is pressed, and are never sent themselves.
@@ -205,6 +207,27 @@ test("print and design: Yes sends \"yes\" as the ticked boxes did, No sends noth
   assert.match(pills, /type="button"\s+aria-pressed=\{value === answer\}/);
   assert.doesNotMatch(pills, /\bname=/);
   assert.match(pills, /focus-visible:ring-2/);
+});
+
+test("print and design side by side in two equal columns, from a form 240px wide, with short helper lines", () => {
+  const block = between('<div className="@container">', "{/* Budget (leaflet) */}");
+  // The columns follow the form's own width (the wrapper spans the form), not
+  // the screen's, so the Get a Quote panel behaves the same; narrower, they stack.
+  assert.match(block, /^<div className="@container">\s*<div className="grid grid-cols-1 @min-\[240px\]:grid-cols-2 gap-2">/);
+  // Two matching boxes (a grid row stretches both to the taller one).
+  const boxes = [...block.matchAll(/<div className="border border-gray-200 rounded-md px-3 py-3 bg-gray-50">\s*<YesNo\s+id="(printing|design)-question"/g)].map((m) => m[1]);
+  assert.deepEqual(boxes, ["printing", "design"]);
+  assert.ok(block.includes('<p className="mt-2 text-xs text-gray-500">Choose No if they&apos;re already printed.</p>'));
+  assert.ok(block.includes('<p className="mt-2 text-xs text-gray-500">Choose No if your artwork is ready.</p>'));
+  assert.doesNotMatch(form, /materials printed and just need|already have your artwork/);
+  // The size and sides come after both boxes, not inside the print one.
+  assert.ok(block.indexOf('id="design-question"') < block.indexOf('htmlFor="item-size"'));
+  // The pills keep their look, are at least 44px tall, and narrow only to fit a tight column.
+  const pills = between("function YesNo(", "\n}\n");
+  assert.match(pills, /<div className="flex gap-2">/);
+  assert.match(pills, /className=\{`flex-1 max-w-16 min-h-11 rounded-full border px-2 text-sm font-semibold transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 \$\{/);
+  assert.match(pills, /"border-blue-700 bg-blue-700 text-white"/);
+  assert.match(pills, /"border-gray-300 bg-white text-gray-700 hover:border-gray-400"/);
 });
 
 test("the service's questions stay hidden until the contact number has 10 digits, with a hint until then", () => {

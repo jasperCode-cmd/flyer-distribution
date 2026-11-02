@@ -447,22 +447,39 @@ export default function QuoteForm() {
                   {/* ── Leaflet Distribution, after the quantity ── */}
                   {isLeaflet && (
                     <>
-                      {/* Printing. Yes sends printing-included as "yes", as the ticked
-                          box did; No sends nothing for it. */}
-                      <div className="border border-gray-200 rounded-md px-4 py-3 bg-gray-50">
-                        <YesNo
-                          id="printing-question"
-                          question="Would you like us to print?"
-                          value={includePrinting}
-                          onChange={setIncludePrinting}
-                        />
-                        <p className="mt-2 text-xs text-gray-500">
-                          Choose No if you already have your materials printed and just need
-                          distribution.
-                        </p>
+                      {/* Print and design, side by side in two equal columns
+                          whenever the form is at least 240px wide (the form's own
+                          width, so the Get a Quote panel behaves the same), else
+                          one above the other. The size and sides, when printing,
+                          go full width underneath both. Yes sends
+                          printing-included or include-design as "yes", as the
+                          ticked boxes did, and No sends nothing; the fields stay in
+                          the order they were sent: printing-included, item-size,
+                          print-sides, then include-design. */}
+                      <div className="@container">
+                        <div className="grid grid-cols-1 @min-[240px]:grid-cols-2 gap-2">
+                          <div className="border border-gray-200 rounded-md px-3 py-3 bg-gray-50">
+                            <YesNo
+                              id="printing-question"
+                              question="Would you like us to print?"
+                              value={includePrinting}
+                              onChange={setIncludePrinting}
+                            />
+                            <p className="mt-2 text-xs text-gray-500">Choose No if they&apos;re already printed.</p>
+                          </div>
+                          <div className="border border-gray-200 rounded-md px-3 py-3 bg-gray-50">
+                            <YesNo
+                              id="design-question"
+                              question="Would you like us to design it?"
+                              value={includeDesign}
+                              onChange={setIncludeDesign}
+                            />
+                            <p className="mt-2 text-xs text-gray-500">Choose No if your artwork is ready.</p>
+                          </div>
+                        </div>
 
                         {includePrinting && (
-                          <div className="mt-3 space-y-3">
+                          <div className="mt-2 space-y-3 border border-gray-200 rounded-md px-4 py-3 bg-gray-50">
                             <input type="hidden" name="printing-included" value="yes" />
                             <div>
                               <label
@@ -512,20 +529,6 @@ export default function QuoteForm() {
                             </div>
                           </div>
                         )}
-                      </div>
-
-                      {/* Design. Yes sends include-design as "yes", as the ticked box
-                          did; No sends nothing for it. */}
-                      <div className="border border-gray-200 rounded-md px-4 py-3 bg-gray-50">
-                        <YesNo
-                          id="design-question"
-                          question="Would you like us to design it?"
-                          value={includeDesign}
-                          onChange={setIncludeDesign}
-                        />
-                        <p className="mt-2 text-xs text-gray-500">
-                          Choose No if you already have your artwork ready.
-                        </p>
                         {includeDesign && <input type="hidden" name="include-design" value="yes" />}
                       </div>
 
@@ -795,7 +798,7 @@ function YesNo({
             type="button"
             aria-pressed={value === answer}
             onClick={() => onChange(answer)}
-            className={`min-w-16 rounded-full border px-5 py-2 text-sm font-semibold transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
+            className={`flex-1 max-w-16 min-h-11 rounded-full border px-2 text-sm font-semibold transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
               value === answer
                 ? "border-blue-700 bg-blue-700 text-white"
                 : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"

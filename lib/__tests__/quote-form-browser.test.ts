@@ -229,3 +229,48 @@ test("switching from another service to Leaflet Distribution, by click and by ke
     }
   }
 });
+
+test("print and design side by side when the form is at least 240px wide, stacked below that, with the size and sides full width underneath", { skip }, async () => {
+  for (const screen of [...SCREENS, { name: "small phone 320x640", width: 320, height: 640 }]) {
+    for (const place of PLACES) {
+      const o = await open(screen, place, "?service=leaflet");
+      try {
+        await o.root.locator("#phone").fill("07700 900123");
+        await o.root.locator("#quantity").selectOption("Not sure yet");
+        await o.root.getByRole("button", { name: "Send Quote Request" }).waitFor({ state: "visible" });
+        const groups = ["printing-question", "design-question"].map((id) => o.root.locator(`[role="group"][aria-labelledby="${id}"]`));
+        await groups[0].getByRole("button", { name: "Yes" }).click();
+        await groups[1].getByRole("button", { name: "Yes" }).click();
+        const r = await o.root.evaluate((el: Element) => {
+          const [print, design] = ["printing-question", "design-question"].map((id) =>
+            el.querySelector(`[aria-labelledby="${id}"]`)!.parentElement!.getBoundingClientRect()
+          );
+          const size = el.querySelector("#item-size")!.closest("div.space-y-3")!.getBoundingClientRect();
+          const form = el.querySelector("form")!.getBoundingClientRect();
+          const pills = [...el.querySelectorAll('[aria-labelledby$="-question"] button')].map((b) => b.getBoundingClientRect());
+          return {
+            form: form.width,
+            sideBySide: Math.abs(print.top - design.top) < 1 && design.left > print.right,
+            equal: Math.abs(print.width - design.width) < 1 && Math.abs(print.height - design.height) < 1,
+            sizeBelowBoth: size.top >= Math.max(print.bottom, design.bottom),
+            sizeFullWidth: Math.abs(size.left - print.left) < 1 && Math.abs(size.right - (design.left > print.right ? design.right : print.right)) < 1,
+            pillHeights: Math.min(...pills.map((p) => p.height)),
+            inside: pills.every((p) => p.right <= form.right + 0.5),
+          };
+        });
+        const where = `${screen.name}, ${place} (form ${Math.round(r.form)}px)`;
+        assert.equal(r.sideBySide, r.form >= 240, `${where}: side by side only from 240px`);
+        if (r.sideBySide) assert.ok(r.equal, `${where}: two equal columns of matching height`);
+        assert.ok(r.sizeBelowBoth && r.sizeFullWidth, `${where}: size and sides full width under both`);
+        assert.ok(r.pillHeights >= 44, `${where}: Yes and No at least 44px tall`);
+        assert.ok(r.inside, `${where}: nothing spills out`);
+        // Still answered by keyboard: Space on a focused pill presses it.
+        await groups[1].getByRole("button", { name: "No" }).focus();
+        await o.page.keyboard.press("Space");
+        assert.equal(await groups[1].getByRole("button", { name: "No" }).getAttribute("aria-pressed"), "true", `${where}: keyboard`);
+      } finally {
+        await o.ctx.close();
+      }
+    }
+  }
+});
