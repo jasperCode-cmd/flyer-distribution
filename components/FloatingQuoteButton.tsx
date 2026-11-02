@@ -171,7 +171,7 @@ export default function FloatingQuoteButton() {
             // is the only heading seen, so there's no second one above it.
             role="region"
             aria-label="Get a Quote"
-            className="origin-bottom-right relative bg-white rounded-2xl shadow-2xl w-[calc(100vw-32px)] sm:w-[460px] lg:w-[min(560px,92vw)]"
+            className="origin-bottom-right relative bg-white rounded-2xl shadow-2xl w-[calc(100vw-32px)] sm:w-[460px] md:w-[min(560px,92vw)]"
           >
             <div className="max-h-[85vh] overflow-y-auto rounded-2xl p-6 pb-20">
               <QuoteForm inPanel />
