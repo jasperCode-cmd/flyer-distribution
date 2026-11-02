@@ -189,12 +189,13 @@ export default function HomePage() {
           <div className="flex flex-col gap-10">
             {/* Text, constrained to keep clear of the full-bleed image at desktop */}
             <div className="lg:max-w-[49%]">
-              {/* Our Google rating, linking to the reviews */}
+              {/* Our Google rating, linking to the reviews. From 640px only: on
+                  phones it is the plain line under the buttons instead. */}
               <a
                 href={GOOGLE_PROFILE}
                 target="_blank"
                 rel="noopener"
-                className="inline-flex flex-wrap items-center gap-x-2 gap-y-0.5 max-w-full rounded-2xl sm:rounded-full bg-white/10 border border-white/20 px-3.5 py-1.5 mb-5 text-xs sm:text-sm hover:bg-white/15 transition-colors"
+                className="hidden sm:inline-flex flex-wrap items-center gap-x-2 gap-y-0.5 max-w-full rounded-2xl sm:rounded-full bg-white/10 border border-white/20 px-3.5 py-1.5 mb-5 text-xs sm:text-sm hover:bg-white/15 transition-colors"
               >
                 <svg role="img" aria-label="5 out of 5 stars" viewBox="0 0 120 24" className="h-3.5 w-auto fill-yellow-400 shrink-0">
                   {[0, 1, 2, 3, 4].map((i) => (
@@ -230,6 +231,22 @@ export default function HomePage() {
                   <span className="relative z-10">See Our Case Studies</span>
                 </Link>
               </div>
+              {/* On phones only: the Google rating as a plain line, in place
+                  of the pill above, with a tap area at least 44px tall. */}
+              <a
+                href={GOOGLE_PROFILE}
+                target="_blank"
+                rel="noopener"
+                className="sm:hidden mt-2 flex w-fit max-w-full min-h-11 items-center gap-2 rounded-sm text-sm text-[#dbeafe] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#facc15]"
+              >
+                <svg role="img" aria-label="5 out of 5 stars" viewBox="0 0 120 24" className="h-3.5 w-auto fill-[#facc15] shrink-0">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <path key={i} d={HERO_STAR} transform={`translate(${i * 24} 0)`} />
+                  ))}
+                </svg>
+                <span>Rated 5.0 on Google by local businesses</span>
+                <span className="sr-only"> (opens in a new tab)</span>
+              </a>
               <HeroCaseStudyTeaser />
             </div>
             {/* Mobile-only square image, unchanged from before */}
