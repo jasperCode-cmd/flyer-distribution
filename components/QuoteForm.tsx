@@ -350,55 +350,9 @@ export default function QuoteForm() {
               </div>
 
               <div>
-                {/* Leaflet Distribution: the quantity first, on its own. Its
-                    choice is sent from the hidden field in the leaflet fields
-                    below, where this dropdown used to be. */}
-                {isLeaflet && (
-                  <div>
-                    <label
-                      htmlFor="quantity"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Approximate quantity (flyers) <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      id="quantity"
-                      required
-                      value={quantity}
-                      onChange={(e) => {
-                        setQuantity(e.target.value);
-                        // Any choice, "Not sure yet" included, folds in the rest.
-                        if (e.target.value) setQuantityChosen(true);
-                      }}
-                      aria-describedby={quantityChosen ? "quantity-hint" : "quantity-hint quantity-continue-hint"}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                    >
-                      <option value="">{QUANTITY_PLACEHOLDER}</option>
-                      {QUANTITY_RANGES.map((range) => (
-                        <option key={range} value={range}>
-                          {range}
-                        </option>
-                      ))}
-                    </select>
-                    <p id="quantity-hint" className="mt-1.5 text-xs text-gray-500">
-                      Not sure? Your best guess is fine.
-                    </p>
-                    {!quantityChosen && (
-                      <p id="quantity-continue-hint" className="mt-1.5 text-xs text-gray-500">
-                        Choose a quantity to continue
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {/* The rest of the section. For leaflets it is hidden, not
-                    removed, until a quantity is chosen, so a Company typed for
-                    another service is kept, then folds in. The other services
-                    show it straight away, as before. */}
-                <div
-                  hidden={isLeaflet && !quantityChosen}
-                  className={isLeaflet ? "quote-fold-in mt-5 space-y-5" : "space-y-5"}
-                >
+                {/* Shown with the heading: Company, then for leaflets the areas
+                    and the quantity, in the order they are sent. */}
+                <div className="space-y-5">
                   {/* Company */}
                   <div>
                     <label
@@ -440,10 +394,59 @@ export default function QuoteForm() {
                         />
                       </div>
 
-                      {/* Quantity, chosen first above, sent here where the dropdown
-                          used to be, as it reads ("1,000 to 2,500") */}
-                      <input type="hidden" name="quantity" value={quantity} />
+                      {/* Quantity: one of the ranges, sent as it reads ("1,000 to 2,500").
+                          Any choice folds in the rest of the section. */}
+                      <div>
+                        <label
+                          htmlFor="quantity"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Approximate quantity (flyers) <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          id="quantity"
+                          name="quantity"
+                          required
+                          value={quantity}
+                          onChange={(e) => {
+                            setQuantity(e.target.value);
+                            // Any choice, "Not sure yet" included, folds in the rest.
+                            if (e.target.value) setQuantityChosen(true);
+                          }}
+                          aria-describedby={quantityChosen ? "quantity-hint" : "quantity-hint quantity-continue-hint"}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                        >
+                          <option value="">{QUANTITY_PLACEHOLDER}</option>
+                          {QUANTITY_RANGES.map((range) => (
+                            <option key={range} value={range}>
+                              {range}
+                            </option>
+                          ))}
+                        </select>
+                        <p id="quantity-hint" className="mt-1.5 text-xs text-gray-500">
+                          Not sure? Your best guess is fine.
+                        </p>
+                        {!quantityChosen && (
+                          <p id="quantity-continue-hint" className="mt-1.5 text-xs text-gray-500">
+                            Choose a quantity to continue
+                          </p>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
 
+                {/* The rest of the section. For leaflets it is hidden until a
+                    quantity is chosen, then folds in below it and stays, so
+                    nothing above moves and nothing typed is lost. The other
+                    services show it straight away, as before. */}
+                <div
+                  hidden={isLeaflet && !quantityChosen}
+                  className={isLeaflet ? "quote-fold-in mt-5 space-y-5" : "mt-5 space-y-5"}
+                >
+                  {/* ── Leaflet Distribution, after the quantity ── */}
+                  {isLeaflet && (
+                    <>
                       {/* Printing. Yes sends printing-included as "yes", as the ticked
                           box did; No sends nothing for it. */}
                       <div className="border border-gray-200 rounded-md px-4 py-3 bg-gray-50">

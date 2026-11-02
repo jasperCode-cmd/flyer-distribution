@@ -29,8 +29,10 @@ const between = (from: string, to: string) => {
   return form.slice(start, end);
 };
 const namesIn = (source: string) => [...source.matchAll(/\bname="([^"]+)"/g)].map((m) => m[1]);
-// The start of the leaflet fields after Company (the quantity is asked before Company).
+// The leaflet fields after Company: the areas and the quantity, then the
+// rest of them once a quantity is chosen.
 const LEAFLET_FIELDS = "{/* \u2500\u2500 Leaflet Distribution fields \u2500\u2500 */}\n                  {isLeaflet && (";
+const LEAFLET_AFTER_QUANTITY = "{/* \u2500\u2500 Leaflet Distribution, after the quantity \u2500\u2500 */}\n                  {isLeaflet && (";
 
 test("the three services send the words the old dropdown sent, with the cards' copy", () => {
   assert.deepEqual(
@@ -136,11 +138,12 @@ test("the details come first, then the service heading, Company, and the service
     'name="email"',
     'name="phone"',
     "?.heading}",
-    // Leaflet Distribution's quantity, before the rest of its section.
-    'id="quantity"',
     'name="company"',
     '<input type="hidden" name="service" value={serviceType} />',
     LEAFLET_FIELDS,
+    'name="areas-required"',
+    'name="quantity"',
+    LEAFLET_AFTER_QUANTITY,
     'name="newsletter"',
     "Send Quote Request",
   ];
@@ -160,7 +163,7 @@ test("the details come first, then the service heading, Company, and the service
 });
 
 test("each service shows its own fields after Company, in their old order", () => {
-  // The leaflet quantity is still sent from here, where its dropdown used to be.
+  // The leaflet fields, the areas and quantity first and the rest after, in their old order.
   assert.deepEqual(namesIn(between(LEAFLET_FIELDS, "{isWebDesign && (")), [
     "areas-required",
     "quantity",

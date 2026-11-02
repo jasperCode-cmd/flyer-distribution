@@ -9,8 +9,8 @@ import { join } from "node:path";
 // visible on an iPhone. Each time the card is chosen, the form opens, and
 // "Your details" with its first field ends up on screen (on a phone it opens
 // below all three cards, so it has to be brought into view). For Leaflet
-// Distribution, the campaign section follows the contact number and the rest
-// follows the quantity. Nothing is sent: the form is never submitted and
+// Distribution, the campaign section follows the contact number, asking
+// Company, Areas and the quantity first, and the rest follows the quantity. Nothing is sent: the form is never submitted and
 // every request off the test server is blocked.
 //
 // Needs a production build of the site running locally and Playwright:
@@ -116,6 +116,45 @@ async function detailsOnScreen(o: Opened): Promise<boolean> {
   return false;
 }
 
+// The section's own controls a person can see, in order (the details aside).
+const sectionControls = (o: Opened): Promise<string[]> =>
+  o.root.evaluate((el: Element) =>
+    [...el.querySelectorAll("form input:not([type=hidden]), form select, form textarea, form button")]
+      .filter((e) => (e as HTMLElement).offsetParent !== null && !["first-name", "last-name", "email", "phone"].includes(e.id))
+      .map((e) => e.id || (e as HTMLInputElement).name || (e.textContent ?? "").trim())
+  );
+
+// Leaflets: Company, Areas and the quantity first, with the hint; the rest
+// after any quantity, below it, with what was typed kept and nothing above
+// moving; then it stays when the quantity is changed back.
+async function leafletSection(o: Opened) {
+  assert.deepEqual(await sectionControls(o), ["company", "areas-required", "quantity"], "Company, Areas, then the quantity");
+  assert.equal(await o.root.locator("#quantity-continue-hint").textContent(), "Choose a quantity to continue");
+  await o.root.locator("#company").fill("Kept Ltd");
+  await o.root.locator("#areas-required").fill("Ringwood BH24");
+  const tops = () =>
+    o.root.evaluate((el: Element) => ["#company", "#areas-required", "#quantity"].map((id) => Math.round(el.querySelector(id)!.getBoundingClientRect().top)));
+  // Let the form's own fold-ins (not the page's endless ones), and any
+  // scroll to the form, finish first.
+  await o.root.evaluate((el: Element) => Promise.all(el.querySelector("form")!.getAnimations({ subtree: true }).map((a) => a.finished)));
+  let before = await tops();
+  for (let i = 0; i < 20; i++) {
+    await o.page.waitForTimeout(100);
+    const now = await tops();
+    if (now.join() === before.join()) break;
+    before = now;
+  }
+  await o.root.locator("#quantity").selectOption("Not sure yet");
+  await o.root.getByRole("button", { name: "Send Quote Request" }).waitFor({ state: "visible" });
+  assert.deepEqual(await tops(), before, "nothing above the rest moves");
+  assert.deepEqual(await sectionControls(o), ["company", "areas-required", "quantity", "Yes", "No", "Yes", "No", "budget", "message", "newsletter", "Send Quote Request"]);
+  assert.equal(await o.root.locator("#company").inputValue(), "Kept Ltd");
+  assert.equal(await o.root.locator("#areas-required").inputValue(), "Ringwood BH24");
+  assert.equal(await o.root.locator("#quantity-continue-hint").count(), 0);
+  await o.root.locator("#quantity").selectOption("");
+  assert.equal((await sectionControls(o)).length, 11, "still revealed after changing back");
+}
+
 async function choose(o: Opened, s: Service, how: "click" | "keyboard" | "preselect") {
   if (how === "click") {
     if (o.phone) await o.card(s).tap();
@@ -149,10 +188,7 @@ for (const screen of SCREENS) {
             // Then the service's questions after the contact number.
             await o.root.locator("#phone").fill("07700 900123");
             await o.root.getByRole("heading", { name: s.heading }).waitFor({ state: "visible" });
-            if (s.param === "leaflet") {
-              assert.equal(await o.root.locator("#company").isVisible(), false, "the rest waits for a quantity");
-              await o.root.locator("#quantity").selectOption("Not sure yet");
-            }
+            if (s.param === "leaflet") await leafletSection(o);
             await o.root.locator("#company").waitFor({ state: "visible" });
             await o.root.getByRole("button", { name: "Send Quote Request" }).waitFor({ state: "visible" });
             assert.deepEqual(o.offServer.filter((r) => !r.startsWith("GET ")), [], "nothing sent");
