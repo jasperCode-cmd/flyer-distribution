@@ -235,6 +235,31 @@ test("once shown, the service's questions stay for the visit, through number edi
   assert.match(form, /onChange=\{\(\) => setServiceType\(s\.value\)\}/, "choosing another card only changes the service");
 });
 
+test("choosing a card, by click, tap or keyboard, the chosen one included, brings Your details into view when it is off screen", () => {
+  // On a phone the form opens below all three cards. Every choice is counted
+  // (a click on the card already chosen fires no change, but is counted).
+  const cards = between("<fieldset", "</fieldset>");
+  assert.match(cards, /onChange=\{\(\) => setServiceType\(s\.value\)\}\s+onClick=\{\(\) => setCardChoices\(\(n\) => n \+ 1\)\}/);
+  assert.match(form, /const \[cardChoices, setCardChoices\] = useState\(0\);/);
+  // Once the form is there, its start and first field are checked.
+  assert.match(form, /useEffect\(\(\) => \{\s+if \(cardChoices\) showDetails\(detailsRef\.current, firstNameRef\.current\);\s+\}, \[cardChoices\]\);/);
+  assert.match(form, /<div ref=\{detailsRef\} className="border-t border-gray-200 pt-6 scroll-mt-20">\s+<h3 className="text-lg font-bold text-blue-900">Your details<\/h3>/);
+  assert.match(form, /ref=\{firstNameRef\}\s+type="text"\s+id="first-name"/);
+  // Only when the first field is not fully on screen, on the page or in the
+  // panel's own scrolling area; smoothly, or at once with reduced motion.
+  const helper = between("function showDetails(", "\n}\n");
+  assert.match(helper, /if \(!start \|\| !field\) return;/);
+  assert.match(helper, /overflowY === "auto" \|\| overflowY === "scroll"/);
+  assert.match(helper, /if \(field\.getBoundingClientRect\(\)\.bottom <= bottom\) return;/);
+  assert.match(helper, /window\.matchMedia\("\(prefers-reduced-motion: reduce\)"\)\.matches/);
+  assert.match(helper, /start\.scrollIntoView\(\{ behavior: reduce \? "instant" : "smooth", block: "start" \}\);/);
+  // A link choosing the service opens the form without moving the page.
+  assert.doesNotMatch(between("// A link can choose the service", "}, []);"), /setCardChoices|showDetails/);
+  // The browser test checks it on screen for every service, by click,
+  // keyboard and link, on /quote and in the panel, on desktop and phone.
+  assert.ok(readFileSync("lib/__tests__/quote-form-browser.test.ts", "utf8").includes("QUOTE_FORM_TEST_URL"));
+});
+
 test("switching service keeps the details and sends only the shown service's fields", () => {
   // Each service's fields are only rendered while it is chosen, so nothing
   // of another service is in the form when it is sent.

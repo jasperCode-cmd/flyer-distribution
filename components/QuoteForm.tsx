@@ -24,6 +24,12 @@ export default function QuoteForm() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  // Each time someone chooses a card (click, tap or keyboard, the one already
+  // chosen included), the start of the form is brought into view if it is
+  // off screen. Counted, so choosing the same card again still asks.
+  const [cardChoices, setCardChoices] = useState(0);
+  const detailsRef = useRef<HTMLDivElement>(null);
+  const firstNameRef = useRef<HTMLInputElement>(null);
   // The result once sent: the success message, or the banner if sending failed.
   const successRef = useRef<HTMLDivElement>(null);
   const errorRef = useRef<HTMLParagraphElement>(null);
@@ -44,6 +50,11 @@ export default function QuoteForm() {
     form.addEventListener("invalid", revealFirstInvalid, true);
     return () => form.removeEventListener("invalid", revealFirstInvalid, true);
   }, [serviceType, submitted]);
+
+  // Once the form is there for the card just chosen.
+  useEffect(() => {
+    if (cardChoices) showDetails(detailsRef.current, firstNameRef.current);
+  }, [cardChoices]);
 
   // A link can choose the service: /quote?service=leaflet, web or screen.
   useEffect(() => {
@@ -160,6 +171,7 @@ export default function QuoteForm() {
                   value={s.value}
                   checked={chosen}
                   onChange={() => setServiceType(s.value)}
+                  onClick={() => setCardChoices((n) => n + 1)}
                   aria-labelledby={`quote-service-${s.param}`}
                   aria-describedby={
                     featured ? `quote-service-${s.param}-line quote-service-${s.param}-badge` : `quote-service-${s.param}-line`
@@ -238,7 +250,7 @@ export default function QuoteForm() {
             value="New Quote Request - Flyer Distribution Hampshire"
           />
 
-          <div className="border-t border-gray-200 pt-6">
+          <div ref={detailsRef} className="border-t border-gray-200 pt-6 scroll-mt-20">
             <h3 className="text-lg font-bold text-blue-900">Your details</h3>
           </div>
 
@@ -252,6 +264,7 @@ export default function QuoteForm() {
                 First name <span className="text-red-500">*</span>
               </label>
               <input
+                ref={firstNameRef}
                 type="text"
                 id="first-name"
                 name="first-name"
@@ -735,6 +748,24 @@ export default function QuoteForm() {
       )}
     </div>
   );
+}
+
+// On a phone the form opens below all three cards, out of sight, so a card
+// chosen there looked as if nothing had happened. If the first field is not
+// fully on screen (the page, or the Get a Quote panel's own scrolling area),
+// the start of the form, "Your details", is brought to just below the
+// header: smoothly, or at once with reduced motion. Left alone when it is
+// already in view.
+function showDetails(start: HTMLElement | null, field: HTMLElement | null) {
+  if (!start || !field) return;
+  let bottom = window.innerHeight;
+  for (let el = field.parentElement; el; el = el.parentElement) {
+    const { overflowY } = getComputedStyle(el);
+    if (overflowY === "auto" || overflowY === "scroll") bottom = Math.min(bottom, el.getBoundingClientRect().bottom);
+  }
+  if (field.getBoundingClientRect().bottom <= bottom) return;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  start.scrollIntoView({ behavior: reduce ? "instant" : "smooth", block: "start" });
 }
 
 // A question answered with Yes or No pills, one of them always pressed.
