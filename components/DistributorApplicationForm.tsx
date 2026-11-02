@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useId } from "react";
 import Link from "next/link";
+import { revealFirstInvalid, showResult } from "@/components/form-result";
 import {
   APPLICATION_HONEYPOT_FIELD,
   DISTRIBUTOR_APPLICATION_SUBJECT,
@@ -15,6 +16,25 @@ export default function DistributorApplicationForm() {
   const [area, setArea] = useState("");
   const [showRest, setShowRest] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  // The result once sent: the success message, or the banner if sending failed.
+  const successRef = useRef<HTMLDivElement>(null);
+  const errorRef = useRef<HTMLParagraphElement>(null);
+  const resultId = useId();
+
+  // After sending, the result is brought into view below the header and focused.
+  useEffect(() => {
+    if (submitted) showResult(successRef.current);
+  }, [submitted]);
+  useEffect(() => {
+    if (error) showResult(errorRef.current);
+  }, [error]);
+  // A field the browser won't accept is brought into view with its message.
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form) return;
+    form.addEventListener("invalid", revealFirstInvalid, true);
+    return () => form.removeEventListener("invalid", revealFirstInvalid, true);
+  }, [submitted]);
 
   const revealed = area.trim().length > 0;
 
@@ -53,10 +73,17 @@ export default function DistributorApplicationForm() {
 
   if (submitted) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
+      <div
+        ref={successRef}
+        tabIndex={-1}
+        role="region"
+        aria-labelledby={`${resultId}-title`}
+        aria-describedby={`${resultId}-text`}
+        className="bg-white rounded-lg border border-gray-200 p-8 text-center scroll-mt-20 focus:outline-none"
+      >
         <div className="text-green-500 text-5xl mb-4">✓</div>
-        <h2 className="text-xl font-bold text-blue-900 mb-2">Application Received</h2>
-        <p className="text-gray-600 text-lg">
+        <h2 id={`${resultId}-title`} className="text-xl font-bold text-blue-900 mb-2">Application Received</h2>
+        <p id={`${resultId}-text`} className="text-gray-600 text-lg">
           Thanks for applying. We&apos;ll be in touch soon, most likely on WhatsApp.
         </p>
 
@@ -250,7 +277,11 @@ export default function DistributorApplicationForm() {
 
             {/* Error message */}
             {error && (
-              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-4 py-3">
+              <p
+                ref={errorRef}
+                tabIndex={-1}
+                className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-4 py-3 scroll-mt-20 focus:outline-none"
+              >
                 Something went wrong. Please try again or email us at{" "}
                 <a href="mailto:flyerdistributionhampshire@gmail.com" className="underline">
                   flyerdistributionhampshire@gmail.com
