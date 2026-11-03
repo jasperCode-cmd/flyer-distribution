@@ -7,9 +7,43 @@ import { hidesSiteChrome } from "@/lib/site-chrome";
 import { campaignSlots, slotNoun } from "@/lib/campaign-constants";
 import SlotCountdown from "./SlotCountdown";
 
-const DISMISS_KEY = "fdh-slot-popup-dismissed";
+// Shown at most once per visit: recorded in sessionStorage the moment it
+// appears, whether it is then closed, clicked or ignored, so no other page in
+// the same visit shows it again. The key's name dates from when it was only
+// recorded on closing. Never shown to someone who has sent a quote request in
+// this visit. If sessionStorage cannot be used, the flags below in memory
+// still limit it to once per page load.
+const SEEN_KEY = "fdh-slot-popup-dismissed";
+const QUOTE_SENT_KEY = "fdh-quote-request-sent";
 const SHOW_AFTER_MS = 13000;
 const BACKDROP_GUARD_MS = 1000;
+
+// The quote form's own subject field, which marks a quote request (the
+// distributor application form has its own). The quote form is not changed
+// for this: a submit only fires once the browser's checks pass, and the
+// request is sent straight after.
+export const QUOTE_REQUEST_SUBJECT = "New Quote Request - Flyer Distribution Hampshire";
+
+let shownThisPageLoad = false;
+let quoteSentThisPageLoad = false;
+
+function readFlag(key: string): boolean {
+  try {
+    return sessionStorage.getItem(key) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function setFlag(key: string) {
+  try {
+    sessionStorage.setItem(key, "1");
+  } catch {}
+}
+
+function mayShow(): boolean {
+  return !shownThisPageLoad && !quoteSentThisPageLoad && !readFlag(SEEN_KEY) && !readFlag(QUOTE_SENT_KEY);
+}
 
 export default function SlotPopup() {
   const pathname = usePathname();
@@ -19,24 +53,41 @@ export default function SlotPopup() {
   const [canDismissOnBackdrop, setCanDismissOnBackdrop] = useState(false);
   const guardTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // A quote request sent on any page, including /quote, means no popup for
+  // the rest of the visit.
+  useEffect(() => {
+    function onSubmit(e: Event) {
+      const form = e.target;
+      if (!(form instanceof HTMLFormElement)) return;
+      const subject = form.querySelector<HTMLInputElement>('input[name="subject"]')?.value;
+      if (subject !== QUOTE_REQUEST_SUBJECT) return;
+      quoteSentThisPageLoad = true;
+      setFlag(QUOTE_SENT_KEY);
+    }
+    document.addEventListener("submit", onSubmit, true);
+    return () => document.removeEventListener("submit", onSubmit, true);
+  }, []);
+
   useEffect(() => {
     if (skip) return;
 
-    // ?resetpopup=1 clears a stale "dismissed this session" flag so the
-    // popup can be re-tested without opening a fresh browser context.
+    // ?resetpopup=1 clears the "already shown this visit" flag so the popup
+    // can be re-tested without opening a fresh browser context.
     try {
       if (new URLSearchParams(window.location.search).get("resetpopup") === "1") {
-        sessionStorage.removeItem(DISMISS_KEY);
+        sessionStorage.removeItem(SEEN_KEY);
       }
     } catch {}
 
-    let dismissed = false;
-    try {
-      dismissed = sessionStorage.getItem(DISMISS_KEY) === "1";
-    } catch {}
-    if (dismissed) return;
+    if (!mayShow()) return;
 
-    const showTimer = setTimeout(() => setVisible(true), SHOW_AFTER_MS);
+    const showTimer = setTimeout(() => {
+      // Checked again: a quote may have been sent in the meantime.
+      if (!mayShow()) return;
+      shownThisPageLoad = true;
+      setFlag(SEEN_KEY);
+      setVisible(true);
+    }, SHOW_AFTER_MS);
     return () => clearTimeout(showTimer);
   }, [skip]);
 
@@ -57,14 +108,13 @@ export default function SlotPopup() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
+  // Already recorded as shown when it appeared, so closing only hides it.
   function dismiss() {
     setVisible(false);
-    try {
-      sessionStorage.setItem(DISMISS_KEY, "1");
-    } catch {}
   }
 
-  if (!visible) return null;
+  // Never on /quote or the pages without the site around them.
+  if (!visible || skip) return null;
 
   return (
     <div
