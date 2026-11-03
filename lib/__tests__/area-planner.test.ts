@@ -432,13 +432,18 @@ test("inputs: areas and projects are checked before anything is stored", () => {
 
 // --- Headers, branding and sessions ------------------------------------------------------------------------
 
-test("CSP: the public site's policy is exactly as before; only the map pages may load tiles, from the one host", () => {
+test("CSP: the public site's policy as before plus Cloudflare Web Analytics; only the map pages may load tiles, from the one host", () => {
+  const before =
+    "default-src 'self'; img-src 'self' images.unsplash.com images.pexels.com data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' fonts.gstatic.com; connect-src 'self' api.web3forms.com;";
+  // The site's policy: the beacon script and where it reports, and nothing else new.
   assert.equal(
     SITE_CSP,
-    "default-src 'self'; img-src 'self' images.unsplash.com images.pexels.com data:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' fonts.gstatic.com; connect-src 'self' api.web3forms.com;"
+    "default-src 'self'; img-src 'self' images.unsplash.com images.pexels.com data:; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self' fonts.gstatic.com; connect-src 'self' api.web3forms.com https://cloudflareinsights.com;"
   );
-  assert.equal(PLANNER_CSP, SITE_CSP.replace("data:;", "data: https://tile.openstreetmap.org blob:;"));
-  assert.equal(DELIVERY_CSP, SITE_CSP.replace("data:;", "data: https://tile.openstreetmap.org;"));
+  // The map pages' policies are exactly as they were: no analytics, so a
+  // private delivery link's address is never sent to it.
+  assert.equal(PLANNER_CSP, before.replace("data:;", "data: https://tile.openstreetmap.org blob:;"));
+  assert.equal(DELIVERY_CSP, before.replace("data:;", "data: https://tile.openstreetmap.org;"));
   assert.deepEqual(MAP_PAGE_HEADER_RULES.map((r) => r.source), ["/admin/crm/map", "/admin/crm/map/:path*", "/delivery/:path*"]);
   const delivery = MAP_PAGE_HEADER_RULES[2].headers.find((h) => h.key === "X-Robots-Tag");
   assert.equal(delivery?.value, "noindex, nofollow, noarchive");

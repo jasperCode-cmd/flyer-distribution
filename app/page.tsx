@@ -49,85 +49,16 @@ export const metadata: Metadata = {
 };
 
 
-// Our Google Business Profile, as in the footer and the schema below.
+// Our Google Business Profile, as in the footer and the site-wide schema.
 const GOOGLE_PROFILE = "https://share.google/RVxyPi4TzXAzkt1Am";
 
 // The blue bar after the brands: four reasons to choose us.
 const sellingPoints = ["Local Hampshire and Dorset team", "Postcode targeting", "GPS tracked delivery", "Quote within 24 hours"];
 const HERO_STAR = "M12 2.5l2.9 6.06 6.6.87-4.83 4.6 1.24 6.6L12 17.5l-5.91 3.13 1.24-6.6-4.83-4.6 6.6-.87L12 2.5z";
 
-const localBusinessSchema = {
-  "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  "@id": "https://www.flyerdistributionhampshire.co.uk/#business",
-  "name": "Flyer Distribution Hampshire",
-  "description":
-    "Professional flyer and leaflet distribution across Hampshire and Dorset. Reach real households in Southampton, Bournemouth, Poole and Winchester.",
-  "url": "https://www.flyerdistributionhampshire.co.uk",
-  "email": "flyerdistributionhampshire@gmail.com",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "11 Forest Reach, St Leonards",
-    "addressLocality": "Ringwood",
-    "addressRegion": "Dorset",
-    "postalCode": "BH24 2NR",
-    "addressCountry": "GB"
-  },
-  "image": "https://www.flyerdistributionhampshire.co.uk/Flyer%20Distribution%20Logo%20White%20Cropped.webp",
-  "sameAs": [
-    "https://share.google/RVxyPi4TzXAzkt1Am",
-    "https://www.facebook.com/share/1EWf3WKLJZ/?mibextid=wwXIfr",
-    "https://www.instagram.com/flyerdistributionhampshire/",
-    "https://www.tiktok.com/@aw.flyers",
-  ],
-  "areaServed": [
-    "Southampton",
-    "Bournemouth",
-    "Poole",
-    "Winchester",
-    "Eastleigh",
-    "New Forest",
-    "Romsey",
-    "Ringwood",
-    "Christchurch",
-    "Dorset",
-    "Hythe",
-    "Totton",
-    "Hedge End",
-    "Chandler's Ford",
-    "Brockenhurst",
-  ],
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "5.0",
-    "reviewCount": "2",
-    "bestRating": "5",
-  },
-  "openingHoursSpecification": [
-    {
-      "@type": "OpeningHoursSpecification",
-      "dayOfWeek": [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-      ],
-      "opens": "09:00",
-      "closes": "18:00",
-    },
-  ],
-};
-
 export default function HomePage() {
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
-      />
       {/* Hero */}
       <section id="hero" className="relative bg-blue-900 text-white overflow-hidden">
         {/* Background photo, darkened to stay behind content */}
@@ -137,6 +68,7 @@ export default function HomePage() {
           aria-hidden="true"
           width={1920}
           height={800}
+          sizes="100vw"
           className="absolute inset-0 w-full h-full object-cover"
           style={{ objectPosition: "center" }}
           priority
@@ -179,7 +111,7 @@ export default function HomePage() {
               sizes="(min-width: 1024px) 1054px, 1px"
               quality={90}
               className="absolute top-0 right-0 h-full w-auto max-w-none"
-              priority
+              loading="eager"
             />
           </div>
         </div>
@@ -242,7 +174,6 @@ export default function HomePage() {
                 quality={90}
                 sizes="min(100vw, 384px)"
                 className="w-full max-w-xs sm:max-w-sm rounded-xl shadow-2xl"
-                priority
               />
             </div>
           </div>

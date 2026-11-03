@@ -216,13 +216,13 @@ export default function PublicNoticeLeafletingPage() {
                 Section 48: Duty to Publicise
               </h3>
               <p className="text-gray-600 text-base leading-relaxed">
-                Section 48 requires applicants to publicise the application
-                once it has been accepted, so people know it exists and how
-                to respond to it. This typically reaches a wider audience
-                than the pre-application consultation stage. We deliver
-                these publicity materials on the same project-defined
-                basis, working to whatever area and deadline your Section
-                48 obligations set.
+                Section 48 requires applicants to publicise the proposed
+                application before it is submitted, so people know about it
+                and how to have their say. This usually reaches a wider
+                audience than the Section 47 community consultation. We
+                deliver publicity materials on the same project-defined
+                basis, working to whatever area and deadline your publicity
+                plan sets.
               </p>
             </div>
           </div>

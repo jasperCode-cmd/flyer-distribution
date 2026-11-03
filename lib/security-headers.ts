@@ -4,23 +4,26 @@ import { MAP_TILES } from "./area-planner/tiles";
 // same Content-Security-Policy except the two that show a map (the Area
 // Planner and the private delivery pages), which may also load map tiles
 // from the one tile host, and on the planner blob: images for the
-// "Download image" preview. Nothing else is loosened anywhere.
+// "Download image" preview. The public site's policy also allows
+// Cloudflare Web Analytics (its beacon script and where it reports); the
+// map pages' policies do not, so a private delivery link's address is never
+// sent to it. Nothing else is loosened anywhere.
 
-function contentSecurityPolicy(extraImg: string[] = []): string {
+function contentSecurityPolicy(extraImg: string[] = [], analytics = false): string {
   const img = ["'self'", "images.unsplash.com", "images.pexels.com", "data:", ...extraImg].join(" ");
   return [
     "default-src 'self'",
     `img-src ${img}`,
-    "script-src 'self' 'unsafe-inline'",
+    `script-src 'self' 'unsafe-inline'${analytics ? " https://static.cloudflareinsights.com" : ""}`,
     "style-src 'self' 'unsafe-inline'",
     "font-src 'self' fonts.gstatic.com",
-    "connect-src 'self' api.web3forms.com",
+    `connect-src 'self' api.web3forms.com${analytics ? " https://cloudflareinsights.com" : ""}`,
   ]
     .map((d) => `${d};`)
     .join(" ");
 }
 
-export const SITE_CSP = contentSecurityPolicy();
+export const SITE_CSP = contentSecurityPolicy([], true);
 export const PLANNER_CSP = contentSecurityPolicy([MAP_TILES.host, "blob:"]);
 export const DELIVERY_CSP = contentSecurityPolicy([MAP_TILES.host]);
 
