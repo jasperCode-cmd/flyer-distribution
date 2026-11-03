@@ -99,13 +99,12 @@ const caseStudies = [
   {
     place: "Across Hampshire",
     subtitle: "Public Notice Leafleting",
-    stat: "3,500+ Leaflets (Hampshire Council Road Closure)",
+    stat: "3,500+ Leaflets (Council Road Closure)",
     body: (
       <>
-        Statutory public notice leafleting supporting community consultation
-        requirements for a Nationally Significant Infrastructure Project,
-        distributed across the project-defined area, taking in locations
-        from Lyndhurst to{" "}
+        Road closure notices for the council, delivered door to door to let
+        residents know about the closure, across the area the council set
+        out, taking in locations from Lyndhurst to{" "}
         <Link href="/areas/leaflet-distribution-eastleigh" className="text-blue-700 hover:underline font-medium">
           Fair Oak
         </Link>
