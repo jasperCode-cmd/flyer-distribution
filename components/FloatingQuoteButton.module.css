@@ -1,0 +1,103 @@
+/* The floating Get a Quote pill and panel (FloatingQuoteButton.tsx), moving
+   as they did with framer-motion, in plain CSS. Each grows in from 30% of
+   its size while fading in, on a spring. The pill shrinks away in 200ms; the
+   panel springs away. Hovered with a mouse, the pill grows to 112% in 180ms
+   and springs back.
+
+   The springs are framer-motion's own, sampled as linear() easings over the
+   time each takes to settle: the pill's (stiffness 400, damping 26) in
+   410ms, overshooting to about 105%; the panel's (stiffness 300, damping 28)
+   in 530ms, overshooting to about 101%. Browsers without linear() get a
+   close cubic-bezier instead.
+
+   The component sets data-stage: "enter" is the starting look, drawn for a
+   frame; "shown" lets it transition in; "leave" lets it transition out
+   before it is removed. */
+
+.pill,
+.panel {
+  scale: 1;
+  opacity: 1;
+  transition-property: scale, opacity;
+}
+
+.pill[data-stage="enter"],
+.pill[data-stage="leave"],
+.panel[data-stage="enter"],
+.panel[data-stage="leave"] {
+  scale: 0.3;
+  opacity: 0;
+}
+
+.pill {
+  transition-duration: 410ms;
+  transition-timing-function: cubic-bezier(0.34, 1.36, 0.64, 1);
+}
+
+.pill[data-stage="leave"] {
+  transition-duration: 200ms;
+  transition-timing-function: ease-in-out;
+}
+
+@media (hover: hover) {
+  .pill[data-stage="shown"]:hover {
+    scale: 1.12;
+    transition-duration: 180ms;
+    transition-timing-function: ease-out;
+  }
+}
+
+.panel {
+  transition-duration: 530ms;
+  transition-timing-function: cubic-bezier(0.3, 1.12, 0.5, 1);
+}
+
+@supports (transition-timing-function: linear(0, 1)) {
+  .pill {
+    transition-timing-function: linear(0, 0.0068 1.46%, 0.0259 2.93%, 0.0669 4.88%, 0.1217 6.83%, 0.2038 9.27%, 0.3711 13.66%, 0.5583 18.54%, 0.6774 21.95%, 0.7675 24.88%, 0.8448 27.8%, 0.9091 30.73%, 0.9606 33.66%, 1.0058 37.07%, 1.0368 40.49%, 1.0579 44.39%, 1.0678 49.27%, 1.063 55.61%, 1.0117 77.56%, 0.9978 90.24%, 0.9954 99.02%, 1);
+  }
+
+  .panel {
+    transition-timing-function: linear(0, 0.0051 1.13%, 0.0258 2.64%, 0.059 4.15%, 0.1136 6.04%, 0.2056 8.68%, 0.4915 16.23%, 0.6068 19.62%, 0.696 22.64%, 0.7717 25.66%, 0.8341 28.68%, 0.8896 32.08%, 0.9355 35.85%, 0.9701 40%, 0.9949 44.91%, 1.0098 51.32%, 1.0128 61.51%, 1.0006 96.23%, 1);
+  }
+}
+
+/* The idle wiggle while the pill waits unopened: every 7 seconds (the first
+   after 7), a 0.6 second rock to -8, 8, -5 and 5 degrees and back, each
+   step eased in and out. */
+.wiggle {
+  animation: wiggle 7s ease-in-out 7s infinite;
+}
+
+@keyframes wiggle {
+  0% {
+    transform: rotate(0deg);
+  }
+  1.714% {
+    transform: rotate(-8deg);
+  }
+  3.429% {
+    transform: rotate(8deg);
+  }
+  5.143% {
+    transform: rotate(-5deg);
+  }
+  6.857% {
+    transform: rotate(5deg);
+  }
+  8.571%,
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+/* The loading state fades in only if the form takes more than a moment. */
+.loading {
+  animation: appear 200ms ease-out 300ms both;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+}

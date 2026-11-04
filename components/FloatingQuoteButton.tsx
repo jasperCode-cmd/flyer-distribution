@@ -1,13 +1,53 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { hidesSiteChrome } from "@/lib/site-chrome";
-import { AnimatePresence, motion, useAnimation } from "framer-motion";
-import QuoteForm from "./QuoteForm";
+import styles from "./FloatingQuoteButton.module.css";
 
 const HERO_EXIT_DELAY_MS = 3000;
-const IDLE_WIGGLE_INTERVAL_MS = 7000;
+// How long the pill and the panel take to animate out before they are
+// removed: the same as their transitions in FloatingQuoteButton.module.css.
+const PILL_LEAVE_MS = 200;
+const PANEL_LEAVE_MS = 530;
+
+// The quote form is only fetched (a dynamic import) the first time the panel
+// is opened, so no page loads it for the many visitors who never open the
+// panel. Held in state rather than behind Suspense, so it shows the moment
+// it arrives. While it is on its way the panel shows a small loading state;
+// if it can't be fetched (offline, say), the panel points to the quote page,
+// and opening the panel again tries again.
+type QuoteFormComponent = typeof import("./QuoteForm").default;
+
+// As tall as the form first is (three cards, with the panel's width), so the
+// panel doesn't jump when it arrives.
+function QuoteFormLoading() {
+  return (
+    <div
+      role="status"
+      className={`flex min-h-[592px] md:min-h-[319px] items-center justify-center gap-3 text-sm text-gray-600 ${styles.loading}`}
+    >
+      <span
+        aria-hidden="true"
+        className="h-5 w-5 rounded-full border-2 border-blue-200 border-t-blue-700 motion-safe:animate-spin"
+      />
+      Loading the quote form...
+    </div>
+  );
+}
+
+function QuoteFormUnavailable() {
+  return (
+    <div role="alert" className="py-8 text-center text-gray-600">
+      The quote form could not be loaded. Please check your connection, or{" "}
+      <Link href="/quote" className="text-blue-700 underline font-medium">
+        open the quote page
+      </Link>
+      .
+    </div>
+  );
+}
 
 function SendIcon() {
   return (
@@ -33,6 +73,36 @@ function CloseIcon() {
   );
 }
 
+type Stage = "gone" | "enter" | "shown" | "leave";
+
+// Keeps the pill or the panel on the page while it animates in and out with
+// CSS transitions. "enter" draws it at its starting look, and two frames
+// later "shown" lets it transition in. Hidden, "leave" lets it transition
+// out for leaveMs before it is removed ("gone"). Shown again on its way out,
+// it turns back from where it is, as with framer-motion before.
+function usePresence(show: boolean, leaveMs: number): Stage {
+  const [stage, setStage] = useState<Stage>(show ? "enter" : "gone");
+  const [wasShown, setWasShown] = useState(show);
+  if (show !== wasShown) {
+    setWasShown(show);
+    if (show) setStage(stage === "gone" ? "enter" : "shown");
+    else setStage(stage === "enter" ? "gone" : "leave");
+  }
+  useEffect(() => {
+    if (stage === "enter") {
+      let frame = requestAnimationFrame(() => {
+        frame = requestAnimationFrame(() => setStage("shown"));
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+    if (stage === "leave") {
+      const timer = setTimeout(() => setStage("gone"), leaveMs);
+      return () => clearTimeout(timer);
+    }
+  }, [stage, leaveMs]);
+  return stage;
+}
+
 // Sitewide floating "Get a Quote" launcher. Reuses the same QuoteForm used
 // on /quote rather than duplicating it. On the homepage it stays hidden
 // until the hero has scrolled fully out of view, then waits a cancelable
@@ -49,8 +119,19 @@ export default function FloatingQuoteButton() {
   const [open, setOpen] = useState(false);
   const [hasOpenedOnce, setHasOpenedOnce] = useState(false);
   const [footerInView, setFooterInView] = useState(false);
+  const [QuoteForm, setQuoteForm] = useState<QuoteFormComponent | null>(null);
+  const [formFailed, setFormFailed] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const wiggleControls = useAnimation();
+  const pillStage = usePresence(!skip && visible && !open && !footerInView, PILL_LEAVE_MS);
+  const panelStage = usePresence(!skip && open, PANEL_LEAVE_MS);
+
+  useEffect(() => {
+    if (!open || QuoteForm) return;
+    import("./QuoteForm").then(
+      (loaded) => setQuoteForm(() => loaded.default),
+      () => setFormFailed(true)
+    );
+  }, [open, QuoteForm]);
 
   useEffect(() => {
     if (skip || !isHomepage) return;
@@ -97,20 +178,6 @@ export default function FloatingQuoteButton() {
     return () => observer.disconnect();
   }, [skip, pathname]);
 
-  // Idle attention wiggle while resting and unopened; stops for good the
-  // first time the panel is opened, per hasOpenedOnce rather than `open`
-  // alone, so it doesn't resume after the user closes the panel again.
-  useEffect(() => {
-    if (skip || !visible || open || hasOpenedOnce || footerInView) return;
-    const interval = setInterval(() => {
-      wiggleControls.start({
-        rotate: [0, -8, 8, -5, 5, 0],
-        transition: { duration: 0.6, ease: "easeInOut" },
-      });
-    }, IDLE_WIGGLE_INTERVAL_MS);
-    return () => clearInterval(interval);
-  }, [skip, visible, open, hasOpenedOnce, footerInView, wiggleControls]);
-
   useEffect(() => {
     if (!open) return;
     function onKeyDown(e: KeyboardEvent) {
@@ -134,59 +201,52 @@ export default function FloatingQuoteButton() {
   function handleOpen() {
     setOpen(true);
     setHasOpenedOnce(true);
+    setFormFailed(false);
   }
+
+  // Idle attention wiggle while resting and unopened; stops for good the
+  // first time the panel is opened, per hasOpenedOnce rather than `open`
+  // alone, so it doesn't resume after the user closes the panel again.
+  const wiggling = visible && !open && !hasOpenedOnce && !footerInView;
 
   return (
     <div ref={containerRef} className="fixed bottom-6 right-6 z-50">
-      <AnimatePresence>
-        {visible && !open && !footerInView && (
-          <motion.button
-            key="pill"
-            type="button"
-            onClick={handleOpen}
-            initial={{ scale: 0.3, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.3, opacity: 0, transition: { duration: 0.2 } }}
-            transition={{ type: "spring", stiffness: 400, damping: 26 }}
-            whileHover={{ scale: 1.12, transition: { duration: 0.18, ease: "easeOut" } }}
-            className="origin-bottom-right flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white font-bold pl-4 pr-5 py-3.5 rounded-full shadow-lg"
-          >
-            <motion.span animate={wiggleControls} className="flex items-center gap-2">
-              <SendIcon />
-              <span className="text-sm">Get a Quote</span>
-            </motion.span>
-          </motion.button>
-        )}
-      </AnimatePresence>
+      {pillStage !== "gone" && (
+        <button
+          type="button"
+          onClick={handleOpen}
+          data-stage={pillStage}
+          className={`${styles.pill} origin-bottom-right flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white font-bold pl-4 pr-5 py-3.5 rounded-full shadow-lg`}
+        >
+          <span className={`flex items-center gap-2${wiggling ? ` ${styles.wiggle}` : ""}`}>
+            <SendIcon />
+            <span className="text-sm">Get a Quote</span>
+          </span>
+        </button>
+      )}
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            key="panel"
-            initial={{ scale: 0.3, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.3, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            // Named for screen readers; the form's own "Get Your Free Quote"
-            // is the only heading seen, so there's no second one above it.
-            role="region"
-            aria-label="Get a Quote"
-            className="origin-bottom-right relative bg-white rounded-2xl shadow-2xl w-[calc(100vw-32px)] sm:w-[460px] md:w-[min(560px,92vw)]"
+      {panelStage !== "gone" && (
+        <div
+          data-stage={panelStage}
+          // Named for screen readers; the form's own "Get Your Free Quote"
+          // is the only heading seen, so there's no second one above it.
+          role="region"
+          aria-label="Get a Quote"
+          className={`${styles.panel} origin-bottom-right relative bg-white rounded-2xl shadow-2xl w-[calc(100vw-32px)] sm:w-[460px] md:w-[min(560px,92vw)]`}
+        >
+          <div className="max-h-[85vh] overflow-y-auto rounded-2xl p-6 pb-20">
+            {QuoteForm ? <QuoteForm inPanel /> : formFailed ? <QuoteFormUnavailable /> : <QuoteFormLoading />}
+          </div>
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label="Close"
+            className="absolute bottom-4 right-4 flex items-center justify-center w-11 h-11 rounded-full bg-blue-700 hover:bg-blue-800 text-white shadow-lg transition-colors"
           >
-            <div className="max-h-[85vh] overflow-y-auto rounded-2xl p-6 pb-20">
-              <QuoteForm inPanel />
-            </div>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              aria-label="Close"
-              className="absolute bottom-4 right-4 flex items-center justify-center w-11 h-11 rounded-full bg-blue-700 hover:bg-blue-800 text-white shadow-lg transition-colors"
-            >
-              <CloseIcon />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <CloseIcon />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

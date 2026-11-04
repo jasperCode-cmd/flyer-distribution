@@ -8,11 +8,21 @@ import { readFileSync } from "node:fs";
 // browser test checks it in the page at 1440 and 390.
 
 const panel = readFileSync("components/FloatingQuoteButton.tsx", "utf8");
-const body = panel.slice(panel.indexOf('key="panel"'), panel.indexOf("</motion.div>"));
+const body = panel.slice(panel.indexOf("data-stage={panelStage}"), panel.lastIndexOf("</div>\n      )}"));
 
 test("the panel's own heading is gone and the form comes first", () => {
+  assert.ok(body.length > 0);
   assert.doesNotMatch(body, /<h[1-6]\b/, "no heading of the panel's own");
-  assert.match(body, /<div className="max-h-\[85vh\] overflow-y-auto rounded-2xl p-6 pb-20">\s*<QuoteForm inPanel \/>\s*<\/div>/);
+  // The form, or until it has arrived the loading state (or, if it could not be fetched, the way to /quote).
+  assert.match(
+    body,
+    /<div className="max-h-\[85vh\] overflow-y-auto rounded-2xl p-6 pb-20">\s*\{QuoteForm \? <QuoteForm inPanel \/> : formFailed \? <QuoteFormUnavailable \/> : <QuoteFormLoading \/>\}\s*<\/div>/
+  );
+  assert.doesNotMatch(panel.slice(panel.indexOf("function QuoteFormLoading"), panel.indexOf("function SendIcon")), /<h[1-6]\b/);
+});
+
+test("the panel is as wide as before: 768px and up 560px (or 92% of the screen), 460px from 640px, else the screen less 32px", () => {
+  assert.match(body, /className=\{`\$\{styles\.panel\} origin-bottom-right relative bg-white rounded-2xl shadow-2xl w-\[calc\(100vw-32px\)\] sm:w-\[460px\] md:w-\[min\(560px,92vw\)\]`\}/);
 });
 
 test("the panel keeps an accessible name, without becoming a dialog", () => {
