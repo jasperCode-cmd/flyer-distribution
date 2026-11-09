@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Breadcrumb from "@/components/Breadcrumb";
+import { FDH_ADDRESS } from "@/lib/fdh-address";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -117,7 +118,7 @@ export default function PrivacyPolicyPage() {
             </p>
             <ul className={`${ul} space-y-1.5 mt-4`}>
               <li>Email: <EmailLink /></li>
-              <li>Address: 11 Forest Reach, St Leonards, Ringwood, BH24 2NR</li>
+              <li>Address: {FDH_ADDRESS}</li>
             </ul>
           </div>
 
@@ -420,10 +421,7 @@ export default function PrivacyPolicyPage() {
             </p>
             <ul className={`${ul} space-y-1.5`}>
               <li>Email: <EmailLink /></li>
-              <li>
-                Post: Flyer Distribution Hampshire, 11 Forest Reach, St
-                Leonards, Ringwood, BH24 2NR
-              </li>
+              <li>Post: Flyer Distribution Hampshire, {FDH_ADDRESS}</li>
             </ul>
             <p className="text-gray-600 text-base leading-relaxed mt-4">
               This policy was written on 10 October 2026. If we change how we

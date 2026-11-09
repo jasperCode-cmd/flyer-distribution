@@ -1,9 +1,11 @@
 "use client";
 
+import { Fragment } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { hidesSiteChrome } from "@/lib/site-chrome";
+import { FDH_ADDRESS_LINES } from "@/lib/fdh-address";
 
 const serviceLinks = [
   { href: "/services", label: "Services" },
@@ -105,10 +107,12 @@ export default function Footer() {
                   Address
                 </span>
                 <address className="not-italic">
-                  11 Forest Reach<br />
-                  St Leonards<br />
-                  Ringwood<br />
-                  BH24 2NR
+                  {FDH_ADDRESS_LINES.map((line, i) => (
+                    <Fragment key={line}>
+                      {i > 0 && <br />}
+                      {line}
+                    </Fragment>
+                  ))}
                 </address>
               </li>
 

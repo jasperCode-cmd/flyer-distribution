@@ -5,6 +5,7 @@ import DistributorRequirements from "@/components/DistributorRequirements";
 import DistributorApplicationForm from "@/components/DistributorApplicationForm";
 import StaggerGroup from "@/components/StaggerGroup";
 import ScrollReveal from "@/components/ScrollReveal";
+import { FDH_POSTAL_ADDRESS } from "@/lib/fdh-address";
 
 export const metadata: Metadata = {
   title: "Leaflet Distributor Jobs in Hampshire & Dorset",
@@ -81,14 +82,7 @@ const jobPostingSchema = {
   },
   jobLocation: {
     "@type": "Place",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "11 Forest Reach, St Leonards",
-      addressLocality: "Ringwood",
-      addressRegion: "Dorset",
-      postalCode: "BH24 2NR",
-      addressCountry: "GB",
-    },
+    address: FDH_POSTAL_ADDRESS,
   },
   employmentType: "OTHER",
   datePosted: "2026-09-22",

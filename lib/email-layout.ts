@@ -6,9 +6,10 @@
 // the tests build an email the same way as the send does. Every value from a
 // form is escaped by the email that uses it.
 
+import { FDH_ADDRESS_LINES } from "./fdh-address";
+
 export const SITE_URL = "https://www.flyerdistributionhampshire.co.uk";
 export const BUSINESS_NAME = "Flyer Distribution Hampshire";
-export const BUSINESS_ADDRESS = "11 Forest Reach, St Leonards, Ringwood, BH24 2NR";
 export const BUSINESS_EMAIL = "flyerdistributionhampshire@gmail.com";
 export const WEBSITE_LABEL = "www.flyerdistributionhampshire.co.uk";
 
@@ -122,7 +123,7 @@ ${phoneCss}}
 ${params.body}
 <tr><td class="px" bgcolor="#f6f7f9" style="background:#f6f7f9;padding:22px 40px;border-top:1px solid #e5e7eb;">
 <p style="margin:0 0 4px 0;font-family:${FONT};font-size:13px;line-height:19px;font-weight:bold;color:${TEXT};">${BUSINESS_NAME}</p>
-<p style="margin:0 0 4px 0;font-family:${FONT};font-size:13px;line-height:19px;color:${MUTED};">${BUSINESS_ADDRESS}</p>
+<p style="margin:0 0 4px 0;font-family:${FONT};font-size:13px;line-height:19px;color:${MUTED};">${FDH_ADDRESS_LINES.join("<br>")}</p>
 <p style="margin:0 0 10px 0;font-family:${FONT};font-size:13px;line-height:19px;color:${MUTED};"><a href="mailto:${BUSINESS_EMAIL}" style="color:${HEADING_BLUE};text-decoration:underline;">${BUSINESS_EMAIL}</a> &nbsp;|&nbsp; <a href="${SITE_URL}" style="color:${HEADING_BLUE};text-decoration:underline;">${WEBSITE_LABEL}</a></p>
 <p style="margin:0;font-family:${FONT};font-size:12px;line-height:18px;color:${MUTED};">${e(params.whyReceiving)}</p>
 </td></tr>
@@ -135,7 +136,8 @@ ${params.body}
 `;
 }
 
-// The footer in the plain-text version.
+// The footer in the plain-text version, the address a line at a time as in
+// the HTML.
 export function footerText(whyReceiving: string): string[] {
-  return ["--", BUSINESS_NAME, BUSINESS_ADDRESS, BUSINESS_EMAIL, WEBSITE_LABEL, whyReceiving];
+  return ["--", BUSINESS_NAME, ...FDH_ADDRESS_LINES, BUSINESS_EMAIL, WEBSITE_LABEL, whyReceiving];
 }

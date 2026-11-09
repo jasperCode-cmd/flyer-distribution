@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { hidesSiteChrome } from "@/lib/site-chrome";
+import { FDH_POSTAL_ADDRESS } from "@/lib/fdh-address";
 
 // The website's own structured data, on every public page: the website and
 // the business behind it, as one graph, so the website's publisher reference
@@ -28,14 +29,7 @@ const siteSchema = {
         "Professional flyer and leaflet distribution across Hampshire and Dorset. Reach real households in Southampton, Bournemouth, Poole and Winchester.",
       "url": "https://www.flyerdistributionhampshire.co.uk",
       "email": "flyerdistributionhampshire@gmail.com",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "11 Forest Reach, St Leonards",
-        "addressLocality": "Ringwood",
-        "addressRegion": "Dorset",
-        "postalCode": "BH24 2NR",
-        "addressCountry": "GB",
-      },
+      "address": FDH_POSTAL_ADDRESS,
       "image": "https://www.flyerdistributionhampshire.co.uk/Flyer%20Distribution%20Logo%20White%20Cropped.webp",
       // The logo shown in the site header.
       "logo": "https://www.flyerdistributionhampshire.co.uk/website_logo_main.webp",

@@ -1,4 +1,5 @@
 import type { DocumentBranding } from "./types";
+import { FDH_ADDRESS } from "@/lib/fdh-address";
 
 // Flyer Distribution Hampshire: how its quotes and invoices look and read.
 // Edit the wording here; nothing secret belongs in this file.
@@ -12,7 +13,8 @@ export const FDH_DOCUMENTS: DocumentBranding = {
   // Left empty until confirmed; while it is empty nothing is printed.
   legalLine: "",
 
-  addressLines: ["11 Forest Reach", "St Leonards", "Ringwood", "BH24 2NR"],
+  // On a single line; the "From" column wraps it after "St. Leonards,".
+  addressLines: [FDH_ADDRESS],
   email: "flyerdistributionhampshire@gmail.com",
   website: "www.flyerdistributionhampshire.co.uk",
   fileNamePrefix: "Flyer-Distribution-Hampshire",

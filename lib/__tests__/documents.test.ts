@@ -201,7 +201,7 @@ test("each business file: terms in step with its day counts, Not VAT registered,
   }
 });
 
-const FDH_MARKS = [/flyer/i, /hampshire/i, /\bFDH\b/, /forest reach/i, /st leonards/i, /ringwood/i, /BH24/i, /atkinson/i, /schibsted/i, /fdh-logo/i];
+const FDH_MARKS = [/flyer/i, /hampshire/i, /\bFDH\b/, /forest reach/i, /st\.? leonards/i, /ringwood road/i, /ringwood/i, /BH24/i, /atkinson/i, /schibsted/i, /fdh-logo/i];
 
 test("the Bournemouth settings name nothing of Flyer Distribution Hampshire", () => {
   const text = JSON.stringify(LDB_DOCUMENTS);
@@ -259,8 +259,7 @@ test("an FDH quote: the logo, FDH's details, the quote terms and no bank details
   for (const expected of [
     "Quote",
     "QUO-1001",
-    "11 Forest Reach",
-    "BH24 2NR",
+    "Flat 11, Forest Reach, 184 Ringwood Road, St. Leonards, Ringwood, BH24 2NR",
     "flyerdistributionhampshire@gmail.com",
     "www.flyerdistributionhampshire.co.uk",
     "Valid until 17 November 2026",
