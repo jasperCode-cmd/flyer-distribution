@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { imageToLngLat, solveAlignment, type ImagePoint, type PointPair } from "@/lib/rounds/alignment";
+import { imageToLngLat, overlayCorners, solveAlignment, type ImagePoint, type PointPair } from "@/lib/rounds/alignment";
 import { detectCrop } from "@/lib/rounds/extract/crop";
 import { fullCrop, type Crop, type Point } from "@/lib/rounds/extract/image";
 import { DEFAULT_TOLERANCE, MAX_TOLERANCE, MIN_TOLERANCE } from "@/lib/rounds/extract/mask";
@@ -24,20 +24,31 @@ const AlignMap = dynamic(() => import("./AlignMap"), { ssr: false, loading: () =
 //    twice. The screenshot then lies over the map, see-through, to check.
 // 3. Trace: the route's blue is picked out and traced into a line on the
 //    map, with an eraser for stray bits and the start and end dots marked.
-// Saving keeps the crop, the points, the line and the dots; the image itself
-// stays in the browser.
+// The line-up is saved as soon as it is done (going on to the trace step),
+// and the traced line with "Save and next", so closing the page loses at
+// most the screenshot in hand. Saving keeps the crop, the points, the line
+// and the dots; the image itself stays in the browser. On leaving, the
+// screenshot's place on the map is handed back, so the next one (often of
+// the same streets) opens there.
 
 export type WorkImage = { url: string; width: number; height: number; pixels: ImageData | null };
+
+export type Bbox = [number, number, number, number];
 
 type Props = {
   shot: RoundScreenshotView;
   image: WorkImage;
   index: number;
   total: number;
-  focus: [number, number, number, number] | null;
-  onSaved: (shot: RoundScreenshotView) => void;
-  onSkip: () => void;
+  // Where the map opens: where the previous screenshot was, else the job's area.
+  focus: Bbox | null;
+  // `where`: the screenshot's place on the map (or what the map showed).
+  onSaved: (shot: RoundScreenshotView, where: Bbox | null) => void;
+  onSkip: (where: Bbox | null) => void;
+  // Lined up (and saved as such), or traced but not yet saved.
+  onProgress?: (status: "lined" | "traced", shot?: RoundScreenshotView) => void;
   skipLabel?: string;
+  saveLabel?: string;
 };
 
 type Pick = { image: ImagePoint | null; map: LngLat | null };
@@ -50,7 +61,7 @@ const STEPS: { id: Step; label: string }[] = [
   { id: "trace", label: "3. Trace" },
 ];
 
-export default function ScreenshotWorkspace({ shot, image, index, total, focus, onSaved, onSkip, skipLabel = "Skip for now" }: Props) {
+export default function ScreenshotWorkspace({ shot, image, index, total, focus, onSaved, onSkip, onProgress, skipLabel = "Skip", saveLabel }: Props) {
   const saved = shot.alignment?.pairs;
   const [step, setStep] = useState<Step>(shot.alignment ? (shot.route ? "trace" : "align") : "crop");
   const [crop, setCrop] = useState<Crop>(() => shot.crop ?? (image.pixels ? detectCrop({ width: image.width, height: image.height, data: image.pixels.data }) : fullCrop(image)));
@@ -71,6 +82,7 @@ export default function ScreenshotWorkspace({ shot, image, index, total, focus, 
   const [traceMode, setTraceMode] = useState<AlignMode>("view");
   const [brushPx, setBrushPx] = useState(24);
   const [saving, setSaving] = useState(false);
+  const [linedUp, setLinedUp] = useState<RoundScreenshotView>(shot);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [places, setPlaces] = useState<Place[]>([]);
@@ -124,6 +136,7 @@ export default function ScreenshotWorkspace({ shot, image, index, total, focus, 
         ...(result.end ? { end: imageToLngLat(transform, result.end) } : {}),
       });
       if (result.lines.length === 0) setError("No route found. Check the crop, or widen the colour tolerance.");
+      else onProgress?.("traced");
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -142,11 +155,39 @@ export default function ScreenshotWorkspace({ shot, image, index, total, focus, 
         body.markers = markers.start || markers.end ? markers : null;
       }
       const updated = await api<RoundScreenshotView>(`/api/crm/rounds/screenshots/${shot.id}`, send("PATCH", body));
-      onSaved(updated);
+      onSaved(updated, where());
     } catch (e) {
       setError((e as Error).message);
     } finally {
       setSaving(false);
+    }
+  }
+
+  // The screenshot's place on the map once lined up, else what the map shows.
+  function where(): Bbox | null {
+    if (transform) {
+      const [tl, tr, bl] = overlayCorners(transform, image.width, image.height);
+      const br: [number, number] = [tr[0] + bl[0] - tl[0], tr[1] + bl[1] - tl[1]];
+      const xs = [tl[0], tr[0], bl[0], br[0]];
+      const ys = [tl[1], tr[1], bl[1], br[1]];
+      return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
+    }
+    return mapHandle.current?.bounds() ?? null;
+  }
+
+  // The line-up is saved on going on to trace, so it isn't lost if the page
+  // is closed before the line is.
+  async function toTrace() {
+    setStep("trace");
+    if (!pairs) return;
+    const done = linedUp.alignment?.pairs;
+    if (done && JSON.stringify(done) === JSON.stringify(pairs) && JSON.stringify(linedUp.crop) === JSON.stringify(crop)) return;
+    try {
+      const updated = await api<RoundScreenshotView>(`/api/crm/rounds/screenshots/${shot.id}`, send("PATCH", { crop, pairs }));
+      setLinedUp(updated);
+      onProgress?.("lined", updated);
+    } catch (e) {
+      setError(`The line-up couldn't be saved yet: ${(e as Error).message}`);
     }
   }
 
@@ -186,7 +227,7 @@ export default function ScreenshotWorkspace({ shot, image, index, total, focus, 
             <button
               key={s.id}
               type="button"
-              onClick={() => setStep(s.id)}
+              onClick={() => (s.id === "trace" ? toTrace() : setStep(s.id))}
               disabled={(s.id === "trace" && !transform) || (s.id !== "crop" && !image)}
               aria-current={step === s.id ? "step" : undefined}
               className={`rounded-md px-3 py-1.5 text-sm font-semibold disabled:opacity-40 ${step === s.id ? "bg-blue-900 text-white" : "border border-gray-300 text-gray-800 hover:bg-gray-50"}`}
@@ -355,7 +396,7 @@ export default function ScreenshotWorkspace({ shot, image, index, total, focus, 
       )}
 
       <div className="flex flex-wrap justify-end gap-2 border-t border-gray-100 pt-3">
-        <button type="button" onClick={onSkip} className="rounded-md px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100">
+        <button type="button" onClick={() => onSkip(where())} className="rounded-md px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100">
           {skipLabel}
         </button>
         {step === "crop" && (
@@ -364,13 +405,13 @@ export default function ScreenshotWorkspace({ shot, image, index, total, focus, 
           </button>
         )}
         {step === "align" && (
-          <button type="button" onClick={() => setStep("trace")} disabled={!transform} className="rounded-md bg-blue-900 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
+          <button type="button" onClick={toTrace} disabled={!transform} className="rounded-md bg-blue-900 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
             Next: trace
           </button>
         )}
         {step === "trace" && (
           <button type="button" onClick={save} disabled={saving || !transform} className="rounded-md bg-blue-900 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
-            {saving ? "Saving..." : index + 1 < total ? "Save and next" : "Save"}
+            {saving ? "Saving..." : (saveLabel ?? (index + 1 < total ? "Save and next" : "Save"))}
           </button>
         )}
       </div>

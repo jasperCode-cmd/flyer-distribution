@@ -5,12 +5,14 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import BusinessBadge from "@/components/crm/BusinessBadge";
-import { UNASSIGNED_COLOUR } from "@/lib/area-planner/colours";
-import { dateLabel, formatDistance } from "@/lib/rounds/format";
-import { imageTimeInstant, readImageTime } from "@/lib/rounds/exif";
+import { NOT_SPECIFIED, dateLabel, distributorColour, distributorName, formatDistance } from "@/lib/rounds/format";
+import { imageTimeInstant } from "@/lib/rounds/exif";
+import { STATUS_LABELS, planFiles, progressOf, statusOf } from "@/lib/rounds/queue";
 import type { RoundDetail, RoundOptions, RoundScreenshotView } from "@/lib/rounds/types";
-import { compressForStorage, makeWorkingImage } from "@/lib/rounds/working-image";
-import ScreenshotWorkspace, { type WorkImage } from "./ScreenshotWorkspace";
+import { MAX_SCREENSHOTS } from "@/lib/rounds/validate";
+import { compressForStorage, makeWorkingImage, readAllFacts } from "@/lib/rounds/working-image";
+import { clearHandedOver, handedOver } from "./pending-files";
+import ScreenshotQueue from "./ScreenshotQueue";
 import ShareLinks from "./ShareLinks";
 import { api, send, ukDate } from "./rounds-api";
 
@@ -18,19 +20,20 @@ const RoundMap = dynamic(() => import("./RoundMap"), { ssr: false, loading: () =
 
 // One round in the CRM: its details (which can be changed), the distance
 // and postcode sectors worked out from its lines, the full lines on a map,
-// each screenshot's state ("Screenshot not stored" until storage is on),
-// lining up a screenshot again from its file, adding screenshots, sharing
-// with the client, and deleting the round.
+// each screenshot's state (To do, Lined up or Saved, and "Screenshot not
+// stored" until storage is on) with the progress, choosing screenshot files
+// to work through (the round's own are recognised by their fingerprint, so
+// choosing the same files again carries on; new ones are added, all in one
+// request), sharing with the client, and deleting the round.
 
 type Detail = RoundDetail & { focus: [number, number, number, number] | null };
-type Working = { shot: RoundScreenshotView; image: WorkImage; queue: { shot: RoundScreenshotView; image: WorkImage }[] };
+type Queue = { startId: string | null };
 
 const when = (iso: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" }).format(new Date(iso));
 
 function status(s: RoundScreenshotView): string {
-  if (s.routeLengthM !== null) return `Traced, ${formatDistance(s.routeLengthM)}`;
-  if (s.alignment) return "Lined up, not traced";
-  return "Not lined up yet";
+  const st = statusOf(s);
+  return st === "saved" ? `${STATUS_LABELS.saved}, ${formatDistance(s.routeLengthM)}` : STATUS_LABELS[st];
 }
 
 export default function RoundPage({ id }: { id: string }) {
@@ -40,7 +43,11 @@ export default function RoundPage({ id }: { id: string }) {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
-  const [working, setWorking] = useState<Working | null>(null);
+  const [queue, setQueue] = useState<Queue | null>(null);
+  // Screenshot files chosen in this visit, by screenshot id (only ever held
+  // as files; each is read in full only when its turn comes).
+  const [chosen, setChosen] = useState<Map<string, File>>(() => new Map());
+  const [reading, setReading] = useState<{ done: number; total: number } | null>(null);
   const [form, setForm] = useState({ jobKey: "", distributorId: "", date: "", notes: "" });
 
   const load = useCallback(async () => {
@@ -55,6 +62,23 @@ export default function RoundPage({ id }: { id: string }) {
     load();
     api<RoundOptions>("/api/crm/rounds/options").then(setOptions).catch(() => {});
   }, [load]);
+
+  // Straight from adding the round: its files were handed over, so the work
+  // goes on here at once.
+  useEffect(() => {
+    if (!round) return;
+    const handed = handedOver(id);
+    if (!handed) return;
+    clearHandedOver(id);
+    const bySha = new Map(round.shots.filter((s) => s.sha256).map((s) => [s.sha256!, s.id]));
+    const files = new Map<string, File>();
+    for (const h of handed) {
+      const sid = bySha.get(h.sha256);
+      if (sid) files.set(sid, h.file);
+    }
+    setChosen(files);
+    setQueue({ startId: null });
+  }, [round, id]);
 
   const lines = useMemo(() => round?.shots.flatMap((s) => s.route ?? []) ?? [], [round]);
   const markers = useMemo(() => round?.shots.map((s) => s.markers ?? {}) ?? [], [round]);
@@ -92,32 +116,6 @@ export default function RoundPage({ id }: { id: string }) {
     }
   }
 
-  // Lining a screenshot up again: from the stored image, or from its file
-  // picked again (checked to be the same file by its fingerprint).
-  async function reopen(shot: RoundScreenshotView, file: File | null) {
-    setError(null);
-    try {
-      if (file) {
-        const image = await makeWorkingImage(file);
-        if (shot.sha256 && image.sha256 !== shot.sha256) {
-          setError("That isn't the same screenshot file as the one this was traced from.");
-          return;
-        }
-        if (image.width !== shot.width || image.height !== shot.height) {
-          setError("That screenshot is a different size from the one this was traced from.");
-          return;
-        }
-        setWorking({ shot, image, queue: [] });
-      } else {
-        const res = await fetch(`/api/crm/rounds/screenshots/${shot.id}/image`);
-        if (!res.ok) throw new Error("Screenshot not stored.");
-        setWorking({ shot, image: await makeWorkingImage(await res.blob()), queue: [] });
-      }
-    } catch (e) {
-      setError((e as Error).message);
-    }
-  }
-
   async function attach(shot: RoundScreenshotView, file: File) {
     setError(null);
     try {
@@ -132,33 +130,58 @@ export default function RoundPage({ id }: { id: string }) {
     }
   }
 
-  async function addShots(files: FileList | null) {
-    if (!files?.length || !round) return;
+  // Choosing screenshot files: read one at a time; any the round already
+  // has are recognised by their fingerprint (so its saved ones stay as they
+  // are), and new ones are added together in one request. Then work
+  // through them, starting from the first not yet saved.
+  async function choose(list: FileList | null) {
+    if (!list?.length || !round) return;
     setError(null);
+    setNotice(null);
+    const picked = [...list];
+    setReading({ done: 0, total: picked.length });
     try {
-      const picked: { file: File; image: Awaited<ReturnType<typeof makeWorkingImage>>; time: ReturnType<typeof readImageTime> }[] = [];
-      for (const file of [...files]) {
-        const image = await makeWorkingImage(file);
-        const time = readImageTime(new Uint8Array(await file.arrayBuffer()));
-        picked.push({ file, image, time });
-      }
-      const made = await api<{ screenshotIds: string[] }>(
-        `/api/crm/rounds/${id}/screenshots`,
-        send("POST", {
-          screenshots: picked.map((p) => ({ width: p.image.width, height: p.image.height, sha256: p.image.sha256, originalName: p.file.name, takenAt: p.time ? imageTimeInstant(p.time).toISOString() : null })),
-        })
+      const { read, unreadable } = await readAllFacts(picked, (done) => setReading({ done, total: picked.length }));
+      const plan = planFiles(
+        read.map((r) => r.facts),
+        round.shots,
+        MAX_SCREENSHOTS
       );
-      if (options?.storage) {
-        for (const [i, sid] of made.screenshotIds.entries()) {
-          await fetch(`/api/crm/rounds/screenshots/${sid}/image`, { method: "PUT", body: await compressForStorage(picked[i].image), headers: { "x-source-sha256": picked[i].image.sha256 } });
-        }
+      const files = new Map(chosen);
+      for (const m of plan.matched) files.set(m.shotId, read[m.file].file);
+      let fresh = round;
+      if (plan.fresh.length) {
+        const made = await api<{ screenshotIds: string[] }>(
+          `/api/crm/rounds/${id}/screenshots`,
+          send("POST", {
+            screenshots: plan.fresh.map((i) => ({
+              width: read[i].facts.width,
+              height: read[i].facts.height,
+              sha256: read[i].facts.sha256,
+              originalName: read[i].file.name,
+              takenAt: read[i].facts.time ? imageTimeInstant(read[i].facts.time!).toISOString() : null,
+            })),
+          })
+        );
+        made.screenshotIds.forEach((sid, k) => files.set(sid, read[plan.fresh[k]].file));
+        fresh = await api<Detail>(`/api/crm/rounds/${id}`);
+        setRound(fresh);
       }
-      const fresh = await api<Detail>(`/api/crm/rounds/${id}`);
-      setRound(fresh);
-      const queue = made.screenshotIds.map((sid, i) => ({ shot: fresh.shots.find((s) => s.id === sid)!, image: picked[i].image }));
-      setWorking({ ...queue[0], queue: queue.slice(1) });
+      setChosen(files);
+      const notes = [
+        plan.matched.length ? `${plan.matched.length} already in this round` : "",
+        plan.fresh.length ? `${plan.fresh.length} added` : "",
+        plan.repeats ? `${plan.repeats} chosen twice` : "",
+        plan.overLimit ? `${plan.overLimit} left out: a round can have at most ${MAX_SCREENSHOTS}` : "",
+        unreadable.length ? `${unreadable.length} not readable as images (${unreadable.slice(0, 3).join(", ")}${unreadable.length > 3 ? "..." : ""})` : "",
+      ].filter(Boolean);
+      setNotice(notes.join("; ") + ".");
+      const first = fresh.shots.find((s) => files.has(s.id) && statusOf(s) !== "saved");
+      setQueue({ startId: first?.id ?? null });
     } catch (e) {
       setError((e as Error).message);
+    } finally {
+      setReading(null);
     }
   }
 
@@ -182,32 +205,33 @@ export default function RoundPage({ id }: { id: string }) {
     }
   }
 
-  if (working) {
-    const position = round.shots.findIndex((s) => s.id === working.shot.id);
-    const finish = async () => {
-      const [next, ...rest] = working.queue;
-      if (next) setWorking({ ...next, queue: rest });
-      else {
-        setWorking(null);
-        await load();
-      }
-    };
+  if (queue) {
     return (
-      <ScreenshotWorkspace
-        key={working.shot.id}
-        shot={working.shot}
-        image={working.image}
-        index={position}
-        total={round.shots.length}
-        focus={round.focus}
-        onSaved={finish}
-        onSkip={finish}
-        skipLabel="Back to the round"
-      />
+      <div className="space-y-3">
+        <p className="text-sm text-gray-500">
+          <Link href="/admin/crm/rounds" className="hover:underline">
+            Rounds
+          </Link>{" "}
+          / {dateLabel(new Date(`${round.date}T00:00:00Z`))} / {round.lead ? round.lead.name : round.project ? round.project.name : "Round"}
+        </p>
+        <ScreenshotQueue
+          shots={round.shots}
+          files={chosen}
+          startId={queue.startId}
+          focus={round.focus}
+          storage={!!options?.storage}
+          onClose={async () => {
+            setQueue(null);
+            await load();
+          }}
+        />
+      </div>
     );
   }
 
-  const colour = round.distributor?.colour ?? UNASSIGNED_COLOUR;
+  const colour = distributorColour(round.distributor);
+  const progress = progressOf(round.shots.map(statusOf));
+  const canWork = round.shots.some((s) => (chosen.has(s.id) || s.stored) && statusOf(s) !== "saved");
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -224,7 +248,7 @@ export default function RoundPage({ id }: { id: string }) {
           <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-700">
             <span className="flex items-center gap-1.5">
               <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: colour }} aria-hidden="true" />
-              {round.distributor?.name ?? "No distributor"}
+              {distributorName(round.distributor)}
             </span>
             {round.lead && (
               <Link href={`/admin/crm/leads/${round.lead.id}`} className="text-blue-700 hover:underline">
@@ -273,7 +297,7 @@ export default function RoundPage({ id }: { id: string }) {
           <label className="text-sm">
             <span className="font-semibold text-gray-800">Distributor</span>
             <select value={form.distributorId} onChange={(e) => setForm({ ...form, distributorId: e.target.value })} className="mt-1 w-full rounded-md border border-gray-300 px-2 py-2">
-              <option value="">Not set</option>
+              <option value="">{NOT_SPECIFIED}</option>
               {options?.distributors.map((d) => (
                 <option key={d.id} value={d.id}>
                   {d.name}
@@ -327,15 +351,32 @@ export default function RoundPage({ id }: { id: string }) {
 
       <section className="rounded-lg border border-gray-200 bg-white p-4" aria-label="Screenshots">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-bold text-blue-900">Screenshots</h2>
-          <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-blue-700 px-3 py-1.5 text-sm font-semibold text-blue-800 hover:bg-blue-50">
-            Add screenshots
-            <input type="file" accept="image/png,image/jpeg,image/webp" multiple className="sr-only" onChange={(e) => addShots(e.target.files)} />
-          </label>
+          <div>
+            <h2 className="text-sm font-bold text-blue-900">Screenshots</h2>
+            {round.shots.length > 0 && (
+              <p className="text-sm text-gray-700" role="status">
+                {progress.label}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {canWork && (
+              <button type="button" onClick={() => setQueue({ startId: null })} className="rounded-md bg-blue-900 px-3 py-1.5 text-sm font-semibold text-white hover:bg-blue-800">
+                Carry on
+              </button>
+            )}
+            <label className={`inline-flex items-center gap-2 rounded-md border border-blue-700 px-3 py-1.5 text-sm font-semibold text-blue-800 ${reading ? "opacity-60" : "cursor-pointer hover:bg-blue-50"}`}>
+              {reading ? `Reading ${reading.done} of ${reading.total}...` : "Choose screenshots"}
+              <input type="file" accept="image/png,image/jpeg,image/webp" multiple className="sr-only" disabled={!!reading} onChange={(e) => choose(e.target.files)} />
+            </label>
+          </div>
         </div>
+        <p className="mt-1 text-xs text-gray-500">
+          Choose this round&apos;s screenshot files to carry on, or more to add (up to {MAX_SCREENSHOTS} in a round). Ones already here are recognised and keep their saved work.
+        </p>
         <ul className="mt-3 divide-y divide-gray-100">
           {round.shots.map((s, i) => (
-            <li key={s.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+            <li key={s.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
               <div className="min-w-0 text-sm">
                 <p className="font-medium text-gray-900">
                   {i + 1}. {s.originalName ?? "Screenshot"} <span className="font-normal text-gray-500">({s.width} by {s.height})</span>
@@ -343,19 +384,15 @@ export default function RoundPage({ id }: { id: string }) {
                 <p className="text-gray-600">
                   {status(s)}
                   {s.takenAt ? ` · taken ${when(s.takenAt)}` : ""}
+                  {chosen.has(s.id) ? " · file chosen" : ""}
                 </p>
                 {!s.stored && <p className="mt-0.5 inline-block rounded bg-amber-50 px-1.5 py-0.5 text-xs font-semibold text-amber-900">Screenshot not stored</p>}
               </div>
               <div className="flex flex-wrap gap-2">
-                {s.stored ? (
-                  <button type="button" onClick={() => reopen(s, null)} className="rounded-md border border-gray-300 px-2.5 py-1.5 text-xs font-semibold text-gray-800 hover:bg-gray-50">
+                {(chosen.has(s.id) || s.stored) && (
+                  <button type="button" onClick={() => setQueue({ startId: s.id })} className="rounded-md border border-gray-300 px-2.5 py-1.5 text-xs font-semibold text-gray-800 hover:bg-gray-50">
                     Line up and trace
                   </button>
-                ) : (
-                  <label className="cursor-pointer rounded-md border border-gray-300 px-2.5 py-1.5 text-xs font-semibold text-gray-800 hover:bg-gray-50">
-                    Line up and trace (choose the file)
-                    <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={(e) => e.target.files?.[0] && reopen(s, e.target.files[0])} />
-                  </label>
                 )}
                 {!s.stored &&
                   (options?.storage ? (

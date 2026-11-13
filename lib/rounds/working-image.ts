@@ -6,6 +6,8 @@
 // browser can't make WebP) for file storage once it is switched on. Browser
 // only; nothing here leaves the browser by itself.
 
+import { readImageTime, type ImageTime } from "./exif";
+
 export const WORKING_MAX_HEIGHT = 1600;
 export const WEBP_QUALITY = 0.9;
 export const JPEG_QUALITY = 0.88;
@@ -28,6 +30,43 @@ export type WorkingImage = {
 export async function sha256Hex(bytes: ArrayBuffer): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+// What a picked file is, without keeping it: its fingerprint, its working
+// size and its own date where it has one. Read one file at a time (the
+// bytes and the decoded picture are let go before the next), so choosing a
+// hundred screenshots never holds a hundred in memory; the full working
+// copy is made only for the one being worked on.
+export type FileFacts = { sha256: string; width: number; height: number; time: ImageTime | null };
+
+export async function readFileFacts(file: Blob): Promise<FileFacts> {
+  const bytes = await file.arrayBuffer();
+  const sha256 = await sha256Hex(bytes);
+  const time = readImageTime(new Uint8Array(bytes));
+  const bitmap = await createImageBitmap(file);
+  const size = workingSize(bitmap.width, bitmap.height);
+  bitmap.close();
+  return { sha256, ...size, time };
+}
+
+// The facts of several files, strictly one after another, reporting how
+// far it has got. A file that can't be read as an image is skipped and
+// named in `unreadable`.
+export async function readAllFacts(
+  files: File[],
+  onProgress: (done: number) => void
+): Promise<{ read: { file: File; facts: FileFacts }[]; unreadable: string[] }> {
+  const read: { file: File; facts: FileFacts }[] = [];
+  const unreadable: string[] = [];
+  for (const [i, file] of files.entries()) {
+    try {
+      read.push({ file, facts: await readFileFacts(file) });
+    } catch {
+      unreadable.push(file.name);
+    }
+    onProgress(i + 1);
+  }
+  return { read, unreadable };
 }
 
 export async function makeWorkingImage(file: Blob): Promise<WorkingImage> {

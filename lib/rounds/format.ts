@@ -1,4 +1,20 @@
+import { UNASSIGNED_COLOUR } from "@/lib/area-planner/colours";
+
 // How rounds' figures read, in the CRM and on a client's report. Pure.
+
+// A round with no distributor recorded: named "Not specified" in the CRM
+// (lists, filters, the map's popups) and drawn in a neutral grey. Clients'
+// reports never name distributors either way.
+export const NOT_SPECIFIED = "Not specified";
+export const NOT_SPECIFIED_COLOUR = UNASSIGNED_COLOUR;
+
+export function distributorName(d: { name: string } | null | undefined): string {
+  return d?.name ?? NOT_SPECIFIED;
+}
+
+export function distributorColour(d: { colour: string } | null | undefined): string {
+  return d?.colour ?? NOT_SPECIFIED_COLOUR;
+}
 
 // "850 m" or "4.2 km".
 export function formatDistance(metres: number | null | undefined): string {

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { PrismaPg } from "@prisma/adapter-pg";
 import sharp from "sharp";
 import { PrismaClient } from "@/generated/prisma/client";
+import { holdRoundsLock } from "./rounds-db-lock";
 import { imageToLngLat, toMercator, type PointPair, type Transform } from "@/lib/rounds/alignment";
 import { localPlane, linesLengthM, type LngLat, type Lines } from "@/lib/rounds/geometry";
 import {
@@ -64,8 +65,12 @@ async function cleanUp() {
   await prisma.appSetting.deleteMany({ where: { key: TRIM_SETTING } });
 }
 
+let release: (() => Promise<void>) | null = null;
+
 before(async () => {
   if (skip) return;
+  // One Rounds database test file at a time (they share the trim setting).
+  release = await holdRoundsLock(url);
   prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: url }), log: [{ emit: "event", level: "query" }] });
   (prisma as unknown as { $on(e: "query", cb: () => void): void }).$on("query", () => queries++);
   await cleanUp();
@@ -75,6 +80,7 @@ after(async () => {
   if (skip) return;
   await cleanUp();
   await prisma.$disconnect();
+  await release?.();
 });
 
 const lead = (name: string, business: "FDH" | "LDB" = "FDH", extra: object = {}) =>
@@ -292,13 +298,66 @@ test("attaching a screenshot: only with storage on, only a WebP or JPEG of its s
   assert.deepEqual((await getRound(prisma, made.id))!.screenshots, { total: 1, traced: 0, stored: 1 });
 });
 
-test("more screenshots can be added, up to twelve", { skip }, async () => {
+const fp = (n: number) => n.toString(16).padStart(64, "0");
+
+test("more screenshots can be added, up to 100 in a round", { skip }, async () => {
   const made = await createRound(prisma, { business: "FDH", leadId: null, projectId: null, distributorId: null, date: "2026-11-05", notes: `${MARK} more`, screenshots: [shot()] });
   const ids = await addScreenshots(prisma, made.id, [shot(), shot()]);
   assert.equal(ids.length, 2);
   const positions = (await prisma.roundScreenshot.findMany({ where: { roundId: made.id }, orderBy: { position: "asc" } })).map((s) => s.position);
   assert.deepEqual(positions, [0, 1, 2]);
-  await assert.rejects(addScreenshots(prisma, made.id, Array.from({ length: 10 }, () => shot())), /at most 12/);
+  await assert.rejects(addScreenshots(prisma, made.id, Array.from({ length: 98 }, () => shot())), /at most 100/);
+  assert.equal((await addScreenshots(prisma, made.id, Array.from({ length: 97 }, () => shot()))).length, 97);
+  assert.equal(await prisma.roundScreenshot.count({ where: { roundId: made.id } }), 100);
+  await assert.rejects(addScreenshots(prisma, made.id, [shot()]), /at most 100/);
+});
+
+test("sixty screenshots are made in a few statements, not one each, and come back in the order sent", { skip }, async () => {
+  const sixty = Array.from({ length: 60 }, (_, i) => ({ ...shot(), sha256: fp(1000 + i), originalName: `IMG_${1000 + i}.PNG` }));
+  queries = 0;
+  const made = await createRound(prisma, { business: "FDH", leadId: null, projectId: null, distributorId: null, date: "2026-11-06", notes: `${MARK} sixty`, screenshots: sixty });
+  assert.ok(queries <= 6, `${queries} statements to make a round with 60 screenshots`);
+  assert.equal(made.screenshotIds.length, 60);
+  const rows = await prisma.roundScreenshot.findMany({ where: { roundId: made.id }, select: { id: true, position: true, originalName: true, sourceSha256: true }, orderBy: { position: "asc" } });
+  assert.deepEqual(rows.map((r) => r.id), made.screenshotIds);
+  assert.deepEqual(rows.map((r) => r.originalName), sixty.map((s) => s.originalName));
+
+  // Adding forty more to another round: the same few statements.
+  const other = await createRound(prisma, { business: "FDH", leadId: null, projectId: null, distributorId: null, date: "2026-11-06", notes: `${MARK} forty`, screenshots: [shot()] });
+  queries = 0;
+  const forty = await addScreenshots(prisma, other.id, Array.from({ length: 40 }, (_, i) => ({ ...shot(), sha256: fp(2000 + i) })));
+  assert.ok(queries <= 6, `${queries} statements to add 40 screenshots`);
+  assert.equal(forty.length, 40);
+});
+
+test("choosing the same files again: screenshots the round has are recognised by fingerprint, not made twice", { skip }, async () => {
+  const first = [fp(3001), fp(3002), fp(3003)].map((sha256) => ({ ...shot(), sha256 }));
+  const made = await createRound(prisma, { business: "FDH", leadId: null, projectId: null, distributorId: null, date: "2026-11-07", notes: `${MARK} again`, screenshots: [...first, first[1]] });
+  // The same file twice in one upload is one screenshot.
+  assert.equal(await prisma.roundScreenshot.count({ where: { roundId: made.id } }), 3);
+  assert.equal(made.screenshotIds[3], made.screenshotIds[1]);
+  await saveScreenshotWork(prisma, made.screenshotIds[0], { pairs: PAIRS, route: ROUTE });
+  // Two of the same files again and one new: only the new one is made, and
+  // the saved one keeps its work.
+  const again = await addScreenshots(prisma, made.id, [first[0], { ...shot(), sha256: fp(3004) }, first[2]]);
+  assert.equal(again[0], made.screenshotIds[0]);
+  assert.equal(again[2], made.screenshotIds[2]);
+  assert.equal(await prisma.roundScreenshot.count({ where: { roundId: made.id } }), 4);
+  const round = (await getRound(prisma, made.id))!;
+  assert.equal(round.shots.find((s) => s.id === made.screenshotIds[0])!.routeLengthM !== null, true);
+  assert.deepEqual(round.shots.map((s) => s.position), [0, 1, 2, 3]);
+});
+
+test("Not specified: a round with no distributor is listed and filtered as such", { skip }, async () => {
+  const d = await distributor("Specified");
+  const none = await createRound(prisma, { business: "FDH", leadId: null, projectId: null, distributorId: null, date: "2026-09-01", notes: `${MARK} none`, screenshots: [shot()] });
+  const some = await createRound(prisma, { business: "FDH", leadId: null, projectId: null, distributorId: d.id, date: "2026-09-01", notes: `${MARK} some`, screenshots: [shot()] });
+  const onDay = { from: "2026-09-01", to: "2026-09-01" };
+  const unset = (await listRounds(prisma, { ...onDay, distributorId: null })).rounds.map((r) => r.id);
+  assert.ok(unset.includes(none.id));
+  assert.ok(!unset.includes(some.id));
+  assert.equal((await listRounds(prisma, { ...onDay })).rounds.filter((r) => r.id === none.id || r.id === some.id).length, 2);
+  assert.equal((await getRound(prisma, none.id))!.distributor, null);
 });
 
 test("the privacy trim setting: 150 m until set", { skip }, async () => {

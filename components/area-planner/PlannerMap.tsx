@@ -14,7 +14,7 @@ import { leafletText } from "@/lib/area-planner/share-view";
 import { areaName } from "@/lib/area-planner/costs";
 import type { PlannerArea, PlannerDistributor, PlannerOverlap } from "@/lib/area-planner/types";
 import type { MapRound } from "@/lib/rounds/types";
-import { formatDistance, shortDate } from "@/lib/rounds/format";
+import { distributorColour, distributorName, formatDistance, shortDate } from "@/lib/rounds/format";
 import { boundsOf, createBaseMap, polygonGeometry, toLatLngs } from "./leaflet-base";
 import { OVERLAP_STYLE, areaPathStyle, escapeHtml } from "./map-style";
 
@@ -444,8 +444,8 @@ export default function PlannerMap(props: Props) {
     };
   }, [props.tool, props.readOnly, props.assigning]);
 
-  // The Rounds layer: each traced round in its distributor's colour, in its
-  // own pane above the areas; tapping one shows its date, distributor,
+  // The Rounds layer: each traced round in its distributor's colour (a
+  // neutral grey where none is specified), in its own pane above the areas; tapping one shows its date, distributor,
   // lead, distance, sectors and screenshots (loaded only when it opens).
   const roundsGroup = useRef<L.LayerGroup | null>(null);
   useEffect(() => {
@@ -459,7 +459,7 @@ export default function PlannerMap(props: Props) {
     const renderer = L.canvas({ pane: "ap-rounds", tolerance: 8 });
     const group = L.layerGroup();
     for (const round of rounds) {
-      const colour = round.distributor?.colour ?? "#8A8F98";
+      const colour = distributorColour(round.distributor);
       const line = L.polyline(
         round.lines.map((l) => l.map(([lng, lat]) => [lat, lng] as L.LatLngTuple)),
         { color: colour, weight: 4, opacity: 0.9, renderer, pane: "ap-rounds" }
@@ -494,10 +494,10 @@ function roundPopup(round: MapRound): string {
         .map((s) => `<img src="/api/crm/rounds/screenshots/${escapeHtml(s.id)}/image" alt="Screenshot" style="height:120px;border:1px solid #e5e7eb;border-radius:4px" loading="lazy">`)
         .join("")}</div>`
     : `<p style="margin:6px 0 0;color:#6b7280">${round.screenshots.length} screenshot${round.screenshots.length === 1 ? "" : "s"}, not stored</p>`;
-  const dot = `<span style="display:inline-block;width:10px;height:10px;border-radius:9999px;background:${escapeHtml(round.distributor?.colour ?? "#8A8F98")};margin-right:4px"></span>`;
+  const dot = `<span style="display:inline-block;width:10px;height:10px;border-radius:9999px;background:${escapeHtml(distributorColour(round.distributor))};margin-right:4px"></span>`;
   return `<div style="font:13px/1.4 system-ui,sans-serif;color:#111827">
 <p style="margin:0;font-weight:700">${escapeHtml(shortDate(round.date))} <span style="font-weight:600;color:#6b7280">${escapeHtml(round.business)}</span></p>
-<p style="margin:2px 0 0">${dot}${escapeHtml(round.distributor?.name ?? "No distributor")}</p>
+<p style="margin:2px 0 0">${dot}${escapeHtml(distributorName(round.distributor))}</p>
 ${round.lead ? `<p style="margin:2px 0 0">${escapeHtml(round.lead.name)}</p>` : ""}
 <p style="margin:2px 0 0">${escapeHtml(formatDistance(round.distanceM))}${round.sectors.length ? ` · ${escapeHtml(round.sectors.join(", "))}` : ""}</p>
 ${pictures}

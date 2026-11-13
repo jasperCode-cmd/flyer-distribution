@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { formatDistance, shortDate } from "@/lib/rounds/format";
+import { distributorColour, distributorName, formatDistance, shortDate } from "@/lib/rounds/format";
 import type { ReportLinkView, RoundSummary } from "@/lib/rounds/types";
 import ShareLinks from "./ShareLinks";
 
@@ -28,8 +28,8 @@ export default function LeadRounds({ leadId, rounds, links }: { leadId: string; 
               <Link href={`/admin/crm/rounds/${r.id}`} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm hover:bg-blue-50">
                 <span className="font-medium text-gray-900">{shortDate(r.date)}</span>
                 <span className="flex items-center gap-1.5 text-gray-700">
-                  <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: r.distributor?.colour ?? "#8A8F98" }} aria-hidden="true" />
-                  {r.distributor?.name ?? "No distributor"}
+                  <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: distributorColour(r.distributor) }} aria-hidden="true" />
+                  {distributorName(r.distributor)}
                 </span>
                 <span className="tabular-nums text-gray-800">{r.distanceM !== null ? formatDistance(r.distanceM) : "Not traced yet"}</span>
                 <span className="text-xs text-gray-600">{r.sectors.map((s) => s.code).join(", ")}</span>

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import type { MapRound, RoundOptions } from "@/lib/rounds/types";
 import { api, filtersQuery, ukDate } from "@/components/rounds/rounds-api";
+import { NOT_SPECIFIED } from "@/lib/rounds/format";
+import { NOT_SPECIFIED_FILTER } from "@/lib/rounds/validate";
 
 // The Area Planner's "Rounds" layer: off by default, and nothing is read
 // until it is switched on. Then the traced rounds for the filters (date
@@ -85,6 +87,7 @@ export default function RoundsLayerControls({ onRounds }: Props) {
           </select>
           <select value={filters.distributorId} onChange={set("distributorId")} aria-label="Distributor" className="max-w-40 rounded border border-gray-300 px-1.5 py-1 text-xs">
             <option value="">All distributors</option>
+            <option value={NOT_SPECIFIED_FILTER}>{NOT_SPECIFIED}</option>
             {options?.distributors.map((d) => (
               <option key={d.id} value={d.id}>
                 {d.name}

@@ -2,6 +2,7 @@ import { after, before, test } from "node:test";
 import assert from "node:assert/strict";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
+import { holdRoundsLock } from "./rounds-db-lock";
 import { distanceM, localPlane, type LngLat, type Lines } from "@/lib/rounds/geometry";
 import { imageToLngLat, toMercator, type PointPair, type Transform } from "@/lib/rounds/alignment";
 import { hashShareToken } from "@/lib/area-planner/share-links";
@@ -75,8 +76,12 @@ async function cleanUp() {
   await prisma.appSetting.deleteMany({ where: { key: TRIM_SETTING } });
 }
 
+let release: (() => Promise<void>) | null = null;
+
 before(async () => {
   if (skip) return;
+  // One Rounds database test file at a time (they share the trim setting).
+  release = await holdRoundsLock(url);
   prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) });
   await cleanUp();
 });
@@ -85,6 +90,7 @@ after(async () => {
   if (skip) return;
   await cleanUp();
   await prisma.$disconnect();
+  await release?.();
 });
 
 const shot = () => ({ width: 740, height: 1600, sha256: null, originalName: "IMG.PNG", takenAt: null });

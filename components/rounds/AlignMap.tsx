@@ -16,7 +16,11 @@ import { AffineImageOverlay } from "./affine-overlay";
 
 export type AlignMode = "view" | "pick" | "erase" | "start" | "end";
 
-export type AlignMapHandle = { fitBbox(bbox: [number, number, number, number]): void };
+export type AlignMapHandle = {
+  fitBbox(bbox: [number, number, number, number]): void;
+  // What the map shows now, as [west, south, east, north].
+  bounds(): [number, number, number, number] | null;
+};
 
 type Props = {
   handleRef: MutableRefObject<AlignMapHandle | null>;
@@ -58,6 +62,10 @@ export default function AlignMap(props: Props) {
   props.handleRef.current = {
     fitBbox([w, s, e, n]) {
       mapRef.current?.fitBounds([[s, w], [n, e]], { padding: [20, 20], maxZoom: 17 });
+    },
+    bounds() {
+      const b = mapRef.current?.getBounds();
+      return b ? [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()] : null;
     },
   };
 

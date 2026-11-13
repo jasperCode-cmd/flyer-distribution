@@ -14,7 +14,7 @@ import { lineLengthM, linesBbox, roundCoords, roundDistanceM, type Lines } from 
 import { buildReportView, type ReportView } from "./report-view";
 import { sectorsForLines } from "./sectors";
 import { ALLOWED_TYPES, MAX_FILE_BYTES, type FileStream, type ScreenshotStorage } from "./storage";
-import { DEFAULT_TRIM_M, type NewLink, type NewRound, type NewScreenshot, type RoundChanges, type ScreenshotWork } from "./validate";
+import { DEFAULT_TRIM_M, MAX_SCREENSHOTS, type NewLink, type NewRound, type NewScreenshot, type RoundChanges, type ScreenshotWork } from "./validate";
 import type {
   JobOption,
   MapRound,
@@ -110,7 +110,7 @@ function whereFor(filters: RoundFilters): Prisma.RoundWhereInput {
   if (filters.from || filters.to) where.date = { ...(filters.from && { gte: asDate(filters.from) }), ...(filters.to && { lte: asDate(filters.to) }) };
   if (filters.business) where.business = filters.business;
   if (filters.leadId) where.leadId = filters.leadId;
-  if (filters.distributorId) where.distributorId = filters.distributorId;
+  if (filters.distributorId !== undefined) where.distributorId = filters.distributorId;
   if (filters.projectId) where.projectId = filters.projectId;
   return where;
 }
@@ -371,7 +371,30 @@ function screenshotData(s: NewScreenshot, position: number) {
   };
 }
 
+// The same file picked twice (by its fingerprint) is one screenshot: each
+// later copy is mapped to the first. Files without a fingerprint are each
+// their own.
+function distinctShots(shots: NewScreenshot[]): { unique: NewScreenshot[]; indexOf: number[] } {
+  const unique: NewScreenshot[] = [];
+  const bySha = new Map<string, number>();
+  const indexOf = shots.map((s) => {
+    const seen = s.sha256 ? bySha.get(s.sha256) : undefined;
+    if (seen !== undefined) return seen;
+    unique.push(s);
+    if (s.sha256) bySha.set(s.sha256, unique.length - 1);
+    return unique.length - 1;
+  });
+  return { unique, indexOf };
+}
+
+const tooMany = () => new RoundsError(`A round can have at most ${MAX_SCREENSHOTS} screenshots.`);
+
+// A round with its screenshots' details, all created in one statement each
+// (the round, then every screenshot together), never one per screenshot.
+// The ids come back in the order the screenshots were sent.
 export async function createRound(db: Db, input: NewRound): Promise<{ id: string; screenshotIds: string[] }> {
+  const { unique, indexOf } = distinctShots(input.screenshots);
+  if (unique.length > MAX_SCREENSHOTS) throw tooMany();
   return db.$transaction(async (tx) => {
     const job = await jobFor(tx, input.leadId, input.projectId, input.business);
     if (input.distributorId) await checkDistributor(tx, input.distributorId);
@@ -381,11 +404,11 @@ export async function createRound(db: Db, input: NewRound): Promise<{ id: string
         distributorId: input.distributorId,
         date: asDate(input.date),
         notes: input.notes,
-        screenshots: { create: input.screenshots.map((s, i) => screenshotData(s, i)) },
+        screenshots: { createMany: { data: unique.map((s, i) => screenshotData(s, i)) } },
       },
       select: { id: true, screenshots: { select: { id: true }, orderBy: { position: "asc" } } },
     });
-    return { id: round.id, screenshotIds: round.screenshots.map((s) => s.id) };
+    return { id: round.id, screenshotIds: indexOf.map((i) => round.screenshots[i].id) };
   });
 }
 
@@ -430,18 +453,27 @@ export async function deleteRound(db: Db, storage: ScreenshotStorage, id: string
   if (result.count === 0) throw notFound();
 }
 
+// More screenshots for a round, all created in one statement. One the round
+// already has (the same file, by its fingerprint) isn't made again: its id
+// is given back, so picking the same files again to carry on is safe. The
+// ids come back in the order the screenshots were sent.
 export async function addScreenshots(db: Db, roundId: string, shots: NewScreenshot[]): Promise<string[]> {
+  const { unique, indexOf } = distinctShots(shots);
   return db.$transaction(async (tx) => {
-    const round = await tx.round.findUnique({ where: { id: roundId }, select: { screenshots: { select: { position: true } } } });
+    const round = await tx.round.findUnique({ where: { id: roundId }, select: { screenshots: { select: { id: true, position: true, sourceSha256: true } } } });
     if (!round) throw notFound();
-    if (round.screenshots.length + shots.length > 12) throw new RoundsError("A round can have at most 12 screenshots.");
+    const known = new Map(round.screenshots.filter((s) => s.sourceSha256).map((s) => [s.sourceSha256!, s.id]));
+    const fresh = unique.filter((s) => !(s.sha256 && known.has(s.sha256)));
+    if (round.screenshots.length + fresh.length > MAX_SCREENSHOTS) throw tooMany();
     const start = Math.max(-1, ...round.screenshots.map((s) => s.position)) + 1;
-    const ids: string[] = [];
-    for (const [i, s] of shots.entries()) {
-      const row = await tx.roundScreenshot.create({ data: { roundId, ...screenshotData(s, start + i) }, select: { id: true } });
-      ids.push(row.id);
+    let made: string[] = [];
+    if (fresh.length) {
+      await tx.roundScreenshot.createMany({ data: fresh.map((s, i) => ({ roundId, ...screenshotData(s, start + i) })) });
+      made = (await tx.roundScreenshot.findMany({ where: { roundId, position: { gte: start } }, select: { id: true }, orderBy: { position: "asc" } })).map((r) => r.id);
     }
-    return ids;
+    const freshIndex = new Map(fresh.map((s, i) => [s, i]));
+    const uniqueIds = unique.map((s) => (s.sha256 && known.get(s.sha256)) || made[freshIndex.get(s)!]);
+    return indexOf.map((i) => uniqueIds[i]);
   });
 }
 

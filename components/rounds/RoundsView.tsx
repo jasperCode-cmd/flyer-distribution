@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import BusinessBadge from "@/components/crm/BusinessBadge";
-import { formatDistance, shortDate } from "@/lib/rounds/format";
-import { MAX_TRIM_M, MIN_TRIM_M } from "@/lib/rounds/validate";
+import { NOT_SPECIFIED, distributorColour, distributorName, formatDistance, shortDate } from "@/lib/rounds/format";
+import { MAX_TRIM_M, MIN_TRIM_M, NOT_SPECIFIED_FILTER } from "@/lib/rounds/validate";
 import type { RoundOptions, RoundSummary } from "@/lib/rounds/types";
 import { api, filtersQuery, send } from "./rounds-api";
 
@@ -103,6 +103,7 @@ export default function RoundsView() {
           <span className="block text-xs font-semibold text-gray-600">Distributor</span>
           <select value={filters.distributorId} onChange={set("distributorId")} className="mt-1 w-full rounded-md border border-gray-300 px-2 py-1.5">
             <option value="">All</option>
+            <option value={NOT_SPECIFIED_FILTER}>{NOT_SPECIFIED}</option>
             {options?.distributors.map((d) => (
               <option key={d.id} value={d.id}>
                 {d.name}
@@ -132,8 +133,8 @@ export default function RoundsView() {
                   <span className="truncate text-gray-900">{r.lead?.name ?? r.project?.name ?? "No job"}</span>
                 </span>
                 <span className="flex min-w-0 items-center gap-1.5 text-sm text-gray-700">
-                  <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: r.distributor?.colour ?? "#8A8F98" }} aria-hidden="true" />
-                  <span className="truncate">{r.distributor?.name ?? "No distributor"}</span>
+                  <span className="inline-block h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: distributorColour(r.distributor) }} aria-hidden="true" />
+                  <span className="truncate">{distributorName(r.distributor)}</span>
                 </span>
                 <span className="text-sm tabular-nums text-gray-800">{r.distanceM !== null ? formatDistance(r.distanceM) : "-"}</span>
                 <span className="truncate text-xs text-gray-600">{r.sectors.length ? r.sectors.map((s) => s.code).join(", ") : "No sectors yet"}</span>

@@ -4,8 +4,17 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { CRM_NAV_GROUPS } from "@/lib/crm-nav";
 import { screenshotStorage, type BlobClient } from "@/lib/rounds/storage";
-import { dateLabel, formatDistance } from "@/lib/rounds/format";
-import { parseFilters, validateNewLink, validateNewRound, validateScreenshotWork, validateTrim } from "@/lib/rounds/validate";
+import { NOT_SPECIFIED, NOT_SPECIFIED_COLOUR, dateLabel, distributorColour, distributorName, formatDistance } from "@/lib/rounds/format";
+import {
+  MAX_SCREENSHOTS,
+  NOT_SPECIFIED_FILTER,
+  parseFilters,
+  validateNewLink,
+  validateNewRound,
+  validateNewScreenshots,
+  validateScreenshotWork,
+  validateTrim,
+} from "@/lib/rounds/validate";
 
 // How the Rounds feature is put together, checked on the source and without
 // a database: where it appears in the CRM, that rounds are only read when a
@@ -108,6 +117,71 @@ test("the API's checks: a round, a screenshot's work, a client link, the trim, t
     business: "LDB",
     leadId: "clead00000001",
   });
+  // "Not specified": rounds with no distributor.
+  assert.deepEqual(parseFilters(new URLSearchParams(`distributorId=${NOT_SPECIFIED_FILTER}`)), { distributorId: null });
+  assert.deepEqual(parseFilters(new URLSearchParams("distributorId=cdist00000001")), { distributorId: "cdist00000001" });
+});
+
+test("up to 100 screenshots in a round and in one upload, the same limit everywhere", () => {
+  assert.equal(MAX_SCREENSHOTS, 100);
+  const many = (n: number) => Array.from({ length: n }, (_, i) => ({ width: 738, height: 1600, sha256: i.toString(16).padStart(64, "0"), originalName: `IMG_${i}.PNG`, takenAt: null }));
+  assert.ok(validateNewRound({ business: "FDH", date: "2026-11-10", screenshots: many(100) }).ok);
+  assert.ok(!validateNewRound({ business: "FDH", date: "2026-11-10", screenshots: many(101) }).ok);
+  assert.ok(validateNewScreenshots({ screenshots: many(100) }).ok);
+  assert.ok(!validateNewScreenshots({ screenshots: many(101) }).ok);
+  // No other limit left behind: the pages and the service use the shared one.
+  for (const f of ["components/rounds/NewRound.tsx", "components/rounds/RoundPage.tsx", "lib/rounds/service.ts", "lib/rounds/validate.ts"]) {
+    assert.doesNotMatch(read(f).replace(/^\s*\/\/.*$/gm, ""), /\b12\b/, f);
+  }
+  assert.match(read("components/rounds/NewRound.tsx"), /MAX_SCREENSHOTS/);
+  assert.match(read("components/rounds/RoundPage.tsx"), /MAX_SCREENSHOTS/);
+  assert.match(read("lib/rounds/service.ts"), /MAX_SCREENSHOTS/);
+});
+
+test("picked screenshots are read one at a time and only the one in hand at full size; records are made in one request", () => {
+  const helper = read("lib/rounds/working-image.ts");
+  // One after another, never all at once.
+  const readAll = helper.slice(helper.indexOf("export async function readAllFacts"), helper.indexOf("export async function makeWorkingImage"));
+  assert.match(readAll, /for \(const \[i, file\] of files\.entries\(\)\) \{[\s\S]*await readFileFacts\(file\)/);
+  assert.doesNotMatch(readAll, /Promise\.all/);
+  assert.match(helper, /bitmap\.close\(\)/);
+  for (const f of ["components/rounds/NewRound.tsx", "components/rounds/RoundPage.tsx"]) {
+    const page = read(f);
+    assert.match(page, /readAllFacts\(/, f);
+    // Picking files never makes full working copies.
+    assert.doesNotMatch(page.slice(page.indexOf("async function " + (f.includes("New") ? "pick" : "choose"))), /^\s*for [\s\S]{0,200}makeWorkingImage/m, f);
+  }
+  const queue = read("components/rounds/ScreenshotQueue.tsx");
+  assert.match(queue, /makeWorkingImage\(source\)/);
+  assert.match(queue, /URL\.revokeObjectURL/);
+  // The upload page sends every screenshot's details in its one request,
+  // and the round page adds new ones in one request too.
+  assert.match(read("components/rounds/NewRound.tsx"), /screenshots: picked\.map\(/);
+  assert.match(read("components/rounds/RoundPage.tsx"), /screenshots: plan\.fresh\.map\(/);
+  const service = read("lib/rounds/service.ts");
+  assert.match(service, /screenshots: \{ createMany:/);
+  assert.match(service, /tx\.roundScreenshot\.createMany\(/);
+  assert.doesNotMatch(service, /roundScreenshot\.create\(/);
+});
+
+test("distributor: Not specified by default, saved as none, shown and filtered as Not specified, grey on the map", () => {
+  assert.equal(distributorName(null), NOT_SPECIFIED);
+  assert.equal(distributorName({ name: "Dan" }), "Dan");
+  assert.equal(distributorColour(null), NOT_SPECIFIED_COLOUR);
+  assert.equal(NOT_SPECIFIED_COLOUR, "#8A8F98");
+  assert.equal(distributorColour({ colour: "#2A78D6" }), "#2A78D6");
+  for (const f of ["components/rounds/NewRound.tsx", "components/rounds/RoundPage.tsx"]) {
+    const page = read(f);
+    assert.match(page, /<option value="">\{NOT_SPECIFIED\}<\/option>/, f);
+    assert.match(page, /distributorId: (form\.)?distributorId \|\| null/, f);
+  }
+  assert.match(read("components/rounds/NewRound.tsx"), /const \[distributorId, setDistributorId\] = useState\(""\);/);
+  for (const f of ["components/rounds/RoundsView.tsx", "components/area-planner/RoundsLayerControls.tsx"]) {
+    assert.match(read(f), /<option value=\{NOT_SPECIFIED_FILTER\}>\{NOT_SPECIFIED\}<\/option>/, f);
+  }
+  const shown = [...files("components/rounds"), "components/area-planner/PlannerMap.tsx"].map(read).join("\n");
+  assert.doesNotMatch(shown, /No distributor"|>Not set</);
+  assert.match(read("components/area-planner/PlannerMap.tsx"), /distributorColour\(round\.distributor\)/);
 });
 
 test("how figures read", () => {
@@ -127,6 +201,8 @@ test("no em or en dashes in any Rounds file", () => {
     ...files("app/api/crm/route-reports"),
     ...files("app/route-report"),
     "components/area-planner/RoundsLayerControls.tsx",
+    "lib/__tests__/rounds-queue.test.ts",
+    "lib/__tests__/rounds-db-lock.ts",
   ];
   for (const f of all) assert.doesNotMatch(read(f), /[\u2013\u2014]/, f);
 });

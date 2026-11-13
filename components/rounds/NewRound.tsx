@@ -4,26 +4,32 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import BusinessBadge from "@/components/crm/BusinessBadge";
 import type { Business } from "@/lib/business";
-import { imageTimeInstant, readImageTime, type ImageTime } from "@/lib/rounds/exif";
+import { imageTimeInstant } from "@/lib/rounds/exif";
+import { NOT_SPECIFIED } from "@/lib/rounds/format";
+import { planFiles } from "@/lib/rounds/queue";
 import { MAX_SCREENSHOTS } from "@/lib/rounds/validate";
-import type { RoundDetail, RoundOptions, RoundScreenshotView } from "@/lib/rounds/types";
-import { compressForStorage, makeWorkingImage, type WorkingImage } from "@/lib/rounds/working-image";
-import ScreenshotWorkspace from "./ScreenshotWorkspace";
+import type { RoundOptions } from "@/lib/rounds/types";
+import { readAllFacts, type FileFacts } from "@/lib/rounds/working-image";
+import { handOver } from "./pending-files";
 import { api, send, ukDate } from "./rounds-api";
 
-// Adding a round: pick its screenshots (they are read here, in the browser:
-// scaled to the working size, fingerprinted, and their own date read where
-// they have one), choose the job, the distributor and the date, then line
-// up and trace each screenshot in turn. Only the round's details and the
-// traced lines are saved; screenshots are kept only once storage is on.
+// Adding a round: pick its screenshots, up to MAX_SCREENSHOTS (each read
+// here, in the browser, one at a time: fingerprinted, its working size and
+// its own date read, and let go; none is held in memory), choose the job,
+// the distributor (Not specified unless chosen) and the date, then save the
+// round with every screenshot's details in one request. The round's own
+// page then opens to work through them one at a time. Only the round's
+// details and the traced lines are saved; screenshots are kept only once
+// storage is on.
 
-type Picked = { file: File; image: WorkingImage; time: ImageTime | null };
+type Picked = { file: File; facts: FileFacts };
 
 export default function NewRound({ leadId, projectId }: { leadId: string | null; projectId: string | null }) {
   const router = useRouter();
   const [options, setOptions] = useState<RoundOptions | null>(null);
   const [picked, setPicked] = useState<Picked[]>([]);
-  const [reading, setReading] = useState(false);
+  const [reading, setReading] = useState<{ done: number; total: number } | null>(null);
+  const [pickNote, setPickNote] = useState<string | null>(null);
   const [jobKey, setJobKey] = useState("");
   const [business, setBusiness] = useState<Business>("FDH");
   const [distributorId, setDistributorId] = useState("");
@@ -32,8 +38,6 @@ export default function NewRound({ leadId, projectId }: { leadId: string | null;
   const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [round, setRound] = useState<(RoundDetail & { focus: [number, number, number, number] | null }) | null>(null);
-  const [current, setCurrent] = useState(0);
 
   useEffect(() => {
     api<RoundOptions>("/api/crm/rounds/options")
@@ -50,27 +54,36 @@ export default function NewRound({ leadId, projectId }: { leadId: string | null;
 
   const job = useMemo(() => options?.jobs.find((j) => j.key === jobKey) ?? null, [options, jobKey]);
 
-  async function pick(files: FileList | null) {
-    if (!files?.length) return;
-    setReading(true);
+  async function pick(list: FileList | null) {
+    if (!list?.length) return;
+    const files = [...list];
+    setReading({ done: 0, total: files.length });
     setError(null);
+    setPickNote(null);
     try {
-      const add: Picked[] = [];
-      for (const file of [...files].slice(0, MAX_SCREENSHOTS - picked.length)) {
-        const bytes = new Uint8Array(await file.arrayBuffer());
-        add.push({ file, image: await makeWorkingImage(file), time: readImageTime(bytes) });
-      }
-      const all = [...picked, ...add];
+      const { read, unreadable } = await readAllFacts(files, (done) => setReading({ done, total: files.length }));
+      // Already picked count as the round's screenshots: a file picked again is left out.
+      const plan = planFiles(
+        read.map((r) => r.facts),
+        picked.map((p, i) => ({ id: String(i), sha256: p.facts.sha256 })),
+        MAX_SCREENSHOTS
+      );
+      const all = [...picked, ...plan.fresh.map((i) => read[i])];
       setPicked(all);
-      const dated = all.find((p) => p.time);
+      const repeats = plan.repeats + plan.matched.length;
+      const notes = [
+        repeats ? `${repeats} picked twice, used once` : "",
+        plan.overLimit ? `${plan.overLimit} left out: a round can have at most ${MAX_SCREENSHOTS}` : "",
+        unreadable.length ? `${unreadable.length} couldn't be read as images (${unreadable.slice(0, 3).join(", ")}${unreadable.length > 3 ? "..." : ""})` : "",
+      ].filter(Boolean);
+      if (notes.length) setPickNote(notes.join("; ") + ".");
+      const dated = all.find((p) => p.facts.time);
       if (dated && (!date || dateFromFile)) {
-        setDate(dated.time!.date);
+        setDate(dated.facts.time!.date);
         setDateFromFile(true);
       }
-    } catch {
-      setError("A file couldn't be read as an image. Use the PNG or JPEG screenshots.");
     } finally {
-      setReading(false);
+      setReading(null);
     }
   }
 
@@ -78,6 +91,7 @@ export default function NewRound({ leadId, projectId }: { leadId: string | null;
     setSaving(true);
     setError(null);
     try {
+      // Every screenshot's details in this one request.
       const made = await api<{ id: string; screenshotIds: string[] }>(
         "/api/crm/rounds",
         send("POST", {
@@ -88,51 +102,23 @@ export default function NewRound({ leadId, projectId }: { leadId: string | null;
           date,
           notes,
           screenshots: picked.map((p) => ({
-            width: p.image.width,
-            height: p.image.height,
-            sha256: p.image.sha256,
+            width: p.facts.width,
+            height: p.facts.height,
+            sha256: p.facts.sha256,
             originalName: p.file.name,
-            takenAt: p.time ? imageTimeInstant(p.time).toISOString() : null,
+            takenAt: p.facts.time ? imageTimeInstant(p.facts.time).toISOString() : null,
           })),
         })
       );
-      // Kept only where file storage is switched on.
-      if (options?.storage) {
-        for (const [i, sid] of made.screenshotIds.entries()) {
-          const body = await compressForStorage(picked[i].image);
-          await fetch(`/api/crm/rounds/screenshots/${sid}/image`, { method: "PUT", body, headers: { "x-source-sha256": picked[i].image.sha256 } });
-        }
-      }
-      setRound(await api(`/api/crm/rounds/${made.id}`));
-      setCurrent(0);
+      handOver(
+        made.id,
+        picked.map((p) => ({ file: p.file, sha256: p.facts.sha256 }))
+      );
+      router.push(`/admin/crm/rounds/${made.id}`);
     } catch (e) {
       setError((e as Error).message);
-    } finally {
       setSaving(false);
     }
-  }
-
-  function advance(updated?: RoundScreenshotView) {
-    if (round && updated) setRound({ ...round, shots: round.shots.map((s) => (s.id === updated.id ? updated : s)) });
-    if (round && current + 1 < round.shots.length) setCurrent(current + 1);
-    else if (round) router.push(`/admin/crm/rounds/${round.id}`);
-  }
-
-  if (round) {
-    const shot = round.shots[current];
-    return (
-      <ScreenshotWorkspace
-        key={shot.id}
-        shot={shot}
-        image={picked[current].image}
-        index={current}
-        total={round.shots.length}
-        focus={round.focus}
-        onSaved={advance}
-        onSkip={() => advance()}
-        skipLabel={current + 1 < round.shots.length ? "Skip this one" : "Finish later"}
-      />
-    );
   }
 
   const ready = picked.length > 0 && !!date && !saving;
@@ -141,29 +127,39 @@ export default function NewRound({ leadId, projectId }: { leadId: string | null;
       <section className="rounded-lg border border-gray-200 bg-white p-4" aria-label="Screenshots">
         <h2 className="text-sm font-bold text-blue-900">Screenshots</h2>
         <p className="mt-1 text-sm text-gray-600">
-          The MapMyRun route screenshots for this round, up to {MAX_SCREENSHOTS}. Several can show different parts of the same round.
+          The MapMyRun route screenshots for this round, up to {MAX_SCREENSHOTS}. Several can show different parts of the same round; after saving, you work through them one at a time.
           {options && !options.storage && " Screenshots aren't stored yet: they are used here to trace the route, and only the round and its lines are saved."}
         </p>
-        <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-md border border-blue-700 px-3 py-2 text-sm font-semibold text-blue-800 hover:bg-blue-50">
-          {reading ? "Reading..." : picked.length ? "Add more screenshots" : "Choose screenshots"}
-          <input type="file" accept="image/png,image/jpeg,image/webp" multiple className="sr-only" onChange={(e) => pick(e.target.files)} disabled={reading || picked.length >= MAX_SCREENSHOTS} />
+        <label className={`mt-3 inline-flex items-center gap-2 rounded-md border border-blue-700 px-3 py-2 text-sm font-semibold text-blue-800 ${reading || picked.length >= MAX_SCREENSHOTS ? "opacity-60" : "cursor-pointer hover:bg-blue-50"}`}>
+          {reading ? `Reading ${reading.done} of ${reading.total}...` : picked.length ? "Add more screenshots" : "Choose screenshots"}
+          <input type="file" accept="image/png,image/jpeg,image/webp" multiple className="sr-only" onChange={(e) => pick(e.target.files)} disabled={!!reading || picked.length >= MAX_SCREENSHOTS} />
         </label>
+        {pickNote && (
+          <p className="mt-2 text-sm text-amber-800" role="status">
+            {pickNote}
+          </p>
+        )}
         {picked.length > 0 && (
-          <ul className="mt-3 flex gap-3 overflow-x-auto pb-1">
-            {picked.map((p, i) => (
-              <li key={`${p.file.name}-${i}`} className="w-28 shrink-0 text-xs text-gray-600">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.image.url} alt={`Screenshot ${i + 1}`} className="h-44 w-full rounded border border-gray-200 object-cover object-top" />
-                <p className="mt-1 truncate font-medium text-gray-800" title={p.file.name}>
-                  {p.file.name}
-                </p>
-                <p>{p.time ? `Taken ${p.time.date.split("-").reverse().join("/")} ${p.time.time.slice(0, 5)}` : "No date in the file"}</p>
-                <button type="button" className="mt-1 text-red-700 hover:underline" onClick={() => setPicked(picked.filter((_, k) => k !== i))}>
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ul>
+          <>
+            <p className="mt-3 text-sm font-semibold text-gray-800">
+              {picked.length} screenshot{picked.length === 1 ? "" : "s"}
+            </p>
+            <ol className="mt-1 max-h-72 divide-y divide-gray-100 overflow-y-auto rounded-md border border-gray-100 text-sm" aria-label="Chosen screenshots">
+              {picked.map((p, i) => (
+                <li key={p.facts.sha256} className="flex items-center gap-2 px-2 py-1.5">
+                  <span className="w-7 shrink-0 text-right tabular-nums text-gray-500">{i + 1}.</span>
+                  <span className="min-w-0 flex-1 truncate font-medium text-gray-900" title={p.file.name}>
+                    {p.file.name}
+                  </span>
+                  <span className="shrink-0 text-xs text-gray-500">{p.facts.time ? `${p.facts.time.date.split("-").reverse().join("/")} ${p.facts.time.time.slice(0, 5)}` : "No date in the file"}</span>
+                  <span className="shrink-0 rounded-full border border-gray-300 px-2 py-0.5 text-xs font-semibold text-gray-700">To do</span>
+                  <button type="button" className="shrink-0 text-xs text-red-700 hover:underline" onClick={() => setPicked(picked.filter((_, k) => k !== i))} aria-label={`Remove ${p.file.name}`}>
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ol>
+          </>
         )}
       </section>
 
@@ -217,7 +213,7 @@ export default function NewRound({ leadId, projectId }: { leadId: string | null;
         <label className="text-sm">
           <span className="font-semibold text-gray-800">Distributor</span>
           <select value={distributorId} onChange={(e) => setDistributorId(e.target.value)} className="mt-1 w-full rounded-md border border-gray-300 px-2 py-2">
-            <option value="">Not set</option>
+            <option value="">{NOT_SPECIFIED}</option>
             {options?.distributors.filter((d) => d.active).map((d) => (
               <option key={d.id} value={d.id}>
                 {d.name}
@@ -253,7 +249,7 @@ export default function NewRound({ leadId, projectId }: { leadId: string | null;
       )}
       <div className="flex justify-end">
         <button type="button" onClick={create} disabled={!ready} className="rounded-md bg-blue-900 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50">
-          {saving ? "Saving the round..." : "Save the round and line up the screenshots"}
+          {saving ? "Saving the round..." : `Save the round and work through ${picked.length > 1 ? `the ${picked.length} screenshots` : "the screenshot"}`}
         </button>
       </div>
     </div>

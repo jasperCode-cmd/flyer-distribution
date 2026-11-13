@@ -79,7 +79,8 @@ export type RoundFilters = {
   to?: string;
   business?: Business;
   leadId?: string;
-  distributorId?: string;
+  // null: rounds with no distributor ("Not specified").
+  distributorId?: string | null;
   projectId?: string;
 };
 

@@ -7,7 +7,11 @@ import type { Markers, RoundFilters } from "./types";
 // Checking what the browser sends the Rounds API. Pure, so the pages use the
 // same limits. Anything not understood is refused with a plain reason.
 
-export const MAX_SCREENSHOTS = 12;
+// Screenshots in one round, and in one upload (they are created together,
+// in one request).
+export const MAX_SCREENSHOTS = 100;
+// The distributor filter's value for rounds with no distributor recorded.
+export const NOT_SPECIFIED_FILTER = "none";
 export const MAX_NOTES = 2000;
 export const MAX_NAME = 200;
 export const MAX_IMAGE_SIDE = 4000;
@@ -282,5 +286,7 @@ export function parseFilters(params: URLSearchParams): RoundFilters {
     const v = params.get(key);
     if (isId(v)) out[key] = v;
   }
+  // "Not specified": rounds with no distributor.
+  if (params.get("distributorId") === NOT_SPECIFIED_FILTER) out.distributorId = null;
   return out;
 }
