@@ -189,6 +189,8 @@ model Lead {
   invoices       Invoice[]
   // Its map on the Area Planner, if one has been made.
   areaProject    AreaProject?
+  rounds         Round[]
+  reportLinks    RouteReportLink[]
 
   @@index([stage])
   @@index([assignedToId])
@@ -379,6 +381,7 @@ model Distributor {
   costs          JobCost[]
   plannedAreas   PlannedArea[]
   areaShareLinks AreaShareLink[]
+  rounds         Round[]
 
   @@index([active])
 }
@@ -833,6 +836,7 @@ model AreaProject {
 
   areas      PlannedArea[]
   shareLinks AreaShareLink[]
+  rounds     Round[]
 
   @@index([closedAt])
 }
@@ -898,4 +902,119 @@ model AreaShareLink {
   lastViewedAt DateTime?
 
   @@index([projectId, distributorId])
+}
+
+// A delivery round as a distributor recorded it in MapMyRun, from one or
+// more screenshots of the route (often different parts of the same round).
+// Linked to a lead, an Area Planner project and a distributor where known;
+// unlinked if any of those is deleted. A linked lead or project sets the
+// business, which can still be changed.
+model Round {
+  id       String   @id @default(cuid())
+  business Business @default(FDH)
+
+  leadId        String?
+  lead          Lead?        @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  projectId     String?
+  project       AreaProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  distributorId String?
+  distributor   Distributor? @relation(fields: [distributorId], references: [id], onDelete: SetNull)
+
+  date  DateTime @db.Date
+  notes String?
+
+  // Worked out on the server from the screenshots' saved lines whenever one
+  // changes: the full lines, with any part seen in two screenshots counted
+  // once, and the postcode sectors they pass through with the metres in
+  // each, as [{ "code": "BH6 3", "metres": 820 }].
+  distanceM Int?
+  sectors   Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  screenshots RoundScreenshot[]
+  reportLinks RouteReportLink[]
+
+  @@index([date])
+  @@index([leadId])
+  @@index([projectId])
+  @@index([distributorId])
+  @@index([business])
+}
+
+// One screenshot of a round. The image itself is never stored in the
+// database: it is used in the browser to align and trace the route, and only
+// kept (in file storage, by its URL) once storage is switched on. Without it
+// the screenshot shows as not stored, and can be attached later.
+model RoundScreenshot {
+  id       String @id @default(cuid())
+  roundId  String
+  round    Round  @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  position Int
+
+  // Set only once the image is in file storage.
+  blobUrl     String?
+  contentType String?
+  bytes       Int?
+
+  // The image as worked on in the browser (at most about 1600px tall), which
+  // the crop and the alignment's points are measured in, and a SHA-256 of
+  // the original file, so a file picked again later can be checked to be
+  // the same one.
+  width        Int
+  height       Int
+  sourceSha256 String?
+  originalName String?
+  // The screenshot's own time, from its EXIF data when it has any.
+  takenAt      DateTime?
+
+  // Where the map is in the image: { top, bottom, left, right } in pixels.
+  crop         Json?
+  // The two pairs of points clicked on the image and the map, and the
+  // scale, offset and any small rotation worked out from them.
+  alignment    Json?
+  // The traced route: a GeoJSON MultiLineString in longitude and latitude,
+  // simplified, with stray bits erased.
+  route        Json?
+  // Where the red start and green end dots are, as [lng, lat], when shown.
+  markers      Json?
+  routeLengthM Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([roundId])
+}
+
+// A client's public, read-only route report at /route-report/<token>: one
+// round, or every round of one lead (rounds added later included). Exactly
+// one of roundId and leadId is set, which the migration also enforces. Only
+// a SHA-256 hash of the token is stored, so the link is shown once when it is
+// made. Revoking takes effect at once; an expiry date is optional.
+model RouteReportLink {
+  id      String  @id @default(cuid())
+  roundId String?
+  round   Round?  @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  leadId  String?
+  lead    Lead?   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  tokenHash String @unique
+
+  createdAt    DateTime  @default(now())
+  revokedAt    DateTime?
+  expiresAt    DateTime?
+  lastViewedAt DateTime?
+
+  @@index([roundId])
+  @@index([leadId])
+}
+
+// Small settings kept by key, such as "rounds.clientTrimM": how many metres
+// of each route's start and end are left off anything shown to a client
+// (150 when not set).
+model AppSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
 }
