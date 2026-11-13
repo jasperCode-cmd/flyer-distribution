@@ -198,6 +198,25 @@ export async function postcodeGeometry(code: string): Promise<Polygon | MultiPol
   return encoded ? decodeGeometry(encoded) : null;
 }
 
+export type MappablePostcode = { code: string; kind: PostcodeKind; bbox: Bbox };
+
+// Every postcode district and sector there is a shape for, with its
+// bounding box. Empty when no data is installed.
+export async function mappablePostcodes(): Promise<MappablePostcode[]> {
+  const dir = areaPlannerDataDir();
+  if (!(await manifestOf(dir))) return [];
+  const out: MappablePostcode[] = [];
+  for (const entry of (await postcodesOf(dir)).values()) {
+    if (entry.mappable && entry.bbox) out.push({ code: entry.code, kind: entry.kind, bbox: entry.bbox });
+  }
+  return out;
+}
+
+// The postcode sectors whose bounding box meets this one.
+export async function sectorsMeeting(bbox: Bbox): Promise<MappablePostcode[]> {
+  return (await mappablePostcodes()).filter((p) => p.kind === "sector" && bboxesMeet(bbox, p.bbox));
+}
+
 // A short fixed-length name for a shape, for remembering work done on it.
 export function geometryKey(value: unknown): string {
   return createHash("sha256").update(JSON.stringify(value)).digest("base64url");

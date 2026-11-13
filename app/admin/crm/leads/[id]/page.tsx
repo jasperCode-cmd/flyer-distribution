@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import LeadDetail from "@/components/crm/LeadDetail";
+import { leadRounds } from "@/lib/rounds/service";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,7 @@ export default async function LeadDetailPage({
 }) {
   const { id } = await params;
 
-  const [lead, users] = await Promise.all([
+  const [lead, users, rounds] = await Promise.all([
     prisma.lead.findUnique({
       where: { id },
       include: {
@@ -25,6 +26,7 @@ export default async function LeadDetailPage({
       },
     }),
     prisma.user.findMany({ select: { id: true, name: true } }),
+    leadRounds(prisma, id),
   ]);
 
   if (!lead) notFound();
@@ -51,5 +53,5 @@ export default async function LeadDetailPage({
     tasks: lead.tasks.map((t) => ({ ...t, dueDate: t.dueDate.toISOString() })),
   };
 
-  return <LeadDetail lead={serializable} users={users} />;
+  return <LeadDetail lead={serializable} users={users} rounds={rounds} />;
 }

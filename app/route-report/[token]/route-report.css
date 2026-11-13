@@ -1,0 +1,13 @@
+/* The client report map's round labels: dark ink on white. */
+.leaflet-tooltip.rr-label {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 6px;
+}
+.leaflet-tooltip.rr-label::before {
+  display: none;
+}

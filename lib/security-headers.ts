@@ -1,13 +1,14 @@
 import { MAP_TILES } from "./area-planner/tiles";
 
 // The site's security headers, read by next.config.ts. Every page has the
-// same Content-Security-Policy except the two that show a map (the Area
-// Planner and the private delivery pages), which may also load map tiles
-// from the one tile host, and on the planner blob: images for the
-// "Download image" preview. The public site's policy also allows
+// same Content-Security-Policy except those that show a map (the Area
+// Planner and the CRM's Rounds pages, the private delivery pages and the
+// clients' route reports), which may also load map tiles from the one tile
+// host, and in the CRM blob: images (the "Download image" preview, and a
+// screenshot being lined up, which never leaves the browser). The public site's policy also allows
 // Cloudflare Web Analytics (its beacon script and where it reports); the
-// map pages' policies do not, so a private delivery link's address is never
-// sent to it. Nothing else is loosened anywhere.
+// map pages' policies do not, so a private delivery or report link's
+// address is never sent to it. Nothing else is loosened anywhere.
 
 function contentSecurityPolicy(extraImg: string[] = [], analytics = false): string {
   const img = ["'self'", "images.unsplash.com", "images.pexels.com", "data:", ...extraImg].join(" ");
@@ -26,6 +27,7 @@ function contentSecurityPolicy(extraImg: string[] = [], analytics = false): stri
 export const SITE_CSP = contentSecurityPolicy([], true);
 export const PLANNER_CSP = contentSecurityPolicy([MAP_TILES.host, "blob:"]);
 export const DELIVERY_CSP = contentSecurityPolicy([MAP_TILES.host]);
+export const REPORT_CSP = DELIVERY_CSP;
 
 export const SECURITY_HEADERS = [
   { key: "X-Frame-Options", value: "DENY" },
@@ -48,10 +50,19 @@ export const SECURITY_HEADERS = [
 export const MAP_PAGE_HEADER_RULES = [
   { source: "/admin/crm/map", headers: [{ key: "Content-Security-Policy", value: PLANNER_CSP }] },
   { source: "/admin/crm/map/:path*", headers: [{ key: "Content-Security-Policy", value: PLANNER_CSP }] },
+  { source: "/admin/crm/rounds", headers: [{ key: "Content-Security-Policy", value: PLANNER_CSP }] },
+  { source: "/admin/crm/rounds/:path*", headers: [{ key: "Content-Security-Policy", value: PLANNER_CSP }] },
   {
     source: "/delivery/:path*",
     headers: [
       { key: "Content-Security-Policy", value: DELIVERY_CSP },
+      { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+    ],
+  },
+  {
+    source: "/route-report/:path*",
+    headers: [
+      { key: "Content-Security-Policy", value: REPORT_CSP },
       { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
     ],
   },

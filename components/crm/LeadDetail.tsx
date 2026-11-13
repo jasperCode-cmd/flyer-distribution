@@ -12,6 +12,8 @@ import BusinessBadge from "./BusinessBadge";
 import { BUSINESSES, BUSINESS_NAMES, type Business } from "@/lib/business";
 import EmailsSection, { type EmailsState, type ConversationMessage } from "./EmailsSection";
 import LeadDocuments from "./LeadDocuments";
+import LeadRounds from "@/components/rounds/LeadRounds";
+import type { ReportLinkView, RoundSummary } from "@/lib/rounds/types";
 import { usePaymentReviewEditor } from "./usePaymentReviewEditor";
 import {
   STAGE_LABELS,
@@ -117,9 +119,11 @@ const JOB_STATUS_LABELS: Record<string, string> = {
 export default function LeadDetail({
   lead,
   users,
+  rounds,
 }: {
   lead: LeadDetailData;
   users: { id: string; name: string }[];
+  rounds?: { rounds: RoundSummary[]; links: ReportLinkView[] };
 }) {
   const router = useRouter();
   const [form, setForm] = useState({
@@ -842,6 +846,8 @@ export default function LeadDetail({
 
       {/* Follow-up tasks */}
       <LeadDocuments leadId={lead.id} scrapped={lead.scrapped ?? false} amountPaid={amountPaid === "" ? null : amountPaid} />
+
+      {rounds && <LeadRounds leadId={lead.id} rounds={rounds.rounds} links={rounds.links} />}
 
       <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5">
         <div className="flex items-center justify-between mb-3">

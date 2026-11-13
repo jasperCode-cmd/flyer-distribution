@@ -444,9 +444,22 @@ test("CSP: the public site's policy as before plus Cloudflare Web Analytics; onl
   // private delivery link's address is never sent to it.
   assert.equal(PLANNER_CSP, before.replace("data:;", "data: https://tile.openstreetmap.org blob:;"));
   assert.equal(DELIVERY_CSP, before.replace("data:;", "data: https://tile.openstreetmap.org;"));
-  assert.deepEqual(MAP_PAGE_HEADER_RULES.map((r) => r.source), ["/admin/crm/map", "/admin/crm/map/:path*", "/delivery/:path*"]);
-  const delivery = MAP_PAGE_HEADER_RULES[2].headers.find((h) => h.key === "X-Robots-Tag");
-  assert.equal(delivery?.value, "noindex, nofollow, noarchive");
+  assert.deepEqual(MAP_PAGE_HEADER_RULES.map((r) => r.source), [
+    "/admin/crm/map",
+    "/admin/crm/map/:path*",
+    "/admin/crm/rounds",
+    "/admin/crm/rounds/:path*",
+    "/delivery/:path*",
+    "/route-report/:path*",
+  ]);
+  const rule = (source: string) => MAP_PAGE_HEADER_RULES.find((r) => r.source === source)!;
+  const header = (source: string, key: string) => rule(source).headers.find((h) => h.key === key)?.value;
+  assert.equal(header("/delivery/:path*", "X-Robots-Tag"), "noindex, nofollow, noarchive");
+  // Clients' route reports: the delivery pages' policy (tiles, no analytics), never indexed.
+  assert.equal(header("/route-report/:path*", "Content-Security-Policy"), DELIVERY_CSP);
+  assert.equal(header("/route-report/:path*", "X-Robots-Tag"), "noindex, nofollow, noarchive");
+  // The CRM's Rounds pages: the planner's policy (tiles, and blob: for a screenshot being lined up).
+  assert.equal(header("/admin/crm/rounds/:path*", "Content-Security-Policy"), PLANNER_CSP);
 });
 
 test("delivery pages show none of the website around them", () => {
@@ -454,6 +467,8 @@ test("delivery pages show none of the website around them", () => {
   assert.equal(hidesSiteChrome("/admin/crm/map"), true);
   assert.equal(hidesSiteChrome("/"), false);
   assert.equal(hidesSiteChrome("/deliveryx"), false);
+  assert.equal(hidesSiteChrome("/route-report/abc"), true);
+  assert.equal(hidesSiteChrome("/route-reports"), false);
   for (const file of ["components/Header.tsx", "components/Footer.tsx", "components/AnnouncementBar.tsx", "components/SlotPopup.tsx", "components/FloatingQuoteButton.tsx", "components/SiteSchema.tsx"]) {
     assert.match(readFileSync(file, "utf8"), /hidesSiteChrome\(pathname\)/, file);
   }

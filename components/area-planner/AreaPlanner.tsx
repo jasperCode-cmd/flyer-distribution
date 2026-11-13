@@ -13,6 +13,8 @@ import type { Business } from "@/lib/business";
 import AddProjectDialog from "./AddProjectDialog";
 import AreaPanel, { type AreaFormValues } from "./AreaPanel";
 import DistributorSidebar from "./DistributorSidebar";
+import RoundsLayerControls from "./RoundsLayerControls";
+import type { MapRound } from "@/lib/rounds/types";
 import ProjectSettings from "./ProjectSettings";
 import ProjectSummary from "./ProjectSummary";
 import type { PlannerMapHandle, ShapeInput, Tool } from "./PlannerMap";
@@ -58,6 +60,7 @@ export default function AreaPlanner({ wantedProjectId, wantedLeadId }: Props) {
   const [newLink, setNewLink] = useState<{ distributorId: string; url: string } | null>(null);
   const [fitKey, setFitKey] = useState("none");
   const mapHandle = useRef<PlannerMapHandle | null>(null);
+  const [roundsLayer, setRoundsLayer] = useState<MapRound[] | null>(null);
 
   const planner = usePlanner({
     wantedProjectId,
@@ -361,6 +364,7 @@ export default function AreaPlanner({ wantedProjectId, wantedLeadId }: Props) {
                   Show all areas
                 </button>
               </div>
+              <RoundsLayerControls onRounds={setRoundsLayer} />
               <p className="text-xs text-gray-600">{hint}</p>
               <div className="relative h-[58vh] min-h-[340px] overflow-hidden rounded-lg border border-gray-200 bg-gray-100 lg:h-[640px]">
                 <PlannerMap
@@ -382,6 +386,7 @@ export default function AreaPlanner({ wantedProjectId, wantedLeadId }: Props) {
                   onShapeEdited={editShape}
                   onPlace={(latlng, areaId) => assigningId && place(assigningId, latlng, areaId)}
                   onToolDone={() => setTool("select")}
+                  rounds={roundsLayer}
                 />
                 {(mapLoading || !lists) && (
                   <div className="pointer-events-none absolute inset-x-0 top-3 z-[500] flex justify-center" role="status">
