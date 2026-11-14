@@ -1,0 +1,416 @@
+{
+ "note": "Street-name labels read from each real screenshot (738 x 1600 working size), as Claude's structured output for Locate returns them; recorded once and served by the mock API in tests. Keys: 1, 2 and 3 as in the fixture file names.",
+ "readings": {
+  "1": {
+   "labels": [
+    {
+     "kind": "street",
+     "name": "Pine Drive",
+     "x": 497,
+     "y": 352,
+     "angle": -60
+    },
+    {
+     "kind": "street",
+     "name": "Browning Avenue",
+     "x": 538,
+     "y": 445,
+     "angle": -17
+    },
+    {
+     "kind": "street",
+     "name": "Upper Deacon Road",
+     "x": 240,
+     "y": 489,
+     "angle": -25
+    },
+    {
+     "kind": "street",
+     "name": "Byron Road",
+     "x": 366,
+     "y": 567,
+     "angle": -25
+    },
+    {
+     "kind": "street",
+     "name": "Bursledon Road",
+     "x": 95,
+     "y": 612,
+     "angle": 38
+    },
+    {
+     "kind": "street",
+     "name": "Hinkler Road",
+     "x": 705,
+     "y": 663,
+     "angle": -80
+    },
+    {
+     "kind": "street",
+     "name": "Ellis Road",
+     "x": 665,
+     "y": 783,
+     "angle": 62
+    },
+    {
+     "kind": "street",
+     "name": "Warburton Road",
+     "x": 580,
+     "y": 862,
+     "angle": 85
+    },
+    {
+     "kind": "street",
+     "name": "Drove Road",
+     "x": 93,
+     "y": 836,
+     "angle": 42
+    },
+    {
+     "kind": "street",
+     "name": "Kathleen Road",
+     "x": 55,
+     "y": 958,
+     "angle": -40
+    },
+    {
+     "kind": "street",
+     "name": "Orpen Road",
+     "x": 332,
+     "y": 985,
+     "angle": -45
+    },
+    {
+     "kind": "street",
+     "name": "Parry Road",
+     "x": 430,
+     "y": 997,
+     "angle": 5
+    },
+    {
+     "kind": "street",
+     "name": "Heathfield Road",
+     "x": 163,
+     "y": 1170,
+     "angle": 45
+    },
+    {
+     "kind": "street",
+     "name": "Botley Road",
+     "x": 368,
+     "y": 1223,
+     "angle": -22
+    },
+    {
+     "kind": "street",
+     "name": "Shop Lane",
+     "x": 580,
+     "y": 1320,
+     "angle": 75
+    },
+    {
+     "kind": "street",
+     "name": "Portsmouth Road",
+     "x": 342,
+     "y": 1415,
+     "angle": 22
+    },
+    {
+     "kind": "road_number",
+     "name": "A27",
+     "x": 660,
+     "y": 360,
+     "angle": 0
+    },
+    {
+     "kind": "road_number",
+     "name": "A3024",
+     "x": 187,
+     "y": 686,
+     "angle": 0
+    },
+    {
+     "kind": "road_number",
+     "name": "B3033",
+     "x": 464,
+     "y": 1183,
+     "angle": 0
+    },
+    {
+     "kind": "road_number",
+     "name": "A3025",
+     "x": 30,
+     "y": 1304,
+     "angle": 0
+    },
+    {
+     "kind": "road_number",
+     "name": "A3025",
+     "x": 457,
+     "y": 1465,
+     "angle": 0
+    }
+   ]
+  },
+  "2": {
+   "labels": [
+    {
+     "kind": "street",
+     "name": "Windmill Lane",
+     "x": 542,
+     "y": 385,
+     "angle": -40
+    },
+    {
+     "kind": "street",
+     "name": "Green Lane",
+     "x": 100,
+     "y": 570,
+     "angle": 90
+    },
+    {
+     "kind": "street",
+     "name": "Jurd Way",
+     "x": 236,
+     "y": 747,
+     "angle": 90
+    },
+    {
+     "kind": "street",
+     "name": "Portsmouth Road",
+     "x": 525,
+     "y": 780,
+     "angle": -10
+    },
+    {
+     "kind": "street",
+     "name": "Redcroft Lane",
+     "x": 628,
+     "y": 790,
+     "angle": -50
+    },
+    {
+     "kind": "street",
+     "name": "Hamble Lane",
+     "x": 146,
+     "y": 1013,
+     "angle": -90
+    },
+    {
+     "kind": "street",
+     "name": "Oak Road",
+     "x": 205,
+     "y": 1003,
+     "angle": -88
+    },
+    {
+     "kind": "street",
+     "name": "Luck Road",
+     "x": 90,
+     "y": 1135,
+     "angle": -88
+    },
+    {
+     "kind": "street",
+     "name": "Cedar Close",
+     "x": 338,
+     "y": 1155,
+     "angle": -85
+    },
+    {
+     "kind": "street",
+     "name": "School Road",
+     "x": 565,
+     "y": 1108,
+     "angle": 40
+    },
+    {
+     "kind": "street",
+     "name": "Hungerford",
+     "x": 373,
+     "y": 1350,
+     "angle": -70
+    },
+    {
+     "kind": "street",
+     "name": "Hamble Lane",
+     "x": 42,
+     "y": 1490,
+     "angle": -65
+    },
+    {
+     "kind": "street",
+     "name": "Salterns Lane",
+     "x": 570,
+     "y": 1553,
+     "angle": -38
+    },
+    {
+     "kind": "road_number",
+     "name": "B3397",
+     "x": 153,
+     "y": 911,
+     "angle": 0
+    },
+    {
+     "kind": "road_number",
+     "name": "B3397",
+     "x": 80,
+     "y": 1394,
+     "angle": 0
+    }
+   ]
+  },
+  "3": {
+   "labels": [
+    {
+     "kind": "street",
+     "name": "Windermere Road",
+     "x": 180,
+     "y": 309,
+     "angle": 12
+    },
+    {
+     "kind": "street",
+     "name": "Beechwood Rise",
+     "x": 452,
+     "y": 358,
+     "angle": 38
+    },
+    {
+     "kind": "street",
+     "name": "Chalk Hill",
+     "x": 378,
+     "y": 470,
+     "angle": -90
+    },
+    {
+     "kind": "street",
+     "name": "West End Road",
+     "x": 198,
+     "y": 616,
+     "angle": 0
+    },
+    {
+     "kind": "street",
+     "name": "Yeovil Chase",
+     "x": 250,
+     "y": 733,
+     "angle": -72
+    },
+    {
+     "kind": "street",
+     "name": "Selborne Avenue",
+     "x": 300,
+     "y": 720,
+     "angle": 85
+    },
+    {
+     "kind": "street",
+     "name": "Denmead Road",
+     "x": 390,
+     "y": 715,
+     "angle": 50
+    },
+    {
+     "kind": "street",
+     "name": "Minstead Avenue",
+     "x": 650,
+     "y": 790,
+     "angle": 35
+    },
+    {
+     "kind": "street",
+     "name": "Somerton Avenue",
+     "x": 196,
+     "y": 847,
+     "angle": -3
+    },
+    {
+     "kind": "street",
+     "name": "Exford Avenue",
+     "x": 368,
+     "y": 835,
+     "angle": -42
+    },
+    {
+     "kind": "street",
+     "name": "Taunton Drive",
+     "x": 138,
+     "y": 955,
+     "angle": 62
+    },
+    {
+     "kind": "street",
+     "name": "Blendworth Lane",
+     "x": 400,
+     "y": 1028,
+     "angle": -38
+    },
+    {
+     "kind": "street",
+     "name": "Cheriton Avenue",
+     "x": 610,
+     "y": 1000,
+     "angle": -28
+    },
+    {
+     "kind": "street",
+     "name": "Mon Crescent",
+     "x": 330,
+     "y": 1141,
+     "angle": 20
+    },
+    {
+     "kind": "street",
+     "name": "Bitterne Road East",
+     "x": 95,
+     "y": 1158,
+     "angle": 5
+    },
+    {
+     "kind": "street",
+     "name": "Bitterne Road East",
+     "x": 332,
+     "y": 1202,
+     "angle": 5
+    },
+    {
+     "kind": "street",
+     "name": "Eynham Avenue",
+     "x": 195,
+     "y": 1225,
+     "angle": -65
+    },
+    {
+     "kind": "street",
+     "name": "Keats Road",
+     "x": 242,
+     "y": 1248,
+     "angle": 88
+    },
+    {
+     "kind": "street",
+     "name": "Upper Deacon Road",
+     "x": 277,
+     "y": 1303,
+     "angle": -20
+    },
+    {
+     "kind": "street",
+     "name": "Byron Road",
+     "x": 455,
+     "y": 1462,
+     "angle": -10
+    },
+    {
+     "kind": "street",
+     "name": "Barry Road",
+     "x": 115,
+     "y": 1518,
+     "angle": 50
+    }
+   ]
+  }
+ }
+}

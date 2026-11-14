@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { imageToLngLat, overlayCorners, solveAlignment, type AlignmentSource, type ImagePoint, type PointPair } from "@/lib/rounds/alignment";
+import { imageToLngLat, overlayCorners, solveAlignment, type AlignmentSource, type ImagePoint, type PointPair, type LocateRecord } from "@/lib/rounds/alignment";
 import { findCompass } from "@/lib/rounds/compass";
 import { detectCrop } from "@/lib/rounds/extract/crop";
 import { fullCrop, type Crop, type Point } from "@/lib/rounds/extract/image";
@@ -54,6 +54,8 @@ type Props = {
   skipLabel?: string;
   saveLabel?: string;
   draft?: WorkDraft | null;
+  // What Locate spent on this screenshot, saved with its line-up.
+  locate?: LocateRecord | null;
 };
 
 type Pick = { image: ImagePoint | null; map: LngLat | null };
@@ -66,7 +68,7 @@ const STEPS: { id: Step; label: string }[] = [
   { id: "trace", label: "3. Trace" },
 ];
 
-export default function ScreenshotWorkspace({ shot, image, index, total, focus, onSaved, onSkip, onProgress, skipLabel = "Skip", saveLabel, draft = null }: Props) {
+export default function ScreenshotWorkspace({ shot, image, index, total, focus, onSaved, onSkip, onProgress, skipLabel = "Skip", saveLabel, draft = null, locate = null }: Props) {
   // A line-up already made (found automatically, or saved before) is kept
   // exactly, with how it was made, until a point is redone.
   const kept = useMemo<{ pairs: PointPair[]; turnDeg: number; source: AlignmentSource } | null>(
@@ -181,6 +183,7 @@ export default function ScreenshotWorkspace({ shot, image, index, total, focus, 
         body.pairs = pairs;
         body.turnDeg = turnDeg;
         body.source = source;
+        if (locate) body.locate = locate;
       }
       if (step === "trace") {
         body.route = lines.length ? lines : null;
@@ -215,7 +218,7 @@ export default function ScreenshotWorkspace({ shot, image, index, total, focus, 
     const done = linedUp.alignment?.pairs;
     if (done && JSON.stringify(done) === JSON.stringify(pairs) && JSON.stringify(linedUp.crop) === JSON.stringify(crop)) return;
     try {
-      const updated = await api<RoundScreenshotView>(`/api/crm/rounds/screenshots/${shot.id}`, send("PATCH", { crop, pairs, turnDeg, source }));
+      const updated = await api<RoundScreenshotView>(`/api/crm/rounds/screenshots/${shot.id}`, send("PATCH", { crop, pairs, turnDeg, source, ...(locate ? { locate } : {}) }));
       setLinedUp(updated);
       onProgress?.("lined", updated);
     } catch (e) {
@@ -370,6 +373,7 @@ export default function ScreenshotWorkspace({ shot, image, index, total, focus, 
           {solved?.ok && (
             <span className="text-gray-700">
               {useKept && source.kind === "auto" ? `Lined up automatically (${Math.round(source.confidence * 100)}% sure). ` : ""}
+              {useKept && source.kind === "located" ? `Located from ${source.names} street names (${Math.round(source.confidence * 100)}% sure). ` : ""}
               Off by {solved.alignment.errorsPx.map((e) => `${e.toFixed(1)} px`).join(", ")}
               {solved.alignment.rotated ? `, turned ${solved.alignment.transform.rotationDeg.toFixed(1)}°` : ", north up"}; about {solved.alignment.metresPerPixel.toFixed(2)} m a pixel.
             </span>

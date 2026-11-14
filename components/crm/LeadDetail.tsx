@@ -14,6 +14,7 @@ import EmailsSection, { type EmailsState, type ConversationMessage } from "./Ema
 import LeadDocuments from "./LeadDocuments";
 import LeadRounds from "@/components/rounds/LeadRounds";
 import type { ReportLinkView, RoundSummary } from "@/lib/rounds/types";
+import type { ReportRound } from "@/lib/rounds/report-view";
 import { usePaymentReviewEditor } from "./usePaymentReviewEditor";
 import {
   STAGE_LABELS,
@@ -123,7 +124,7 @@ export default function LeadDetail({
 }: {
   lead: LeadDetailData;
   users: { id: string; name: string }[];
-  rounds?: { rounds: RoundSummary[]; links: ReportLinkView[] };
+  rounds?: { rounds: RoundSummary[]; links: ReportLinkView[]; map: ReportRound[] };
 }) {
   const router = useRouter();
   const [form, setForm] = useState({
@@ -847,7 +848,7 @@ export default function LeadDetail({
       {/* Follow-up tasks */}
       <LeadDocuments leadId={lead.id} scrapped={lead.scrapped ?? false} amountPaid={amountPaid === "" ? null : amountPaid} />
 
-      {rounds && <LeadRounds leadId={lead.id} rounds={rounds.rounds} links={rounds.links} />}
+      {rounds && <LeadRounds leadId={lead.id} rounds={rounds.rounds} links={rounds.links} map={rounds.map} />}
 
       <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-5">
         <div className="flex items-center justify-between mb-3">

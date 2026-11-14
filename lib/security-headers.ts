@@ -2,8 +2,9 @@ import { MAP_TILES } from "./area-planner/tiles";
 
 // The site's security headers, read by next.config.ts. Every page has the
 // same Content-Security-Policy except those that show a map (the Area
-// Planner and the CRM's Rounds pages, the private delivery pages and the
-// clients' route reports), which may also load map tiles from the one tile
+// Planner and the CRM's Rounds pages, a lead's page with its rounds' map, the
+// private delivery pages and the clients' route reports), which may also load
+// map tiles from the one tile
 // host, and in the CRM blob: images (the "Download image" preview, and a
 // screenshot being lined up, which never leaves the browser). The public site's policy also allows
 // Cloudflare Web Analytics (its beacon script and where it reports); the
@@ -52,6 +53,8 @@ export const MAP_PAGE_HEADER_RULES = [
   { source: "/admin/crm/map/:path*", headers: [{ key: "Content-Security-Policy", value: PLANNER_CSP }] },
   { source: "/admin/crm/rounds", headers: [{ key: "Content-Security-Policy", value: PLANNER_CSP }] },
   { source: "/admin/crm/rounds/:path*", headers: [{ key: "Content-Security-Policy", value: PLANNER_CSP }] },
+  // A lead's page shows all its rounds on one map: tiles only.
+  { source: "/admin/crm/leads/:path*", headers: [{ key: "Content-Security-Policy", value: DELIVERY_CSP }] },
   {
     source: "/delivery/:path*",
     headers: [

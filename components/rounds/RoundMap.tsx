@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { createBaseMap } from "@/components/area-planner/leaflet-base";
+import { OS_ATTRIBUTION } from "@/lib/rounds/attribution";
 import type { LngLat, Lines } from "@/lib/rounds/geometry";
 import type { Markers } from "@/lib/rounds/types";
 
@@ -19,6 +20,7 @@ export default function RoundMap({ lines, colour, markers, focus }: Props) {
   useEffect(() => {
     if (!element.current) return;
     const map = createBaseMap(element.current);
+    map.attributionControl.addAttribution(OS_ATTRIBUTION);
     const group = L.featureGroup().addTo(map);
     for (const line of lines) L.polyline(line.map(toLatLng), { color: colour, weight: 4, opacity: 0.9 }).addTo(group);
     for (const m of markers) {

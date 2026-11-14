@@ -52,6 +52,11 @@ const nextConfig: NextConfig = {
     // The Area Planner's postcode shapes and Census household figures.
     "/api/crm/area-planner/**/*": ["./data/area-planner/**/*"],
     "/admin/crm/map": ["./data/area-planner/**/*"],
+    // Rounds work out a round's postcode sectors from those shapes when a
+    // screenshot is saved; Locate looks street names up in the bundled OS
+    // Open Roads data.
+    "/api/crm/rounds/**/*": ["./data/area-planner/**/*"],
+    "/api/crm/rounds/screenshots/**/locate": ["./data/os-roads/**/*"],
   },
   async headers() {
     return [

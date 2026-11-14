@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { ReportView } from "@/lib/rounds/report-view";
 import { formatDistance, roundColour } from "@/lib/rounds/format";
 import { MAP_TILES } from "@/lib/area-planner/tiles";
+import { OS_ATTRIBUTION } from "@/lib/rounds/attribution";
 
 const ReportMap = dynamic(() => import("./ReportMap"), {
   ssr: false,
@@ -118,7 +119,7 @@ export default function RouteReportView({ view, imageBase }: { view: ReportView;
         )}
 
         <p className="text-xs text-gray-500">
-          Map {MAP_TILES.attributionText}. Postcode sectors are worked out from ONS data (contains OS, Royal Mail and ONS data, Crown copyright and database rights 2026)
+          Map {MAP_TILES.attributionText}. {OS_ATTRIBUTION}. Postcode sectors are worked out from ONS data (contains OS, Royal Mail and ONS data, Crown copyright and database rights 2026)
           and are approximate.
         </p>
       </main>

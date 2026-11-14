@@ -2,11 +2,13 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { solveAlignment } from "@/lib/rounds/alignment";
+import { formatUsd } from "@/lib/rounds/format";
 import { STATUS_LABELS, nextToDo, progressOf, statusOf, type QueueStatus } from "@/lib/rounds/queue";
 import type { RoundScreenshotView } from "@/lib/rounds/types";
 import { compressForStorage, makeWorkingImage, type WorkingImage } from "@/lib/rounds/working-image";
 import { AutoProcess, canAutoProcess, type AutoItem, type AutoRef, type Source } from "./auto-process";
-import { loadDrafts, removeDrafts, saveDraft, type StoredDraft } from "./drafts";
+import { loadDrafts, loadLocateLog, logLocate, removeDrafts, saveDraft, type LocateLogEntry, type StoredDraft } from "./drafts";
+import { LOCATE_AT_ONCE, LocateProcess, type LocateItem } from "./locate-process";
 import ReviewGrid from "./ReviewGrid";
 import ScreenshotWorkspace, { type Bbox } from "./ScreenshotWorkspace";
 import { api, send } from "./rounds-api";
@@ -21,6 +23,11 @@ import { api, send } from "./rounds-api";
 // and traces the others in a background worker, one at a time, matching each
 // to the nearest lined up; those it places wait, in this browser, for review
 // (accept, open to fix, or skip), and those it can't are left to do by hand.
+// "Locate and trace all" needs no screenshot lined up first: each is placed
+// from its street names (Claude reads them on the server), a few at a time,
+// with the running cost; those it places wait for review the same way, and
+// the rest are then matched to them where they overlap, or left to do by
+// hand with the reason.
 
 type Entry = { shot: RoundScreenshotView; file: File | null; status: QueueStatus };
 type View = "work" | "review";
@@ -33,6 +40,9 @@ type Props = {
   startId: string | null;
   focus: Bbox | null;
   storage: boolean;
+  // Locate: whether it is set up (the server has its key), and whether the
+  // job has Area Planner areas for it to look in.
+  locate: { ready: boolean; hasArea: boolean };
   initialView?: View;
   onClose: () => void;
 };
@@ -61,7 +71,7 @@ async function storedImage(id: string): Promise<Blob> {
   return res.blob();
 }
 
-export default function ScreenshotQueue({ roundId, shots, files, startId, focus, storage, initialView = "work", onClose }: Props) {
+export default function ScreenshotQueue({ roundId, shots, files, startId, focus, storage, locate, initialView = "work", onClose }: Props) {
   const [entries, setEntries] = useState<Entry[]>(() => shots.map((shot) => ({ shot, file: files.get(shot.id) ?? null, status: statusOf(shot) })));
   const openable = (e: Entry) => !!e.file || e.shot.stored;
   const [current, setCurrent] = useState<number>(() => {
@@ -75,6 +85,13 @@ export default function ScreenshotQueue({ roundId, shots, files, startId, focus,
   });
   const [view, setView] = useState<View>(initialView);
   const [drafts, setDrafts] = useState<Map<string, StoredDraft>>(() => new Map());
+  // The drafts as of now (state is only as of the last render), for a pass
+  // that follows another within one click.
+  const draftsNow = useRef(drafts);
+  const [locateLog, setLocateLog] = useState<Map<string, LocateLogEntry>>(() => new Map());
+  const [locating, setLocating] = useState<{ done: number; total: number; active: number; placed: number; missed: number; costUsd: number; seconds: number; calls: number; stopping: boolean } | null>(null);
+  const [locateSummary, setLocateSummary] = useState<string | null>(null);
+  const locator = useRef<LocateProcess | null>(null);
   const [fixing, setFixing] = useState<string | null>(null);
   const [auto, setAuto] = useState<{ done: number; total: number; name: string | null; placed: number; missed: number } | null>(null);
   const [accepting, setAccepting] = useState(false);
@@ -91,9 +108,13 @@ export default function ScreenshotQueue({ roundId, shots, files, startId, focus,
   // Drafts already waiting in this browser for this round.
   useEffect(() => {
     let live = true;
+    loadLocateLog(roundId).then((log) => {
+      if (live && log.length) setLocateLog(new Map(log.map((e) => [e.id, e])));
+    });
     loadDrafts(roundId).then((found) => {
       if (!live || found.length === 0) return;
       const byId = new Map(found.map((d) => [d.id, d]));
+      draftsNow.current = byId;
       setDrafts(byId);
       const next = latest.current.map((e) => (byId.has(e.shot.id) && e.status !== "saved" ? { ...e, status: "review" as QueueStatus } : e));
       latest.current = next;
@@ -102,6 +123,7 @@ export default function ScreenshotQueue({ roundId, shots, files, startId, focus,
     return () => {
       live = false;
       processor.current?.stop();
+      locator.current?.stop();
     };
   }, [roundId]);
 
@@ -187,11 +209,10 @@ export default function ScreenshotQueue({ roundId, shots, files, startId, focus,
 
   async function forgetDrafts(ids: string[]) {
     await removeDrafts(ids);
-    setDrafts((all) => {
-      const next = new Map(all);
-      for (const id of ids) next.delete(id);
-      return next;
-    });
+    const next = new Map(draftsNow.current);
+    for (const id of ids) next.delete(id);
+    draftsNow.current = next;
+    setDrafts(next);
   }
 
   // --- Auto-process the rest ------------------------------------------------------------------
@@ -212,7 +233,7 @@ export default function ScreenshotQueue({ roundId, shots, files, startId, focus,
     const refs: AutoRef[] = [];
     for (const { e, i } of all.map((e, i) => ({ e, i }))) {
       if (!openable(e)) continue;
-      const draft = drafts.get(e.shot.id)?.draft;
+      const draft = draftsNow.current.get(e.shot.id)?.draft;
       const transform = e.shot.alignment?.transform ?? (draft ? (() => { const s = solveAlignment(draft.pairs, { turnDeg: draft.turnDeg }); return s.ok ? s.alignment.transform : null; })() : null);
       if (!transform) continue;
       refs.push({ id: e.shot.id, position: i, file: sourceOf(e), transform, crop: e.shot.crop ?? draft?.crop ?? null, confidence: draft && !e.shot.alignment ? draft.confidence : 1, depth: draft && !e.shot.alignment ? (draft.depth ?? 3) : e.shot.alignment?.source?.kind === "auto" ? 2 : 0 });
@@ -234,8 +255,7 @@ export default function ScreenshotQueue({ roundId, shots, files, startId, focus,
             placed++;
             const shot = latest.current[position(outcome.id)]?.shot;
             const stored: StoredDraft = { id: outcome.id, roundId, sha256: shot?.sha256 ?? null, savedAt: new Date().toISOString(), draft: outcome.draft, thumb: outcome.thumb };
-            saveDraft(stored);
-            setDrafts((d) => new Map(d).set(outcome.id, stored));
+            putDraft(stored);
             update(outcome.id, (x) => ({ ...x, status: "review" }));
           } else {
             missed++;
@@ -254,6 +274,78 @@ export default function ScreenshotQueue({ roundId, shots, files, startId, focus,
     }
   }
 
+  // --- Locate and trace all ------------------------------------------------------------------
+
+  function putDraft(stored: StoredDraft) {
+    saveDraft(stored);
+    draftsNow.current = new Map(draftsNow.current).set(stored.id, stored);
+    setDrafts(draftsNow.current);
+  }
+
+  const locateBlocked = !locate.ready
+    ? "Locate isn't set up yet"
+    : !locate.hasArea
+      ? "Add this job's areas in the Area Planner first: Locate only looks for street names there"
+      : !autoAvailable
+        ? "This browser can't run Locate; use a recent Chrome, Edge, Firefox or Safari"
+        : !lineable.length
+          ? "Nothing left to locate"
+          : null;
+
+  async function locateAll() {
+    const items: LocateItem[] = latest.current
+      .map((e, i) => ({ e, i }))
+      .filter(({ e }) => ["todo", "needs", "skipped"].includes(e.status) && openable(e))
+      .map(({ e, i }) => ({ id: e.shot.id, position: i, file: sourceOf(e), name: e.shot.originalName ?? `Screenshot ${i + 1}` }));
+    if (!items.length) return;
+    setNotice(null);
+    setLocateSummary(null);
+    const totals = { done: 0, total: items.length, active: 0, placed: 0, missed: 0, costUsd: 0, seconds: 0, calls: 0, stopping: false };
+    setLocating({ ...totals });
+    const run = new LocateProcess();
+    locator.current = run;
+    try {
+      await run.run(items, {
+        onStart: (_item, active) => setLocating((l) => (l ? { ...l, active } : l)),
+        onResult: (result, done) => {
+          totals.done = done;
+          if (result.record) {
+            totals.costUsd += result.record.costUsd;
+            totals.seconds += result.record.seconds;
+            totals.calls++;
+          }
+          const shot = latest.current[position(result.id)]?.shot;
+          if (result.ok) {
+            totals.placed++;
+            putDraft({ id: result.id, roundId, sha256: shot?.sha256 ?? null, savedAt: new Date().toISOString(), draft: result.draft, thumb: result.thumb });
+            update(result.id, (x) => ({ ...x, status: "review" }));
+          } else {
+            totals.missed++;
+            update(result.id, (x) => ({ ...x, status: "needs" }));
+          }
+          logLocate(roundId, result.id, result.record, result.ok, result.ok ? "Placed" : result.reason).then((entry) => setLocateLog((m) => new Map(m).set(entry.id, entry)));
+          setLocating((l) => (l ? { ...totals, active: l.active, stopping: l.stopping } : l));
+        },
+      });
+    } catch (e) {
+      setNotice(`Locate stopped: ${(e as Error).message}`);
+    } finally {
+      locator.current = null;
+      setLocating(null);
+    }
+    if (run.wasNotSetUp) {
+      setLocateSummary("Locate isn't set up yet. Nothing was changed: line the screenshots up by hand, or line one up and auto-process the rest.");
+      return;
+    }
+    const each = totals.calls ? ` (about ${formatUsd(totals.costUsd / totals.calls)} and ${Math.round(totals.seconds / totals.calls)} s each)` : "";
+    setLocateSummary(
+      `Locate ${run.wasStopped ? "stopped" : "finished"}: ${totals.placed} placed for review${totals.missed ? `, ${totals.missed} not placed (the reason is beside each)` : ""}. ${formatUsd(totals.costUsd)} for ${totals.calls} screenshot${totals.calls === 1 ? "" : "s"}${each}.`
+    );
+    if (totals.placed) setView("review");
+    // The rest, matched to the placed ones where they overlap.
+    if (!run.wasStopped && totals.missed && totals.placed && autoAvailable) await autoProcess();
+  }
+
   // --- Review ---------------------------------------------------------------------------------
 
   async function accept(ids: string[]) {
@@ -267,6 +359,7 @@ export default function ScreenshotQueue({ roundId, shots, files, startId, focus,
           pairs: d!.pairs,
           turnDeg: d!.turnDeg,
           source: d!.source,
+          locate: d!.locate ?? locateLog.get(id)?.record ?? undefined,
           route: d!.lines.length ? d!.lines : null,
           markers: d!.markers.start || d!.markers.end ? d!.markers : null,
         },
@@ -297,7 +390,7 @@ export default function ScreenshotQueue({ roundId, shots, files, startId, focus,
     .filter(({ e }) => e.status === "review" && drafts.has(e.shot.id))
     .map(({ e, index }) => {
       const stored = drafts.get(e.shot.id)!;
-      const from = stored.draft.source.from;
+      const from = stored.draft.source.kind === "auto" ? stored.draft.source.from : null;
       const fromIndex = from ? entries.findIndex((x) => x.shot.id === from) : -1;
       return { index, shot: e.shot, stored, canOpen: openable(e), fromIndex: fromIndex >= 0 ? fromIndex : null };
     });
@@ -311,6 +404,15 @@ export default function ScreenshotQueue({ roundId, shots, files, startId, focus,
         (i) => openable(entries[i])
       )
     : -1;
+  // What Locate has cost for this round: spent from this browser, and recorded with saved line-ups.
+  const logged = [...locateLog.values()].filter((e) => e.record);
+  const recorded = entries.map((e) => e.shot.alignment?.locate).filter((r) => !!r);
+  const locateCosts = {
+    spent: logged.reduce((sum, e) => sum + e.record!.costUsd, 0),
+    spentCount: logged.length,
+    recorded: recorded.reduce((sum, r) => sum + r!.costUsd, 0),
+    recordedCount: recorded.length,
+  };
   const waitingForFiles = entries.filter((e) => !openable(e) && e.status !== "saved" && e.status !== "review").length;
 
   return (
@@ -326,7 +428,18 @@ export default function ScreenshotQueue({ roundId, shots, files, startId, focus,
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            {!auto && (
+            {!auto && !locating && (
+              <button
+                type="button"
+                onClick={locateAll}
+                disabled={!!locateBlocked}
+                title={locateBlocked ?? `Places each screenshot from its street names, ${LOCATE_AT_ONCE} at a time. Nothing is saved until you accept.`}
+                className="rounded-md bg-blue-800 px-3 py-1.5 text-sm font-semibold text-white hover:bg-blue-900 disabled:opacity-50"
+              >
+                Locate and trace all{lineable.length ? ` (${lineable.length})` : ""}
+              </button>
+            )}
+            {!auto && !locating && (
               <button
                 type="button"
                 onClick={autoProcess}
@@ -362,8 +475,59 @@ export default function ScreenshotQueue({ roundId, shots, files, startId, focus,
           </div>
         </div>
         {!startingPoints.length && lineable.length > 1 && (
-          <p className="mt-2 text-xs text-gray-600">Line up one screenshot by hand, then &quot;Auto-process the rest&quot; matches the others to it.</p>
+          <p className="mt-2 text-xs text-gray-600">
+            {locate.ready && locate.hasArea ? "\"Locate and trace all\" places each screenshot from its street names. Or line" : "Line"} up one screenshot by hand, then &quot;Auto-process the rest&quot; matches the others to it.
+          </p>
         )}
+        {!locate.ready && (
+          <p className="mt-1 text-xs text-gray-600" role="note">
+            Locate isn&apos;t set up yet.
+          </p>
+        )}
+        {locate.ready && !locate.hasArea && lineable.length > 0 && (
+          <p className="mt-1 text-xs text-gray-600" role="note">
+            Locate needs this job&apos;s areas in the Area Planner, so it knows where to look.
+          </p>
+        )}
+        {locating && (
+          <div className="mt-3 rounded-md border border-blue-200 bg-blue-50 p-2 text-sm" role="status" aria-label="Locating">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="font-semibold text-blue-900">
+                Locating: {locating.done} of {locating.total} done{locating.active ? `, ${locating.active} in progress` : ""}
+              </p>
+              <button
+                type="button"
+                disabled={locating.stopping}
+                onClick={() => {
+                  locator.current?.stop();
+                  setLocating((l) => (l ? { ...l, stopping: true } : l));
+                }}
+                className="rounded-md border border-blue-300 bg-white px-2.5 py-1 text-xs font-semibold text-blue-900 hover:bg-blue-100 disabled:opacity-50"
+              >
+                {locating.stopping ? "Stopping..." : "Stop"}
+              </button>
+            </div>
+            <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-white" aria-hidden="true">
+              <div className="h-full rounded-full bg-blue-700" style={{ width: `${(locating.done / locating.total) * 100}%` }} />
+            </div>
+            <p className="mt-1 text-xs text-blue-900" aria-label="Running cost">
+              {locating.placed} placed for review{locating.missed ? `, ${locating.missed} not placed` : ""}. Running cost {formatUsd(locating.costUsd)}
+              {locating.calls ? ` for ${locating.calls} (about ${formatUsd(locating.costUsd / locating.calls)} and ${Math.round(locating.seconds / locating.calls)} s each)` : ""}. {LOCATE_AT_ONCE} at a time
+              {locating.stopping ? "; stopping once the ones in progress are done" : ""}.
+            </p>
+          </div>
+        )}
+        {locateSummary && (
+          <p className="mt-2 text-sm text-blue-900" role="status">
+            {locateSummary}
+          </p>
+        )}
+        {locateCosts.spent > 0 || locateCosts.recorded > 0 ? (
+          <p className="mt-1 text-xs text-gray-600">
+            Locate for this round: {formatUsd(locateCosts.spent)} spent in this browser on {locateCosts.spentCount} screenshot{locateCosts.spentCount === 1 ? "" : "s"}; {formatUsd(locateCosts.recorded)} recorded with{" "}
+            {locateCosts.recordedCount} saved line-up{locateCosts.recordedCount === 1 ? "" : "s"}.
+          </p>
+        ) : null}
         {auto && (
           <div className="mt-3 rounded-md border border-violet-200 bg-violet-50 p-2 text-sm" role="status" aria-label="Auto-processing">
             <div className="flex flex-wrap items-center justify-between gap-2">
@@ -389,7 +553,7 @@ export default function ScreenshotQueue({ roundId, shots, files, startId, focus,
               <button
                 type="button"
                 onClick={() => open(i)}
-                disabled={!openable(e) || (view === "work" && i === current) || !!auto}
+                disabled={!openable(e) || (view === "work" && i === current) || !!auto || !!locating}
                 className="flex w-full items-center gap-2 px-2 py-1.5 text-left enabled:hover:bg-gray-50 disabled:cursor-default"
               >
                 <span className="w-7 shrink-0 text-right tabular-nums text-gray-500">{i + 1}.</span>
@@ -398,6 +562,11 @@ export default function ScreenshotQueue({ roundId, shots, files, startId, focus,
                 </span>
                 <span className="hidden shrink-0 text-xs text-gray-500 sm:inline">{taken(e.shot.takenAt)}</span>
                 {!openable(e) && e.status !== "saved" && e.status !== "review" && <span className="shrink-0 text-xs text-gray-500">file not chosen</span>}
+                {e.status === "needs" && locateLog.get(e.shot.id)?.placed === false && (
+                  <span className="hidden min-w-0 max-w-[45%] truncate text-xs text-red-800 md:inline" title={locateLog.get(e.shot.id)!.reason}>
+                    {locateLog.get(e.shot.id)!.reason}
+                  </span>
+                )}
                 <span className={`shrink-0 rounded-full border px-2 py-0.5 text-xs font-semibold ${CHIP[e.status]}`}>{STATUS_LABELS[e.status]}</span>
               </button>
             </li>
@@ -419,7 +588,7 @@ export default function ScreenshotQueue({ roundId, shots, files, startId, focus,
       {view === "review" ? (
         <ReviewGrid
           items={reviewItems}
-          busy={accepting || !!auto}
+          busy={accepting || !!auto || !!locating}
           onAccept={accept}
           onOpen={(id) => {
             const i = entries.findIndex((e) => e.shot.id === id);
@@ -427,7 +596,7 @@ export default function ScreenshotQueue({ roundId, shots, files, startId, focus,
           }}
           onSkip={skipDraft}
         />
-      ) : auto ? (
+      ) : auto || locating ? (
         <p className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-600">The automatic line-ups appear for review as they are done.</p>
       ) : entry ? (
         loadError ? (
@@ -455,6 +624,7 @@ export default function ScreenshotQueue({ roundId, shots, files, startId, focus,
             total={entries.length}
             focus={fixDraft ? footprintBox(fixDraft.footprint) : (where ?? focus)}
             draft={fixDraft}
+            locate={fixDraft?.locate ?? locateLog.get(entry.shot.id)?.record ?? null}
             onProgress={(status, shot) => update(entry.shot.id, (x) => ({ ...x, shot: shot ?? x.shot, status }))}
             onSaved={(shot, at) => {
               if (at) setWhere(at);

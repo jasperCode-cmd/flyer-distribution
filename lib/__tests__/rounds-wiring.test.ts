@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { CRM_NAV_GROUPS } from "@/lib/crm-nav";
+import { OS_ATTRIBUTION } from "@/lib/rounds/attribution";
 import { screenshotStorage, type BlobClient } from "@/lib/rounds/storage";
 import { NOT_SPECIFIED, NOT_SPECIFIED_COLOUR, dateLabel, distributorColour, distributorName, formatDistance } from "@/lib/rounds/format";
 import {
@@ -204,7 +205,7 @@ test("auto line-up: one screenshot read at a time in a background worker, drafts
   assert.doesNotMatch(run, /Promise\.all/);
   // Drafts: IndexedDB only, never sent anywhere.
   const drafts = read("components/rounds/drafts.ts");
-  assert.match(drafts, /indexedDB\.open\(DB_NAME, 1\)/);
+  assert.match(drafts, /indexedDB\.open\(DB_NAME, 2\)/);
   assert.doesNotMatch(drafts, /fetch\(|\/api\//);
   // Accepting saves them together, in one request.
   const queue = read("components/rounds/ScreenshotQueue.tsx");
@@ -217,6 +218,61 @@ test("auto line-up: one screenshot read at a time in a background worker, drafts
   for (const step of ["1. Crop", "2. Line up", "3. Trace", "Redo A", "Redo B", "Eraser", "Save and next"]) assert.match(workspace + queue, new RegExp(step), step);
   // The upload page's tip.
   assert.match(read("components/rounds/NewRound.tsx"), /For quicker auto line-up, keep the same zoom, overlap each screenshot by about half a screen, and tap the compass so north is up\./);
+});
+
+test("Locate: one screenshot a request inside the time limit, the key on the server only, nothing logged but a status, OS data traced and credited", () => {
+  const route = read("app/api/crm/rounds/screenshots/[sid]/locate/route.ts");
+  assert.match(route, /export const maxDuration = 60;/);
+  assert.match(route, /locateConfigured\(\)/);
+  assert.match(route, /Locate isn't set up yet\./);
+  assert.doesNotMatch(route, /console\./);
+  const reader = read("lib/rounds/locate/read-labels.ts");
+  assert.match(reader, /import "server-only";/);
+  assert.match(reader, /maxRetries: 0/);
+  assert.match(reader, /fallbacks: "default"/);
+  // Only the status is logged: never the screenshot, the answer or the key.
+  const logs = reader.match(/console\.\w+\([^;]*\);/g) ?? [];
+  assert.deepEqual(logs, ["console.warn(`Rounds: Locate's call to Claude failed (${f.status})`);"]);
+  assert.match(read("lib/rounds/locate/pricing.ts"), /LOCATE_MODEL = "claude-opus-5-5"/);
+  // The key is never sent to the browser: no client code mentions it.
+  for (const f of [...files("components"), ...files("app").filter((f) => !f.startsWith(join("app", "api")))]) assert.doesNotMatch(read(f), /ANTHROPIC_API_KEY/, f);
+  assert.match(read("app/api/crm/rounds/options/route.ts"), /roundOptions\(prisma, storageEnabled\(\), locateConfigured\(\)\)/);
+  // The bundled OS Open Roads data ships with the Locate route; the postcode shapes with every Rounds route.
+  const config = read("next.config.ts");
+  assert.match(config, /"\/api\/crm\/rounds\/screenshots\/\*\*\/locate": \["\.\/data\/os-roads\/\*\*\/\*"\]/);
+  assert.match(config, /"\/api\/crm\/rounds\/\*\*\/\*": \["\.\/data\/area-planner\/\*\*\/\*"\]/);
+  // OS's credit beside OpenStreetMap's wherever rounds' routes are shown, as the manifest words it.
+  const manifest = JSON.parse(read("data/os-roads/manifest.json"));
+  assert.equal(OS_ATTRIBUTION, manifest.attribution);
+  for (const f of ["components/rounds/AlignMap.tsx", "components/rounds/RoundMap.tsx", "components/route-report/ReportMap.tsx", "components/area-planner/PlannerMap.tsx", "components/route-report/RouteReportView.tsx"]) assert.match(read(f), /OS_ATTRIBUTION/, f);
+  for (const f of ["components/rounds/ReviewGrid.tsx", "components/rounds/LeadRounds.tsx"]) assert.match(read(f), /ROUNDS_MAP_CREDIT/, f);
+  // The queue: the button, the running cost, and the not-set-up note; everything else as it was.
+  const queue = read("components/rounds/ScreenshotQueue.tsx");
+  for (const text of ["Locate and trace all", "Running cost", "Locate isn&apos;t set up yet.", "Auto-process the rest", "Review automatic line-ups"]) assert.match(queue, new RegExp(text), text);
+  // One screenshot per request, a few at a time; a busy API pauses the rest, it doesn't stop them.
+  const runner = read("components/rounds/locate-process.ts");
+  assert.match(runner, /export const LOCATE_AT_ONCE = 3;/);
+  assert.match(runner, /pauseUntil/);
+  assert.match(runner, /fetch\(`\/api\/crm\/rounds\/screenshots\/\$\{item\.id\}\/locate`/);
+});
+
+test("Locate's checks: what the browser sends with a screenshot, and the line-up's source and cost record", async () => {
+  const { validateLocateMeta } = await import("@/lib/rounds/validate");
+  const size = { width: 738, height: 1600 };
+  assert.deepEqual(validateLocateMeta({ compassTurn: -8.5, route: [[10, 20], [30, 40]] }, size), { ok: true, value: { compassTurn: -8.5, route: [[10, 20], [30, 40]] } });
+  assert.deepEqual(validateLocateMeta({ route: [] }, size), { ok: true, value: { compassTurn: null, route: [] } });
+  assert.equal(validateLocateMeta({ compassTurn: 60, route: [] }, size).ok, false);
+  assert.equal(validateLocateMeta({ route: [[900, 10]] }, size).ok, false);
+  assert.equal(validateLocateMeta({ route: Array.from({ length: 4001 }, () => [1, 1]) }, size).ok, false);
+  const pairs = [
+    { image: [100, 300], map: [-1.38, 50.91] },
+    { image: [600, 1300], map: [-1.37, 50.9] },
+  ];
+  const located = validateScreenshotWork({ pairs, source: { kind: "located", confidence: 0.83, names: 18 }, locate: { costUsd: 0.0312, seconds: 12.4, model: "claude-opus-5-5", placed: true, names: 18 } }, size);
+  assert.ok(located.ok && located.value.source?.kind === "located" && located.value.locate?.costUsd === 0.0312);
+  assert.equal(validateScreenshotWork({ pairs, locate: { costUsd: -1, seconds: 1, model: "x", placed: true, names: 1 } }, size).ok, false);
+  assert.equal(validateScreenshotWork({ pairs, locate: { costUsd: 0.1, seconds: 1, model: "<script>", placed: true, names: 1 } }, size).ok, false);
+  assert.equal(validateScreenshotWork({ pairs, source: { kind: "located", confidence: 2, names: 1 } }, size).ok, false);
 });
 
 test("no em or en dashes in any Rounds file", () => {
@@ -233,6 +289,16 @@ test("no em or en dashes in any Rounds file", () => {
     "lib/__tests__/rounds-db-lock.ts",
     "lib/__tests__/rounds-match.test.ts",
     "lib/__tests__/rounds-auto.test.ts",
+    "lib/__tests__/rounds-locate.test.ts",
+    "lib/__tests__/rounds-locate-api.test.ts",
+    "lib/__tests__/rounds-locate.db.test.ts",
+    "lib/__tests__/rounds-locate-mock.ts",
+    "lib/__tests__/rounds-wiring.test.ts",
+    "components/area-planner/PlannerMap.tsx",
+    "components/crm/LeadDetail.tsx",
+    "scripts/os-roads/refresh.py",
+    "data/os-roads/README.md",
+    "next.config.ts",
   ];
   for (const f of all) assert.doesNotMatch(read(f), /[\u2013\u2014]/, f);
 });

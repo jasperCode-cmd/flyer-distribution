@@ -1,11 +1,12 @@
 import type { Transform } from "@/lib/rounds/alignment";
 import { footprintOf, pairsFor, traceOnMap, type AutoDraft } from "@/lib/rounds/auto";
 import { lineUp, type LinedUp } from "@/lib/rounds/auto-lineup";
-import type { Compass } from "@/lib/rounds/compass";
+import { findCompass, type Compass } from "@/lib/rounds/compass";
 import { extractRoute } from "@/lib/rounds/extract";
 import { detectCrop } from "@/lib/rounds/extract/crop";
 import type { Crop, RgbaImage } from "@/lib/rounds/extract/image";
 import { linesLengthM } from "@/lib/rounds/geometry";
+import { routeSamples } from "@/lib/rounds/locate/fit";
 import { pack, prepareForMatch, unpack, type Packed } from "@/lib/rounds/match";
 import { workingSize } from "@/lib/rounds/working-image";
 
@@ -14,13 +15,17 @@ import { workingSize } from "@/lib/rounds/working-image";
 // from the screenshots already lined up (lib/rounds/auto-lineup), traced,
 // and sent back as a draft with a small preview. Of each lined-up
 // screenshot only a compact grey copy is kept (about 0.3 MB) to match later
-// ones against.
+// ones against. For Locate, "prepare" reads a screenshot the same way and
+// sends back what the server needs (the screenshot at working size as a
+// JPEG, its compass turn and points along its traced route) and what makes
+// the draft afterwards (the crop and the traced lines).
 
 type Ref = { packed: Packed; compass: Compass | null; crop: Crop; transform: Transform; confidence: number; depth: number; width: number; height: number };
 type Msg =
   | { type: "reference"; id: string; file: Blob; transform: Transform; crop: Crop | null; confidence: number; depth: number }
   | { type: "process"; id: string; file: Blob; tryRefs: string[] }
-  | { type: "forget"; ids: string[] };
+  | { type: "forget"; ids: string[] }
+  | { type: "prepare"; id: string; file: Blob };
 
 type WorkerScope = { onmessage: ((event: MessageEvent<Msg>) => void) | null; postMessage(message: unknown): void };
 const scope = self as unknown as WorkerScope;
@@ -69,6 +74,29 @@ scope.onmessage = async (event) => {
       for (const id of msg.ids) refs.delete(id);
       return;
     }
+    if (msg.type === "prepare") {
+      const { img, canvas } = await decode(msg.file);
+      const crop = detectCrop(img);
+      const compass = findCompass(img, crop);
+      const traced = extractRoute(img, { crop });
+      const jpeg = await canvas.convertToBlob({ type: "image/jpeg", quality: 0.9 });
+      scope.postMessage({
+        type: "prepared",
+        id: msg.id,
+        ok: true,
+        width: img.width,
+        height: img.height,
+        crop,
+        compassTurn: compass ? Math.round(compass.turnDeg * 100) / 100 : null,
+        lines: traced.lines,
+        start: traced.start,
+        end: traced.end,
+        route: routeSamples(traced.lines).map(([x, y]) => [Math.round(x * 10) / 10, Math.round(y * 10) / 10]),
+        jpeg,
+        thumb: await thumbnail(canvas),
+      });
+      return;
+    }
     if (msg.type === "reference") {
       const { img } = await decode(msg.file);
       const prepared = prepareForMatch(img, msg.crop ?? detectCrop(img));
@@ -109,6 +137,6 @@ scope.onmessage = async (event) => {
     keep(msg.id, { packed: pack(prepared.gray), compass: prepared.compass, crop: prepared.crop, transform, confidence: found.confidence, depth: found.depth, width: img.width, height: img.height });
     scope.postMessage({ type: "result", id: msg.id, ok: true, draft, thumb: await thumbnail(canvas), ms: Math.round(performance.now() - started), how: found.how, used: found.used });
   } catch (err) {
-    scope.postMessage({ type: msg.type === "process" ? "result" : "reference", id: "id" in msg ? msg.id : "", ok: false, error: err instanceof Error ? err.message : "Auto line-up failed" });
+    scope.postMessage({ type: msg.type === "process" ? "result" : msg.type === "prepare" ? "prepared" : "reference", id: "id" in msg ? msg.id : "", ok: false, error: err instanceof Error ? err.message : "Auto line-up failed" });
   }
 };

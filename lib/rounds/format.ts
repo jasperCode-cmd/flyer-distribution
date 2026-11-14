@@ -23,6 +23,12 @@ export function formatDistance(metres: number | null | undefined): string {
   return `${(metres / 1000).toFixed(1)} km`;
 }
 
+// A Locate cost in US dollars: tenths of a cent shown below ten cents.
+export function formatUsd(usd: number): string {
+  if (!Number.isFinite(usd) || usd <= 0) return "$0.00";
+  return usd < 0.1 ? `$${usd.toFixed(3)}` : `$${usd.toFixed(2)}`;
+}
+
 // Distinct colours for telling rounds apart on a client's map, by order.
 export const ROUND_COLOURS = ["#2563EB", "#DB2777", "#059669", "#D97706", "#7C3AED", "#0891B2", "#DC2626", "#4D7C0F"] as const;
 

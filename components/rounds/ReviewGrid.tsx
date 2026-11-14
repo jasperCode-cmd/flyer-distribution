@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { flagsOf, type DraftFlag } from "@/lib/rounds/auto";
-import { MAP_TILES } from "@/lib/area-planner/tiles";
-import { formatDistance } from "@/lib/rounds/format";
+import { ROUNDS_MAP_CREDIT } from "@/lib/rounds/attribution";
+import { formatDistance, formatUsd } from "@/lib/rounds/format";
 import { LOW_CONFIDENCE } from "@/lib/rounds/match";
 import type { RoundScreenshotView } from "@/lib/rounds/types";
 import type { StoredDraft } from "./drafts";
@@ -96,7 +96,11 @@ export default function ReviewGrid({ items, busy, onAccept, onOpen, onSkip }: Pr
                 </p>
                 <span
                   className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-bold ${d.confidence >= LOW_CONFIDENCE ? "bg-green-100 text-green-900" : "bg-amber-100 text-amber-900"}`}
-                  title={`${d.blocks} matching patches of the imagery agree, to ${d.rmsPx.toFixed(2)} px`}
+                  title={
+                    d.located
+                      ? `${d.located.names.length} of ${d.located.namesRead} street names agree; labels ${d.located.rmsM ?? "?"} m from their streets`
+                      : `${d.blocks} matching patches of the imagery agree, to ${d.rmsPx.toFixed(2)} px`
+                  }
                 >
                   {Math.round(d.confidence * 100)}% sure
                 </span>
@@ -109,6 +113,12 @@ export default function ReviewGrid({ items, busy, onAccept, onOpen, onSkip }: Pr
                 {d.lines.length ? formatDistance(d.lengthM) : "No line"} · about {d.metresPerPixel.toFixed(2)} m a pixel
                 {it.fromIndex !== null ? ` · matched to ${it.fromIndex + 1}` : ""}
               </p>
+              {d.located && (
+                <p className="mt-0.5 text-xs text-gray-600">
+                  Located from {d.located.names.length} street names{d.located.rmsM !== null ? `, labels within ${Math.round(d.located.rmsM)} m` : ""}
+                  {d.locate ? ` · ${formatUsd(d.locate.costUsd)}, ${Math.round(d.locate.seconds)} s` : ""}
+                </p>
+              )}
               {it.flags.length > 0 && (
                 <p className="mt-1 flex flex-wrap gap-1">
                   {it.flags.map((f) => (
@@ -139,7 +149,7 @@ export default function ReviewGrid({ items, busy, onAccept, onOpen, onSkip }: Pr
           );
         })}
       </ul>
-      <p className="text-[11px] text-gray-500">Maps {MAP_TILES.attributionText}</p>
+      <p className="text-[11px] text-gray-500">{ROUNDS_MAP_CREDIT}</p>
     </section>
   );
 }

@@ -8,10 +8,10 @@ import { geometryBbox, type AreaGeometry } from "@/lib/area-planner/geometry";
 import { nextMapColour, UNASSIGNED_COLOUR } from "@/lib/area-planner/colours";
 import { hashShareToken, isShareTokenShaped, newShareToken } from "@/lib/area-planner/share-links";
 import { parsePostcodeList } from "@/lib/area-planner/postcodes";
-import { solveAlignment, type Alignment } from "./alignment";
+import { solveAlignment, type Alignment, type LocateRecord } from "./alignment";
 import type { Crop } from "./extract/image";
 import { lineLengthM, linesBbox, roundCoords, roundDistanceM, type Lines } from "./geometry";
-import { buildReportView, type ReportView } from "./report-view";
+import { buildReportView, type ReportView, type ReportRound } from "./report-view";
 import { sectorsForLines } from "./sectors";
 import { ALLOWED_TYPES, MAX_FILE_BYTES, type FileStream, type ScreenshotStorage } from "./storage";
 import { DEFAULT_TRIM_M, MAX_SCREENSHOTS, type NewLink, type NewRound, type NewScreenshot, type RoundChanges, type ScreenshotWork } from "./validate";
@@ -278,20 +278,32 @@ export async function getRound(db: Db, id: string, now = new Date()): Promise<(R
     createdAt: row.createdAt.toISOString(),
     shots: row.screenshots.map(screenshotView),
     links: row.reportLinks.map((l) => linkView(l, now)),
+    locateArea: await hasLocateArea(db, row.projectId, row.leadId),
     focus,
   };
 }
 
-// The lead page's Rounds section: its rounds and its own report links.
-export async function leadRounds(db: Db, leadId: string, now = new Date()): Promise<{ rounds: RoundSummary[]; links: ReportLinkView[] }> {
-  const [rows, links] = await Promise.all([
-    db.round.findMany({ where: { leadId }, select: SUMMARY_SELECT, orderBy: [{ date: "desc" }, { createdAt: "desc" }], take: LIST_LIMIT }),
-    db.routeReportLink.findMany({ where: { leadId }, select: LINK_SELECT, orderBy: { createdAt: "desc" } }),
-  ]);
-  return { rounds: rows.map(summaryOf), links: links.map((l) => linkView(l, now)) };
+// Whether Locate has an area to look in for a round: its Area Planner
+// project's areas, or else those of its lead's project.
+async function hasLocateArea(db: Db, projectId: string | null, leadId: string | null): Promise<boolean> {
+  if (projectId && (await db.plannedArea.count({ where: { projectId } })) > 0) return true;
+  if (!projectId && leadId) return (await db.plannedArea.count({ where: { project: { leadId } } })) > 0;
+  return false;
 }
 
-export async function roundOptions(db: Db, storage: boolean): Promise<RoundOptions> {
+// The lead page's Rounds section: its rounds, its own report links, and all
+// its rounds' lines on one map, trimmed exactly as the client's link for the
+// lead shows them.
+export async function leadRounds(db: Db, leadId: string, now = new Date()): Promise<{ rounds: RoundSummary[]; links: ReportLinkView[]; map: ReportRound[] }> {
+  const [rows, links, view] = await Promise.all([
+    db.round.findMany({ where: { leadId }, select: SUMMARY_SELECT, orderBy: [{ date: "desc" }, { createdAt: "desc" }], take: LIST_LIMIT }),
+    db.routeReportLink.findMany({ where: { leadId }, select: LINK_SELECT, orderBy: { createdAt: "desc" } }),
+    reportFor(db, { leadId }, leadId),
+  ]);
+  return { rounds: rows.map(summaryOf), links: links.map((l) => linkView(l, now)), map: view?.rounds ?? [] };
+}
+
+export async function roundOptions(db: Db, storage: boolean, locate = false): Promise<RoundOptions> {
   const [projects, leads, distributors, trimM] = await Promise.all([
     db.areaProject.findMany({
       select: { id: true, name: true, business: true, closedAt: true, leadId: true, lead: { select: { business: true, name: true, businessName: true } } },
@@ -325,6 +337,7 @@ export async function roundOptions(db: Db, storage: boolean): Promise<RoundOptio
     jobs,
     distributors: distributors.map((d) => ({ id: d.id, name: d.name, colour: d.mapColour ?? UNASSIGNED_COLOUR, active: d.active })),
     storage,
+    locate,
     trimM,
   };
 }
@@ -488,8 +501,9 @@ export async function deleteScreenshot(db: Db, storage: ScreenshotStorage, sid: 
 // What saving a screenshot's work changes: the crop, the alignment (worked
 // out again here from the points, starting from the turn sent: the
 // compass's, or one measured automatically), how it was lined up, the traced
-// route and its start and end.
-function workData(work: ScreenshotWork): Prisma.RoundScreenshotUpdateInput {
+// route and its start and end. A Locate record already on the line-up is
+// kept when the line-up is saved again without one (its cost was spent).
+function workData(work: ScreenshotWork, previous: unknown = null): Prisma.RoundScreenshotUpdateInput {
   const data: Prisma.RoundScreenshotUpdateInput = {};
   if (work.crop) data.crop = work.crop;
   if ("pairs" in work) {
@@ -497,7 +511,8 @@ function workData(work: ScreenshotWork): Prisma.RoundScreenshotUpdateInput {
     else {
       const solved = solveAlignment(work.pairs!, { turnDeg: work.turnDeg ?? null });
       if (!solved.ok) throw new RoundsError(solved.error);
-      data.alignment = { ...solved.alignment, source: work.source ?? { kind: "hand" } } as unknown as Prisma.InputJsonValue;
+      const locate = work.locate ?? (previous && typeof previous === "object" ? (previous as { locate?: LocateRecord }).locate : undefined);
+      data.alignment = { ...solved.alignment, source: work.source ?? { kind: "hand" }, ...(locate ? { locate } : {}) } as unknown as Prisma.InputJsonValue;
     }
   }
   if ("route" in work) {
@@ -532,9 +547,9 @@ const SHOT_SELECT = {
 
 // One screenshot's work; then the round's distance and sectors afresh.
 export async function saveScreenshotWork(db: Db, sid: string, work: ScreenshotWork): Promise<RoundScreenshotView> {
-  const shot = await db.roundScreenshot.findUnique({ where: { id: sid }, select: { roundId: true } });
+  const shot = await db.roundScreenshot.findUnique({ where: { id: sid }, select: { roundId: true, alignment: true } });
   if (!shot) throw new RoundsError("That screenshot no longer exists.", 404);
-  const row = await db.roundScreenshot.update({ where: { id: sid }, data: workData(work), select: SHOT_SELECT });
+  const row = await db.roundScreenshot.update({ where: { id: sid }, data: workData(work, shot.alignment), select: SHOT_SELECT });
   if ("route" in work) await refreshRoundSummary(db, shot.roundId);
   return screenshotView(row);
 }
@@ -543,10 +558,13 @@ export async function saveScreenshotWork(db: Db, sid: string, work: ScreenshotWo
 // line-ups): every one checked first, all saved in one transaction, then
 // the round's distance and sectors worked out once.
 export async function saveScreenshotsWork(db: Db, roundId: string, items: { id: string; work: ScreenshotWork }[]): Promise<RoundScreenshotView[]> {
-  const datas = items.map((item) => ({ id: item.id, data: workData(item.work) }));
+  // Every line-up is checked before anything is written.
+  for (const item of items) workData(item.work);
   const rows = await db.$transaction(async (tx) => {
-    const owned = await tx.roundScreenshot.findMany({ where: { roundId, id: { in: items.map((i) => i.id) } }, select: { id: true } });
+    const owned = await tx.roundScreenshot.findMany({ where: { roundId, id: { in: items.map((i) => i.id) } }, select: { id: true, alignment: true } });
     if (owned.length !== items.length) throw new RoundsError("A screenshot in the list isn't in this round.", 404);
+    const before = new Map(owned.map((o) => [o.id, o.alignment]));
+    const datas = items.map((item) => ({ id: item.id, data: workData(item.work, before.get(item.id)) }));
     const out = [];
     for (const d of datas) out.push(await tx.roundScreenshot.update({ where: { id: d.id }, data: d.data, select: SHOT_SELECT }));
     return out;
@@ -650,9 +668,20 @@ function scopeWhere(link: { roundId: string | null; leadId: string | null }): Pr
 export async function resolveReportToken(db: Db, token: unknown, now = new Date()): Promise<ReportView | null> {
   const link = await liveLink(db, token, now);
   if (!link) return null;
+  const view = await reportFor(db, scopeWhere(link), link.leadId);
+  if (!view) return null;
+  if (!link.lastViewedAt || now.getTime() - link.lastViewedAt.getTime() > REPORT_VIEW_NOTE_MS) {
+    await db.routeReportLink.update({ where: { id: link.id }, data: { lastViewedAt: now } });
+  }
+  return view;
+}
+
+// What a report shows for some rounds (one round, or all of a lead's): the
+// client's view, with the start and end of every line trimmed off.
+async function reportFor(db: Db, where: Prisma.RoundWhereInput, leadId: string | null): Promise<ReportView | null> {
   const [rounds, lead, trimM] = await Promise.all([
     db.round.findMany({
-      where: scopeWhere(link),
+      where,
       select: {
         business: true,
         date: true,
@@ -663,15 +692,12 @@ export async function resolveReportToken(db: Db, token: unknown, now = new Date(
       },
       orderBy: [{ date: "asc" }, { createdAt: "asc" }],
     }),
-    link.leadId ? db.lead.findUnique({ where: { id: link.leadId }, select: { name: true, businessName: true, business: true } }) : null,
+    leadId ? db.lead.findUnique({ where: { id: leadId }, select: { name: true, businessName: true, business: true } }) : null,
     clientTrimM(db),
   ]);
   const owner = lead ?? rounds[0]?.lead ?? null;
   if (!owner && rounds.length === 0) return null;
   const business = (lead?.business ?? rounds[0]?.business ?? "FDH") as Business;
-  if (!link.lastViewedAt || now.getTime() - link.lastViewedAt.getTime() > REPORT_VIEW_NOTE_MS) {
-    await db.routeReportLink.update({ where: { id: link.id }, data: { lastViewedAt: now } });
-  }
   return buildReportView(
     {
       business,

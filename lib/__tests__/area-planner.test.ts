@@ -449,6 +449,7 @@ test("CSP: the public site's policy as before plus Cloudflare Web Analytics; onl
     "/admin/crm/map/:path*",
     "/admin/crm/rounds",
     "/admin/crm/rounds/:path*",
+    "/admin/crm/leads/:path*",
     "/delivery/:path*",
     "/route-report/:path*",
   ]);
@@ -460,6 +461,8 @@ test("CSP: the public site's policy as before plus Cloudflare Web Analytics; onl
   assert.equal(header("/route-report/:path*", "X-Robots-Tag"), "noindex, nofollow, noarchive");
   // The CRM's Rounds pages: the planner's policy (tiles, and blob: for a screenshot being lined up).
   assert.equal(header("/admin/crm/rounds/:path*", "Content-Security-Policy"), PLANNER_CSP);
+  // A lead's page, for its rounds' map: tiles only.
+  assert.equal(header("/admin/crm/leads/:path*", "Content-Security-Policy"), DELIVERY_CSP);
 });
 
 test("delivery pages show none of the website around them", () => {

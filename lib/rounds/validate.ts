@@ -1,5 +1,6 @@
 import { isBusiness, type Business } from "@/lib/business";
-import { MAX_ROTATION_DEG, type AlignmentSource, type PointPair } from "./alignment";
+import { MAX_ROTATION_DEG, type AlignmentSource, type LocateRecord, type PointPair } from "./alignment";
+import type { Point } from "./extract/image";
 import type { Crop } from "./extract/image";
 import type { LngLat, Lines } from "./geometry";
 import type { Markers, RoundFilters } from "./types";
@@ -197,6 +198,7 @@ export type ScreenshotWork = {
   // The turn to start the fit from: the compass's, or one measured automatically.
   turnDeg?: number | null;
   source?: AlignmentSource;
+  locate?: LocateRecord;
   route?: Lines | null;
   markers?: Markers | null;
 };
@@ -237,7 +239,27 @@ export function validateScreenshotWork(body: unknown, size: { width: number; hei
     if (src.kind === "hand") out.source = { kind: "hand" };
     else if (src.kind === "auto" && typeof src.confidence === "number" && src.confidence >= 0 && src.confidence <= 1 && (src.from === null || src.from === undefined || isId(src.from))) {
       out.source = { kind: "auto", confidence: Math.round(src.confidence * 1000) / 1000, from: (src.from as string | undefined) ?? null };
+    } else if (src.kind === "located" && typeof src.confidence === "number" && src.confidence >= 0 && src.confidence <= 1 && Number.isInteger(src.names) && (src.names as number) >= 0 && (src.names as number) <= 100) {
+      out.source = { kind: "located", confidence: Math.round(src.confidence * 1000) / 1000, names: src.names as number };
     } else return fail("How the line-up was made isn't valid.");
+  }
+  if ("locate" in body && body.locate !== null && body.locate !== undefined) {
+    const l = body.locate;
+    if (
+      !isObject(l) ||
+      typeof l.costUsd !== "number" ||
+      !(l.costUsd >= 0 && l.costUsd <= 10) ||
+      typeof l.seconds !== "number" ||
+      !(l.seconds >= 0 && l.seconds <= 600) ||
+      typeof l.model !== "string" ||
+      !/^[a-z0-9.-]{1,60}$/.test(l.model) ||
+      typeof l.placed !== "boolean" ||
+      !Number.isInteger(l.names) ||
+      (l.names as number) < 0 ||
+      (l.names as number) > 100
+    )
+      return fail("Locate's record isn't valid.");
+    out.locate = { costUsd: Math.round(l.costUsd * 1e6) / 1e6, seconds: Math.round(l.seconds * 10) / 10, model: l.model, placed: l.placed, names: l.names as number };
   }
   if ("route" in body) {
     if (body.route === null) out.route = null;
@@ -320,4 +342,25 @@ export function parseFilters(params: URLSearchParams): RoundFilters {
   // "Not specified": rounds with no distributor.
   if (params.get("distributorId") === NOT_SPECIFIED_FILTER) out.distributorId = null;
   return out;
+}
+
+// What the browser sends with a screenshot for Locate, besides the image:
+// the compass's turn where it shows, and points along its traced route.
+export const MAX_LOCATE_ROUTE_POINTS = 4000;
+export const MAX_LOCATE_IMAGE_BYTES = 3 * 1024 * 1024;
+export type LocateMeta = { compassTurn: number | null; route: Point[] };
+
+export function validateLocateMeta(body: unknown, size: { width: number; height: number }): Checked<LocateMeta> {
+  if (!isObject(body)) return fail("Nothing was sent.");
+  const turn = body.compassTurn;
+  if (turn !== null && turn !== undefined && (typeof turn !== "number" || !Number.isFinite(turn) || Math.abs(turn) > 45)) return fail("The compass reading isn't valid.");
+  if (!Array.isArray(body.route) || body.route.length > MAX_LOCATE_ROUTE_POINTS) return fail("The route points aren't valid.");
+  const route: Point[] = [];
+  for (const p of body.route) {
+    if (!Array.isArray(p) || p.length !== 2) return fail("The route points aren't valid.");
+    const [x, y] = p as unknown[];
+    if (typeof x !== "number" || typeof y !== "number" || !(x >= 0 && x <= size.width && y >= 0 && y <= size.height)) return fail("A route point is off the screenshot.");
+    route.push([x, y]);
+  }
+  return okay({ compassTurn: typeof turn === "number" ? turn : null, route });
 }

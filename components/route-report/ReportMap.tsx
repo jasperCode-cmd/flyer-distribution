@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { createBaseMap } from "@/components/area-planner/leaflet-base";
+import { OS_ATTRIBUTION } from "@/lib/rounds/attribution";
 import { escapeHtml } from "@/components/area-planner/map-style";
 import type { ReportRound } from "@/lib/rounds/report-view";
 import { formatDistance, roundColour } from "@/lib/rounds/format";
@@ -22,6 +23,7 @@ export default function ReportMap({ rounds, selected, onSelect }: Props) {
   useEffect(() => {
     if (!element.current) return;
     const map = createBaseMap(element.current);
+    map.attributionControl.addAttribution(OS_ATTRIBUTION);
     const renderer = L.canvas({ tolerance: 8 });
     layers.current = rounds.map((round, i) => {
       const line = L.polyline(

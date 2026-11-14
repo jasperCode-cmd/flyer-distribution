@@ -15,6 +15,7 @@ import { areaName } from "@/lib/area-planner/costs";
 import type { PlannerArea, PlannerDistributor, PlannerOverlap } from "@/lib/area-planner/types";
 import type { MapRound } from "@/lib/rounds/types";
 import { distributorColour, distributorName, formatDistance, shortDate } from "@/lib/rounds/format";
+import { OS_ATTRIBUTION } from "@/lib/rounds/attribution";
 import { boundsOf, createBaseMap, polygonGeometry, toLatLngs } from "./leaflet-base";
 import { OVERLAP_STYLE, areaPathStyle, escapeHtml } from "./map-style";
 
@@ -457,7 +458,8 @@ export default function PlannerMap(props: Props) {
     if (!rounds || rounds.length === 0) return;
     if (!map.getPane("ap-rounds")) map.createPane("ap-rounds").style.zIndex = "430";
     const renderer = L.canvas({ pane: "ap-rounds", tolerance: 8 });
-    const group = L.layerGroup();
+    // Lines placed with OS Open Roads carry its credit while the layer is on.
+    const group = L.layerGroup([], { attribution: OS_ATTRIBUTION });
     for (const round of rounds) {
       const colour = distributorColour(round.distributor);
       const line = L.polyline(

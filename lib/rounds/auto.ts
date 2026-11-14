@@ -1,4 +1,4 @@
-import { imageToLngLat, MAX_ROTATION_DEG, type AlignmentSource, type PointPair, type Transform } from "./alignment";
+import { imageToLngLat, MAX_ROTATION_DEG, type AlignmentSource, type LocateRecord, type PointPair, type Transform } from "./alignment";
 import type { Crop, Point } from "./extract/image";
 import { roundCoords, type LngLat, type Lines } from "./geometry";
 import type { Sim } from "./match/similarity";
@@ -15,7 +15,7 @@ export type AutoDraft = {
   // the measured turn: saved as they are, the server's fit keeps the line-up exactly.
   pairs: PointPair[];
   turnDeg: number;
-  source: Extract<AlignmentSource, { kind: "auto" }>;
+  source: Extract<AlignmentSource, { kind: "auto" } | { kind: "located" }>;
   lines: Lines;
   markers: Markers;
   // How sure: 0 to 1, after the screenshot it was matched from (a chain is
@@ -29,6 +29,11 @@ export type AutoDraft = {
   // The screenshot's corners on the map: top left, top right, bottom right, bottom left.
   footprint: LngLat[];
   lengthM: number;
+  // Placed by Locate: the street names that agreed (of those read), how far
+  // the labels sit from their streets, and how much of the route is on streets.
+  located?: { names: string[]; namesRead: number; rmsM: number | null; routeShare: number | null };
+  // What Locate's call cost, saved with the line-up.
+  locate?: LocateRecord;
 };
 
 // The new screenshot's fit on the map: the lined-up one's fit after the match (new pixels to its pixels).

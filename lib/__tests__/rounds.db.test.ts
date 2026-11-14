@@ -230,8 +230,17 @@ test("the list, the map layer and a lead's rounds: filters, batched queries (no 
 
   queries = 0;
   const panel = await leadRounds(prisma, fdh.id);
-  assert.ok(queries <= forOne + 1, "the lead's rounds and its links, side by side");
+  const forPanel = queries;
   assert.deepEqual(panel.rounds.map((r) => r.id), [a.id]);
+  assert.equal(panel.map.length, 1);
+  // The lead's rounds, its links, and its rounds' map (as the client's link
+  // shows it), side by side: a fixed few statements, none per round.
+  assert.ok(forPanel <= forOne + 6, `${forPanel} statements for the lead's panel (the list took ${forOne})`);
+  const another = await createRound(prisma, { business: "FDH", leadId: fdh.id, projectId: null, distributorId: null, date: "2026-11-09", notes: `${MARK} panel`, screenshots: [shot()] });
+  queries = 0;
+  assert.equal((await leadRounds(prisma, fdh.id)).map.length, 2);
+  assert.equal(queries, forPanel, "no more statements for the lead's panel with more rounds");
+  await deleteRound(prisma, screenshotStorage({}), another.id);
 });
 
 test("changing a round: a new lead brings its business; a project for another lead is refused", { skip }, async () => {

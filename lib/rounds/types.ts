@@ -59,6 +59,8 @@ export type RoundDetail = RoundSummary & {
   screenshots: RoundSummary["screenshots"];
   shots: RoundScreenshotView[];
   links: ReportLinkView[];
+  // Whether Locate has the job's Area Planner areas to look in.
+  locateArea: boolean;
 };
 
 // One round on the Area Planner's Rounds layer.
@@ -99,5 +101,7 @@ export type RoundOptions = {
   jobs: JobOption[];
   distributors: (RoundDistributor & { active: boolean })[];
   storage: boolean;
+  // Whether Locate is set up (the server has its API key).
+  locate: boolean;
   trimM: number;
 };

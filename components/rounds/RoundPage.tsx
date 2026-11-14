@@ -235,6 +235,7 @@ export default function RoundPage({ id }: { id: string }) {
           startId={queue.startId}
           focus={round.focus}
           storage={!!options?.storage}
+          locate={{ ready: !!options?.locate, hasArea: round.locateArea }}
           onClose={async () => {
             setQueue(null);
             await load();

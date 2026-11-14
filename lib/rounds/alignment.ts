@@ -26,9 +26,15 @@ export type Transform = {
   offsetY: number;
 };
 
-// How a line-up was made, kept with it: by hand, or found automatically by
-// matching the screenshot to one already lined up (and how sure that was).
-export type AlignmentSource = { kind: "hand" } | { kind: "auto"; confidence: number; from: string | null };
+// How a line-up was made, kept with it: by hand, found automatically by
+// matching the screenshot to one already lined up (and how sure that was),
+// or located from its street names (how sure, and how many names agreed).
+export type AlignmentSource = { kind: "hand" } | { kind: "auto"; confidence: number; from: string | null } | { kind: "located"; confidence: number; names: number };
+
+// What Locate's call cost for a screenshot, kept with its line-up when saved
+// (whether Locate placed it, or it was lined up by hand after): US dollars,
+// seconds, the model that read it, and how many street names agreed.
+export type LocateRecord = { costUsd: number; seconds: number; model: string; placed: boolean; names: number };
 
 export type Alignment = {
   pairs: PointPair[];
@@ -42,6 +48,7 @@ export type Alignment = {
   // The turn the fit started from (the compass's, or 0), when not 0.
   preferredTurnDeg?: number;
   source?: AlignmentSource;
+  locate?: LocateRecord;
 };
 
 export type AlignmentResult = { ok: true; alignment: Alignment } | { ok: false; error: string; errorsPx?: number[] };

@@ -4,6 +4,7 @@ import { useEffect, useRef, type MutableRefObject } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { createBaseMap } from "@/components/area-planner/leaflet-base";
+import { OS_ATTRIBUTION } from "@/lib/rounds/attribution";
 import { overlayCorners, type Transform } from "@/lib/rounds/alignment";
 import type { LngLat, Lines } from "@/lib/rounds/geometry";
 import type { Markers } from "@/lib/rounds/types";
@@ -72,6 +73,7 @@ export default function AlignMap(props: Props) {
   useEffect(() => {
     if (!element.current) return;
     const map = createBaseMap(element.current, { doubleClickZoom: false });
+    map.attributionControl.addAttribution(OS_ATTRIBUTION);
     mapRef.current = map;
     pointLayer.current = L.layerGroup().addTo(map);
     lineLayer.current = L.layerGroup().addTo(map);
