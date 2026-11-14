@@ -2,7 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { imageToLngLat, overlayCorners, solveAlignment, type ImagePoint, type PointPair } from "@/lib/rounds/alignment";
+import { imageToLngLat, overlayCorners, solveAlignment, type AlignmentSource, type ImagePoint, type PointPair } from "@/lib/rounds/alignment";
+import { findCompass } from "@/lib/rounds/compass";
 import { detectCrop } from "@/lib/rounds/extract/crop";
 import { fullCrop, type Crop, type Point } from "@/lib/rounds/extract/image";
 import { DEFAULT_TOLERANCE, MAX_TOLERANCE, MIN_TOLERANCE } from "@/lib/rounds/extract/mask";
@@ -35,6 +36,9 @@ export type WorkImage = { url: string; width: number; height: number; pixels: Im
 
 export type Bbox = [number, number, number, number];
 
+// A line-up and trace found automatically, opened here to fix.
+export type WorkDraft = { crop: Crop; pairs: PointPair[]; turnDeg: number; source: AlignmentSource; lines: Lines; markers: Markers };
+
 type Props = {
   shot: RoundScreenshotView;
   image: WorkImage;
@@ -49,6 +53,7 @@ type Props = {
   onProgress?: (status: "lined" | "traced", shot?: RoundScreenshotView) => void;
   skipLabel?: string;
   saveLabel?: string;
+  draft?: WorkDraft | null;
 };
 
 type Pick = { image: ImagePoint | null; map: LngLat | null };
@@ -61,10 +66,25 @@ const STEPS: { id: Step; label: string }[] = [
   { id: "trace", label: "3. Trace" },
 ];
 
-export default function ScreenshotWorkspace({ shot, image, index, total, focus, onSaved, onSkip, onProgress, skipLabel = "Skip", saveLabel }: Props) {
-  const saved = shot.alignment?.pairs;
-  const [step, setStep] = useState<Step>(shot.alignment ? (shot.route ? "trace" : "align") : "crop");
-  const [crop, setCrop] = useState<Crop>(() => shot.crop ?? (image.pixels ? detectCrop({ width: image.width, height: image.height, data: image.pixels.data }) : fullCrop(image)));
+export default function ScreenshotWorkspace({ shot, image, index, total, focus, onSaved, onSkip, onProgress, skipLabel = "Skip", saveLabel, draft = null }: Props) {
+  // A line-up already made (found automatically, or saved before) is kept
+  // exactly, with how it was made, until a point is redone.
+  const kept = useMemo<{ pairs: PointPair[]; turnDeg: number; source: AlignmentSource } | null>(
+    () =>
+      draft
+        ? { pairs: draft.pairs, turnDeg: draft.turnDeg, source: draft.source }
+        : shot.alignment
+          ? { pairs: shot.alignment.pairs, turnDeg: shot.alignment.transform.rotationDeg, source: shot.alignment.source ?? { kind: "hand" } }
+          : null,
+    [draft, shot.alignment]
+  );
+  const saved = kept?.pairs;
+  const [touched, setTouched] = useState(false);
+  const [step, setStep] = useState<Step>(draft ? "trace" : shot.alignment ? (shot.route ? "trace" : "align") : "crop");
+  const autoCrop = useMemo(() => (image.pixels ? detectCrop({ width: image.width, height: image.height, data: image.pixels.data }) : fullCrop(image)), [image]);
+  // Apple's compass, where it shows: the map's turn, to start the line-up from.
+  const compass = useMemo(() => (image.pixels ? findCompass({ width: image.width, height: image.height, data: image.pixels.data }, autoCrop) : null), [image, autoCrop]);
+  const [crop, setCrop] = useState<Crop>(() => draft?.crop ?? shot.crop ?? autoCrop);
   const [a, setA] = useState<Pick>({ image: saved?.[0]?.image ?? null, map: saved?.[0]?.map ?? null });
   const [b, setB] = useState<Pick>({ image: saved?.[1]?.image ?? null, map: saved?.[1]?.map ?? null });
   const [opacity, setOpacity] = useState(0.5);
@@ -73,8 +93,8 @@ export default function ScreenshotWorkspace({ shot, image, index, total, focus, 
   const [tracing, setTracing] = useState(false);
   const [pixelLines, setPixelLines] = useState<Point[][]>([]);
   const [dots, setDots] = useState<{ start: Point | null; end: Point | null }>({ start: null, end: null });
-  const [lines, setLines] = useState<Lines>(shot.route ?? []);
-  const [markers, setMarkers] = useState<Markers>(shot.markers ?? {});
+  const [lines, setLines] = useState<Lines>(draft?.lines ?? shot.route ?? []);
+  const [markers, setMarkers] = useState<Markers>(draft?.markers ?? shot.markers ?? {});
   const [undo, setUndo] = useState<Lines[]>([]);
   // The trace step's own tool (eraser, start, end); the other steps' map
   // mode follows from what is to be clicked next, worked out as the page
@@ -89,8 +109,14 @@ export default function ScreenshotWorkspace({ shot, image, index, total, focus, 
   const mapHandle = useRef<AlignMapHandle | null>(null);
   const stroke = useRef(false);
 
-  const pairs: PointPair[] | null = a.image && a.map && b.image && b.map ? [{ image: a.image, map: a.map }, { image: b.image, map: b.map }] : null;
-  const solved = useMemo(() => (pairs ? solveAlignment(pairs) : null), [pairs?.flatMap((p) => [...p.image, ...p.map]).join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
+  const clicked: PointPair[] | null = a.image && a.map && b.image && b.map ? [{ image: a.image, map: a.map }, { image: b.image, map: b.map }] : null;
+  // The line-up in use: the kept one until a point is redone, else the
+  // clicked points, starting from the compass's turn where it shows.
+  const useKept = !!kept && !touched;
+  const pairs: PointPair[] | null = useKept ? kept.pairs : clicked;
+  const turnDeg: number | null = useKept ? kept.turnDeg : (compass?.turnDeg ?? null);
+  const source: AlignmentSource = useKept ? kept.source : { kind: "hand" };
+  const solved = useMemo(() => (pairs ? solveAlignment(pairs, { turnDeg }) : null), [pairs?.flatMap((p) => [...p.image, ...p.map]).join(","), turnDeg]); // eslint-disable-line react-hooks/exhaustive-deps
   const transform = solved?.ok ? solved.alignment.transform : null;
   const next: "a-image" | "a-map" | "b-image" | "b-map" | null = !a.image ? "a-image" : !a.map ? "a-map" : !b.image ? "b-image" : !b.map ? "b-map" : null;
   const mode: AlignMode = step === "align" ? (next === "a-map" || next === "b-map" ? "pick" : "view") : step === "trace" ? traceMode : "view";
@@ -112,11 +138,13 @@ export default function ScreenshotWorkspace({ shot, image, index, total, focus, 
   }, [query]);
 
   function pickImage(p: Point) {
+    setTouched(true);
     if (next === "a-image") setA({ image: p, map: null });
     else if (next === "b-image") setB({ image: p, map: null });
   }
 
   function pickMap(p: LngLat) {
+    setTouched(true);
     if (next === "a-map") setA((x) => ({ ...x, map: p }));
     else if (next === "b-map") setB((x) => ({ ...x, map: p }));
   }
@@ -149,7 +177,11 @@ export default function ScreenshotWorkspace({ shot, image, index, total, focus, 
     setError(null);
     try {
       const body: Record<string, unknown> = { crop };
-      if (pairs) body.pairs = pairs;
+      if (pairs) {
+        body.pairs = pairs;
+        body.turnDeg = turnDeg;
+        body.source = source;
+      }
       if (step === "trace") {
         body.route = lines.length ? lines : null;
         body.markers = markers.start || markers.end ? markers : null;
@@ -183,7 +215,7 @@ export default function ScreenshotWorkspace({ shot, image, index, total, focus, 
     const done = linedUp.alignment?.pairs;
     if (done && JSON.stringify(done) === JSON.stringify(pairs) && JSON.stringify(linedUp.crop) === JSON.stringify(crop)) return;
     try {
-      const updated = await api<RoundScreenshotView>(`/api/crm/rounds/screenshots/${shot.id}`, send("PATCH", { crop, pairs }));
+      const updated = await api<RoundScreenshotView>(`/api/crm/rounds/screenshots/${shot.id}`, send("PATCH", { crop, pairs, turnDeg, source }));
       setLinedUp(updated);
       onProgress?.("lined", updated);
     } catch (e) {
@@ -318,17 +350,33 @@ export default function ScreenshotWorkspace({ shot, image, index, total, focus, 
 
       {step === "align" && (
         <div className="flex flex-wrap items-center gap-3 text-sm">
-          <button type="button" onClick={() => setA({ image: null, map: null })} className="rounded-md border border-gray-300 px-3 py-1.5 font-semibold text-gray-800 hover:bg-gray-50">
+          <button
+            type="button"
+            onClick={() => {
+              setTouched(true);
+              setA({ image: null, map: null });
+            }} className="rounded-md border border-gray-300 px-3 py-1.5 font-semibold text-gray-800 hover:bg-gray-50">
             Redo A
           </button>
-          <button type="button" onClick={() => setB({ image: null, map: null })} className="rounded-md border border-gray-300 px-3 py-1.5 font-semibold text-gray-800 hover:bg-gray-50">
+          <button
+            type="button"
+            onClick={() => {
+              setTouched(true);
+              setB({ image: null, map: null });
+            }} className="rounded-md border border-gray-300 px-3 py-1.5 font-semibold text-gray-800 hover:bg-gray-50">
             Redo B
           </button>
           {solved && !solved.ok && <span className="text-red-700" role="alert">{solved.error}</span>}
           {solved?.ok && (
             <span className="text-gray-700">
-              Off by {solved.alignment.errorsPx.map((e) => `${e.toFixed(1)} px`).join(" and ")}
+              {useKept && source.kind === "auto" ? `Lined up automatically (${Math.round(source.confidence * 100)}% sure). ` : ""}
+              Off by {solved.alignment.errorsPx.map((e) => `${e.toFixed(1)} px`).join(", ")}
               {solved.alignment.rotated ? `, turned ${solved.alignment.transform.rotationDeg.toFixed(1)}°` : ", north up"}; about {solved.alignment.metresPerPixel.toFixed(2)} m a pixel.
+            </span>
+          )}
+          {compass && (
+            <span className="text-gray-700" role="note">
+              Apple&apos;s compass shows the map turned {Math.abs(compass.turnDeg).toFixed(0)}° {compass.turnDeg < 0 ? "clockwise" : "anticlockwise"} from north; the line-up starts from that.
             </span>
           )}
           <label className="flex items-center gap-2">

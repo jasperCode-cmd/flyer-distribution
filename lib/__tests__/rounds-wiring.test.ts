@@ -191,6 +191,34 @@ test("how figures read", () => {
   assert.equal(dateLabel(new Date("2026-11-10T00:00:00Z")), "Tuesday 10 November 2026");
 });
 
+test("auto line-up: one screenshot read at a time in a background worker, drafts kept in the browser until accepted together", () => {
+  const worker = read("components/rounds/auto.worker.ts");
+  // One file decoded per message, the bitmap closed, only compact copies kept.
+  assert.match(worker, /const \{ img, canvas \} = await decode\(msg\.file\)/);
+  assert.match(worker, /bitmap\.close\(\)/);
+  assert.match(worker, /packed: pack\(prepared\.gray\)/);
+  assert.doesNotMatch(worker, /Promise\.all/);
+  const run = read("components/rounds/auto-process.ts");
+  assert.match(run, /new Worker\(new URL\("\.\/auto\.worker\.ts", import\.meta\.url\)/);
+  assert.match(run, /while \(todo\.length && !this\.stopped\)/);
+  assert.doesNotMatch(run, /Promise\.all/);
+  // Drafts: IndexedDB only, never sent anywhere.
+  const drafts = read("components/rounds/drafts.ts");
+  assert.match(drafts, /indexedDB\.open\(DB_NAME, 1\)/);
+  assert.doesNotMatch(drafts, /fetch\(|\/api\//);
+  // Accepting saves them together, in one request.
+  const queue = read("components/rounds/ScreenshotQueue.tsx");
+  assert.match(queue, /api<\{ shots: RoundScreenshotView\[\] \}>\(`\/api\/crm\/rounds\/\$\{roundId\}\/screenshots`, send\("PATCH", \{ items \}\)\)/);
+  assert.match(queue, /Auto-process the rest/);
+  const grid = read("components/rounds/ReviewGrid.tsx");
+  for (const label of ["Accept all", "Open to fix", "Skip", "% sure"]) assert.match(grid, new RegExp(label), label);
+  // The manual line-up is still there as it was: crop, line up, trace, with Skip and Save and next.
+  const workspace = read("components/rounds/ScreenshotWorkspace.tsx");
+  for (const step of ["1. Crop", "2. Line up", "3. Trace", "Redo A", "Redo B", "Eraser", "Save and next"]) assert.match(workspace + queue, new RegExp(step), step);
+  // The upload page's tip.
+  assert.match(read("components/rounds/NewRound.tsx"), /For quicker auto line-up, keep the same zoom, overlap each screenshot by about half a screen, and tap the compass so north is up\./);
+});
+
 test("no em or en dashes in any Rounds file", () => {
   const all = [
     ...files("lib/rounds"),
@@ -203,6 +231,8 @@ test("no em or en dashes in any Rounds file", () => {
     "components/area-planner/RoundsLayerControls.tsx",
     "lib/__tests__/rounds-queue.test.ts",
     "lib/__tests__/rounds-db-lock.ts",
+    "lib/__tests__/rounds-match.test.ts",
+    "lib/__tests__/rounds-auto.test.ts",
   ];
   for (const f of all) assert.doesNotMatch(read(f), /[\u2013\u2014]/, f);
 });

@@ -1,5 +1,5 @@
 import { isBusiness, type Business } from "@/lib/business";
-import type { PointPair } from "./alignment";
+import { MAX_ROTATION_DEG, type AlignmentSource, type PointPair } from "./alignment";
 import type { Crop } from "./extract/image";
 import type { LngLat, Lines } from "./geometry";
 import type { Markers, RoundFilters } from "./types";
@@ -194,6 +194,9 @@ export function validateRoute(v: unknown): Checked<Lines> {
 export type ScreenshotWork = {
   crop?: Crop;
   pairs?: PointPair[] | null;
+  // The turn to start the fit from: the compass's, or one measured automatically.
+  turnDeg?: number | null;
+  source?: AlignmentSource;
   route?: Lines | null;
   markers?: Markers | null;
 };
@@ -224,6 +227,18 @@ export function validateScreenshotWork(body: unknown, size: { width: number; hei
       out.pairs = pairs;
     }
   }
+  if ("turnDeg" in body && body.turnDeg !== null && body.turnDeg !== undefined) {
+    if (typeof body.turnDeg !== "number" || !Number.isFinite(body.turnDeg) || Math.abs(body.turnDeg) > MAX_ROTATION_DEG) return fail(`The map can be turned at most ${MAX_ROTATION_DEG} degrees.`);
+    out.turnDeg = body.turnDeg;
+  }
+  if ("source" in body && body.source !== null && body.source !== undefined) {
+    const src = body.source;
+    if (!isObject(src)) return fail("How the line-up was made isn't valid.");
+    if (src.kind === "hand") out.source = { kind: "hand" };
+    else if (src.kind === "auto" && typeof src.confidence === "number" && src.confidence >= 0 && src.confidence <= 1 && (src.from === null || src.from === undefined || isId(src.from))) {
+      out.source = { kind: "auto", confidence: Math.round(src.confidence * 1000) / 1000, from: (src.from as string | undefined) ?? null };
+    } else return fail("How the line-up was made isn't valid.");
+  }
   if ("route" in body) {
     if (body.route === null) out.route = null;
     else {
@@ -247,6 +262,22 @@ export function validateScreenshotWork(body: unknown, size: { width: number; hei
     }
   }
   if (Object.keys(out).length === 0) return fail("Nothing to save.");
+  return okay(out);
+}
+
+// Several screenshots' work saved together (accepting automatic line-ups).
+export type ScreenshotWorkItem = { id: string; body: unknown };
+
+export function validateWorkBatch(body: unknown): Checked<ScreenshotWorkItem[]> {
+  if (!isObject(body) || !Array.isArray(body.items) || body.items.length === 0) return fail("Nothing to save.");
+  if (body.items.length > MAX_SCREENSHOTS) return fail(`Save at most ${MAX_SCREENSHOTS} at a time.`);
+  const seen = new Set<string>();
+  const out: ScreenshotWorkItem[] = [];
+  for (const item of body.items) {
+    if (!isObject(item) || !isId(item.id) || seen.has(item.id)) return fail("A screenshot in the list isn't valid.");
+    seen.add(item.id);
+    out.push({ id: item.id, body: item.work });
+  }
   return okay(out);
 }
 

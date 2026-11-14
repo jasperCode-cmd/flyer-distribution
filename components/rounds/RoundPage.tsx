@@ -11,6 +11,7 @@ import { STATUS_LABELS, planFiles, progressOf, statusOf } from "@/lib/rounds/que
 import type { RoundDetail, RoundOptions, RoundScreenshotView } from "@/lib/rounds/types";
 import { MAX_SCREENSHOTS } from "@/lib/rounds/validate";
 import { compressForStorage, makeWorkingImage, readAllFacts } from "@/lib/rounds/working-image";
+import { loadDrafts } from "./drafts";
 import { clearHandedOver, handedOver } from "./pending-files";
 import ScreenshotQueue from "./ScreenshotQueue";
 import ShareLinks from "./ShareLinks";
@@ -27,12 +28,13 @@ const RoundMap = dynamic(() => import("./RoundMap"), { ssr: false, loading: () =
 // request), sharing with the client, and deleting the round.
 
 type Detail = RoundDetail & { focus: [number, number, number, number] | null };
-type Queue = { startId: string | null };
+type Queue = { startId: string | null; view?: "work" | "review" };
 
 const when = (iso: string) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" }).format(new Date(iso));
 
-function status(s: RoundScreenshotView): string {
+function status(s: RoundScreenshotView, review: boolean): string {
   const st = statusOf(s);
+  if (st !== "saved" && review) return STATUS_LABELS.review;
   return st === "saved" ? `${STATUS_LABELS.saved}, ${formatDistance(s.routeLengthM)}` : STATUS_LABELS[st];
 }
 
@@ -48,6 +50,8 @@ export default function RoundPage({ id }: { id: string }) {
   // as files; each is read in full only when its turn comes).
   const [chosen, setChosen] = useState<Map<string, File>>(() => new Map());
   const [reading, setReading] = useState<{ done: number; total: number } | null>(null);
+  // Automatic line-ups waiting for review in this browser.
+  const [waiting, setWaiting] = useState<Set<string>>(() => new Set());
   const [form, setForm] = useState({ jobKey: "", distributorId: "", date: "", notes: "" });
 
   const load = useCallback(async () => {
@@ -62,6 +66,15 @@ export default function RoundPage({ id }: { id: string }) {
     load();
     api<RoundOptions>("/api/crm/rounds/options").then(setOptions).catch(() => {});
   }, [load]);
+
+  useEffect(() => {
+    if (queue) return;
+    let live = true;
+    loadDrafts(id).then((d) => live && setWaiting(new Set(d.map((x) => x.id))));
+    return () => {
+      live = false;
+    };
+  }, [id, queue]);
 
   // Straight from adding the round: its files were handed over, so the work
   // goes on here at once.
@@ -215,6 +228,8 @@ export default function RoundPage({ id }: { id: string }) {
           / {dateLabel(new Date(`${round.date}T00:00:00Z`))} / {round.lead ? round.lead.name : round.project ? round.project.name : "Round"}
         </p>
         <ScreenshotQueue
+          roundId={round.id}
+          initialView={queue.view}
           shots={round.shots}
           files={chosen}
           startId={queue.startId}
@@ -230,7 +245,9 @@ export default function RoundPage({ id }: { id: string }) {
   }
 
   const colour = distributorColour(round.distributor);
-  const progress = progressOf(round.shots.map(statusOf));
+  const shotStatus = (s: RoundScreenshotView) => (waiting.has(s.id) && statusOf(s) !== "saved" ? "review" : statusOf(s));
+  const progress = progressOf(round.shots.map(shotStatus));
+  const waitingCount = round.shots.filter((s) => shotStatus(s) === "review").length;
   const canWork = round.shots.some((s) => (chosen.has(s.id) || s.stored) && statusOf(s) !== "saved");
   return (
     <div className="space-y-4">
@@ -374,6 +391,16 @@ export default function RoundPage({ id }: { id: string }) {
         <p className="mt-1 text-xs text-gray-500">
           Choose this round&apos;s screenshot files to carry on, or more to add (up to {MAX_SCREENSHOTS} in a round). Ones already here are recognised and keep their saved work.
         </p>
+        {waitingCount > 0 && (
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-md border border-violet-200 bg-violet-50 px-3 py-2 text-sm text-violet-900">
+            <span>
+              {waitingCount} automatic line-up{waitingCount === 1 ? " is" : "s are"} waiting for review in this browser. Nothing is saved until accepted.
+            </span>
+            <button type="button" onClick={() => setQueue({ startId: null, view: "review" })} className="rounded-md bg-violet-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-violet-800">
+              Review
+            </button>
+          </div>
+        )}
         <ul className="mt-3 divide-y divide-gray-100">
           {round.shots.map((s, i) => (
             <li key={s.id} className="flex flex-wrap items-center justify-between gap-3 py-2.5">
@@ -382,7 +409,7 @@ export default function RoundPage({ id }: { id: string }) {
                   {i + 1}. {s.originalName ?? "Screenshot"} <span className="font-normal text-gray-500">({s.width} by {s.height})</span>
                 </p>
                 <p className="text-gray-600">
-                  {status(s)}
+                  {status(s, waiting.has(s.id))}
                   {s.takenAt ? ` · taken ${when(s.takenAt)}` : ""}
                   {chosen.has(s.id) ? " · file chosen" : ""}
                 </p>

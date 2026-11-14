@@ -21,6 +21,7 @@ import {
   openScreenshotFile,
   roundOptions,
   saveScreenshotWork,
+  saveScreenshotsWork,
   setClientTrimM,
   updateRound,
   TRIM_SETTING,
@@ -358,6 +359,38 @@ test("Not specified: a round with no distributor is listed and filtered as such"
   assert.ok(!unset.includes(some.id));
   assert.equal((await listRounds(prisma, { ...onDay })).rounds.filter((r) => r.id === none.id || r.id === some.id).length, 2);
   assert.equal((await getRound(prisma, none.id))!.distributor, null);
+});
+
+test("accepting automatic line-ups: several saved together, the turn and how each was made kept, the round's figures worked out once", { skip }, async () => {
+  const made = await createRound(prisma, { business: "FDH", leadId: null, projectId: null, distributorId: null, date: "2026-11-08", notes: `${MARK} accept`, screenshots: [shot(), shot(), shot()] });
+  const other = await createRound(prisma, { business: "FDH", leadId: null, projectId: null, distributorId: null, date: "2026-11-08", notes: `${MARK} other`, screenshots: [shot()] });
+  // A line-up turned 9 degrees, as four exact points and the measured turn.
+  const turned: Transform = { ...TRANSFORM, rotationDeg: 9 };
+  const pairs = [[100, 400], [640, 400], [640, 1300], [100, 1300]].map(([x, y]) => ({ image: [x, y] as [number, number], map: imageToLngLat(turned, [x, y]) }));
+  const work = (n: number) => ({ crop: { top: 166, bottom: 1600, left: 0, right: 740 }, pairs, turnDeg: 9, source: { kind: "auto" as const, confidence: 0.8 - n / 10, from: made.screenshotIds[0] }, route: ROUTE, markers: null });
+  queries = 0;
+  const saved = await saveScreenshotsWork(prisma, made.id, [
+    { id: made.screenshotIds[1], work: work(1) },
+    { id: made.screenshotIds[2], work: work(2) },
+  ]);
+  const used = queries;
+  assert.equal(saved.length, 2);
+  for (const s of saved) {
+    assert.equal(s.alignment?.transform.rotationDeg, 9);
+    assert.ok(s.alignment!.errorsPx.every((e) => e < 0.05));
+    assert.equal(s.alignment?.source?.kind, "auto");
+    assert.ok(s.routeLengthM! > 0);
+  }
+  // The round's distance and sectors, once: a handful of statements, not one set per screenshot.
+  const round = (await getRound(prisma, made.id))!;
+  assert.ok(round.distanceM! > 0);
+  assert.ok(used <= 12, `${used} statements to accept two`);
+  // A screenshot from another round isn't saved, and nothing is.
+  await assert.rejects(saveScreenshotsWork(prisma, made.id, [{ id: made.screenshotIds[0], work: work(0) }, { id: other.screenshotIds[0], work: work(0) }]), /isn't in this round/);
+  assert.equal((await prisma.roundScreenshot.findUnique({ where: { id: made.screenshotIds[0] } }))!.alignment, null);
+  // A hand line-up saved alone is marked as made by hand.
+  const hand = await saveScreenshotWork(prisma, made.screenshotIds[0], { pairs: PAIRS });
+  assert.equal(hand.alignment?.source?.kind, "hand");
 });
 
 test("the privacy trim setting: 150 m until set", { skip }, async () => {

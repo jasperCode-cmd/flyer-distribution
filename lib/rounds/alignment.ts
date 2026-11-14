@@ -2,12 +2,15 @@
 // pure maths, shared by the browser and the server (which works the fit out
 // again from the points, never trusting a fit it is sent). No imports.
 //
-// Both the screenshot and the map are Web Mercator and north-up, so a fit is
-// normally just a scale and an offset. With two pairs of points, a north-up
-// fit misses both pairs by the same amount (it splits the difference), so
-// "both pairs need a rotation" means that miss is more than a few pixels: a
-// small rotation is then allowed, up to MAX_ROTATION_DEG. Anything more means
-// a point was clicked in the wrong place and is reported instead.
+// Both the screenshot and the map are Web Mercator, so a fit is a scale, a
+// turn and an offset. The turn is known first where it can be: north-up (0)
+// normally, or what Apple's compass shows when the map was turned. With the
+// turn held, a fit misses both pairs by the same amount (it splits the
+// difference), so "every pair needs a different turn" means that miss is
+// more than a few pixels: the turn is then fitted too, up to
+// MAX_ROTATION_DEG either way. Anything more means a point was clicked in the
+// wrong place and is reported instead. A line-up found automatically sends
+// its own measured turn, so its fit is kept exactly.
 
 export type ImagePoint = [x: number, y: number];
 export type LngLat = [lng: number, lat: number];
@@ -23,6 +26,10 @@ export type Transform = {
   offsetY: number;
 };
 
+// How a line-up was made, kept with it: by hand, or found automatically by
+// matching the screenshot to one already lined up (and how sure that was).
+export type AlignmentSource = { kind: "hand" } | { kind: "auto"; confidence: number; from: string | null };
+
 export type Alignment = {
   pairs: PointPair[];
   transform: Transform;
@@ -32,14 +39,17 @@ export type Alignment = {
   // Ground distance per image pixel where the screenshot is, in metres.
   metresPerPixel: number;
   rotated: boolean;
+  // The turn the fit started from (the compass's, or 0), when not 0.
+  preferredTurnDeg?: number;
+  source?: AlignmentSource;
 };
 
 export type AlignmentResult = { ok: true; alignment: Alignment } | { ok: false; error: string; errorsPx?: number[] };
 
-// A click can be a few pixels out; more than this, both pairs, and the fit
+// A click can be a few pixels out; more than this, every pair, and the fit
 // may turn.
 export const NORTH_UP_TOLERANCE_PX = 4;
-export const MAX_ROTATION_DEG = 5;
+export const MAX_ROTATION_DEG = 30;
 // Points closer than this on the screenshot can't give a reliable fit.
 export const MIN_PAIR_SEPARATION_PX = 60;
 // What a phone map of a delivery round can show, in metres per pixel.
@@ -96,9 +106,9 @@ function centroid(points: [number, number][]): [number, number] {
   return [points.reduce((s, p) => s + p[0], 0) / n, points.reduce((s, p) => s + p[1], 0) / n];
 }
 
-// The best fit by least squares: north-up (scale and offset only), or with a
-// rotation too (a similarity transform).
-function fit(pairs: PointPair[], rotate: boolean): Transform | null {
+// The best fit by least squares: with the turn held at `turnDeg` (scale and
+// offset only), or with the turn fitted too (a similarity transform).
+function fit(pairs: PointPair[], rotate: boolean, turnDeg = 0): Transform | null {
   const img = pairs.map((p) => p.image as [number, number]);
   const map = pairs.map((p) => toMercator(p.map));
   const [cx, cy] = centroid(img);
@@ -116,13 +126,23 @@ function fit(pairs: PointPair[], rotate: boolean): Transform | null {
     norm += px * px + py * py;
   }
   if (norm === 0) return null;
-  const a = dot / norm;
-  const b = rotate ? cross / norm : 0;
+  let a: number;
+  let b: number;
+  if (rotate) {
+    a = dot / norm;
+    b = cross / norm;
+  } else {
+    // The scale along the held turn; a mirror image or a map upside down
+    // compared with it isn't a phone screenshot.
+    const r = (turnDeg * Math.PI) / 180;
+    const along = (dot * Math.cos(r) + cross * Math.sin(r)) / norm;
+    if (along <= 0) return null;
+    a = along * Math.cos(r);
+    b = along * Math.sin(r);
+  }
   const scale = Math.hypot(a, b);
   if (!(scale > 0)) return null;
-  // A mirror image or a fit with the map upside down isn't a phone screenshot.
-  if (!rotate && a <= 0) return null;
-  const rotationDeg = (Math.atan2(b, a) * 180) / Math.PI;
+  const rotationDeg = rotate ? (Math.atan2(b, a) * 180) / Math.PI : turnDeg;
   return { scale, rotationDeg, offsetX: mx - (a * cx - b * cy), offsetY: my - (b * cx + a * cy) };
 }
 
@@ -135,8 +155,16 @@ function errorsOf(t: Transform, pairs: PointPair[]): number[] {
 
 const round = (n: number, places: number) => Math.round(n * 10 ** places) / 10 ** places;
 
-export function solveAlignment(pairs: PointPair[]): AlignmentResult {
+export type SolveOptions = {
+  // The turn to start from (clockwise, degrees, as in Transform): what the
+  // compass shows, or a turn measured automatically. North-up when absent.
+  turnDeg?: number | null;
+};
+
+export function solveAlignment(pairs: PointPair[], options: SolveOptions = {}): AlignmentResult {
   if (pairs.length < 2) return { ok: false, error: "Click two points on the screenshot and the same two on the map." };
+  const preferred = options.turnDeg ?? 0;
+  if (!Number.isFinite(preferred) || Math.abs(preferred) > MAX_ROTATION_DEG) return { ok: false, error: `The map can be turned at most ${MAX_ROTATION_DEG} degrees.` };
   for (const p of pairs) {
     const ok =
       p.image.every((v) => Number.isFinite(v)) &&
@@ -154,12 +182,11 @@ export function solveAlignment(pairs: PointPair[]): AlignmentResult {
       }
     }
   }
-  const northUp = fit(pairs, false);
-  if (!northUp) return { ok: false, error: "The map points are the wrong way round compared with the screenshot. Check which is A and which is B." };
-  const northUpErrors = errorsOf(northUp, pairs);
-  let transform = northUp;
+  const held = fit(pairs, false, preferred);
+  if (!held) return { ok: false, error: "The map points are the wrong way round compared with the screenshot. Check which is A and which is B." };
+  const northUpErrors = errorsOf(held, pairs);
+  let transform = held;
   let errorsPx = northUpErrors;
-  let rotated = false;
   if (northUpErrors.every((e) => e > NORTH_UP_TOLERANCE_PX)) {
     const turned = fit(pairs, true);
     if (!turned || Math.abs(turned.rotationDeg) > MAX_ROTATION_DEG) {
@@ -171,8 +198,8 @@ export function solveAlignment(pairs: PointPair[]): AlignmentResult {
     }
     transform = turned;
     errorsPx = errorsOf(turned, pairs);
-    rotated = true;
   }
+  const rotated = transform.rotationDeg !== 0;
   const midLat = pairs.reduce((s, p) => s + p.map[1], 0) / pairs.length;
   const metresPerPixel = transform.scale * Math.cos((midLat * Math.PI) / 180);
   if (metresPerPixel < MIN_METRES_PER_PIXEL || metresPerPixel > MAX_METRES_PER_PIXEL) {
@@ -186,6 +213,7 @@ export function solveAlignment(pairs: PointPair[]): AlignmentResult {
       errorsPx: errorsPx.map((e) => round(e, 2)),
       metresPerPixel: round(metresPerPixel, 4),
       rotated,
+      ...(preferred ? { preferredTurnDeg: round(preferred, 3) } : {}),
     },
   };
 }

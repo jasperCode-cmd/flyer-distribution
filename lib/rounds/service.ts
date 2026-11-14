@@ -485,19 +485,19 @@ export async function deleteScreenshot(db: Db, storage: ScreenshotStorage, sid: 
   await refreshRoundSummary(db, shot.roundId);
 }
 
-// The crop, the alignment (worked out again here from the clicked points)
-// and the traced route; then the round's distance and sectors afresh.
-export async function saveScreenshotWork(db: Db, sid: string, work: ScreenshotWork): Promise<RoundScreenshotView> {
-  const shot = await db.roundScreenshot.findUnique({ where: { id: sid }, select: { roundId: true } });
-  if (!shot) throw new RoundsError("That screenshot no longer exists.", 404);
+// What saving a screenshot's work changes: the crop, the alignment (worked
+// out again here from the points, starting from the turn sent: the
+// compass's, or one measured automatically), how it was lined up, the traced
+// route and its start and end.
+function workData(work: ScreenshotWork): Prisma.RoundScreenshotUpdateInput {
   const data: Prisma.RoundScreenshotUpdateInput = {};
   if (work.crop) data.crop = work.crop;
   if ("pairs" in work) {
     if (work.pairs === null) data.alignment = Prisma.DbNull;
     else {
-      const solved = solveAlignment(work.pairs!);
+      const solved = solveAlignment(work.pairs!, { turnDeg: work.turnDeg ?? null });
       if (!solved.ok) throw new RoundsError(solved.error);
-      data.alignment = solved.alignment as unknown as Prisma.InputJsonValue;
+      data.alignment = { ...solved.alignment, source: work.source ?? { kind: "hand" } } as unknown as Prisma.InputJsonValue;
     }
   }
   if ("route" in work) {
@@ -511,27 +511,48 @@ export async function saveScreenshotWork(db: Db, sid: string, work: ScreenshotWo
     }
   }
   if ("markers" in work) data.markers = work.markers ? (work.markers as unknown as Prisma.InputJsonValue) : Prisma.DbNull;
-  const row = await db.roundScreenshot.update({
-    where: { id: sid },
-    data,
-    select: {
-      id: true,
-      position: true,
-      width: true,
-      height: true,
-      originalName: true,
-      takenAt: true,
-      sourceSha256: true,
-      blobUrl: true,
-      crop: true,
-      alignment: true,
-      route: true,
-      markers: true,
-      routeLengthM: true,
-    },
-  });
+  return data;
+}
+
+const SHOT_SELECT = {
+  id: true,
+  position: true,
+  width: true,
+  height: true,
+  originalName: true,
+  takenAt: true,
+  sourceSha256: true,
+  blobUrl: true,
+  crop: true,
+  alignment: true,
+  route: true,
+  markers: true,
+  routeLengthM: true,
+} satisfies Prisma.RoundScreenshotSelect;
+
+// One screenshot's work; then the round's distance and sectors afresh.
+export async function saveScreenshotWork(db: Db, sid: string, work: ScreenshotWork): Promise<RoundScreenshotView> {
+  const shot = await db.roundScreenshot.findUnique({ where: { id: sid }, select: { roundId: true } });
+  if (!shot) throw new RoundsError("That screenshot no longer exists.", 404);
+  const row = await db.roundScreenshot.update({ where: { id: sid }, data: workData(work), select: SHOT_SELECT });
   if ("route" in work) await refreshRoundSummary(db, shot.roundId);
   return screenshotView(row);
+}
+
+// Several screenshots of one round saved together (accepting automatic
+// line-ups): every one checked first, all saved in one transaction, then
+// the round's distance and sectors worked out once.
+export async function saveScreenshotsWork(db: Db, roundId: string, items: { id: string; work: ScreenshotWork }[]): Promise<RoundScreenshotView[]> {
+  const datas = items.map((item) => ({ id: item.id, data: workData(item.work) }));
+  const rows = await db.$transaction(async (tx) => {
+    const owned = await tx.roundScreenshot.findMany({ where: { roundId, id: { in: items.map((i) => i.id) } }, select: { id: true } });
+    if (owned.length !== items.length) throw new RoundsError("A screenshot in the list isn't in this round.", 404);
+    const out = [];
+    for (const d of datas) out.push(await tx.roundScreenshot.update({ where: { id: d.id }, data: d.data, select: SHOT_SELECT }));
+    return out;
+  });
+  if (items.some((i) => "route" in i.work)) await refreshRoundSummary(db, roundId);
+  return rows.map(screenshotView);
 }
 
 export async function refreshRoundSummary(db: Db, roundId: string): Promise<void> {

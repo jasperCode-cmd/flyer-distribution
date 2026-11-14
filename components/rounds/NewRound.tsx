@@ -130,6 +130,9 @@ export default function NewRound({ leadId, projectId }: { leadId: string | null;
           The MapMyRun route screenshots for this round, up to {MAX_SCREENSHOTS}. Several can show different parts of the same round; after saving, you work through them one at a time.
           {options && !options.storage && " Screenshots aren't stored yet: they are used here to trace the route, and only the round and its lines are saved."}
         </p>
+        <p className="mt-2 rounded-md bg-violet-50 px-3 py-2 text-sm text-violet-900" role="note">
+          <span className="font-semibold">Tip:</span> For quicker auto line-up, keep the same zoom, overlap each screenshot by about half a screen, and tap the compass so north is up.
+        </p>
         <label className={`mt-3 inline-flex items-center gap-2 rounded-md border border-blue-700 px-3 py-2 text-sm font-semibold text-blue-800 ${reading || picked.length >= MAX_SCREENSHOTS ? "opacity-60" : "cursor-pointer hover:bg-blue-50"}`}>
           {reading ? `Reading ${reading.done} of ${reading.total}...` : picked.length ? "Add more screenshots" : "Choose screenshots"}
           <input type="file" accept="image/png,image/jpeg,image/webp" multiple className="sr-only" onChange={(e) => pick(e.target.files)} disabled={!!reading || picked.length >= MAX_SCREENSHOTS} />

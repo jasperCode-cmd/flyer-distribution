@@ -5,7 +5,9 @@ import type { RoundScreenshotView } from "./types";
 // the round's screenshots by their fingerprint (the SHA-256 of the file), so
 // picking the same files again carries on where the work stopped. Pure.
 
-export type QueueStatus = "todo" | "lined" | "traced" | "saved" | "skipped";
+// "review": lined up and traced automatically, waiting to be accepted;
+// "needs": auto line-up couldn't place it, so it is to line up by hand.
+export type QueueStatus = "todo" | "lined" | "traced" | "saved" | "skipped" | "review" | "needs";
 
 export const STATUS_LABELS: Record<QueueStatus, string> = {
   todo: "To do",
@@ -13,6 +15,8 @@ export const STATUS_LABELS: Record<QueueStatus, string> = {
   traced: "Traced",
   saved: "Saved",
   skipped: "Skipped",
+  review: "Ready for review",
+  needs: "Needs line-up",
 };
 
 // What the database says about a screenshot: saved once its traced line is
@@ -24,20 +28,22 @@ export function statusOf(shot: Pick<RoundScreenshotView, "routeLengthM" | "align
   return "todo";
 }
 
-export type Progress = { total: number; saved: number; skipped: number; label: string };
+export type Progress = { total: number; saved: number; skipped: number; review: number; label: string };
 
 export function progressOf(statuses: QueueStatus[]): Progress {
   const saved = statuses.filter((s) => s === "saved").length;
   const skipped = statuses.filter((s) => s === "skipped").length;
+  const review = statuses.filter((s) => s === "review").length;
   const total = statuses.length;
-  return { total, saved, skipped, label: `${saved} of ${total} done${skipped ? `, ${skipped} skipped` : ""}` };
+  return { total, saved, skipped, review, label: `${saved} of ${total} done${review ? `, ${review} ready for review` : ""}${skipped ? `, ${skipped} skipped` : ""}` };
 }
 
 // The next one still to work on after `from`: the first later one neither
 // saved nor skipped, else the first such from the start; -1 when none is
 // left. `open` says which can be worked on here (its file is to hand).
 export function nextToDo(statuses: QueueStatus[], from: number, open: (i: number) => boolean = () => true): number {
-  const waiting = (i: number) => statuses[i] !== "saved" && statuses[i] !== "skipped" && open(i);
+  // Ones waiting for review are reviewed, not worked through.
+  const waiting = (i: number) => statuses[i] !== "saved" && statuses[i] !== "skipped" && statuses[i] !== "review" && open(i);
   for (let i = from + 1; i < statuses.length; i++) if (waiting(i)) return i;
   for (let i = 0; i <= Math.min(from, statuses.length - 1); i++) if (waiting(i)) return i;
   return -1;

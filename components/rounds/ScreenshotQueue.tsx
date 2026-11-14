@@ -1,29 +1,39 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { solveAlignment } from "@/lib/rounds/alignment";
 import { STATUS_LABELS, nextToDo, progressOf, statusOf, type QueueStatus } from "@/lib/rounds/queue";
 import type { RoundScreenshotView } from "@/lib/rounds/types";
 import { compressForStorage, makeWorkingImage, type WorkingImage } from "@/lib/rounds/working-image";
+import { AutoProcess, canAutoProcess, type AutoItem, type AutoRef, type Source } from "./auto-process";
+import { loadDrafts, removeDrafts, saveDraft, type StoredDraft } from "./drafts";
+import ReviewGrid from "./ReviewGrid";
 import ScreenshotWorkspace, { type Bbox } from "./ScreenshotWorkspace";
+import { api, send } from "./rounds-api";
 
-// Working through a round's screenshots one at a time: every screenshot
-// listed with its name, its own date and how far it has got (To do, Lined
-// up, Traced, Saved, Skipped), the progress, and the one in hand in the
-// workspace, with Skip and Save and next. Only that one is held at full
-// size; the others are just their files, read when their turn comes. Each
-// is saved as soon as it is done, and the next opens on the map where the
-// last one was. A screenshot whose file isn't to hand here (and isn't
-// stored) is listed but can't be opened until its file is chosen.
+// Working through a round's screenshots: every screenshot listed with its
+// name, its own date and how far it has got (To do, Lined up, Traced, Saved,
+// Skipped, Ready for review, Needs line-up), the progress, and the one in
+// hand in the workspace, with Skip and Save and next. Only that one is held
+// at full size; the others are just their files, read when their turn comes.
+// Each is saved as soon as it is done, and the next opens on the map where
+// the last one was. Once one is lined up, "Auto-process the rest" lines up
+// and traces the others in a background worker, one at a time, matching each
+// to the nearest lined up; those it places wait, in this browser, for review
+// (accept, open to fix, or skip), and those it can't are left to do by hand.
 
 type Entry = { shot: RoundScreenshotView; file: File | null; status: QueueStatus };
+type View = "work" | "review";
 
 type Props = {
+  roundId: string;
   shots: RoundScreenshotView[];
   // Files chosen in this browser, by screenshot id.
   files: Map<string, File>;
   startId: string | null;
   focus: Bbox | null;
   storage: boolean;
+  initialView?: View;
   onClose: () => void;
 };
 
@@ -38,7 +48,12 @@ const CHIP: Record<QueueStatus, string> = {
   traced: "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-900",
   saved: "border-green-200 bg-green-50 text-green-900",
   skipped: "border-amber-200 bg-amber-50 text-amber-900",
+  review: "border-violet-200 bg-violet-50 text-violet-900",
+  needs: "border-red-200 bg-red-50 text-red-900",
 };
+
+// Up to this many lined-up screenshots are handed to the worker to start from.
+const START_REFS = 8;
 
 async function storedImage(id: string): Promise<Blob> {
   const res = await fetch(`/api/crm/rounds/screenshots/${id}/image`);
@@ -46,7 +61,7 @@ async function storedImage(id: string): Promise<Blob> {
   return res.blob();
 }
 
-export default function ScreenshotQueue({ shots, files, startId, focus, storage, onClose }: Props) {
+export default function ScreenshotQueue({ roundId, shots, files, startId, focus, storage, initialView = "work", onClose }: Props) {
   const [entries, setEntries] = useState<Entry[]>(() => shots.map((shot) => ({ shot, file: files.get(shot.id) ?? null, status: statusOf(shot) })));
   const openable = (e: Entry) => !!e.file || e.shot.stored;
   const [current, setCurrent] = useState<number>(() => {
@@ -58,6 +73,11 @@ export default function ScreenshotQueue({ shots, files, startId, focus, storage,
       (i) => openable(entries[i])
     );
   });
+  const [view, setView] = useState<View>(initialView);
+  const [drafts, setDrafts] = useState<Map<string, StoredDraft>>(() => new Map());
+  const [fixing, setFixing] = useState<string | null>(null);
+  const [auto, setAuto] = useState<{ done: number; total: number; name: string | null; placed: number; missed: number } | null>(null);
+  const [accepting, setAccepting] = useState(false);
   const [image, setImage] = useState<(WorkingImage & { forId: string }) | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -66,9 +86,27 @@ export default function ScreenshotQueue({ shots, files, startId, focus, storage,
   const latest = useRef(entries);
   latest.current = entries;
   const listRef = useRef<HTMLOListElement>(null);
+  const processor = useRef<AutoProcess | null>(null);
+
+  // Drafts already waiting in this browser for this round.
+  useEffect(() => {
+    let live = true;
+    loadDrafts(roundId).then((found) => {
+      if (!live || found.length === 0) return;
+      const byId = new Map(found.map((d) => [d.id, d]));
+      setDrafts(byId);
+      const next = latest.current.map((e) => (byId.has(e.shot.id) && e.status !== "saved" ? { ...e, status: "review" as QueueStatus } : e));
+      latest.current = next;
+      setEntries(next);
+    });
+    return () => {
+      live = false;
+      processor.current?.stop();
+    };
+  }, [roundId]);
 
   const progress = useMemo(() => progressOf(entries.map((e) => e.status)), [entries]);
-  const currentId = current >= 0 ? entries[current]?.shot.id : null;
+  const currentId = view === "work" && current >= 0 ? entries[current]?.shot.id : null;
 
   // Only the one in hand is read at full size; the last one is let go.
   useEffect(() => {
@@ -120,6 +158,7 @@ export default function ScreenshotQueue({ shots, files, startId, focus, storage,
 
   function moveOn(after: Entry[], from: number) {
     setNotice(null);
+    setFixing(null);
     setCurrent(
       nextToDo(
         after.map((e) => e.status),
@@ -134,6 +173,8 @@ export default function ScreenshotQueue({ shots, files, startId, focus, storage,
     if (!openable(e)) return;
     // A skipped one opened again is back to where it had got.
     if (e.status === "skipped") update(e.shot.id, (x) => ({ ...x, status: statusOf(x.shot) }));
+    setFixing(e.status === "review" ? e.shot.id : null);
+    setView("work");
     setCurrent(i);
   }
 
@@ -144,7 +185,125 @@ export default function ScreenshotQueue({ shots, files, startId, focus, storage,
     moveOn(after, -1);
   }
 
+  async function forgetDrafts(ids: string[]) {
+    await removeDrafts(ids);
+    setDrafts((all) => {
+      const next = new Map(all);
+      for (const id of ids) next.delete(id);
+      return next;
+    });
+  }
+
+  // --- Auto-process the rest ------------------------------------------------------------------
+
+  const position = (id: string) => latest.current.findIndex((e) => e.shot.id === id);
+  const sourceOf = (e: Entry): Source => e.file ?? (() => storedImage(e.shot.id));
+  const lineable = entries.filter((e) => ["todo", "needs", "skipped"].includes(e.status) && openable(e));
+  const startingPoints = entries.filter((e) => (e.shot.alignment || drafts.has(e.shot.id)) && openable(e));
+  const autoAvailable = canAutoProcess();
+
+  async function autoProcess() {
+    const all = latest.current;
+    const items: AutoItem[] = all
+      .map((e, i) => ({ e, i }))
+      .filter(({ e }) => ["todo", "needs", "skipped"].includes(e.status) && openable(e))
+      .map(({ e, i }) => ({ id: e.shot.id, position: i, file: sourceOf(e), name: e.shot.originalName ?? `Screenshot ${i + 1}` }));
+    // Lined up ones (by hand, or waiting for review) nearest the rest go first.
+    const refs: AutoRef[] = [];
+    for (const { e, i } of all.map((e, i) => ({ e, i }))) {
+      if (!openable(e)) continue;
+      const draft = drafts.get(e.shot.id)?.draft;
+      const transform = e.shot.alignment?.transform ?? (draft ? (() => { const s = solveAlignment(draft.pairs, { turnDeg: draft.turnDeg }); return s.ok ? s.alignment.transform : null; })() : null);
+      if (!transform) continue;
+      refs.push({ id: e.shot.id, position: i, file: sourceOf(e), transform, crop: e.shot.crop ?? draft?.crop ?? null, confidence: draft && !e.shot.alignment ? draft.confidence : 1, depth: draft && !e.shot.alignment ? (draft.depth ?? 3) : e.shot.alignment?.source?.kind === "auto" ? 2 : 0 });
+    }
+    const gap = (r: AutoRef) => Math.min(...items.map((it) => Math.abs(it.position - r.position)));
+    const start = refs.sort((a, b) => gap(a) - gap(b)).slice(0, START_REFS);
+    if (!items.length || !start.length) return;
+    setNotice(null);
+    setAuto({ done: 0, total: items.length, name: null, placed: 0, missed: 0 });
+    const run = new AutoProcess();
+    processor.current = run;
+    let placed = 0;
+    let missed = 0;
+    try {
+      await run.run(start, items, {
+        onStart: (item, done, total) => setAuto({ done, total, name: item.name, placed, missed }),
+        onResult: (outcome, done, total) => {
+          if (outcome.ok) {
+            placed++;
+            const shot = latest.current[position(outcome.id)]?.shot;
+            const stored: StoredDraft = { id: outcome.id, roundId, sha256: shot?.sha256 ?? null, savedAt: new Date().toISOString(), draft: outcome.draft, thumb: outcome.thumb };
+            saveDraft(stored);
+            setDrafts((d) => new Map(d).set(outcome.id, stored));
+            update(outcome.id, (x) => ({ ...x, status: "review" }));
+          } else {
+            missed++;
+            update(outcome.id, (x) => ({ ...x, status: "needs" }));
+          }
+          setAuto({ done, total, name: null, placed, missed });
+        },
+      });
+      setNotice(`Auto-processing ${run.wasStopped ? "stopped" : "finished"}: ${placed} lined up and traced for review${missed ? `, ${missed} need lining up by hand` : ""}.`);
+      if (placed) setView("review");
+    } catch (e) {
+      setNotice(`Auto-processing stopped: ${(e as Error).message}`);
+    } finally {
+      processor.current = null;
+      setAuto(null);
+    }
+  }
+
+  // --- Review ---------------------------------------------------------------------------------
+
+  async function accept(ids: string[]) {
+    const items = ids
+      .map((id) => ({ id, d: drafts.get(id)?.draft }))
+      .filter((x) => x.d)
+      .map(({ id, d }) => ({
+        id,
+        work: {
+          crop: d!.crop,
+          pairs: d!.pairs,
+          turnDeg: d!.turnDeg,
+          source: d!.source,
+          route: d!.lines.length ? d!.lines : null,
+          markers: d!.markers.start || d!.markers.end ? d!.markers : null,
+        },
+      }));
+    if (!items.length) return;
+    setAccepting(true);
+    setNotice(null);
+    try {
+      // All in one request; the round's figures are worked out once.
+      const res = await api<{ shots: RoundScreenshotView[] }>(`/api/crm/rounds/${roundId}/screenshots`, send("PATCH", { items }));
+      for (const shot of res.shots) update(shot.id, (x) => ({ ...x, shot, status: statusOf(shot) }));
+      await forgetDrafts(res.shots.map((s) => s.id));
+      setNotice(`${res.shots.length} accepted and saved.`);
+    } catch (e) {
+      setNotice(`Not saved: ${(e as Error).message}`);
+    } finally {
+      setAccepting(false);
+    }
+  }
+
+  async function skipDraft(id: string) {
+    await forgetDrafts([id]);
+    update(id, (x) => ({ ...x, status: "skipped" }));
+  }
+
+  const reviewItems = entries
+    .map((e, index) => ({ e, index }))
+    .filter(({ e }) => e.status === "review" && drafts.has(e.shot.id))
+    .map(({ e, index }) => {
+      const stored = drafts.get(e.shot.id)!;
+      const from = stored.draft.source.from;
+      const fromIndex = from ? entries.findIndex((x) => x.shot.id === from) : -1;
+      return { index, shot: e.shot, stored, canOpen: openable(e), fromIndex: fromIndex >= 0 ? fromIndex : null };
+    });
+
   const entry = current >= 0 ? entries[current] : null;
+  const fixDraft = entry && (fixing === entry.shot.id || entry.status === "review") ? (drafts.get(entry.shot.id)?.draft ?? null) : null;
   const left = entry
     ? nextToDo(
         entries.map((e, i) => (i === current ? "saved" : e.status)),
@@ -152,7 +311,7 @@ export default function ScreenshotQueue({ shots, files, startId, focus, storage,
         (i) => openable(entries[i])
       )
     : -1;
-  const waitingForFiles = entries.filter((e) => !openable(e) && e.status !== "saved").length;
+  const waitingForFiles = entries.filter((e) => !openable(e) && e.status !== "saved" && e.status !== "review").length;
 
   return (
     <div className="space-y-3">
@@ -166,17 +325,71 @@ export default function ScreenshotQueue({ shots, files, startId, focus, storage,
               <div className="h-full rounded-full bg-green-600" style={{ width: `${progress.total ? (progress.saved / progress.total) * 100 : 0}%` }} />
             </div>
           </div>
-          <button type="button" onClick={onClose} className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-800 hover:bg-gray-50">
-            Back to the round
-          </button>
+          <div className="flex flex-wrap gap-2">
+            {!auto && (
+              <button
+                type="button"
+                onClick={autoProcess}
+                disabled={!autoAvailable || !startingPoints.length || !lineable.length}
+                title={
+                  !autoAvailable
+                    ? "This browser can't auto-process; use a recent Chrome, Edge, Firefox or Safari"
+                    : !startingPoints.length
+                      ? "Line up one screenshot by hand first; the rest are matched to it"
+                      : !lineable.length
+                        ? "Nothing left to auto-process"
+                        : undefined
+                }
+                className="rounded-md bg-violet-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-violet-800 disabled:opacity-50"
+              >
+                Auto-process the rest{lineable.length ? ` (${lineable.length})` : ""}
+              </button>
+            )}
+            {view === "work" ? (
+              reviewItems.length > 0 && (
+                <button type="button" onClick={() => setView("review")} className="rounded-md border border-violet-300 px-3 py-1.5 text-sm font-semibold text-violet-900 hover:bg-violet-50">
+                  Review automatic line-ups ({reviewItems.length})
+                </button>
+              )
+            ) : (
+              <button type="button" onClick={() => setView("work")} className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-800 hover:bg-gray-50">
+                Back to working through
+              </button>
+            )}
+            <button type="button" onClick={onClose} className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-semibold text-gray-800 hover:bg-gray-50">
+              Back to the round
+            </button>
+          </div>
         </div>
+        {!startingPoints.length && lineable.length > 1 && (
+          <p className="mt-2 text-xs text-gray-600">Line up one screenshot by hand, then &quot;Auto-process the rest&quot; matches the others to it.</p>
+        )}
+        {auto && (
+          <div className="mt-3 rounded-md border border-violet-200 bg-violet-50 p-2 text-sm" role="status" aria-label="Auto-processing">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="font-semibold text-violet-900">
+                Auto-processing {Math.min(auto.done + 1, auto.total)} of {auto.total}
+                {auto.name ? `: ${auto.name}` : ""}
+              </p>
+              <button type="button" onClick={() => processor.current?.stop()} className="rounded-md border border-violet-300 bg-white px-2.5 py-1 text-xs font-semibold text-violet-900 hover:bg-violet-100">
+                Stop
+              </button>
+            </div>
+            <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-white" aria-hidden="true">
+              <div className="h-full rounded-full bg-violet-600" style={{ width: `${(auto.done / auto.total) * 100}%` }} />
+            </div>
+            <p className="mt-1 text-xs text-violet-900">
+              {auto.placed} lined up for review{auto.missed ? `, ${auto.missed} to do by hand` : ""}. One screenshot is read at a time, in the background.
+            </p>
+          </div>
+        )}
         <ol ref={listRef} className="mt-3 max-h-48 divide-y divide-gray-100 overflow-y-auto rounded-md border border-gray-100 text-sm" aria-label="Screenshots">
           {entries.map((e, i) => (
-            <li key={e.shot.id} aria-current={i === current ? "true" : undefined} className={i === current ? "bg-blue-50" : undefined}>
+            <li key={e.shot.id} aria-current={view === "work" && i === current ? "true" : undefined} className={view === "work" && i === current ? "bg-blue-50" : undefined}>
               <button
                 type="button"
                 onClick={() => open(i)}
-                disabled={!openable(e) || i === current}
+                disabled={!openable(e) || (view === "work" && i === current) || !!auto}
                 className="flex w-full items-center gap-2 px-2 py-1.5 text-left enabled:hover:bg-gray-50 disabled:cursor-default"
               >
                 <span className="w-7 shrink-0 text-right tabular-nums text-gray-500">{i + 1}.</span>
@@ -184,7 +397,7 @@ export default function ScreenshotQueue({ shots, files, startId, focus, storage,
                   {e.shot.originalName ?? "Screenshot"}
                 </span>
                 <span className="hidden shrink-0 text-xs text-gray-500 sm:inline">{taken(e.shot.takenAt)}</span>
-                {!openable(e) && e.status !== "saved" && <span className="shrink-0 text-xs text-gray-500">file not chosen</span>}
+                {!openable(e) && e.status !== "saved" && e.status !== "review" && <span className="shrink-0 text-xs text-gray-500">file not chosen</span>}
                 <span className={`shrink-0 rounded-full border px-2 py-0.5 text-xs font-semibold ${CHIP[e.status]}`}>{STATUS_LABELS[e.status]}</span>
               </button>
             </li>
@@ -198,12 +411,25 @@ export default function ScreenshotQueue({ shots, files, startId, focus, storage,
       </section>
 
       {notice && (
-        <p className="text-sm text-amber-800" role="status">
+        <p className="text-sm text-violet-900" role="status">
           {notice}
         </p>
       )}
 
-      {entry ? (
+      {view === "review" ? (
+        <ReviewGrid
+          items={reviewItems}
+          busy={accepting || !!auto}
+          onAccept={accept}
+          onOpen={(id) => {
+            const i = entries.findIndex((e) => e.shot.id === id);
+            if (i >= 0) open(i);
+          }}
+          onSkip={skipDraft}
+        />
+      ) : auto ? (
+        <p className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-600">The automatic line-ups appear for review as they are done.</p>
+      ) : entry ? (
         loadError ? (
           <div className="space-y-2 rounded-lg border border-red-200 bg-white p-4 text-sm">
             <p className="text-red-700" role="alert">
@@ -222,21 +448,23 @@ export default function ScreenshotQueue({ shots, files, startId, focus, storage,
           </div>
         ) : image && image.forId === entry.shot.id ? (
           <ScreenshotWorkspace
-            key={entry.shot.id}
+            key={`${entry.shot.id}${fixDraft ? "-draft" : ""}`}
             shot={entry.shot}
             image={image}
             index={current}
             total={entries.length}
-            focus={where ?? focus}
+            focus={fixDraft ? footprintBox(fixDraft.footprint) : (where ?? focus)}
+            draft={fixDraft}
             onProgress={(status, shot) => update(entry.shot.id, (x) => ({ ...x, shot: shot ?? x.shot, status }))}
             onSaved={(shot, at) => {
               if (at) setWhere(at);
+              if (drafts.has(shot.id)) forgetDrafts([shot.id]);
               const after = update(entry.shot.id, (x) => ({ ...x, shot, status: statusOf(shot) }));
               moveOn(after, current);
             }}
             onSkip={(at) => {
               if (at) setWhere(at);
-              const after = update(entry.shot.id, (x) => ({ ...x, status: x.status === "saved" ? "saved" : "skipped" }));
+              const after = update(entry.shot.id, (x) => ({ ...x, status: x.status === "saved" || x.status === "review" ? x.status : "skipped" }));
               moveOn(after, current);
             }}
             skipLabel="Skip"
@@ -253,6 +481,11 @@ export default function ScreenshotQueue({ shots, files, startId, focus, storage,
             {progress.saved === progress.total ? "Every screenshot is saved." : `Nothing left to work on here: ${progress.label}.`}
           </p>
           <div className="flex flex-wrap gap-2">
+            {reviewItems.length > 0 && (
+              <button type="button" onClick={() => setView("review")} className="rounded-md bg-violet-700 px-3 py-1.5 font-semibold text-white hover:bg-violet-800">
+                Review automatic line-ups ({reviewItems.length})
+              </button>
+            )}
             {progress.skipped > 0 && (
               <button type="button" onClick={revisitSkipped} className="rounded-md border border-gray-300 px-3 py-1.5 font-semibold text-gray-800 hover:bg-gray-50">
                 Go back to the skipped ones
@@ -266,4 +499,8 @@ export default function ScreenshotQueue({ shots, files, startId, focus, storage,
       )}
     </div>
   );
+}
+
+function footprintBox(points: [number, number][]): Bbox {
+  return [Math.min(...points.map((p) => p[0])), Math.min(...points.map((p) => p[1])), Math.max(...points.map((p) => p[0])), Math.max(...points.map((p) => p[1]))];
 }
