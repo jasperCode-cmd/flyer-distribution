@@ -1,10 +1,12 @@
 import Link from "next/link";
 import AreaCheckForm from "@/components/AreaCheckForm";
+import HomeAreaGroup from "@/components/HomeAreaGroup";
 import { regionColumns } from "@/lib/areas-overview";
 
 // The homepage's "Areas We Cover": the intro and a "Check if we cover you"
 // search, then the four regions with their towns, from the same data as the
-// /areas explorer so the two never disagree.
+// /areas explorer so the two never disagree. On phones each region is a row
+// that opens and closes (components/HomeAreaGroup.tsx).
 
 const Arrow = ({ className }: { className: string }) => (
   <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={2.25} strokeLinecap="round" strokeLinejoin="round">
@@ -36,25 +38,10 @@ export default function HomeAreas() {
           <AreaCheckForm />
         </div>
 
-        {/* 2. The four regions and their towns */}
-        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-8">
+        {/* 2. The four regions and their towns: columns from md, rows that open and close on phones, a line between them. */}
+        <div className="mt-10 grid grid-cols-1 divide-y divide-white/15 md:grid-cols-2 md:gap-x-8 md:gap-y-8 md:divide-y-0 lg:grid-cols-4">
           {regionColumns().map((region) => (
-            <div key={region.id}>
-              <h3 className="text-xs font-bold uppercase tracking-[0.14em] text-blue-300 mb-2">{region.label}</h3>
-              <ul>
-                {region.areas.map((area) => (
-                  <li key={area.slug} className="border-b border-white/15">
-                    <Link
-                      href={area.href}
-                      className={`group flex min-h-11 items-center justify-between gap-3 rounded-sm py-2 font-semibold text-white transition-colors hover:text-[#facc15] ${FOCUS}`}
-                    >
-                      {area.name}
-                      <Arrow className="h-4 w-4 shrink-0 text-[#facc15] transition-transform duration-200 group-hover:translate-x-0.5" />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <HomeAreaGroup key={region.id} label={region.label} areas={region.areas} />
           ))}
         </div>
 

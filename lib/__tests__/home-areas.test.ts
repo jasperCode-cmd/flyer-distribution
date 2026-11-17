@@ -63,8 +63,8 @@ test("the section: heading and intro, the search form, 16 town links in their co
   for (const attr of ['id="area-check"', 'name="q"', 'type="search"', 'placeholder="Town or postcode, e.g. BH14"']) assert.ok(input.includes(attr), attr);
   assert.match(html, /<button type="submit" class="h-12[^"]*">Check<\/button>/);
   assert.equal((html.match(/<form\b/g) ?? []).length, 1);
-  // Each column's heading and its towns, one link per row.
-  const columns = [...html.matchAll(/<h3[^>]*>([^<]*)<\/h3><ul>([\s\S]*?)<\/ul>/g)].map((m) => [
+  // Each column's heading (as from md) and its towns, one link per row.
+  const columns = [...html.matchAll(/<h3 class="hidden md:block[^"]*">([^<]*)<\/h3>[\s\S]*?<ul class="[^"]*">([\s\S]*?)<\/ul>/g)].map((m) => [
     m[1].replace(/&amp;/g, "&"),
     [...m[2].matchAll(/<li class="border-b[^"]*"><a class="([^"]*)" href="([^"]*)">([\s\S]*?)<\/a><\/li>/g)].map((l) => ({ cls: l[1], href: l[2], name: textOf(l[3]) })),
   ]) as [string, { cls: string; href: string; name: string }[]][];
@@ -83,6 +83,38 @@ test("the section: heading and intro, the search form, 16 town links in their co
   assert.ok([...html.matchAll(/href="([^"]*)"/g)].every((m) => m[1].startsWith("/")));
   assert.doesNotMatch(html, /[\u2013\u2014]/);
   assert.doesNotMatch(text, /\bstreet/i);
+});
+
+test("on phones each region is a row that opens and closes, closed to start with; every town stays in the HTML", () => {
+  const html = render();
+  const groups = [
+    ...html.matchAll(
+      /<h3 class="md:hidden"><button type="button" aria-expanded="(\w+)" aria-controls="([^"]+)" class="([^"]*)"><span class="[^"]*">([^<]*)<\/span><span class="([^"]*)">([^<]*)<\/span><svg[^>]*class="([^"]*)"[\s\S]*?<\/button><\/h3><div id="([^"]+)" class="([^"]*)"><ul class="([^"]*)">([\s\S]*?)<\/ul><\/div>/g
+    ),
+  ].map((m) => ({ expanded: m[1], controls: m[2], button: m[3], label: m[4].replace(/&amp;/g, "&"), countClass: m[5], count: m[6], chevron: m[7], id: m[8], panel: m[9], list: m[10], towns: [...m[11].matchAll(/href="([^"]*)"/g)].map((x) => x[1]) }));
+  // The four regions, in order, each a real button that names the towns it opens.
+  assert.deepEqual(groups.map((g) => g.label), EXPECTED.map(([label]) => label));
+  for (const g of groups) {
+    assert.equal(g.expanded, "false", `${g.label}: closed to start with`);
+    assert.equal(g.controls, g.id, `${g.label}: aria-controls names its towns`);
+    assert.match(g.button, /\bmin-h-14 w-full\b/, `${g.label}: at least 56px tall, full width`);
+    assert.match(g.countClass, /text-sm text-blue-200\/70/);
+    assert.match(g.chevron, /text-\[#facc15\] transition-transform duration-300 motion-reduce:transition-none/);
+    // Closed: collapsed and hidden by CSS on phones (so not tabbed to or read out), always shown from md.
+    assert.match(g.panel, /^grid transition-\[grid-template-rows,visibility\] duration-300 ease-out motion-reduce:transition-none md:visible md:grid-rows-\[1fr\] invisible grid-rows-\[0fr\]$/);
+    assert.equal(g.list, "overflow-hidden md:overflow-visible");
+  }
+  // The counts, and every town's link in the server HTML, once.
+  assert.deepEqual(groups.map((g) => g.count), EXPECTED.map(([, names]) => `${names.length} ${names.length === 1 ? "area" : "areas"}`));
+  const towns = groups.flatMap((g) => g.towns);
+  assert.equal(towns.length, 16);
+  for (const card of overviewCards()) assert.equal(html.split(`href="${card.href}"`).length - 1, card.slug === "winchester" ? 2 : 1, card.slug);
+  // A line between the regions on phones (none from md, where they are columns).
+  assert.match(html, /<div class="mt-10 grid grid-cols-1 divide-y divide-white\/15 md:grid-cols-2 md:gap-x-8 md:gap-y-8 md:divide-y-0 lg:grid-cols-4">/);
+  // The opening is the component's own state, so more than one region can be open.
+  const source = readFileSync("components/HomeAreaGroup.tsx", "utf8");
+  assert.match(source, /const \[open, setOpen\] = useState\(false\);/);
+  assert.match(source, /onClick=\{\(\) => setOpen\(\(o\) => !o\)\}/);
 });
 
 test("the search sends people to /areas?q=, and /areas runs it straight away", () => {
