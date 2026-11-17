@@ -388,9 +388,11 @@ export default function LeafletPrintingPage() {
         </div>
       </section>
 
-      {/* 4. Paper and finish: the recommendation and the paper photo, beside the print builder (after the text on phones) */}
+      {/* 4. Paper and finish: the recommendation and the paper photo, beside the print builder (after the text on phones).
+          From lg the two columns are the same height, and the photo grows to fill the left one, so its bottom
+          lines up with the builder's, whatever the builder is showing. Below lg the photo stays 180px tall. */}
       <section id="paper-and-finish" className={`bg-[#f8fafc] ${SECTION}`}>
-        <div className={`${CONTAINER} grid grid-cols-1 items-start gap-12 lg:grid-cols-2`}>
+        <div className={`${CONTAINER} grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:items-stretch`}>
           <div className="flex flex-col gap-[18px]">
             <h2 className={H2}>Paper and finish</h2>
             <p className={INTRO}>
@@ -402,14 +404,14 @@ export default function LeafletPrintingPage() {
               <span className={`shrink-0 ${BADGE}`}>We recommend</span>
               <span className="text-[18px] font-bold text-[#172554]">250gsm silk, double-sided</span>
             </div>
-            <div className="h-[180px] overflow-hidden rounded-[16px]">
+            <div className="relative h-[180px] overflow-hidden rounded-[16px] lg:h-auto lg:min-h-[180px] lg:flex-1">
               <Image
                 src="/images/printing-paper.webp"
                 alt="A fan of coloured paper sheets"
                 width={1200}
                 height={700}
                 sizes="(min-width: 1200px) 552px, (min-width: 1024px) 45vw, calc(100vw - 48px)"
-                className="h-full w-full object-cover"
+                className="absolute inset-0 h-full w-full object-cover object-center"
               />
             </div>
           </div>

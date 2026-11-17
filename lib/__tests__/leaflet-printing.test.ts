@@ -202,7 +202,7 @@ test("the print builder: a white card of pill buttons, the default chosen, its s
   assert.doesNotMatch(builder, /bg-\[#eff6ff\]/);
   assert.match(builder, /<div class="mt-6 flex flex-col gap-4 border-t border-\[#e2e8f0\] pt-5[^"]*"><p [^>]*aria-live="polite">Your choice: <strong[^>]*>A5 flyers, double-sided, 250gsm silk<\/strong><\/p><a class="[^"]*bg-\[#facc15\][^"]*" href="\/quote\?service=printing&amp;item=flyers&amp;size=A5&amp;sides=double&amp;ptype=silk&amp;weight=250">Get this printed<svg/);
   // The section can be linked to, for the quote form's Change link.
-  assert.match(html(), /<section id="paper-and-finish" class="bg-\[#f8fafc\] py-16 sm:py-\[88px\]"><div class="mx-auto w-full max-w-\[1200px\] px-6 grid grid-cols-1 items-start gap-12 lg:grid-cols-2">/);
+  assert.match(html(), /<section id="paper-and-finish" class="bg-\[#f8fafc\] py-16 sm:py-\[88px\]"><div class="mx-auto w-full max-w-\[1200px\] px-6 grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:items-stretch">/);
 });
 
 test("three ways to order, the navy one most popular, each with its link", () => {
@@ -337,10 +337,13 @@ test("the design's measures: the 1200px container, 88px sections alternating whi
   assert.match(SOURCE, /<div className="flex h-full items-center justify-center text-\[#1e3a8a\]">\s+<Icon className="h-12 w-12">\{icon\}<\/Icon>/);
   // The two smaller cards: #f8fafc, no border, the 34px blue icon on the left.
   assert.equal((print.match(/<li class="flex items-start gap-\[18px\] rounded-\[18px\] bg-\[#f8fafc\] p-6"><span class="shrink-0 text-\[#1d4ed8\]"><svg[^>]*class="block h-\[34px\] w-\[34px\]"/g) ?? []).length, 2);
-  // Paper and finish: the recommendation box white with a 2px navy border; under it the paper photo (16px corners, 180px);
-  // then the print builder (beside the text from lg, after it on phones). No size chips: the builder has the sizes.
+  // Paper and finish: the recommendation box white with a 2px navy border; under it the paper photo (16px corners),
+  // 180px tall below lg and from lg growing (from 180px) to fill the left column, which stretches to the builder's
+  // height, the photo covering it from the centre; then the print builder (beside the text from lg, after it on
+  // phones). No size chips: the builder has the sizes.
   const paper = sectionOf("Paper and finish");
-  assert.match(paper, /<div class="flex items-center gap-4 rounded-\[16px\] border-2 border-\[#1e3a8a\] bg-white px-\[22px\] py-5"><span class="shrink-0 [^"]*bg-\[#facc15\][^"]*">We recommend<\/span><span class="[^"]*font-bold[^"]*">250gsm silk, double-sided<\/span><\/div><div class="h-\[180px\] overflow-hidden rounded-\[16px\]"><img[^>]*alt="A fan of coloured paper sheets"[^>]*class="h-full w-full object-cover"[^>]*\/><\/div><\/div><div class="rounded-\[20px\]/);
+  assert.match(paper, /<div class="flex items-center gap-4 rounded-\[16px\] border-2 border-\[#1e3a8a\] bg-white px-\[22px\] py-5"><span class="shrink-0 [^"]*bg-\[#facc15\][^"]*">We recommend<\/span><span class="[^"]*font-bold[^"]*">250gsm silk, double-sided<\/span><\/div><div class="relative h-\[180px\] overflow-hidden rounded-\[16px\] lg:h-auto lg:min-h-\[180px\] lg:flex-1"><img[^>]*alt="A fan of coloured paper sheets"[^>]*class="absolute inset-0 h-full w-full object-cover object-center"[^>]*\/><\/div><\/div><div class="rounded-\[20px\]/);
+  assert.match(html(), /<section id="paper-and-finish" [^>]*><div class="[^"]* grid grid-cols-1 items-start gap-12 lg:grid-cols-2 lg:items-stretch"><div class="flex flex-col gap-\[18px\]"><h2 /);
   assert.match(paper, /we recommend <strong>250gsm silk, printed double-sided<\/strong>\./);
   assert.equal((paper.match(/<li /g) ?? []).length, 0);
   // Printing questions: the review a grey card with a 1px border; the questions 19px, bold, between 1px dividers.
