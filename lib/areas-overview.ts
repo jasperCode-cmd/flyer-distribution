@@ -3,7 +3,7 @@ import { AREA_REGIONS, type OverviewCard, type RegionId } from "@/lib/area-searc
 import { areas } from "@/lib/areas-data";
 import { formatPostcodeRanges } from "@/lib/postcode-ranges";
 
-// The /areas overview's 15 cards, in region order: each page's name, postcodes
+// The /areas overview's 16 cards, in region order: each page's name, postcodes
 // and homes from lib/area-pages.ts, and its blurb from lib/areas-data.ts word
 // for word. Built on the server, so the browser gets only what the cards show
 // and search.

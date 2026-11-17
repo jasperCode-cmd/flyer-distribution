@@ -51,6 +51,8 @@ test("one card per area page, in region order, with its old blurb, postcodes and
   const bySlug = Object.fromEntries(cards.map((c) => [c.slug, c]));
   assert.equal(bySlug.southampton.homes, "About 107,500 homes");
   assert.equal(bySlug.brockenhurst.homes, "About 2,000 homes");
+  assert.equal(bySlug.lymington.homes, "About 15,000 homes");
+  assert.equal(bySlug.lymington.range, "SO41");
   assert.equal(bySlug.dorset.homes, "About 216,000 homes");
   assert.equal(bySlug.winchester.range, "SO21 to SO24 and SO32");
   assert.equal(bySlug.dorset.range, "22 postcodes");
@@ -101,7 +103,16 @@ test("town names find their page, from the start of any word, in any case", () =
   assert.deepEqual(find("Forest"), ["new-forest"]);
   assert.deepEqual(find("Eastleigh"), ["eastleigh"]);
   // The places each page lists under its postcodes count too.
-  assert.deepEqual(find("Lymington"), ["new-forest"]);
+  // Lymington and its places find its page first, then the New Forest's.
+  for (const q of ["Lymington", "lymington", "Milford", "milford on sea", "Pennington", "Sway", "SO41", "so41 0aa", "SO410AA"]) assert.deepEqual(find(q), ["lymington", "new-forest"], q);
+  // Boldre is Lymington's; East Boldre (SO42) is on the Brockenhurst page, so it shows too, after Lymington.
+  assert.deepEqual(find("Boldre"), ["lymington", "brockenhurst", "new-forest"]);
+  // A place named in whole words finds only the pages listing it; one still being typed finds those it starts.
+  assert.deepEqual(find("Swayth"), ["southampton"]);
+  assert.deepEqual(find("Swaythling"), ["southampton"]);
+  assert.deepEqual(find("Penning"), ["lymington", "new-forest"]);
+  // Penn is a whole word in Poole's Penn Hill, so that is what it finds.
+  assert.deepEqual(find("Penn"), ["poole", "dorset"]);
   assert.deepEqual(find("Verwood"), ["dorset"]);
   // Places we no longer cover find nothing.
   for (const q of ["Weymouth", "Dorchester", "Sherborne", "Blandford", "Swanage", "Wareham"]) assert.deepEqual(find(q), [], q);
@@ -121,11 +132,11 @@ test("town names find their page, from the start of any word, in any case", () =
 
 test("region chips show their own areas, and the results line says what is showing", () => {
   assert.deepEqual(shownFor("").shown.map((c) => c.slug), cards.map((c) => c.slug));
-  assert.equal(shownFor("").line, "Showing all 15 areas");
+  assert.equal(shownFor("").line, "Showing all 16 areas");
   const expected: Record<string, AreaSlug[]> = {
     "southampton-eastleigh": ["southampton", "eastleigh", "chandlers-ford", "hedge-end"],
     "winchester-test-valley": ["winchester", "romsey"],
-    "new-forest-waterside": ["totton", "hythe", "brockenhurst", "ringwood", "new-forest"],
+    "new-forest-waterside": ["totton", "hythe", "lymington", "brockenhurst", "ringwood", "new-forest"],
     "bournemouth-poole-dorset": ["bournemouth", "poole", "christchurch", "dorset"],
   };
   for (const region of AREA_REGIONS) {
@@ -162,7 +173,7 @@ test("a search that finds nothing shows the empty state, with a way to ask", () 
   assert.match(textOf(html), /We may still deliver there\. Tell us where you'd like to reach and we'll let you know\./);
   assert.match(html, /<a[^>]*href="\/quote\?service=leaflet"[^>]*>Ask about your area<\/a>/);
   // The cards are all still there, just hidden.
-  assert.equal((html.match(/<li hidden="">/g) ?? []).length, 15);
+  assert.equal((html.match(/<li hidden="">/g) ?? []).length, 16);
 });
 
 test("every card and its link is in the server-rendered HTML, all showing, with no outside links", () => {
@@ -174,7 +185,7 @@ test("every card and its link is in the server-rendered HTML, all showing, with 
   assert.doesNotMatch(html, /<li hidden/);
   assert.equal((html.match(/<h1\b/g) ?? []).length, 1);
   assert.match(html, /<h1[^>]*>Areas We Cover<\/h1>/);
-  assert.match(html, /role="status"[^>]*>Showing all 15 areas<\/p>/);
+  assert.match(html, /role="status"[^>]*>Showing all 16 areas<\/p>/);
   // Breadcrumb, the hero line and its link, the search and the panel.
   assert.match(html, /<nav aria-label="Breadcrumb"[\s\S]*?>Home<\/a>[\s\S]*?aria-current="page">Areas<\/span>/);
   const text = textOf(html);

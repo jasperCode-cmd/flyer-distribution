@@ -36,6 +36,7 @@ Website: https://www.flyerdistributionhampshire.co.uk
 - [Hedge End](https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-hedge-end)
 - [Chandler's Ford](https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-chandlers-ford)
 - [Brockenhurst](https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-brockenhurst)
+- [Lymington](https://www.flyerdistributionhampshire.co.uk/areas/leaflet-distribution-lymington)
 
 ## About
 

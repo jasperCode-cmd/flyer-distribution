@@ -55,6 +55,7 @@ const siteSchema = {
         "Hedge End",
         "Chandler's Ford",
         "Brockenhurst",
+        "Lymington",
       ],
       "openingHoursSpecification": [
         {

@@ -1,4 +1,4 @@
-// The 15 area pages' own details, drawn by components/AreaPage.tsx. Each
+// The 16 area pages' own details, drawn by components/AreaPage.tsx. Each
 // page's copy is its existing copy, word for word, as text and links, with
 // only the corrections asked for: Poole's, Dorset's and Bournemouth's
 // postcode ranges, Dorset's "covering everything" now "ranging", Dorset
@@ -29,6 +29,7 @@ export type AreaSlug =
   | "hedge-end"
   | "chandlers-ford"
   | "brockenhurst"
+  | "lymington"
 ;
 
 export type AreaPageData = {
@@ -253,11 +254,11 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     groups: [
       { name: "Totton and Waterside", codes: ["SO40", "SO45"], places: ["Totton", "Marchwood", "Hythe", "Dibden Purlieu", "Fawley"], pages: ["totton", "hythe"] },
       { name: "Lyndhurst and Brockenhurst", codes: ["SO42", "SO43"], places: ["Lyndhurst", "Brockenhurst", "Beaulieu"], pages: ["brockenhurst"] },
-      { name: "Lymington and New Milton", codes: ["SO41", "BH25"], places: ["Lymington", "Milford on Sea", "New Milton", "Barton on Sea"], pages: [] },
+      { name: "Lymington and New Milton", codes: ["SO41", "BH25"], places: ["Lymington", "Milford on Sea", "New Milton", "Barton on Sea"], pages: ["lymington"] },
       { name: "Ringwood and Fordingbridge", codes: ["BH24", "SP6"], places: ["Ringwood", "Burley", "Fordingbridge"], pages: ["ringwood"] },
     ],
     homes: 80_000,
-    nearby: ["brockenhurst", "hythe", "totton", "ringwood", "southampton", "bournemouth"],
+    nearby: ["brockenhurst", "lymington", "hythe", "totton", "ringwood", "southampton", "bournemouth"],
     copy: [
       [
         "The New Forest is a unique area covering a wide spread of market towns, villages, and residential communities across southern Hampshire. Key towns include Lyndhurst, ",
@@ -267,7 +268,9 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
         ", alongside a network of smaller villages with loyal, locally-minded residents.",
       ],
       [
-        "We cover SO40, SO41, SO42, SO43, and surrounding postcode areas, delivering to households across the district. The New Forest demographic tends to be established and community-focused, making it well suited to local services, home improvement businesses, and independent retailers.",
+        "We cover SO40, SO41 around ",
+        { href: "/areas/leaflet-distribution-lymington", text: "Lymington" },
+        ", SO42, SO43, and surrounding postcode areas, delivering to households across the district. The New Forest demographic tends to be established and community-focused, making it well suited to local services, home improvement businesses, and independent retailers.",
       ],
       [
         "Vehicle ",
@@ -652,7 +655,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
       { code: "SO42", places: ["Brockenhurst", "Beaulieu", "East Boldre"] },
     ],
     homes: 2_000,
-    nearby: ["new-forest", "hythe", "southampton"],
+    nearby: ["new-forest", "lymington", "hythe", "southampton"],
     copy: [
       [
         "Brockenhurst is one of the New Forest's best-known villages, with New Forest ponies wandering along Brookley Road and a mainline railway station at its centre. We cover SO42 and the surrounding area, delivering door to door across the village and into the smaller hamlets and residential roads nearby.",
@@ -673,6 +676,45 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
       "Yes. SO42 is a small district of about 2,000 homes, so you can take the whole of it or just the sectors around Brockenhurst village.",
       "Yes. Brockenhurst can be part of a wider New Forest campaign, and Hythe or Southampton can be added as well.",
       "Brockenhurst rounds are GPS tracked in the same way as our other New Forest rounds, and you get a route report at the end showing the routes delivered.",
+    ],
+  },
+  "lymington": {
+    slug: "lymington",
+    name: "Lymington",
+    inName: "Lymington",
+    eyebrow: "Lymington, Hampshire",
+    wide: false,
+    postcodes: [
+      { code: "SO41", places: ["Lymington", "Pennington", "Milford on Sea", "Sway", "Boldre"] },
+    ],
+    homes: 15_000,
+    nearby: ["brockenhurst", "new-forest", "ringwood", "christchurch"],
+    copy: [
+      [
+        "Lymington is a Georgian market town on the southern edge of the New Forest, set around the Lymington River with its harbour, marinas and ferry to the Isle of Wight. We cover SO41, delivering door to door across Lymington town, Pennington, Milford on Sea, Sway and Boldre, from the busy town centre to the quieter village lanes.",
+      ],
+      [
+        "Each part of SO41 has its own character. Pennington is largely residential, Milford on Sea looks out towards the Needles and Hurst Castle, and Sway and Boldre are rural villages with a strong community feel, so a campaign can be shaped around the households that suit your business. We've recently delivered campaigns across Lymington for local businesses, and the town pairs naturally with nearby ",
+        { href: "/areas/leaflet-distribution-brockenhurst", text: "Brockenhurst" },
+        " or the wider ",
+        { href: "/areas/leaflet-distribution-new-forest", text: "New Forest" },
+        ".",
+      ],
+      [
+        "Lymington's Saturday market and harbour bring in visitors as well as residents, and vehicle campaigns around the town's car parks are part of ",
+        { href: "/services", text: "our leaflet distribution services" },
+        ". For campaigns reaching further along the coast, ",
+        { href: "/areas/leaflet-distribution-christchurch", text: "Christchurch" },
+        " can be added, and ",
+        { href: "/areas/leaflet-distribution-ringwood", text: "Ringwood" },
+        ", on the western edge of the forest, fits in as well.",
+      ],
+    ],
+    faqs: [
+      "We cover SO41, which takes in Lymington town and Pennington along with Milford on Sea, Sway and Boldre.",
+      "Yes. SO41 can be split by sector, so you could choose Lymington and Pennington on their own, the villages of Sway and Boldre, or Milford on Sea by the coast.",
+      "Yes. A Lymington campaign can carry on to Brockenhurst and the wider New Forest, and Ringwood or Christchurch can be added under the same plan.",
+      "Lymington rounds are GPS tracked, including the village rounds out to Sway and Boldre, and after the campaign you receive a route report covering the SO41 areas you chose.",
     ],
   },
 };

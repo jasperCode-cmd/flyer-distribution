@@ -56,7 +56,7 @@ const questions = [
 
 /* Plain-text versions for FAQPage schema: no markdown, no link syntax */
 const schemaAnswers = [
-  "We cover the Hampshire and Dorset corridor, offering flyer distribution and leaflet distribution across Southampton, Bournemouth, Poole, Winchester, Eastleigh, the New Forest, Romsey, Ringwood, Christchurch, and Dorset more widely, along with Hythe, Totton, Hedge End, Chandler's Ford, and Brockenhurst. See our full coverage areas for details, and if your target area isn't listed, get in touch, as we can often accommodate additional postcodes on request.",
+  "We cover the Hampshire and Dorset corridor, offering flyer distribution and leaflet distribution across Southampton, Bournemouth, Poole, Winchester, Eastleigh, the New Forest, Romsey, Ringwood, Christchurch, and Dorset more widely, along with Hythe, Totton, Hedge End, Chandler's Ford, Brockenhurst, and Lymington. See our full coverage areas for details, and if your target area isn't listed, get in touch, as we can often accommodate additional postcodes on request.",
   "Once we have your printed leaflets, we take care of getting them delivered. Our door-to-door leaflet distribution service posts them directly through letterboxes across your chosen postcode areas in Hampshire and Dorset. Once your materials are received, our team carries out the rounds and confirms completion. Take a look at examples of our work to see it in action.",
   "Yes. Our Design, Print and Deliver package is a complete end-to-end service where we handle everything from initial artwork through to delivery across Hampshire and Dorset. Just let us know when requesting your quote and we'll talk you through the options. We also handle statutory Public Notice Leafleting for infrastructure projects across Hampshire.",
   "Yes. Postcode-level targeting is central to how we work. You choose the postcode areas you want to reach, and we focus your flyer distribution campaign there. Our Campaign Planning service can help if you're unsure which postcode areas in Hampshire or Dorset are best suited to your business.",
@@ -123,8 +123,9 @@ export default function FaqPage() {
                 <Link href="/areas/leaflet-distribution-hythe" className={a}>Hythe</Link>,{" "}
                 <Link href="/areas/leaflet-distribution-totton" className={a}>Totton</Link>,{" "}
                 <Link href="/areas/leaflet-distribution-hedge-end" className={a}>Hedge End</Link>,{" "}
-                <Link href="/areas/leaflet-distribution-chandlers-ford" className={a}>Chandler&apos;s Ford</Link>, and{" "}
-                <Link href="/areas/leaflet-distribution-brockenhurst" className={a}>Brockenhurst</Link>. See our full{" "}
+                <Link href="/areas/leaflet-distribution-chandlers-ford" className={a}>Chandler&apos;s Ford</Link>,{" "}
+                <Link href="/areas/leaflet-distribution-brockenhurst" className={a}>Brockenhurst</Link>, and{" "}
+                <Link href="/areas/leaflet-distribution-lymington" className={a}>Lymington</Link>. See our full{" "}
                 <Link href="/areas" className={a}>coverage areas</Link> for details, and if
                 your target area isn&apos;t listed,{" "}
                 <Link href="/quote" className={a}>get in touch</Link>, as we can often

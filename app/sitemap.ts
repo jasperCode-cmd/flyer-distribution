@@ -30,6 +30,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/areas/leaflet-distribution-hedge-end",
     "/areas/leaflet-distribution-chandlers-ford",
     "/areas/leaflet-distribution-brockenhurst",
+    "/areas/leaflet-distribution-lymington",
     "/services/hand-to-hand-distribution",
     "/services/b2b-distribution",
     "/privacy-policy",
@@ -39,8 +40,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return routes.map((route) => ({
     url: `${BASE_URL}${route}`,
     // The area pages moved to /areas/leaflet-distribution-[area] on 27 October 2026,
-    // and the /areas overview's links changed with them.
-    lastModified: new Date(route === "/areas" || route.startsWith("/areas/") ? "2026-10-27" : "2026-06-24"),
+    // and the /areas overview's links changed with them. Lymington's page was added on 17 November 2026.
+    lastModified: new Date(
+      route === "/areas/leaflet-distribution-lymington" ? "2026-11-17" : route === "/areas" || route.startsWith("/areas/") ? "2026-10-27" : "2026-06-24"
+    ),
     changeFrequency: "monthly",
     priority: route === "" ? 1 : 0.8,
   }));

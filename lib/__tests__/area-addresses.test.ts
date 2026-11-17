@@ -18,7 +18,7 @@ const pageFolders = readdirSync("app/areas").filter((name) => statSync(join("app
 const moved = pageFolders.map((name) => name.slice(PREFIX.length));
 
 test("every area page is at /areas/leaflet-distribution-[area]", () => {
-  assert.equal(pageFolders.length, 15);
+  assert.equal(pageFolders.length, 16);
   for (const name of pageFolders) {
     assert.ok(name.startsWith(PREFIX), name);
     assert.ok(statSync(join("app/areas", name, "page.tsx")).isFile(), name);
@@ -49,13 +49,16 @@ test("every old address, with and without a trailing slash, redirects permanentl
   assert.match(readFileSync("next.config.ts", "utf8"), /THESE REDIRECTS MUST NEVER BE REMOVED/);
 });
 
-test("the sitemap lists only the new addresses, with them and /areas dated 27 October 2026", () => {
+test("the sitemap lists only the new addresses, with them and /areas dated 27 October 2026 (Lymington, added later, 17 November 2026)", () => {
   const entries = sitemap();
   const areaEntries = entries.filter((e) => e.url.startsWith(`${SITE}/areas/`));
   assert.deepEqual(areaEntries.map((e) => e.url).sort(), pageFolders.map((name) => `${SITE}/areas/${name}`));
   const overview = entries.filter((e) => e.url === `${SITE}/areas`);
   assert.equal(overview.length, 1);
-  for (const e of [...areaEntries, ...overview]) assert.equal(new Date(e.lastModified!).toISOString(), "2026-10-27T00:00:00.000Z", e.url);
+  for (const e of [...areaEntries, ...overview]) {
+    const added = e.url === `${SITE}/areas/leaflet-distribution-lymington` ? "2026-11-17T00:00:00.000Z" : "2026-10-27T00:00:00.000Z";
+    assert.equal(new Date(e.lastModified!).toISOString(), added, e.url);
+  }
   // Everything else keeps its date.
   for (const e of entries.filter((e) => e.url !== `${SITE}/areas` && !e.url.startsWith(`${SITE}/areas/`))) {
     assert.equal(new Date(e.lastModified!).toISOString(), "2026-06-24T00:00:00.000Z", e.url);

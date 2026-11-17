@@ -21,6 +21,9 @@ const MOVED_AREAS = [
   "hedge-end",
   "chandlers-ford",
   "brockenhurst",
+  // Lymington's page is new (17 November 2026) and never had an old address;
+  // it gets the same short /areas/lymington address as the others.
+  "lymington",
 ];
 
 const nextConfig: NextConfig = {

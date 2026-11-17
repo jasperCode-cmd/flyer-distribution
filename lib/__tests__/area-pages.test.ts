@@ -6,7 +6,7 @@ import { findPostcode } from "@/lib/area-planner/data";
 import { AREA_PAGES, coverageMapAlt, coverageMapSrc, type AreaPageData, type AreaSlug } from "@/lib/area-pages";
 import { formatPostcodeRanges } from "@/lib/postcode-ranges";
 
-// The 15 area pages' shared template data: the confirmed postcode lists and
+// The 16 area pages' shared template data: the confirmed postcode lists and
 // neighbourhood names, homes from the Area Planner's Census 2021 figures,
 // nearby pages, the shared rating snapshot in place of a review of its own,
 // four answers written for that page, and the wording rules (no banned
@@ -26,7 +26,7 @@ const squash = (s: string) => s.replace(/\s+/g, " ").trim();
 test("every area page folder has a data entry, and nothing else does", () => {
   const folders = readdirSync("app/areas").filter((n) => n.startsWith("leaflet-distribution-")).map((n) => n.slice(21)).sort();
   assert.deepEqual([...slugs].sort(), folders);
-  assert.equal(pages.length, 15);
+  assert.equal(pages.length, 16);
   for (const [slug, page] of Object.entries(AREA_PAGES)) assert.equal(page.slug, slug);
 });
 
@@ -47,6 +47,7 @@ test("the postcode lists are the confirmed ones, each with its neighbourhood nam
     "hedge-end": ["SO30"],
     "chandlers-ford": ["SO53"],
     brockenhurst: ["SO42"],
+    lymington: ["SO41"],
   };
   for (const page of pages) {
     assert.deepEqual(page.postcodes.map((p) => p.code), expected[page.slug], page.slug);
@@ -100,6 +101,33 @@ test("nearby pages are real pages, and Southampton and Eastleigh link to the one
   assert.deepEqual(AREA_PAGES.eastleigh.nearby, ["chandlers-ford", "hedge-end"]);
 });
 
+test("Lymington: SO41 and its places, its homes, its nearby pages, and links back from Brockenhurst and the New Forest", () => {
+  const page = AREA_PAGES.lymington;
+  assert.equal(page.eyebrow, "Lymington, Hampshire");
+  assert.equal(page.inName, "Lymington");
+  assert.deepEqual(page.postcodes, [{ code: "SO41", places: ["Lymington", "Pennington", "Milford on Sea", "Sway", "Boldre"] }]);
+  // SO41's 14,801 Census 2021 households, to the nearest 500.
+  assert.equal(page.homes, 15_000);
+  assert.deepEqual(page.nearby, ["brockenhurst", "new-forest", "ringwood", "christchurch"]);
+  // Its copy names all five places, and links only to pages on the site.
+  const text = squash(textOf(page.copy));
+  for (const place of ["Lymington", "Pennington", "Milford on Sea", "Sway", "Boldre"]) assert.ok(text.includes(place), place);
+  assert.match(text, /We've recently delivered campaigns across Lymington for local businesses/);
+  // Reciprocal: Brockenhurst and the New Forest list it nearby, and the New Forest links it where SO41 is mentioned.
+  assert.ok(AREA_PAGES.brockenhurst.nearby.includes("lymington"));
+  assert.ok(AREA_PAGES["new-forest"].nearby.includes("lymington"));
+  const forest = AREA_PAGES["new-forest"].copy.flat();
+  const at = forest.findIndex((x) => typeof x !== "string" && x.href === "/areas/leaflet-distribution-lymington");
+  assert.ok(at > 0 && (forest[at - 1] as string).endsWith("SO41 around "), "linked beside SO41 in the copy");
+  assert.deepEqual(AREA_PAGES["new-forest"].groups!.find((g) => g.codes.includes("SO41"))!.pages, ["lymington"]);
+  // The page file: its own title, description, canonical and breadcrumb.
+  const file = readFileSync("app/areas/leaflet-distribution-lymington/page.tsx", "utf8");
+  assert.equal(file.split('"Leaflet Distribution Lymington"').length - 1, 3, "title, Open Graph and Twitter");
+  const description = "Leaflet and flyer distribution across Lymington and SO41 postcodes. Door-to-door delivery across this coastal market town on the edge of the New Forest.";
+  assert.equal(file.split(`"${description}"`).length - 1, 3, "meta, Open Graph and Twitter");
+  assert.match(file, /name: "Lymington",\n\s+item: "https:\/\/www\.flyerdistributionhampshire\.co\.uk\/areas\/leaflet-distribution-lymington"/);
+});
+
 test("each page shows the shared rating snapshot where its review was, and no full review", () => {
   const template = readFileSync("components/AreaPage.tsx", "utf8");
   const howItWorks = template.indexOf("{/* 6. How a campaign works */}");
@@ -116,8 +144,8 @@ test("each page shows the shared rating snapshot where its review was, and no fu
 
 test("four answers per page, all different, each about that page", () => {
   const all = pages.flatMap((p) => p.faqs);
-  assert.equal(all.length, 60);
-  assert.equal(new Set(all).size, 60, "no two answers alike");
+  assert.equal(all.length, 64);
+  assert.equal(new Set(all).size, 64, "no two answers alike");
   for (const page of pages) {
     const [where, target, together, proof] = page.faqs;
     // Which parts: names the page's postcodes, one by one or as a range.
@@ -301,7 +329,7 @@ test("New Forest and Dorset group their postcodes by town; every other page keep
     "new-forest": [
       ["Totton and Waterside", ["SO40", "SO45"], ["Totton", "Marchwood", "Hythe", "Dibden Purlieu", "Fawley"], ["totton", "hythe"]],
       ["Lyndhurst and Brockenhurst", ["SO42", "SO43"], ["Lyndhurst", "Brockenhurst", "Beaulieu"], ["brockenhurst"]],
-      ["Lymington and New Milton", ["SO41", "BH25"], ["Lymington", "Milford on Sea", "New Milton", "Barton on Sea"], []],
+      ["Lymington and New Milton", ["SO41", "BH25"], ["Lymington", "Milford on Sea", "New Milton", "Barton on Sea"], ["lymington"]],
       ["Ringwood and Fordingbridge", ["BH24", "SP6"], ["Ringwood", "Burley", "Fordingbridge"], ["ringwood"]],
     ],
   };

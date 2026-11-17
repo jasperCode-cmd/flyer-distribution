@@ -8,7 +8,7 @@ import type { AreaSlug } from "@/lib/area-pages";
 export const AREA_REGIONS = [
   { id: "southampton-eastleigh", label: "Southampton & Eastleigh", slugs: ["southampton", "eastleigh", "chandlers-ford", "hedge-end"] },
   { id: "winchester-test-valley", label: "Winchester & Test Valley", slugs: ["winchester", "romsey"] },
-  { id: "new-forest-waterside", label: "New Forest & Waterside", slugs: ["totton", "hythe", "brockenhurst", "ringwood", "new-forest"] },
+  { id: "new-forest-waterside", label: "New Forest & Waterside", slugs: ["totton", "hythe", "lymington", "brockenhurst", "ringwood", "new-forest"] },
   { id: "bournemouth-poole-dorset", label: "Bournemouth, Poole & Dorset", slugs: ["bournemouth", "poole", "christchurch", "dorset"] },
 ] as const satisfies readonly { id: string; label: string; slugs: readonly AreaSlug[] }[];
 
@@ -46,6 +46,9 @@ const startsAWord = (text: string, q: string) => {
   return t.startsWith(q) || t.includes(` ${q}`);
 };
 
+// The search is whole words of the text: "sway" in Sway, not in Swaythling.
+const wholeWords = (text: string, q: string) => ` ${words(text)} `.includes(` ${q} `);
+
 const DISTRICT = /^[A-Z]{1,2}\d[A-Z\d]?$/;
 
 // The postcode district a search names, if it names one: a district (BH14),
@@ -66,7 +69,9 @@ export function postcodeDistrict(query: string): string | null {
 // typed (SO5) finds the districts it starts, until one matches exactly; the
 // letters alone (BH) find every page with districts there. A town name finds
 // its page from the start of any word, and from three letters the places
-// each page lists under its postcodes count too.
+// each page lists under its postcodes count too: from the start of a word,
+// unless some page lists a place the search names in whole words, when only
+// those count (Sway finds Lymington's Sway, not Southampton's Swaythling).
 export function matchAreas<T extends SearchableArea>(areas: readonly T[], query: string): T[] {
   const q = words(query);
   if (!q) return [...areas];
@@ -75,13 +80,15 @@ export function matchAreas<T extends SearchableArea>(areas: readonly T[], query:
   const exact = district !== "" && areas.some((a) => a.codes.includes(district));
   const stillTyping = district !== "" && !exact && DISTRICT.test(compact);
   const letters = /^[A-Z]{1,2}$/.test(compact) ? compact : null;
+  const wholePlace = q.length >= 3 && areas.some((a) => a.places.some((p) => wholeWords(p, q)));
+  const placeMatch = (p: string) => (wholePlace ? wholeWords(p, q) : startsAWord(p, q));
   const found = areas.filter(
     (a) =>
       (exact && a.codes.includes(district)) ||
       (stillTyping && a.codes.some((c) => c.startsWith(district))) ||
       (letters !== null && a.codes.some((c) => c.replace(/\d.*$/, "") === letters)) ||
       startsAWord(a.name, q) ||
-      (q.length >= 3 && a.places.some((p) => startsAWord(p, q)))
+      (q.length >= 3 && a.places.some(placeMatch))
   );
   return [...found.filter((a) => !a.wide), ...found.filter((a) => a.wide)];
 }

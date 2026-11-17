@@ -1,12 +1,13 @@
-// The 15 area pages' links and short blurbs, used for the cards on the
+// The 16 area pages' links and short blurbs, used for the cards on the
 // /areas overview (see lib/areas-overview.ts). Their regions, as on /areas
 // and the homepage, come from AREA_REGIONS in lib/area-search.ts.
 export interface AreaEntry {
   name: string;
   href: string;
   desc: string;
-  population: number;
-  populationLabel: string;
+  // Not shown anywhere; kept where a sourced figure exists.
+  population?: number;
+  populationLabel?: string;
 }
 
 export const areas: AreaEntry[] = [
@@ -114,5 +115,10 @@ export const areas: AreaEntry[] = [
     desc: "One of the New Forest's best-known villages, with ponies wandering along Brookley Road.",
     population: 3488,
     populationLabel: "Residents (2021 Census)",
+  },
+  {
+    name: "Lymington",
+    href: "/areas/leaflet-distribution-lymington",
+    desc: "Georgian market town on the New Forest coast, with Pennington, Milford on Sea, Sway and Boldre around it.",
   },
 ];

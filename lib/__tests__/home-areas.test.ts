@@ -26,7 +26,7 @@ const textOf = (html: string) =>
 const EXPECTED: [string, string[]][] = [
   ["Southampton & Eastleigh", ["Southampton", "Eastleigh", "Chandler's Ford", "Hedge End"]],
   ["Winchester & Test Valley", ["Winchester", "Romsey"]],
-  ["New Forest & Waterside", ["New Forest", "Totton", "Hythe", "Brockenhurst", "Ringwood"]],
+  ["New Forest & Waterside", ["New Forest", "Totton", "Hythe", "Lymington", "Brockenhurst", "Ringwood"]],
   ["Bournemouth, Poole & Dorset", ["Bournemouth", "Poole", "Christchurch", "Dorset"]],
 ];
 
@@ -48,7 +48,7 @@ test("the four columns are the explorer's own regions, names and links", () => {
   }
 });
 
-test("the section: heading and intro, the search form, 15 town links in their columns, and See all coverage areas", () => {
+test("the section: heading and intro, the search form, 16 town links in their columns, and See all coverage areas", () => {
   const html = render();
   const text = textOf(html);
   assert.match(html, /^<section class="bg-blue-900 text-white">/);
@@ -70,7 +70,7 @@ test("the section: heading and intro, the search form, 15 town links in their co
   ]) as [string, { cls: string; href: string; name: string }[]][];
   assert.deepEqual(columns.map(([label, links]) => [label, links.map((l) => l.name)]), EXPECTED);
   const links = columns.flatMap(([, l]) => l);
-  assert.equal(links.length, 15);
+  assert.equal(links.length, 16);
   const cards = overviewCards();
   for (const link of links) {
     assert.equal(link.href, cards.find((c) => c.name === link.name)!.href, link.name);
