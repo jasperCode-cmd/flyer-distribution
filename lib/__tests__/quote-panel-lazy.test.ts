@@ -26,7 +26,7 @@ test("the form is a dynamic import, made only once the panel is open", () => {
 
 test("a small loading state while the form is on its way, and the quote page if it can't be fetched", () => {
   assert.match(panel, /role="status"[\s\S]*?Loading the quote form\.\.\./);
-  assert.match(panel, /min-h-\[592px\] md:min-h-\[319px\]/);
+  assert.match(panel, /min-h-\[792px\] md:min-h-\[488px\]/);
   assert.match(panel, /motion-safe:animate-spin/);
   assert.match(css, /\.loading \{\s+animation: appear 200ms ease-out 300ms both;\s+\}/);
   assert.match(panel, /role="alert"[\s\S]*?The quote form could not be loaded\.[\s\S]*?<Link href="\/quote"/);

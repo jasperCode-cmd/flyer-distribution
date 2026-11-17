@@ -251,7 +251,7 @@ export default function B2BDistributionPage() {
             distribution so you can focus on running your business.
           </p>
           <Link
-            href="/quote"
+            href="/quote?service=b2b"
             className="inline-block bg-white text-blue-900 hover:bg-blue-50 font-bold px-8 py-4 rounded-md text-base transition duration-200 ease-out hover:scale-105 shadow-lg"
           >
             Get a Free Quote

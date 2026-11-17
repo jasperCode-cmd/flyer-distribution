@@ -59,8 +59,8 @@ test("the sitemap lists only the new addresses, with them and /areas dated 27 Oc
     const added = e.url === `${SITE}/areas/leaflet-distribution-lymington` ? "2026-11-17T00:00:00.000Z" : "2026-10-27T00:00:00.000Z";
     assert.equal(new Date(e.lastModified!).toISOString(), added, e.url);
   }
-  // Everything else keeps its date.
-  for (const e of entries.filter((e) => e.url !== `${SITE}/areas` && !e.url.startsWith(`${SITE}/areas/`))) {
+  // Everything else keeps its date (Leaflet Printing, added later, has its own: see leaflet-printing.test.ts).
+  for (const e of entries.filter((e) => e.url !== `${SITE}/areas` && !e.url.startsWith(`${SITE}/areas/`) && e.url !== `${SITE}/leaflet-printing`)) {
     assert.equal(new Date(e.lastModified!).toISOString(), "2026-06-24T00:00:00.000Z", e.url);
   }
 });

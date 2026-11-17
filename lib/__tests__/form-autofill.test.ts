@@ -59,9 +59,12 @@ for (const [file, fields] of [
 
 test("the quote form's own fields: one autofill value each, and none on the questions about the campaign", () => {
   const source = readFileSync("components/QuoteForm.tsx", "utf8");
-  assert.deepEqual([...source.matchAll(/autoComplete="([^"]+)"/g)].map((m) => m[1]), ["given-name", "family-name", "email", "tel", "organization"]);
+  assert.deepEqual([...source.matchAll(/autoComplete="([^"]+)"/g)].map((m) => m[1]), ["given-name", "family-name", "email", "tel", "organization", "postal-code"]);
   // The areas to leaflet are the target, not the visitor's own postcode.
   assert.equal(attr(tagOf(source, "areas-required"), "autoComplete"), undefined);
+  assert.equal(attr(tagOf(source, "print-delivery-areas"), "autoComplete"), undefined);
+  // Where to send printed leaflets is their own postcode, so autofill offers it.
+  assert.equal(attr(tagOf(source, "print-send-to"), "autoComplete"), "postal-code");
 });
 
 test("the application's own fields: one autofill value each, and the hidden bot trap still off", () => {

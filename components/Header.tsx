@@ -6,11 +6,20 @@ import { usePathname } from "next/navigation";
 import { hidesSiteChrome } from "@/lib/site-chrome";
 import { useState, useRef, useEffect } from "react";
 
-const servicesGroups = [
+type ServiceItem = { href: string; label: string; description?: string; highlight?: boolean };
+type ServiceGroup = { label: string; href: string | null; featured?: { badge: string; description: string }; items: ServiceItem[] };
+
+// The Services menu, shared by the desktop dropdown and the phone menu. It
+// leads with Leaflet Distribution, the most prominent (navy, with a badge),
+// then Leaflet Printing, lighter (light blue, with a printer icon); each says
+// in a line what it is. The rest are plain links.
+const servicesGroups: ServiceGroup[] = [
   {
-    label: "Leaflet Services",
+    label: "Leaflet Distribution",
     href: "/services",
+    featured: { badge: "Most popular", description: "Door to door, GPS tracked. We can design and print it too." },
     items: [
+      { href: "/leaflet-printing", label: "Leaflet Printing", description: "Flyers, leaflets and business cards", highlight: true },
       { href: "/services/public-notice-leafleting", label: "Public Notice Leafleting" },
       { href: "/services/hand-to-hand-distribution", label: "Hand-to-Hand Leaflet Distribution" },
       { href: "/services/b2b-distribution", label: "B2B Leaflet Distribution" },
@@ -25,6 +34,38 @@ const servicesGroups = [
     ],
   },
 ];
+
+const FEATURED_ITEM = "block rounded-md bg-[#1e3a8a] px-3 py-2.5 text-white hover:bg-[#172554] transition-colors";
+const HIGHLIGHT_ITEM = "flex items-start gap-2.5 rounded-md bg-[#dbeafe] px-3 py-2.5 text-blue-900 hover:bg-[#bfdbfe] transition-colors";
+
+function FeaturedLabel({ label, badge, description }: { label: string; badge: string; description: string }) {
+  return (
+    <>
+      <span className="flex flex-wrap items-center gap-2 text-sm font-semibold">
+        {label}
+        <span className="rounded-full bg-[#facc15] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-900">{badge}</span>
+      </span>
+      <span className="mt-0.5 block text-xs text-[#dbeafe]">{description}</span>
+    </>
+  );
+}
+
+function HighlightLabel({ label, description }: { label: string; description?: string }) {
+  return (
+    <>
+      {/* A printer, in line. */}
+      <svg aria-hidden="true" viewBox="0 0 24 24" className="mt-0.5 h-4 w-4 shrink-0 text-blue-700" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M6 9V2h12v7" />
+        <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
+        <rect x="6" y="14" width="12" height="8" />
+      </svg>
+      <span>
+        <span className="block text-sm font-semibold">{label}</span>
+        {description && <span className="mt-0.5 block text-xs text-blue-800">{description}</span>}
+      </span>
+    </>
+  );
+}
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -107,7 +148,11 @@ export default function Header() {
                   <div className="bg-white border border-blue-100 rounded-md shadow-lg py-1 min-w-[200px]">
                     {servicesGroups.map((group, gi) => (
                       <div key={group.label} className={gi > 0 ? "mt-2" : ""}>
-                        {group.href ? (
+                        {group.href && group.featured ? (
+                          <Link href={group.href} className={`mx-2 mt-1 mb-1 ${FEATURED_ITEM}`} onClick={() => setServicesOpen(false)}>
+                            <FeaturedLabel label={group.label} badge={group.featured.badge} description={group.featured.description} />
+                          </Link>
+                        ) : group.href ? (
                           <Link
                             href={group.href}
                             className="block px-4 py-2.5 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 transition-colors font-semibold"
@@ -120,16 +165,22 @@ export default function Header() {
                             {group.label}
                           </p>
                         )}
-                        {group.items.map((item) => (
-                          <Link
-                            key={item.href}
-                            href={item.href}
-                            className="block px-4 py-2.5 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 transition-colors font-medium"
-                            onClick={() => setServicesOpen(false)}
-                          >
-                            {item.label}
-                          </Link>
-                        ))}
+                        {group.items.map((item) =>
+                          item.highlight ? (
+                            <Link key={item.href} href={item.href} className={`mx-2 mb-1 ${HIGHLIGHT_ITEM}`} onClick={() => setServicesOpen(false)}>
+                              <HighlightLabel label={item.label} description={item.description} />
+                            </Link>
+                          ) : (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              className="block px-4 py-2.5 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 transition-colors font-medium"
+                              onClick={() => setServicesOpen(false)}
+                            >
+                              {item.label}
+                            </Link>
+                          )
+                        )}
                       </div>
                     ))}
                   </div>
@@ -208,7 +259,15 @@ export default function Header() {
                   <div className="pl-4 flex flex-col gap-1 mt-1">
                     {servicesGroups.map((group, gi) => (
                       <div key={group.label} className={gi > 0 ? "mt-2" : ""}>
-                        {group.href ? (
+                        {group.href && group.featured ? (
+                          <Link
+                            href={group.href}
+                            className={`my-1 ${FEATURED_ITEM}`}
+                            onClick={() => { setMenuOpen(false); setMobileServicesOpen(false); }}
+                          >
+                            <FeaturedLabel label={group.label} badge={group.featured.badge} description={group.featured.description} />
+                          </Link>
+                        ) : group.href ? (
                           <Link
                             href={group.href}
                             className="block text-sm text-gray-600 hover:text-blue-700 px-2 py-2 rounded hover:bg-blue-50 transition-colors font-semibold"
@@ -221,16 +280,27 @@ export default function Header() {
                             {group.label}
                           </p>
                         )}
-                        {group.items.map((item) => (
-                          <Link
-                            key={item.href}
-                            href={item.href}
-                            className="block text-sm text-gray-600 hover:text-blue-700 px-2 py-2 rounded hover:bg-blue-50 transition-colors font-medium"
-                            onClick={() => { setMenuOpen(false); setMobileServicesOpen(false); }}
-                          >
-                            {item.label}
-                          </Link>
-                        ))}
+                        {group.items.map((item) =>
+                          item.highlight ? (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              className={`mb-1 ${HIGHLIGHT_ITEM}`}
+                              onClick={() => { setMenuOpen(false); setMobileServicesOpen(false); }}
+                            >
+                              <HighlightLabel label={item.label} description={item.description} />
+                            </Link>
+                          ) : (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              className="block text-sm text-gray-600 hover:text-blue-700 px-2 py-2 rounded hover:bg-blue-50 transition-colors font-medium"
+                              onClick={() => { setMenuOpen(false); setMobileServicesOpen(false); }}
+                            >
+                              {item.label}
+                            </Link>
+                          )
+                        )}
                       </div>
                     ))}
                   </div>

@@ -33,6 +33,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/areas/leaflet-distribution-lymington",
     "/services/hand-to-hand-distribution",
     "/services/b2b-distribution",
+    "/leaflet-printing",
     "/privacy-policy",
     "/before-you-book",
   ]; // /blog excluded: noindex
@@ -40,9 +41,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return routes.map((route) => ({
     url: `${BASE_URL}${route}`,
     // The area pages moved to /areas/leaflet-distribution-[area] on 27 October 2026,
-    // and the /areas overview's links changed with them. Lymington's page was added on 17 November 2026.
+    // and the /areas overview's links changed with them. Lymington's page and
+    // the Leaflet Printing page were added on 17 November 2026.
     lastModified: new Date(
-      route === "/areas/leaflet-distribution-lymington" ? "2026-11-17" : route === "/areas" || route.startsWith("/areas/") ? "2026-10-27" : "2026-06-24"
+      route === "/areas/leaflet-distribution-lymington" || route === "/leaflet-printing"
+        ? "2026-11-17"
+        : route === "/areas" || route.startsWith("/areas/")
+          ? "2026-10-27"
+          : "2026-06-24"
     ),
     changeFrequency: "monthly",
     priority: route === "" ? 1 : 0.8,

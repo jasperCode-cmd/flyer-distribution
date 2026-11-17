@@ -50,15 +50,32 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: QUANTITY_MESSAGE }, { status: 400 });
   }
   if (!validQuantity) data.quantity = "";
+  // A printing enquiry sends its quantity as print-quantity, from the same
+  // ranges and required the same way; it is saved as the lead's quantity too.
+  const isPrinting = data.service === "Leaflet Printing";
+  if (isPrinting && !isQuantityRange(data["print-quantity"])) {
+    return NextResponse.json({ error: QUANTITY_MESSAGE }, { status: 400 });
+  }
+  const leadQuantity = isPrinting ? data["print-quantity"] : data.quantity;
 
   if (data.service === "Leaflet Distribution" && data.budget && !LEAFLET_BUDGETS.includes(data.budget)) {
     return NextResponse.json({ error: BUDGET_MESSAGE }, { status: 400 });
   }
 
-  const printingIncluded = data["printing-included"] === "yes";
-  const designIncluded = data["include-design"] === "yes";
+  // A printing enquiry is printing by definition; its design and delivery
+  // areas come from its own fields.
+  const printingIncluded = data["printing-included"] === "yes" || isPrinting;
+  const designIncluded = data["include-design"] === "yes" || data["print-design"] === "Yes";
+  const targetAreas = data["areas-required"] || data["print-delivery-areas"] || null;
 
   const noteLines = [`Service type: ${data.service || "Unspecified"}`];
+  if (data["distribution-type"]) noteLines.push(`Distribution type: ${data["distribution-type"]}`);
+  if (data["print-items"]) noteLines.push(`Print items: ${data["print-items"]}`);
+  if (data["print-size"]) noteLines.push(`Item size: ${data["print-size"]}`);
+  if (isPrinting && data["print-sides"]) noteLines.push(`Print sides: ${data["print-sides"]}`);
+  if (data["print-design"]) noteLines.push(`Design wanted: ${data["print-design"]}`);
+  if (data["print-send-to"]) noteLines.push(`Send printed leaflets to: ${data["print-send-to"]}`);
+  if (data["also-deliver"]) noteLines.push(`Also deliver: ${data["also-deliver"]}`);
   if (data.budget) noteLines.push(`Budget range: ${data.budget}`);
   if (data["business-type"]) noteLines.push(`Business type: ${data["business-type"]}`);
   if (data["event-date"]) noteLines.push(`Event date: ${data["event-date"]}`);
@@ -82,8 +99,8 @@ export async function POST(req: Request) {
         email: data.email || null,
         phone: data.phone || null,
         businessName: data.company || null,
-        targetAreas: data["areas-required"] || null,
-        leafletQuantity: data.quantity || null,
+        targetAreas,
+        leafletQuantity: leadQuantity || null,
         printingIncluded,
         designIncluded,
         source: "WEBSITE_QUOTE_FORM",

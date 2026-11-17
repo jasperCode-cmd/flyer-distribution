@@ -47,7 +47,7 @@ export default function QuotePage() {
           </h1>
           <p className="text-blue-200 text-xl max-w-xl">
             Fill in the form below and we&apos;ll come back to you within 24
-            hours with a tailored quote for your distribution campaign. Not
+            hours with a tailored quote for your campaign. Not
             ready yet? Have a look at our{" "}
             <Link href="/case-studies" className="text-white underline underline-offset-2 hover:text-blue-200">
               case studies

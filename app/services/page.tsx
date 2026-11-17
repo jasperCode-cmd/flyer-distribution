@@ -285,12 +285,19 @@ export default function ServicesPage() {
                   <p className="text-gray-600 text-base leading-relaxed mb-5">
                     {pkg.desc}
                   </p>
-                  <Link
-                    href="/quote?service=leaflet"
-                    className="inline-block bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-5 py-2.5 rounded-md transition duration-200 ease-out hover:scale-105"
-                  >
-                    Get a Quote
-                  </Link>
+                  <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+                    <Link
+                      href="/quote?service=leaflet"
+                      className="inline-block bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold px-5 py-2.5 rounded-md transition duration-200 ease-out hover:scale-105"
+                    >
+                      Get a Quote
+                    </Link>
+                    {pkg.id === "print-and-deliver" && (
+                      <Link href="/leaflet-printing" className="text-sm font-semibold text-blue-700 underline underline-offset-2 hover:text-blue-900">
+                        See our leaflet printing
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

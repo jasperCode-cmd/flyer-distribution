@@ -20,13 +20,13 @@ const PANEL_LEAVE_MS = 530;
 // and opening the panel again tries again.
 type QuoteFormComponent = typeof import("./QuoteForm").default;
 
-// As tall as the form first is (three cards, with the panel's width), so the
-// panel doesn't jump when it arrives.
+// As tall as the form first is (the four service cards, with the panel's
+// width), so the panel doesn't jump when it arrives.
 function QuoteFormLoading() {
   return (
     <div
       role="status"
-      className={`flex min-h-[592px] md:min-h-[319px] items-center justify-center gap-3 text-sm text-gray-600 ${styles.loading}`}
+      className={`flex min-h-[792px] md:min-h-[488px] items-center justify-center gap-3 text-sm text-gray-600 ${styles.loading}`}
     >
       <span
         aria-hidden="true"

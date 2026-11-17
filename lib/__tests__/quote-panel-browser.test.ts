@@ -281,6 +281,8 @@ const EXPECTED = {
   phone: "07700 900123",
   company: "Payload Test Ltd",
   service: "Leaflet Distribution",
+  // The kind of leaflet distribution, left on its default.
+  "distribution-type": "Door to door",
   "areas-required": "Ringwood BH24, Fordingbridge SP6",
   quantity: "2,500 to 5,000",
   "printing-included": "yes",

@@ -5,12 +5,12 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/generated/prisma/client";
-import { QUOTE_SERVICES, serviceFromParam } from "@/lib/quote-services";
+import { DISTRIBUTION_TYPES, QUOTE_SERVICES, distributionTypeFromParam, serviceFromParam } from "@/lib/quote-services";
 import { THANK_YOU_NOTE, sendQuoteThankYou } from "@/lib/quote-thank-you";
 import { enquiryFromQuoteForm } from "@/lib/thank-you-email";
 import type { SendEmailParams } from "@/lib/gmail";
 
-// The quote form's start: three service cards, then the contact details,
+// The quote form's start: four service cards, then the contact details,
 // then the chosen service's questions once the contact number has 10 digits.
 // The service values it sends, the ?service= words links use, the start
 // state as it renders (no fields until a card is chosen), and the
@@ -33,33 +33,59 @@ const namesIn = (source: string) => [...source.matchAll(/\bname="([^"]+)"/g)].ma
 // rest of them once a quantity is chosen.
 const LEAFLET_FIELDS = "{/* \u2500\u2500 Leaflet Distribution fields \u2500\u2500 */}\n                  {isLeaflet && (";
 const LEAFLET_AFTER_QUANTITY = "{/* \u2500\u2500 Leaflet Distribution, after the quantity \u2500\u2500 */}\n                  {isLeaflet && (";
+const PRINTING_FIELDS = "{/* \u2500\u2500 Leaflet Printing fields \u2500\u2500 */}";
+const PRINTING_AFTER_QUANTITY = "{/* \u2500\u2500 Leaflet Printing, after the quantity \u2500\u2500 */}";
+const WEB_FIELDS = "{/* \u2500\u2500 Web Design & SEO fields \u2500\u2500 */}";
 
-test("the three services send the words the old dropdown sent, with the cards' copy", () => {
+test("the four services send the words the old dropdown sent (and Leaflet Printing its own), with the cards' copy", () => {
   assert.deepEqual(
     QUOTE_SERVICES.map((s) => [s.value, s.param, s.title, s.line, s.heading]),
     [
-      ["Leaflet Distribution", "leaflet", "Leaflet Distribution", "Door to door, GPS tracked", "About your campaign"],
+      ["Leaflet Distribution", "leaflet", "Leaflet Distribution", "Door to door, GPS tracked. We can design and print it too.", "About your campaign"],
+      ["Leaflet Printing", "printing", "Leaflet Printing", "Printed and sent to you", "About your print job"],
       ["Web Design & SEO", "web", "Web Design & SEO", "A site that brings in enquiries", "About your business"],
       ["Screen Hire", "screen", "Screen Hire", "Mobile screen trailer for events", "About your event"],
     ]
   );
-  // /api/quote-lead checks the leaflet value word for word.
-  assert.match(readFileSync("app/api/quote-lead/route.ts", "utf8"), /data\.service === "Leaflet Distribution"/);
+  // /api/quote-lead checks the leaflet and printing values word for word.
+  const route = readFileSync("app/api/quote-lead/route.ts", "utf8");
+  assert.match(route, /data\.service === "Leaflet Distribution"/);
+  assert.match(route, /data\.service === "Leaflet Printing"/);
 });
 
-test("a link chooses a service with ?service=leaflet, web or screen, and nothing else does", () => {
+test("a link chooses a service with ?service=leaflet, printing, web or screen, or Leaflet Distribution and its kind, and nothing else does", () => {
   assert.equal(serviceFromParam("leaflet"), "Leaflet Distribution");
+  assert.equal(serviceFromParam("printing"), "Leaflet Printing");
   assert.equal(serviceFromParam("web"), "Web Design & SEO");
   assert.equal(serviceFromParam("screen"), "Screen Hire");
   assert.equal(serviceFromParam(" Web "), "Web Design & SEO");
-  for (const other of [null, undefined, "", "leaflets", "Leaflet Distribution", "flyers", "web-design"]) {
+  // The kinds of leaflet distribution choose Leaflet Distribution, and their kind.
+  for (const [param, kind] of [
+    ["public-notice", "Public notice leafleting"],
+    ["hand-to-hand", "Hand-to-hand"],
+    ["b2b", "B2B"],
+    [" B2B ", "B2B"],
+  ]) {
+    assert.equal(serviceFromParam(param), "Leaflet Distribution", param);
+    assert.equal(distributionTypeFromParam(param), kind, param);
+  }
+  // Door to door is the default, with no word of its own.
+  assert.deepEqual(DISTRIBUTION_TYPES.map((t) => [t.value, t.param]), [
+    ["Door to door", null],
+    ["Public notice leafleting", "public-notice"],
+    ["Hand-to-hand", "hand-to-hand"],
+    ["B2B", "b2b"],
+  ]);
+  for (const param of ["leaflet", "printing", "web", "screen"]) assert.equal(distributionTypeFromParam(param), "", param);
+  for (const other of [null, undefined, "", "leaflets", "Leaflet Distribution", "flyers", "web-design", "print", "public notice", "door to door", "null"]) {
     assert.equal(serviceFromParam(other), "", String(other));
+    assert.equal(distributionTypeFromParam(other), "", String(other));
   }
   // Read from the address when the form loads.
-  assert.match(form, /serviceFromParam\(new URLSearchParams\(window\.location\.search\)\.get\("service"\)\)/);
+  assert.match(form, /const param = new URLSearchParams\(window\.location\.search\)\.get\("service"\);\s+const chosen = serviceFromParam\(param\);\s+if \(chosen\) setServiceType\(chosen\);\s+const kind = distributionTypeFromParam\(param\);\s+if \(kind\) setDistributionType\(kind\);/);
 });
 
-test("before a card is chosen: the heading, the three cards and the hint, and no fields", () => {
+test("before a card is chosen: the heading, the four cards and the hint, and no fields", () => {
   const run = spawnSync(process.execPath, ["--import", "tsx", "lib/__tests__/render-quote-form.ts"], { encoding: "utf8" });
   assert.equal(run.status, 0, run.stderr);
   const html = run.stdout;
@@ -67,13 +93,13 @@ test("before a card is chosen: the heading, the three cards and the hint, and no
   assert.ok(html.includes("Free, with no obligation. We&#x27;ll be in touch within 24 hours."));
   assert.match(html, /<legend[^>]*>What do you need\?<\/legend>/);
   const radios = [...html.matchAll(/<input type="radio"[^>]*\bname="quote-service" value="([^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(radios, ["Leaflet Distribution", "Web Design &amp; SEO", "Screen Hire"]);
+  assert.deepEqual(radios, ["Leaflet Distribution", "Leaflet Printing", "Web Design &amp; SEO", "Screen Hire"]);
   assert.doesNotMatch(html, /checked=""/, "none chosen yet");
   for (const s of QUOTE_SERVICES) assert.ok(html.includes(s.line), s.line);
   assert.ok(html.includes("Choose a service to see the right questions for you."));
   // No form, and no other control of any kind.
   assert.doesNotMatch(html, /<form/);
-  assert.equal((html.match(/<(input|select|textarea|button)\b/g) ?? []).length, 3);
+  assert.equal((html.match(/<(input|select|textarea|button)\b/g) ?? []).length, 4);
 });
 
 test("the cards are one keyboard-reachable choice outside the form, and the dropdown is gone", () => {
@@ -90,24 +116,28 @@ test("the cards are one keyboard-reachable choice outside the form, and the drop
   assert.ok(!form.includes("Select a service..."));
 });
 
-test("Leaflet Distribution leads: wider, dark blue, badged, and plainly selected; the other two as before", () => {
+test("Leaflet Distribution leads: full width and larger, light blue until chosen, then navy; the other three in a row, as before", () => {
   const cards = between("<fieldset", "</fieldset>");
-  // Wider on desktop, first and full width when they stack, in the same order.
-  assert.match(cards, /grid grid-cols-1 sm:grid-cols-\[1\.3fr_1fr_1fr\] gap-3/);
-  assert.deepEqual(QUOTE_SERVICES.map((s) => s.param), ["leaflet", "web", "screen"]);
-  // Dark blue with a soft shadow; a 3px yellow ring when chosen; focus shows white then yellow.
+  // Leaflet Distribution full width on top; the other three in an equal row under it, one column on phones.
+  assert.match(cards, /<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">/);
+  assert.deepEqual(QUOTE_SERVICES.map((s) => s.param), ["leaflet", "printing", "web", "screen"]);
   assert.match(cards, /const featured = s\.param === "leaflet";/);
-  assert.match(cards, /border-\[#1e3a8a\] bg-\[#1e3a8a\] shadow-\[/);
-  assert.match(cards, /chosen \? "ring-\[3px\] ring-\[#facc15\]" : ""/);
+  assert.match(cards, /\? `sm:col-span-3 grid grid-cols-\[auto_minmax\(0,1fr\)\] sm:grid-cols-\[auto_minmax\(0,1fr\)_auto\] [^`]*p-5 sm:px-7 sm:py-7 border-\[#1e3a8a\] /);
+  // Not chosen: light blue with the 2px navy border. Chosen: navy, a 3px yellow ring and a soft shadow.
+  assert.match(cards, /: "bg-\[#eff6ff\] hover:bg-\[#dbeafe\]"/);
+  assert.match(cards, /\? "bg-\[#1e3a8a\] ring-\[3px\] ring-\[#facc15\] shadow-\[0_12px_28px_-10px_rgba\(30,58,138,0\.65\)\]"/);
+  assert.match(cards, /rounded-xl border-2 cursor-pointer/);
+  // Focus shows yellow, set off from the card.
   assert.match(cards, /has-\[:focus-visible\]:ring-\[3px\] has-\[:focus-visible\]:ring-\[#facc15\] has-\[:focus-visible\]:ring-offset-2 has-\[:focus-visible\]:ring-offset-white/);
-  // White title, light blue line, yellow icon.
-  assert.match(cards, /featured \? "text-white" : "text-gray-900"/);
-  assert.match(cards, /featured \? "text-\[#dbeafe\]" : "text-gray-600"/);
-  assert.match(cards, /featured \? "text-\[#facc15\]" : chosen \? "text-blue-700" : "text-gray-500"/);
+  // Navy title and icon until chosen, then white and yellow; the larger paper plane on the left.
+  assert.match(cards, /const dark = featured && chosen;/);
+  assert.match(cards, /featured \? `text-xl sm:text-2xl \$\{dark \? "text-white" : "text-\[#1e3a8a\]"\}` : "text-gray-900"/);
+  assert.match(cards, /featured \? `text-sm sm:text-base \$\{dark \? "text-\[#dbeafe\]" : "text-gray-700"\}` : "text-sm text-gray-600"/);
+  assert.match(cards, /featured \? `h-10 w-10 \$\{dark \? "text-\[#facc15\]" : "text-\[#1e3a8a\]"\}` : `h-7 w-7 \$\{chosen \? "text-blue-700" : "text-gray-500"\}`/);
   // "Start here" becomes "Selected", seen but not read out: the radio already says it.
-  assert.match(cards, /<span aria-hidden="true"[^>]*text-\[#facc15\]">\s+\{chosen \? \(\s+<>\s+Selected/);
+  assert.match(cards, /<span\s+aria-hidden="true"\s+className=\{`[^`]*\$\{dark \? "text-\[#facc15\]" : "text-\[#1e3a8a\]"\}`\}\s+>\s+\{chosen \? \(\s+<>\s+Selected/);
   assert.match(cards, /\) : \(\s+<>\s+Start here/);
-  // The other two keep their look: white, a light border, blue and light blue when chosen.
+  // The other three keep the old look: white, a light border, blue and light blue when chosen.
   assert.match(cards, /"border-blue-700 bg-blue-50 shadow-\[0_0_0_4px_rgba\(29,78,216,0\.12\),0_8px_20px_-6px_rgba\(29,78,216,0\.35\)\]"/);
   assert.match(cards, /"border-gray-200 bg-white hover:border-gray-300"/);
   assert.match(cards, /has-\[:focus-visible\]:ring-2 has-\[:focus-visible\]:ring-blue-500 has-\[:focus-visible\]:ring-offset-2/);
@@ -117,17 +147,20 @@ test("Leaflet Distribution leads: wider, dark blue, badged, and plainly selected
   const run = spawnSync(process.execPath, ["--import", "tsx", "lib/__tests__/render-quote-form.ts"], { encoding: "utf8" });
   assert.equal(run.status, 0, run.stderr);
   const labels = [...run.stdout.matchAll(/<label class="([^"]*)">([\s\S]*?)<\/label>/g)];
-  assert.equal(labels.length, 3);
-  const [leaflet, web, screen] = labels;
-  assert.match(leaflet[1], /bg-\[#1e3a8a\]/);
+  assert.equal(labels.length, 4);
+  const [leaflet, printing, web, screen] = labels;
+  assert.match(leaflet[1], /sm:col-span-3 /);
+  assert.match(leaflet[1], /border-\[#1e3a8a\] .*bg-\[#eff6ff\]/);
+  assert.doesNotMatch(leaflet[1], /bg-\[#1e3a8a\]/);
   assert.match(leaflet[2], /aria-describedby="quote-service-leaflet-line quote-service-leaflet-badge"/);
   assert.match(leaflet[2], /<span id="quote-service-leaflet-badge"[^>]*>Most popular<\/span>/);
   assert.match(leaflet[2], /<span aria-hidden="true"[^>]*>Start here<svg/);
-  for (const card of [web, screen]) {
+  for (const card of [printing, web, screen]) {
     assert.match(card[1], /border-gray-200 bg-white/);
     assert.doesNotMatch(card[2], /Most popular|Start here|Selected/);
-    assert.match(card[2], /aria-describedby="quote-service-(web|screen)-line"/);
+    assert.match(card[2], /aria-describedby="quote-service-(printing|web|screen)-line"/);
   }
+  assert.ok(printing[2].includes("Printed and sent to you"));
 });
 
 test("the details come first, then the service heading, Company, and the service where the dropdown was", () => {
@@ -163,16 +196,27 @@ test("the details come first, then the service heading, Company, and the service
 });
 
 test("each service shows its own fields after Company, in their old order", () => {
-  // The leaflet fields, the areas and quantity first and the rest after, in their old order.
-  assert.deepEqual(namesIn(between(LEAFLET_FIELDS, "{isWebDesign && (")), [
-    "areas-required",
-    "quantity",
+  // The leaflet fields: the kind (new), the areas and quantity first, and the rest after, in their old order.
+  assert.deepEqual(namesIn(between(LEAFLET_FIELDS, PRINTING_FIELDS)), ["distribution-type", "areas-required", "quantity"]);
+  assert.deepEqual(namesIn(between(LEAFLET_AFTER_QUANTITY, PRINTING_AFTER_QUANTITY)), [
     "printing-included",
     "item-size",
     "print-sides",
     "print-sides",
     "include-design",
     "budget",
+    "message",
+  ]);
+  // Leaflet Printing: what to print and the quantity first, the rest after.
+  assert.deepEqual(namesIn(between(PRINTING_FIELDS, "{/* The rest of the section.")), ["print-items", "print-quantity"]);
+  assert.deepEqual(namesIn(between(PRINTING_AFTER_QUANTITY, WEB_FIELDS)), [
+    "print-size",
+    "print-sides",
+    "print-sides",
+    "print-design",
+    "print-send-to",
+    "also-deliver",
+    "print-delivery-areas",
     "message",
   ]);
   assert.deepEqual(namesIn(between("{isWebDesign && (", "{isScreenHire && (")), ["business-type", "budget", "message"]);
@@ -290,6 +334,7 @@ test("switching service keeps the details and sends only the shown service's fie
   // Each service's fields are only rendered while it is chosen, so nothing
   // of another service is in the form when it is sent.
   assert.match(form, /const isLeaflet = serviceType === "Leaflet Distribution";/);
+  assert.match(form, /const isPrinting = serviceType === "Leaflet Printing";/);
   assert.match(form, /const isWebDesign = serviceType === "Web Design & SEO";/);
   assert.match(form, /const isScreenHire = serviceType === "Screen Hire";/);
   // The details and Company sit outside those parts, so they stay as typed.
@@ -323,9 +368,20 @@ test("the services pages' quote links choose their service; every other quote li
     // The areas overview's closing band asks about leaflets too.
     [join("app", "areas", "page.tsx")]: ["/quote?service=leaflet"],
     [join("app", "services", "page.tsx")]: ["/quote?service=leaflet", "/quote?service=leaflet"],
+    // The kinds of leaflet distribution choose Leaflet Distribution and their kind.
+    [join("app", "services", "b2b-distribution", "page.tsx")]: ["/quote?service=b2b"],
+    [join("app", "services", "hand-to-hand-distribution", "page.tsx")]: ["/quote?service=hand-to-hand"],
+    [join("app", "services", "public-notice-leafleting", "page.tsx")]: ["/quote?service=public-notice"],
     [join("app", "services", "screen-hire", "page.tsx")]: ["/quote?service=screen"],
     [join("app", "services", "web-design-seo", "page.tsx")]: ["/quote?service=web", "/quote?service=web", "/quote?service=web"],
   });
+  // Every link on the three kinds' pages and the printing page names a word the form knows.
+  for (const word of ["b2b", "hand-to-hand", "public-notice"]) assert.ok(distributionTypeFromParam(word), word);
+  // The Leaflet Printing page's links all choose Leaflet Printing.
+  const printing = readFileSync("app/leaflet-printing/page.tsx", "utf8");
+  assert.match(printing, /const QUOTE_HREF = "\/quote\?service=printing";/);
+  assert.equal(serviceFromParam("printing"), "Leaflet Printing");
+  assert.doesNotMatch(printing, /href="\/quote/);
   // Including both "Book a Free Call" buttons.
   const web = readFileSync("app/services/web-design-seo/page.tsx", "utf8");
   assert.equal((web.match(/href="\/quote\?service=web"[^>]*>\s*Book a Free Call/g) ?? []).length, 2);
@@ -448,4 +504,112 @@ test("real database: a blank first name is still refused, as before", { skip }, 
   );
   assert.equal(res.status, 400);
   assert.equal(await prisma.lead.count({ where: { email: `nobody${DOMAIN}` } }), 0);
+});
+
+// The route's reply, with its best-effort thank-you attempt (Leaflet
+// Distribution only; no Gmail here, so it fails and takes its note off) let finish.
+async function postQuietly(fields: Record<string, string>): Promise<Response> {
+  const original = console.error;
+  console.error = () => {};
+  try {
+    const res = await POST(new Request("http://localhost/api/quote-lead", { method: "POST", body: JSON.stringify(fields) }));
+    for (let wait = 0; wait < 30 && (await prisma.activity.count({ where: { detail: THANK_YOU_NOTE, lead: { email: fields.email } } })); wait++) {
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    await new Promise((r) => setTimeout(r, 200));
+    return res;
+  } finally {
+    console.error = original;
+  }
+}
+const noteOf = async (email: string) =>
+  (await prisma.activity.findMany({ where: { type: "NOTE", lead: { email } }, select: { detail: true } })).map((a) => a.detail).join("\n");
+
+test("real database: a Leaflet Printing enquiry is saved as a lead, with its answers in the lead's note", { skip }, async () => {
+  const email = `printing${DOMAIN}`;
+  // What the form sends for printing, with design and letterbox delivery both Yes.
+  const res = await postQuietly({
+    "first-name": "Pia",
+    "last-name": "Test",
+    email,
+    phone: "07700 900123",
+    company: "Pia Ltd",
+    service: "Leaflet Printing",
+    "print-items": "Flyers and leaflets, Business cards",
+    "print-quantity": "2,500 to 5,000",
+    "print-size": "A5",
+    "print-sides": "Double sided",
+    "print-design": "Yes",
+    "print-send-to": "SO15 2AB",
+    "also-deliver": "Yes (Print and Deliver)",
+    "print-delivery-areas": "Southampton SO15, SO16",
+    message: "Silk please",
+  });
+  assert.equal(res.status, 201);
+  const lead = await prisma.lead.findFirst({
+    where: { email },
+    select: { name: true, businessName: true, leafletQuantity: true, printingIncluded: true, designIncluded: true, targetAreas: true, source: true },
+  });
+  assert.deepEqual(lead, {
+    name: "Pia Test",
+    businessName: "Pia Ltd",
+    leafletQuantity: "2,500 to 5,000",
+    printingIncluded: true,
+    designIncluded: true,
+    targetAreas: "Southampton SO15, SO16",
+    source: "WEBSITE_QUOTE_FORM",
+  });
+  const note = await noteOf(email);
+  for (const line of [
+    "Service type: Leaflet Printing",
+    "Print items: Flyers and leaflets, Business cards",
+    "Item size: A5",
+    "Print sides: Double sided",
+    "Design wanted: Yes",
+    "Send printed leaflets to: SO15 2AB",
+    "Also deliver: Yes (Print and Deliver)",
+    "Message: Silk please",
+  ]) {
+    assert.ok(note.split("\n").includes(line), line);
+  }
+
+  // With design and delivery left on No, neither is sent, and neither is recorded.
+  const plain = `printing-plain${DOMAIN}`;
+  assert.equal(
+    (await postQuietly({ "first-name": "Pip", email: plain, phone: "07700 900123", service: "Leaflet Printing", "print-items": "Flyers and leaflets", "print-quantity": "Not sure yet", "print-size": "A6", "print-sides": "Single sided", "print-send-to": "BH24 2NR" })).status,
+    201
+  );
+  const plainLead = await prisma.lead.findFirst({ where: { email: plain }, select: { printingIncluded: true, designIncluded: true, targetAreas: true, leafletQuantity: true } });
+  assert.deepEqual(plainLead, { printingIncluded: true, designIncluded: false, targetAreas: null, leafletQuantity: "Not sure yet" });
+  const plainNote = await noteOf(plain);
+  assert.doesNotMatch(plainNote, /Design wanted|Also deliver/);
+});
+
+test("real database: a Leaflet Printing enquiry without one of the quantities is refused", { skip }, async () => {
+  for (const [i, quantity] of [undefined, "", "lots"].entries()) {
+    const email = `printing-noqty${i}${DOMAIN}`;
+    const fields: Record<string, string> = { "first-name": "Noa", email, phone: "07700 900123", service: "Leaflet Printing", "print-send-to": "SO15 2AB" };
+    if (quantity !== undefined) fields["print-quantity"] = quantity;
+    const res = await POST(new Request("http://localhost/api/quote-lead", { method: "POST", body: JSON.stringify(fields) }));
+    assert.equal(res.status, 400, String(quantity));
+    assert.equal(await prisma.lead.count({ where: { email } }), 0);
+  }
+});
+
+test("real database: a Leaflet Distribution enquiry's kind goes in the lead's note", { skip }, async () => {
+  const email = `kind${DOMAIN}`;
+  const res = await postQuietly({
+    "first-name": "Kit",
+    email,
+    phone: "07700 900123",
+    service: "Leaflet Distribution",
+    "distribution-type": "B2B",
+    "areas-required": "Offices in Southampton",
+    quantity: "1,000 to 2,500",
+    budget: "Under £300",
+  });
+  assert.equal(res.status, 201);
+  const lead = await prisma.lead.findFirst({ where: { email }, select: { targetAreas: true, leafletQuantity: true, printingIncluded: true } });
+  assert.deepEqual(lead, { targetAreas: "Offices in Southampton", leafletQuantity: "1,000 to 2,500", printingIncluded: false });
+  assert.ok((await noteOf(email)).split("\n").includes("Distribution type: B2B"));
 });

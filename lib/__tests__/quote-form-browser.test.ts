@@ -39,14 +39,16 @@ const skip = !BASE || !local ? "set QUOTE_FORM_TEST_URL to a local production bu
 
 const SERVICES = [
   { value: "Leaflet Distribution", param: "leaflet", heading: "About your campaign" },
+  { value: "Leaflet Printing", param: "printing", heading: "About your print job" },
   { value: "Web Design & SEO", param: "web", heading: "About your business" },
   { value: "Screen Hire", param: "screen", heading: "About your event" },
 ] as const;
 type Service = (typeof SERVICES)[number];
 // The neighbour to start from, and the arrow key that then chooses the service.
 const BY_KEYBOARD: Record<Service["param"], [Service["param"], string]> = {
-  leaflet: ["web", "ArrowLeft"],
-  web: ["leaflet", "ArrowRight"],
+  leaflet: ["printing", "ArrowLeft"],
+  printing: ["leaflet", "ArrowRight"],
+  web: ["printing", "ArrowRight"],
   screen: ["web", "ArrowRight"],
 };
 const SCREENS = [
@@ -128,7 +130,11 @@ const sectionControls = (o: Opened): Promise<string[]> =>
 // after any quantity, below it, with what was typed kept and nothing above
 // moving; then it stays when the quantity is changed back.
 async function leafletSection(o: Opened) {
-  assert.deepEqual(await sectionControls(o), ["company", "areas-required", "quantity"], "Company, Areas, then the quantity");
+  assert.deepEqual(
+    await sectionControls(o),
+    ["company", "distribution-type", "distribution-type", "distribution-type", "distribution-type", "areas-required", "quantity"],
+    "Company, the kind, Areas, then the quantity"
+  );
   assert.equal(await o.root.locator("#quantity-continue-hint").textContent(), "Choose a quantity to continue");
   await o.root.locator("#company").fill("Kept Ltd");
   await o.root.locator("#areas-required").fill("Ringwood BH24");
@@ -147,12 +153,25 @@ async function leafletSection(o: Opened) {
   await o.root.locator("#quantity").selectOption("Not sure yet");
   await o.root.getByRole("button", { name: "Send Quote Request" }).waitFor({ state: "visible" });
   assert.deepEqual(await tops(), before, "nothing above the rest moves");
-  assert.deepEqual(await sectionControls(o), ["company", "areas-required", "quantity", "Yes", "No", "Yes", "No", "budget", "message", "newsletter", "Send Quote Request"]);
+  const KIND = ["distribution-type", "distribution-type", "distribution-type", "distribution-type"];
+  assert.deepEqual(await sectionControls(o), ["company", ...KIND, "areas-required", "quantity", "Yes", "No", "Yes", "No", "budget", "message", "newsletter", "Send Quote Request"]);
   assert.equal(await o.root.locator("#company").inputValue(), "Kept Ltd");
   assert.equal(await o.root.locator("#areas-required").inputValue(), "Ringwood BH24");
   assert.equal(await o.root.locator("#quantity-continue-hint").count(), 0);
   await o.root.locator("#quantity").selectOption("");
-  assert.equal((await sectionControls(o)).length, 11, "still revealed after changing back");
+  assert.equal((await sectionControls(o)).length, 15, "still revealed after changing back");
+}
+
+// Printing: what to print and the quantity first, with the hint; the rest, Send
+// included, only once a quantity is chosen, as for leaflets.
+async function printingSection(o: Opened) {
+  await o.root.locator("#print-quantity").waitFor({ state: "visible" });
+  assert.equal(await o.root.locator("#print-quantity-continue-hint").textContent(), "Choose a quantity to continue");
+  assert.equal(await o.root.getByRole("button", { name: "Send Quote Request" }).isVisible(), false, "Send waits for a quantity");
+  assert.equal(await o.root.locator("#print-send-to").isVisible(), false, "the rest waits for a quantity");
+  await o.root.locator("#print-quantity").selectOption("Not sure yet");
+  await o.root.locator("#print-send-to").waitFor({ state: "visible" });
+  assert.equal(await o.root.locator("#print-quantity-continue-hint").count(), 0);
 }
 
 async function choose(o: Opened, s: Service, how: "click" | "keyboard" | "preselect") {
@@ -189,6 +208,7 @@ for (const screen of SCREENS) {
             await o.root.locator("#phone").fill("07700 900123");
             await o.root.getByRole("heading", { name: s.heading }).waitFor({ state: "visible" });
             if (s.param === "leaflet") await leafletSection(o);
+            if (s.param === "printing") await printingSection(o);
             await o.root.locator("#company").waitFor({ state: "visible" });
             await o.root.getByRole("button", { name: "Send Quote Request" }).waitFor({ state: "visible" });
             assert.deepEqual(o.offServer.filter((r) => !r.startsWith("GET ")), [], "nothing sent");

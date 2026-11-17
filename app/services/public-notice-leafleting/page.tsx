@@ -476,7 +476,7 @@ export default function PublicNoticeLeafletingPage() {
             ))}
           </div>
           <Link
-            href="/quote"
+            href="/quote?service=public-notice"
             className="inline-block bg-white text-blue-900 hover:bg-blue-50 font-bold px-8 py-4 rounded-md text-base transition duration-200 ease-out hover:scale-105 shadow-lg"
           >
             Get a Free Quote

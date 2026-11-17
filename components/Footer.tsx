@@ -9,6 +9,7 @@ import { FDH_ADDRESS_LINES } from "@/lib/fdh-address";
 
 const serviceLinks = [
   { href: "/services", label: "Services" },
+  { href: "/leaflet-printing", label: "Leaflet Printing" },
   { href: "/services/public-notice-leafleting", label: "Public Notice Leafleting" },
   { href: "/services/hand-to-hand-distribution", label: "Hand-to-Hand Leaflet Distribution" },
   { href: "/services/b2b-distribution", label: "B2B Leaflet Distribution" },

@@ -3,10 +3,22 @@
 import { useState, useRef, useEffect, useId } from "react";
 import { revealFirstInvalid, showResult } from "@/components/form-result";
 import { QUANTITY_PLACEHOLDER, QUANTITY_RANGES } from "@/lib/quote-quantity";
-import { QUOTE_SERVICES, serviceFromParam, type QuoteService } from "@/lib/quote-services";
+import {
+  DEFAULT_DISTRIBUTION_TYPE,
+  DISTRIBUTION_TYPES,
+  QUOTE_SERVICES,
+  distributionTypeFromParam,
+  serviceFromParam,
+  type DistributionType,
+  type QuoteService,
+} from "@/lib/quote-services";
 
 // How many digits the contact number needs before the service's questions show.
 const PHONE_DIGITS_TO_CONTINUE = 10;
+
+// Leaflet Printing's "What would you like printed?", in the order it is sent.
+const PRINT_ITEMS = ["Flyers and leaflets", "Folded leaflets", "Business cards", "Custom-shaped flyers", "Perforated flyers", "Something else"];
+const DEFAULT_PRINT_ITEMS = ["Flyers and leaflets"];
 
 // inPanel: the form is in the floating Get a Quote panel. From 768px up the
 // panel itself is the card there, so the form drops its own border and
@@ -23,6 +35,12 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
   const [quantityChosen, setQuantityChosen] = useState(false);
   const [includePrinting, setIncludePrinting] = useState(false);
   const [includeDesign, setIncludeDesign] = useState(false);
+  // Leaflet Distribution: what kind, which names the areas field to suit.
+  const [distributionType, setDistributionType] = useState<DistributionType["value"]>(DEFAULT_DISTRIBUTION_TYPE);
+  // Leaflet Printing: what to print, whether to design it, and whether to deliver it door to door too.
+  const [printItems, setPrintItems] = useState<string[]>(DEFAULT_PRINT_ITEMS);
+  const [printDesign, setPrintDesign] = useState(false);
+  const [alsoDeliver, setAlsoDeliver] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(false);
@@ -59,13 +77,19 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
     if (cardChoices) showDetails(detailsRef.current, firstNameRef.current);
   }, [cardChoices]);
 
-  // A link can choose the service: /quote?service=leaflet, web or screen.
+  // A link can choose the service: /quote?service=leaflet, printing, web or
+  // screen, or Leaflet Distribution and its kind: public-notice, hand-to-hand or b2b.
   useEffect(() => {
-    const chosen = serviceFromParam(new URLSearchParams(window.location.search).get("service"));
+    const param = new URLSearchParams(window.location.search).get("service");
+    const chosen = serviceFromParam(param);
     if (chosen) setServiceType(chosen);
+    const kind = distributionTypeFromParam(param);
+    if (kind) setDistributionType(kind);
   }, []);
 
   const isLeaflet = serviceType === "Leaflet Distribution";
+  const isPrinting = serviceType === "Leaflet Printing";
+  const areasField = DISTRIBUTION_TYPES.find((t) => t.value === distributionType) ?? DISTRIBUTION_TYPES[0];
   const isWebDesign = serviceType === "Web Design & SEO";
   const isScreenHire = serviceType === "Screen Hire";
 
@@ -95,6 +119,10 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
         setIncludePrinting(false);
         setIncludeDesign(false);
         setQuantity("");
+        setDistributionType(DEFAULT_DISTRIBUTION_TYPE);
+        setPrintItems(DEFAULT_PRINT_ITEMS);
+        setPrintDesign(false);
+        setAlsoDeliver(false);
 
         // Best-effort CRM lead capture, alongside the Web3Forms email
         // above. Never allowed to affect the user-facing success state.
@@ -139,26 +167,31 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
         Free, with no obligation. We&apos;ll be in touch within 24 hours.
       </p>
 
-      {/* The service, as one choice of three cards. The radios sit outside
+      {/* The service, as one choice of four cards. The radios sit outside
           the form, so they are never sent themselves: the choice goes as
           "service", from the hidden field after Company below. */}
       <fieldset className="mt-7">
         <legend className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-gray-500">
           What do you need?
         </legend>
-        {/* Leaflet Distribution leads: wider on desktop and first when they stack. */}
-        <div className="grid grid-cols-1 sm:grid-cols-[1.3fr_1fr_1fr] gap-3">
+        {/* Leaflet Distribution leads: a full-width card on top, larger than
+            the rest, then the other three in an equal row under it (one
+            column on phones). */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {QUOTE_SERVICES.map((s) => {
             const chosen = serviceType === s.value;
-            // The leaflet card: dark blue, a "Most popular" badge, and a yellow
-            // ring when chosen. Its focus ring is white then yellow, so it
-            // shows against the dark card and the white page alike.
+            // The leaflet card: light blue with a navy border until chosen,
+            // then navy with a yellow ring, with a "Most popular" badge
+            // either way. Its focus ring is yellow, set off from the card.
             const featured = s.param === "leaflet";
+            const dark = featured && chosen;
             const look = featured
-              ? `border-[#1e3a8a] bg-[#1e3a8a] shadow-[0_12px_28px_-10px_rgba(30,58,138,0.65)] has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-[#facc15] has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-white ${
-                  chosen ? "ring-[3px] ring-[#facc15]" : ""
+              ? `sm:col-span-3 grid grid-cols-[auto_minmax(0,1fr)] sm:grid-cols-[auto_minmax(0,1fr)_auto] items-start sm:items-center gap-x-4 sm:gap-x-6 gap-y-2 p-5 sm:px-7 sm:py-7 border-[#1e3a8a] has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-[#facc15] has-[:focus-visible]:ring-offset-2 has-[:focus-visible]:ring-offset-white ${
+                  chosen
+                    ? "bg-[#1e3a8a] ring-[3px] ring-[#facc15] shadow-[0_12px_28px_-10px_rgba(30,58,138,0.65)]"
+                    : "bg-[#eff6ff] hover:bg-[#dbeafe]"
                 }`
-              : `has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500 has-[:focus-visible]:ring-offset-2 ${
+              : `flex sm:flex-col items-start gap-3 sm:gap-2.5 p-4 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500 has-[:focus-visible]:ring-offset-2 ${
                   chosen
                     ? "border-blue-700 bg-blue-50 shadow-[0_0_0_4px_rgba(29,78,216,0.12),0_8px_20px_-6px_rgba(29,78,216,0.35)]"
                     : "border-gray-200 bg-white hover:border-gray-300"
@@ -166,7 +199,7 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
             return (
               <label
                 key={s.param}
-                className={`relative flex sm:flex-col items-start gap-3 sm:gap-2.5 rounded-xl border-2 p-4 cursor-pointer transition-[border-color,background-color,box-shadow] duration-200 ${look}`}
+                className={`relative rounded-xl border-2 cursor-pointer transition-[border-color,background-color,box-shadow] duration-200 ${look}`}
               >
                 <input
                   type="radio"
@@ -181,34 +214,40 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
                   }
                   className="sr-only"
                 />
-                {featured && (
-                  <span
-                    id={`quote-service-${s.param}-badge`}
-                    className="absolute -top-2.5 left-3 rounded-full bg-[#facc15] px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-[#1e3a8a] leading-none"
-                  >
-                    Most popular
-                  </span>
-                )}
                 <ServiceIcon
                   param={s.param}
-                  className={featured ? "text-[#facc15]" : chosen ? "text-blue-700" : "text-gray-500"}
+                  className={featured ? `h-10 w-10 ${dark ? "text-[#facc15]" : "text-[#1e3a8a]"}` : `h-7 w-7 ${chosen ? "text-blue-700" : "text-gray-500"}`}
                 />
                 <span className="flex flex-col sm:flex-1">
-                  <span
-                    id={`quote-service-${s.param}`}
-                    className={`block font-bold leading-snug ${featured ? "text-white" : "text-gray-900"}`}
-                  >
-                    {s.title}
+                  <span className={featured ? "flex flex-wrap items-center gap-x-2.5 gap-y-1" : "contents"}>
+                    <span
+                      id={`quote-service-${s.param}`}
+                      className={`block font-bold leading-snug ${featured ? `text-xl sm:text-2xl ${dark ? "text-white" : "text-[#1e3a8a]"}` : "text-gray-900"}`}
+                    >
+                      {s.title}
+                    </span>
+                    {featured && (
+                      <span
+                        id={`quote-service-${s.param}-badge`}
+                        className="rounded-full bg-[#facc15] px-2 py-1 text-[11px] font-bold uppercase tracking-wide text-[#1e3a8a] leading-none"
+                      >
+                        Most popular
+                      </span>
+                    )}
                   </span>
                   <span
                     id={`quote-service-${s.param}-line`}
-                    className={`mt-0.5 block text-sm leading-snug ${featured ? "text-[#dbeafe]" : "text-gray-600"}`}
+                    className={`mt-1 block leading-snug ${featured ? `text-sm sm:text-base ${dark ? "text-[#dbeafe]" : "text-gray-700"}` : "text-sm text-gray-600"}`}
                   >
                     {s.line}
                   </span>
-                  {featured && (
+                </span>
+                {featured && (
                     // Seen only: the radio already says whether it is chosen.
-                    <span aria-hidden="true" className="mt-2.5 sm:mt-auto sm:pt-2.5 inline-flex items-center gap-1 text-sm font-bold text-[#facc15]">
+                    <span
+                      aria-hidden="true"
+                      className={`col-start-2 sm:col-start-3 inline-flex items-center gap-1 text-sm font-bold ${dark ? "text-[#facc15]" : "text-[#1e3a8a]"}`}
+                    >
                       {chosen ? (
                         <>
                           Selected
@@ -226,7 +265,6 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
                       )}
                     </span>
                   )}
-                </span>
               </label>
             );
           })}
@@ -380,19 +418,54 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
                   {/* ── Leaflet Distribution fields ── */}
                   {isLeaflet && (
                     <>
-                      {/* Areas required */}
+                      {/* What kind: four cards, two by two (one column on phones),
+                          Door to door to start with. Sent as distribution-type. */}
+                      <fieldset>
+                        <legend className="block text-sm font-medium text-gray-700 mb-2">
+                          What kind of leaflet distribution? <span className="text-red-500">*</span>
+                        </legend>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {DISTRIBUTION_TYPES.map((t) => {
+                            const picked = distributionType === t.value;
+                            return (
+                              <label
+                                key={t.value}
+                                className={`flex items-start gap-3 rounded-lg border-2 px-3 py-2.5 cursor-pointer transition-colors duration-150 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500 has-[:focus-visible]:ring-offset-2 ${
+                                  picked ? "border-blue-700 bg-blue-50" : "border-gray-200 bg-white hover:border-gray-300"
+                                }`}
+                              >
+                                <input
+                                  type="radio"
+                                  name="distribution-type"
+                                  value={t.value}
+                                  required
+                                  checked={picked}
+                                  onChange={() => setDistributionType(t.value)}
+                                  className="mt-0.5 h-4 w-4 shrink-0 border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span>
+                                  <span className="block text-sm font-semibold text-gray-900">{t.value}</span>
+                                  <span className="block text-xs text-gray-600">{t.line}</span>
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </fieldset>
+
+                      {/* Areas required: its label and example follow the kind chosen; its name never changes. */}
                       <div>
                         <label
                           htmlFor="areas-required"
                           className="block text-sm font-medium text-gray-700 mb-1"
                         >
-                          Areas required / target postcodes
+                          {areasField.areasLabel}
                         </label>
                         <input
                           type="text"
                           id="areas-required"
                           name="areas-required"
-                          placeholder="e.g. Southampton SO15, SO16"
+                          placeholder={areasField.areasPlaceholder}
                           className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
                       </div>
@@ -437,6 +510,86 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
                       </div>
                     </>
                   )}
+
+                  {/* ── Leaflet Printing fields ── */}
+                  {isPrinting && (
+                    <>
+                      {/* What to print: pill checkboxes, Flyers and leaflets ticked to
+                          start with. The boxes have no name; what is ticked is sent as
+                          one line, print-items, in the list's order. */}
+                      <fieldset>
+                        <legend className="block text-sm font-medium text-gray-700 mb-2">
+                          What would you like printed? <span className="font-normal text-gray-500">(tick all that apply)</span>
+                        </legend>
+                        <div className="flex flex-wrap gap-2">
+                          {PRINT_ITEMS.map((item) => {
+                            const ticked = printItems.includes(item);
+                            return (
+                              <label
+                                key={item}
+                                className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-sm font-semibold cursor-pointer transition-colors duration-150 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500 has-[:focus-visible]:ring-offset-2 ${
+                                  ticked ? "border-blue-700 bg-blue-700 text-white" : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={ticked}
+                                  onChange={() =>
+                                    setPrintItems((now) => (now.includes(item) ? now.filter((i) => i !== item) : PRINT_ITEMS.filter((i) => i === item || now.includes(i))))
+                                  }
+                                  className="sr-only"
+                                />
+                                {ticked && (
+                                  <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M5 12.5l4.5 4.5L19 7.5" />
+                                  </svg>
+                                )}
+                                {item}
+                              </label>
+                            );
+                          })}
+                        </div>
+                        <input type="hidden" name="print-items" value={printItems.join(", ")} />
+                      </fieldset>
+
+                      {/* Quantity: the leaflet ranges. Any choice folds in the rest. */}
+                      <div>
+                        <label
+                          htmlFor="print-quantity"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Approximate quantity <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          id="print-quantity"
+                          name="print-quantity"
+                          required
+                          value={quantity}
+                          onChange={(e) => {
+                            setQuantity(e.target.value);
+                            if (e.target.value) setQuantityChosen(true);
+                          }}
+                          aria-describedby={quantityChosen ? "print-quantity-hint" : "print-quantity-hint print-quantity-continue-hint"}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                        >
+                          <option value="">{QUANTITY_PLACEHOLDER}</option>
+                          {QUANTITY_RANGES.map((range) => (
+                            <option key={range} value={range}>
+                              {range}
+                            </option>
+                          ))}
+                        </select>
+                        <p id="print-quantity-hint" className="mt-1.5 text-xs text-gray-500">
+                          Not sure? Your best guess is fine.
+                        </p>
+                        {!quantityChosen && (
+                          <p id="print-quantity-continue-hint" className="mt-1.5 text-xs text-gray-500">
+                            Choose a quantity to continue
+                          </p>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* The rest of the section. For leaflets it is hidden until a
@@ -444,8 +597,8 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
                     nothing above moves and nothing typed is lost. The other
                     services show it straight away, as before. */}
                 <div
-                  hidden={isLeaflet && !quantityChosen}
-                  className={isLeaflet ? "quote-fold-in mt-5 space-y-5" : "mt-5 space-y-5"}
+                  hidden={(isLeaflet || isPrinting) && !quantityChosen}
+                  className={isLeaflet || isPrinting ? "quote-fold-in mt-5 space-y-5" : "mt-5 space-y-5"}
                 >
                   {/* ── Leaflet Distribution, after the quantity ── */}
                   {isLeaflet && (
@@ -572,6 +725,152 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
                           name="message"
                           rows={4}
                           placeholder="Tell us about your campaign, timing, or any special requirements..."
+                          className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {/* ── Leaflet Printing, after the quantity ── */}
+                  {isPrinting && (
+                    <>
+                      {/* Size and sides side by side, with the paper note beside them
+                          (by the form's own width, so the Get a Quote panel matches). */}
+                      <div className="@container">
+                        <div className="grid grid-cols-1 @min-[420px]:grid-cols-2 @min-[600px]:grid-cols-3 gap-4 items-start">
+                          <div>
+                            <label
+                              htmlFor="print-size"
+                              className="block text-sm font-medium text-gray-700 mb-1"
+                            >
+                              Item size
+                            </label>
+                            <select
+                              id="print-size"
+                              name="print-size"
+                              defaultValue="A5"
+                              className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            >
+                              <option value="A5">A5 (most popular)</option>
+                              <option value="A4">A4</option>
+                              <option value="A6">A6</option>
+                              <option value="DL">DL</option>
+                              <option value="Other or not sure">Other or not sure</option>
+                            </select>
+                          </div>
+                          <fieldset>
+                            <legend className="block text-sm font-medium text-gray-700 mb-2">Print sides</legend>
+                            <div className="flex flex-col gap-2">
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="print-sides"
+                                  value="Double sided"
+                                  defaultChecked
+                                  className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="text-sm text-gray-700">Double sided (recommended)</span>
+                              </label>
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="print-sides"
+                                  value="Single sided"
+                                  className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="text-sm text-gray-700">Single sided</span>
+                              </label>
+                            </div>
+                          </fieldset>
+                          <p className="@min-[420px]:col-span-2 @min-[600px]:col-span-1 rounded-md border border-blue-100 bg-[#eff6ff] px-3 py-2.5 text-xs leading-relaxed text-blue-900">
+                            Paper: we recommend 250gsm silk. We&apos;ll go through other options on the call.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Design: Yes sends print-design "Yes"; No sends nothing. */}
+                      <div className="border border-gray-200 rounded-md px-3 py-3 bg-gray-50">
+                        <YesNo
+                          id="print-design-question"
+                          question="Would you like us to design it?"
+                          value={printDesign}
+                          onChange={setPrintDesign}
+                        />
+                        <p className="mt-2 text-xs text-gray-500">Choose No if your artwork is ready.</p>
+                        {printDesign && <input type="hidden" name="print-design" value="Yes" />}
+                      </div>
+
+                      {/* Where to send the printed leaflets: their own postcode. */}
+                      <div>
+                        <label
+                          htmlFor="print-send-to"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Where should we send them? <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="print-send-to"
+                          name="print-send-to"
+                          required
+                          autoComplete="postal-code"
+                          placeholder="Your postcode, e.g. SO15 2AB"
+                          aria-describedby="print-send-to-hint"
+                          className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <p id="print-send-to-hint" className="mt-1.5 text-xs text-gray-500">
+                          We deliver across Hampshire and Dorset, and can send them to other areas too.
+                        </p>
+                      </div>
+
+                      {/* Door to door as well: Yes sends also-deliver and shows the
+                          areas to deliver to; No sends nothing. */}
+                      <div className="border border-gray-200 rounded-md px-3 py-3 bg-gray-50">
+                        <YesNo
+                          id="also-deliver-question"
+                          question="Would you also like us to deliver them through letterboxes?"
+                          value={alsoDeliver}
+                          onChange={setAlsoDeliver}
+                        />
+                        <p className="mt-2 text-xs text-gray-500">
+                          Choose No if you just want the printed leaflets. Door to door delivery covers Hampshire and Dorset, every round GPS tracked.
+                        </p>
+                        {alsoDeliver && (
+                          <div className="quote-fold-in mt-3 space-y-2">
+                            <input type="hidden" name="also-deliver" value="Yes (Print and Deliver)" />
+                            <p className="text-sm font-semibold text-blue-900">Great, we&apos;ll quote you for Print and Deliver.</p>
+                            <div>
+                              <label
+                                htmlFor="print-delivery-areas"
+                                className="block text-sm font-medium text-gray-700 mb-1"
+                              >
+                                Areas required / target postcodes
+                              </label>
+                              <input
+                                type="text"
+                                id="print-delivery-areas"
+                                name="print-delivery-areas"
+                                placeholder="e.g. Southampton SO15, SO16"
+                                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Additional details (printing) */}
+                      <div>
+                        <label
+                          htmlFor="print-message"
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Additional details
+                        </label>
+                        <textarea
+                          id="print-message"
+                          name="message"
+                          rows={4}
+                          placeholder="Paper or finish you have in mind, when you need them, or anything else..."
                           className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                         />
                       </div>
@@ -826,9 +1125,16 @@ function ServiceIcon({ param, className }: { param: QuoteService["param"]; class
       strokeWidth={1.75}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={`h-7 w-7 shrink-0 transition-colors duration-200 ${className}`}
+      className={`shrink-0 transition-colors duration-200 ${className}`}
     >
       {param === "leaflet" && <path d="M21.5 2.5 2.5 10l7 3 3 7 9-17.5ZM9.5 13 15 8.5" />}
+      {param === "printing" && (
+        <>
+          <path d="M6 9V2h12v7" />
+          <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
+          <rect x="6" y="14" width="12" height="8" />
+        </>
+      )}
       {param === "web" && (
         <>
           <rect x="3" y="4" width="18" height="16" rx="2" />
