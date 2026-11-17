@@ -74,11 +74,75 @@ const PROMISES = [
   },
 ];
 
-const NEXT_STEPS = [
-  { title: "Planning a campaign?", text: "Get a free quote within 24 hours", href: "/quote?service=leaflet" },
-  { title: "Want to see our work?", text: "Real campaigns, with the areas we covered", href: "/case-studies" },
-  { title: "Want to join the team?", text: "Flexible, local leaflet delivery work", href: "/leaflet-distribution-jobs" },
+// The last section: where to go next on the left, every service on the right.
+// Line icons in the site's style (the paper plane, website and screen ones
+// are the quote form's).
+const ICON_PATHS = {
+  plane: <path d="M21.5 2.5 2.5 10l7 3 3 7 9-17.5ZM9.5 13 15 8.5" />,
+  map: (
+    <>
+      <path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z" />
+      <path d="M8 2v16M16 6v16" />
+    </>
+  ),
+  personPlus: (
+    <>
+      <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+      <circle cx="8.5" cy="7" r="4" />
+      <path d="M20 8v6M23 11h-6" />
+    </>
+  ),
+  web: (
+    <>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M3 9h18M6.5 6.5h.01M9 6.5h.01M7.5 13h9M7.5 16h5.5" />
+    </>
+  ),
+  screen: (
+    <>
+      <rect x="3" y="2.5" width="18" height="11" rx="1.5" />
+      <path d="M12 13.5V17M3.5 17h16M19.5 17h2" />
+      <circle cx="8" cy="19.5" r="1.5" />
+      <circle cx="15" cy="19.5" r="1.5" />
+    </>
+  ),
+};
+
+function LineIcon({ name, className }: { name: keyof typeof ICON_PATHS; className: string }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+      {ICON_PATHS[name]}
+    </svg>
+  );
+}
+
+function ArrowIcon({ className }: { className: string }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={2.25} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12h14M13 6l6 6-6 6" />
+    </svg>
+  );
+}
+
+const WHERE_NEXT = [
+  { title: "Want to see our work?", text: "Real campaigns, with the areas we covered", href: "/case-studies", icon: "map" as const },
+  { title: "Want to join the team?", text: "Flexible, local leaflet delivery work", href: "/leaflet-distribution-jobs", icon: "personPlus" as const },
 ];
+
+const LEAFLET_PILLS = [
+  { label: "Distribution", href: "/services" },
+  { label: "Printing", href: "/leaflet-printing" },
+  { label: "Public Notice", href: "/services/public-notice-leafleting" },
+  { label: "Hand-to-Hand", href: "/services/hand-to-hand-distribution" },
+  { label: "B2B", href: "/services/b2b-distribution" },
+];
+
+const OTHER_SERVICES = [
+  { title: "Web Design & SEO", text: "Bespoke websites and SEO for local businesses", href: "/services/web-design-seo", icon: "web" as const },
+  { title: "Screen Hire", text: "Mobile LED screen trailer for events and advertising", href: "/services/screen-hire", icon: "screen" as const },
+];
+
+const LIFT = "transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2";
 
 export default function AboutPage() {
   return (
@@ -174,77 +238,93 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="bg-slate-50 py-16 border-t border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-blue-900 mb-3">
-            Our Services
-          </h2>
-          <p className="text-gray-600 mb-8 text-lg">
-            From leaflet distribution to web design and mobile screen hire, we offer a range of marketing solutions for local businesses.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                title: "Leaflet Services",
-                desc: "Door-to-door distribution, targeted postcode campaigns, design and print.",
-                href: "/services",
-              },
-              {
-                title: "Web Design & SEO",
-                desc: "Bespoke websites and search engine optimisation for local businesses.",
-                href: "/services/web-design-seo",
-              },
-              {
-                title: "Screen Hire",
-                desc: "Mobile LED screen trailer hire for events and advertising across Hampshire and Dorset.",
-                href: "/services/screen-hire",
-              },
-            ].map((svc) => (
-              <Link
-                key={svc.title}
-                href={svc.href}
-                className="border border-gray-200 rounded-lg p-6 bg-white hover:border-blue-400 hover:shadow-md transition-all block"
-              >
-                <h3 className="text-base font-semibold text-blue-900 mb-2">
-                  {svc.title}
-                </h3>
-                <p className="text-gray-600 text-base leading-relaxed">{svc.desc}</p>
-                <span className="mt-3 inline-block text-blue-600 text-xs font-semibold">
-                  View service →
-                </span>
-              </Link>
-            ))}
+      {/* 5. Where next, beside every service: one section in place of Our Services and the next steps. */}
+      <section className="bg-[#f8fafc] py-16 sm:py-[88px]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 items-start gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+          {/* Left: the next step, then two more places to go. */}
+          <div>
+            <p className="text-sm font-bold uppercase tracking-[0.14em] text-[#1d4ed8]">Where next?</p>
+            <h2 className="mt-3 font-heading text-[34px] sm:text-[44px] font-extrabold leading-[1.1] text-[#172554]">Planning a campaign?</h2>
+            <p className="mt-4 text-[18px] leading-relaxed text-[#374151]">
+              Tell us what you need and where, and get a free quote within 24 hours.
+            </p>
+            <Link
+              href="/quote?service=leaflet"
+              className="mt-7 inline-block bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold px-7 py-3.5 rounded-md transition duration-200 ease-out hover:scale-105 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+            >
+              Get a Free Quote
+            </Link>
+            <ul className="mt-7 space-y-3">
+              {WHERE_NEXT.map((item) => (
+                <li key={item.href}>
+                  <Link href={item.href} className={`group flex items-center gap-4 rounded-[14px] border border-[#e2e8f0] bg-white p-4 ${LIFT}`}>
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#dbeafe] text-[#1d4ed8]">
+                      <LineIcon name={item.icon} className="h-5 w-5" />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-bold text-[#172554]">{item.title}</span>
+                      <span className="block text-sm text-[#374151]">{item.text}</span>
+                    </span>
+                    <ArrowIcon className="h-5 w-5 shrink-0 text-[#1d4ed8] transition-transform duration-200 group-hover:translate-x-1" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
-        </div>
-      </section>
 
-      {/* 6. Next steps */}
-      <section className="bg-white py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="sr-only">Next steps</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {NEXT_STEPS.map((step) => (
-              <Link
-                key={step.href}
-                href={step.href}
-                className="group flex h-full flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-blue-400 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
-              >
-                <h3 className="text-xl font-bold text-[#1e3a8a]">{step.title}</h3>
-                <p className="mt-2 text-base text-gray-600 leading-relaxed">{step.text}</p>
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  className="mt-auto pt-4 h-9 w-9 text-[#1d4ed8] transition-transform duration-200 group-hover:translate-x-1"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2.25}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg>
+          {/* Right: every service. */}
+          <div className="rounded-[24px] border border-[#e2e8f0] bg-white p-6 shadow-[0_18px_40px_-20px_rgba(15,23,42,0.25)] sm:p-8">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Our services</p>
+            {/* Leaflet services: its title and each pill are links of their own (links can't nest). */}
+            <div className="mt-4 rounded-2xl bg-[#1e3a8a] p-5 text-white sm:p-6">
+              <div className="flex items-start gap-4">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#172554] text-[#facc15]">
+                  <LineIcon name="plane" className="h-6 w-6" />
+                </span>
+                <div className="min-w-0">
+                  <h3 className="font-heading text-[22px] font-extrabold leading-tight">
+                    <Link href="/services" className="inline-flex min-h-10 items-center underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#facc15]">
+                      Leaflet services &rarr;
+                    </Link>
+                  </h3>
+                  <p className="mt-1.5 text-[#dbeafe]">Door to door across Hampshire and Dorset, GPS tracked. Design and print too.</p>
+                </div>
+              </div>
+              <ul className="mt-5 flex flex-wrap gap-2">
+                {LEAFLET_PILLS.map((pill) => (
+                  <li key={pill.href}>
+                    <Link
+                      href={pill.href}
+                      className="inline-flex min-h-10 items-center rounded-full bg-white px-4 text-[13px] font-bold text-[#1e3a8a] transition-colors hover:bg-[#dbeafe] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#facc15]"
+                    >
+                      {pill.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* The other two, each one link, divided by a line. */}
+            <ul className="mt-2 divide-y divide-[#e2e8f0]">
+              {OTHER_SERVICES.map((svc) => (
+                <li key={svc.href}>
+                  <Link href={svc.href} className="group flex items-center gap-4 rounded-lg px-1 py-4 transition-colors hover:bg-[#f8fafc] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#dbeafe] text-[#1d4ed8]">
+                      <LineIcon name={svc.icon} className="h-5 w-5" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-lg font-bold leading-snug text-[#172554]">{svc.title}</h3>
+                      <p className="text-sm text-[#374151]">{svc.text}</p>
+                    </div>
+                    <ArrowIcon className="h-5 w-5 shrink-0 text-[#1d4ed8] transition-transform duration-200 group-hover:translate-x-1" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-2 border-t border-[#e2e8f0] pt-4">
+              <Link href="/services" className="inline-flex min-h-10 items-center font-bold text-[#1d4ed8] underline-offset-4 hover:text-[#172554] hover:underline">
+                View all services &rarr;
               </Link>
-            ))}
+            </div>
           </div>
         </div>
       </section>
