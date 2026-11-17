@@ -124,7 +124,7 @@ test("the hero: yellow label, H1, intro, the two buttons and the printer photo",
     { src: "printing-flyers-leaflets.webp", alt: "Colourful printed leaflets laid out on a desk", lazy: true, size: "1200x700" },
     { src: "printing-folded-leaflets.webp", alt: "A printed folded leaflet standing on a stack of leaflets", lazy: true, size: "1200x700" },
     { src: "printing-business-cards.webp", alt: "A stack of printed business cards", lazy: true, size: "1200x700" },
-    { src: "printing-paper.webp", alt: "A fan of coloured paper sheets", lazy: true, size: "1200x700" },
+    { src: "printing-paper.webp", alt: "A fan of coloured paper sheets", lazy: true, size: "2400x1350" },
   ]);
   for (const img of imgs) assert.ok(existsSync(join("public", "images", img.src!)), img.src);
   assert.doesNotMatch(SOURCE, /Leaflet going through door/);

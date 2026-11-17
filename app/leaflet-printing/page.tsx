@@ -404,13 +404,15 @@ export default function LeafletPrintingPage() {
               <span className={`shrink-0 ${BADGE}`}>We recommend</span>
               <span className="text-[18px] font-bold text-[#172554]">250gsm silk, double-sided</span>
             </div>
+            {/* From lg the photo is cropped to cover a box up to about 580px tall, so it is drawn up to about
+                1030px wide: sizes says so (1024px, which picks the 2048px version on high-density screens). */}
             <div className="relative h-[180px] overflow-hidden rounded-[16px] lg:h-auto lg:min-h-[180px] lg:flex-1">
               <Image
                 src="/images/printing-paper.webp"
                 alt="A fan of coloured paper sheets"
-                width={1200}
-                height={700}
-                sizes="(min-width: 1200px) 552px, (min-width: 1024px) 45vw, calc(100vw - 48px)"
+                width={2400}
+                height={1350}
+                sizes="(min-width: 1024px) 1024px, calc(100vw - 48px)"
                 className="absolute inset-0 h-full w-full object-cover object-center"
               />
             </div>
