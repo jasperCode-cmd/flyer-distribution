@@ -4,66 +4,70 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { hidesSiteChrome } from "@/lib/site-chrome";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
 
-type ServiceItem = { href: string; label: string; description?: string; highlight?: boolean };
-type ServiceGroup = { label: string; href: string | null; featured?: { badge: string; description: string }; items: ServiceItem[] };
+type ServiceItem = { href: string; label: string; description: string; look?: "featured" | "highlight" };
 
-// The Services menu, shared by the desktop dropdown and the phone menu. It
-// leads with Leaflet Distribution, the most prominent (navy, with a badge),
-// then Leaflet Printing, lighter (light blue, with a printer icon); each says
-// in a line what it is. The rest are plain links.
-const servicesGroups: ServiceGroup[] = [
-  {
-    label: "Leaflet Distribution",
-    href: "/services",
-    featured: { badge: "Most popular", description: "Door to door, GPS tracked. We can design and print it too." },
-    items: [
-      { href: "/leaflet-printing", label: "Leaflet Printing", description: "Flyers, leaflets and business cards", highlight: true },
-      { href: "/services/public-notice-leafleting", label: "Public Notice Leafleting" },
-      { href: "/services/hand-to-hand-distribution", label: "Hand-to-Hand Leaflet Distribution" },
-      { href: "/services/b2b-distribution", label: "B2B Leaflet Distribution" },
-    ],
-  },
-  {
-    label: "Additional Services",
-    href: null,
-    items: [
-      { href: "/services/web-design-seo", label: "Web Design & SEO" },
-      { href: "/services/screen-hire", label: "Screen Hire" },
-    ],
-  },
+// The Services menu, shared by the desktop dropdown (two columns) and the
+// phone menu (one). The leaflet services lead with Leaflet Distribution, the
+// most prominent (navy, its badge on a line of its own above the title), then
+// Leaflet Printing, lighter (light blue, with a printer icon); the rest are
+// plain. Each says in a line what it is.
+const LEAFLET_SERVICES: ServiceItem[] = [
+  { href: "/services", label: "Leaflet Distribution", description: "Door to door, GPS tracked. We can design and print it too.", look: "featured" },
+  { href: "/leaflet-printing", label: "Leaflet Printing", description: "Flyers, leaflets and business cards", look: "highlight" },
+  { href: "/services/public-notice-leafleting", label: "Public Notice Leafleting", description: "Road closures, works and consultations" },
+  { href: "/services/hand-to-hand-distribution", label: "Hand-to-Hand Leaflet Distribution", description: "Leaflets handed out at events and busy spots" },
+  { href: "/services/b2b-distribution", label: "B2B Leaflet Distribution", description: "Reach local businesses directly" },
 ];
+const ADDITIONAL_SERVICES: ServiceItem[] = [
+  { href: "/services/web-design-seo", label: "Web Design & SEO", description: "A site that brings in enquiries" },
+  { href: "/services/screen-hire", label: "Screen Hire", description: "Mobile screen trailer for events" },
+];
+const BADGE = "Most popular";
 
-const FEATURED_ITEM = "block rounded-md bg-[#1e3a8a] px-3 py-2.5 text-white hover:bg-[#172554] transition-colors";
-const HIGHLIGHT_ITEM = "flex items-start gap-2.5 rounded-md bg-[#dbeafe] px-3 py-2.5 text-blue-900 hover:bg-[#bfdbfe] transition-colors";
+const GROUP_LABEL = "text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500";
+const FOCUS = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-1";
 
-function FeaturedLabel({ label, badge, description }: { label: string; badge: string; description: string }) {
+function PrinterIcon() {
   return (
-    <>
-      <span className="flex flex-wrap items-center gap-2 text-sm font-semibold">
-        {label}
-        <span className="rounded-full bg-[#facc15] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-900">{badge}</span>
-      </span>
-      <span className="mt-0.5 block text-xs text-[#dbeafe]">{description}</span>
-    </>
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="mt-0.5 h-5 w-5 shrink-0 text-blue-700" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 9V2h12v7" />
+      <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
+      <rect x="6" y="14" width="12" height="8" />
+    </svg>
   );
 }
 
-function HighlightLabel({ label, description }: { label: string; description?: string }) {
+// One service, as the desktop panel and the phone menu both show it: a bold
+// navy title (white on the navy card) with its line underneath. Each is at
+// least 44px tall.
+function ServiceLink({ item, onClick }: { item: ServiceItem; onClick: () => void }) {
+  if (item.look === "featured") {
+    return (
+      <Link href={item.href} onClick={onClick} className={`block min-h-11 rounded-xl bg-[#1e3a8a] px-4 py-3 text-white transition-colors hover:bg-[#172554] ${FOCUS}`}>
+        <span className="inline-block rounded-full bg-[#facc15] px-2 py-0.5 text-[10px] font-bold uppercase leading-tight tracking-wider text-[#1e3a8a]">{BADGE}</span>
+        <span className="mt-1.5 block whitespace-nowrap text-[15px] font-bold leading-snug">{item.label}</span>
+        <span className="mt-0.5 block text-balance text-[13px] leading-snug text-[#dbeafe]">{item.description}</span>
+      </Link>
+    );
+  }
+  if (item.look === "highlight") {
+    return (
+      <Link href={item.href} onClick={onClick} className={`flex min-h-11 items-start gap-3 rounded-xl bg-[#dbeafe] px-4 py-3 transition-colors hover:bg-[#bfdbfe] ${FOCUS}`}>
+        <PrinterIcon />
+        <span className="min-w-0">
+          <span className="block text-sm font-bold leading-snug text-[#1e3a8a]">{item.label}</span>
+          <span className="mt-0.5 block text-balance text-[13px] leading-snug text-slate-600">{item.description}</span>
+        </span>
+      </Link>
+    );
+  }
   return (
-    <>
-      {/* A printer, in line. */}
-      <svg aria-hidden="true" viewBox="0 0 24 24" className="mt-0.5 h-4 w-4 shrink-0 text-blue-700" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-        <path d="M6 9V2h12v7" />
-        <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
-        <rect x="6" y="14" width="12" height="8" />
-      </svg>
-      <span>
-        <span className="block text-sm font-semibold">{label}</span>
-        {description && <span className="mt-0.5 block text-xs text-blue-800">{description}</span>}
-      </span>
-    </>
+    <Link href={item.href} onClick={onClick} className={`block min-h-11 rounded-lg px-4 py-2.5 transition-colors hover:bg-slate-100 ${FOCUS}`}>
+      <span className="block text-sm font-bold leading-snug text-[#1e3a8a]">{item.label}</span>
+      <span className="mt-0.5 block text-balance text-[13px] leading-snug text-slate-500">{item.description}</span>
+    </Link>
   );
 }
 
@@ -80,16 +84,61 @@ export default function Header() {
   const [servicesOpen, setServicesOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const servicesButtonRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  // A click on Services opens the panel and keeps it open. Hover opens it
+  // too, and moving away closes it only if hover opened it; a click closes it
+  // only if a click opened it.
+  const openedByClick = useRef(false);
+  const closePanel = () => {
+    openedByClick.current = false;
+    setServicesOpen(false);
+  };
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setServicesOpen(false);
+        closePanel();
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Escape closes the panel and puts focus back on Services.
+  useEffect(() => {
+    if (!servicesOpen) return;
+    function handleKey(e: KeyboardEvent) {
+      if (e.key !== "Escape") return;
+      closePanel();
+      servicesButtonRef.current?.focus();
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [servicesOpen]);
+
+  // The panel opens under Services; if that would take it within 16px of the
+  // right edge of the screen, it moves left just enough (never past 16px from
+  // the left edge). Placed before it is painted, and again if the window resizes.
+  useLayoutEffect(() => {
+    if (!servicesOpen) return;
+    function place() {
+      const wrapper = dropdownRef.current;
+      const panel = panelRef.current;
+      if (!wrapper || !panel) return;
+      const left = wrapper.getBoundingClientRect().left;
+      const over = left + panel.offsetWidth - (document.documentElement.clientWidth - 16);
+      panel.style.transform = over > 0 ? `translateX(${-Math.min(over, left - 16)}px)` : "";
+    }
+    place();
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, [servicesOpen]);
+
+  const closeMobile = () => {
+    setMenuOpen(false);
+    setMobileServicesOpen(false);
+  };
 
   const pathname = usePathname();
   if (hidesSiteChrome(pathname)) return null;
@@ -118,18 +167,31 @@ export default function Header() {
               Home
             </Link>
 
-            {/* Services dropdown */}
+            {/* Services dropdown: two columns, leaflet services on the left and
+                the additional services on the right, then View all services. */}
             <div
               ref={dropdownRef}
               className="relative"
               onMouseEnter={() => setServicesOpen(true)}
-              onMouseLeave={() => setServicesOpen(false)}
+              onMouseLeave={() => {
+                if (!openedByClick.current) setServicesOpen(false);
+              }}
+              onBlur={(e) => {
+                // Tabbing on past the panel closes it.
+                if (e.relatedTarget && !e.currentTarget.contains(e.relatedTarget as Node)) closePanel();
+              }}
             >
               <button
-                onClick={() => setServicesOpen((o) => !o)}
+                ref={servicesButtonRef}
+                onClick={() => {
+                  if (servicesOpen && openedByClick.current) return closePanel();
+                  openedByClick.current = true;
+                  setServicesOpen(true);
+                }}
                 className="flex items-center gap-1 text-sm text-gray-600 hover:text-blue-700 transition-colors font-medium"
                 aria-expanded={servicesOpen}
                 aria-haspopup="true"
+                aria-controls="services-menu"
               >
                 Services
                 <svg
@@ -144,45 +206,52 @@ export default function Header() {
               </button>
 
               {servicesOpen && (
-                <div className="absolute left-0 top-full pt-2 z-50">
-                  <div className="bg-white border border-blue-100 rounded-md shadow-lg py-1 min-w-[200px]">
-                    {servicesGroups.map((group, gi) => (
-                      <div key={group.label} className={gi > 0 ? "mt-2" : ""}>
-                        {group.href && group.featured ? (
-                          <Link href={group.href} className={`mx-2 mt-1 mb-1 ${FEATURED_ITEM}`} onClick={() => setServicesOpen(false)}>
-                            <FeaturedLabel label={group.label} badge={group.featured.badge} description={group.featured.description} />
-                          </Link>
-                        ) : group.href ? (
-                          <Link
-                            href={group.href}
-                            className="block px-4 py-2.5 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 transition-colors font-semibold"
-                            onClick={() => setServicesOpen(false)}
-                          >
-                            {group.label}
-                          </Link>
-                        ) : (
-                          <p className="px-4 py-2.5 text-sm text-gray-600 font-semibold">
-                            {group.label}
-                          </p>
-                        )}
-                        {group.items.map((item) =>
-                          item.highlight ? (
-                            <Link key={item.href} href={item.href} className={`mx-2 mb-1 ${HIGHLIGHT_ITEM}`} onClick={() => setServicesOpen(false)}>
-                              <HighlightLabel label={item.label} description={item.description} />
-                            </Link>
-                          ) : (
-                            <Link
-                              key={item.href}
-                              href={item.href}
-                              className="block px-4 py-2.5 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 transition-colors font-medium"
-                              onClick={() => setServicesOpen(false)}
-                            >
-                              {item.label}
-                            </Link>
-                          )
-                        )}
+                <div ref={panelRef} id="services-menu" className="absolute left-0 top-full pt-3 z-50">
+                  <div className="w-[640px] max-w-[calc(100vw-32px)] rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_24px_48px_-12px_rgba(15,23,42,0.28)]">
+                    <div className="grid grid-cols-[3fr_2fr]">
+                      <div className="pr-5">
+                        <p className={GROUP_LABEL}>Leaflet services</p>
+                        <ul className="mt-2.5 space-y-1.5">
+                          {LEAFLET_SERVICES.map((item) => (
+                            <li key={item.href}>
+                              <ServiceLink item={item} onClick={closePanel} />
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                    ))}
+                      <div className="flex flex-col border-l border-[#e2e8f0] pl-5">
+                        <p className={GROUP_LABEL}>Additional services</p>
+                        <ul className="mt-2.5 space-y-1.5">
+                          {ADDITIONAL_SERVICES.map((item) => (
+                            <li key={item.href}>
+                              <ServiceLink item={item} onClick={closePanel} />
+                            </li>
+                          ))}
+                        </ul>
+                        {/* Pinned to the bottom of the column. */}
+                        <div className="mt-auto pt-4">
+                          <div className="rounded-xl bg-[#1e3a8a] p-4 text-white">
+                            <p className="text-sm font-bold">Not sure which you need?</p>
+                            <Link
+                              href="/quote"
+                              onClick={closePanel}
+                              className={`mt-1 inline-flex min-h-8 items-center rounded text-sm font-bold text-[#facc15] underline-offset-4 hover:text-yellow-200 hover:underline ${FOCUS}`}
+                            >
+                              Get a free quote &rarr;
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-4 border-t border-[#e2e8f0] pt-3">
+                      <Link
+                        href="/services"
+                        onClick={closePanel}
+                        className={`inline-flex min-h-8 items-center rounded px-1 text-sm font-bold text-blue-700 underline-offset-4 hover:text-[#1e3a8a] hover:underline ${FOCUS}`}
+                      >
+                        View all services &rarr;
+                      </Link>
+                    </div>
                   </div>
                 </div>
               )}
@@ -256,53 +325,31 @@ export default function Header() {
                   </svg>
                 </button>
                 {mobileServicesOpen && (
-                  <div className="pl-4 flex flex-col gap-1 mt-1">
-                    {servicesGroups.map((group, gi) => (
-                      <div key={group.label} className={gi > 0 ? "mt-2" : ""}>
-                        {group.href && group.featured ? (
-                          <Link
-                            href={group.href}
-                            className={`my-1 ${FEATURED_ITEM}`}
-                            onClick={() => { setMenuOpen(false); setMobileServicesOpen(false); }}
-                          >
-                            <FeaturedLabel label={group.label} badge={group.featured.badge} description={group.featured.description} />
-                          </Link>
-                        ) : group.href ? (
-                          <Link
-                            href={group.href}
-                            className="block text-sm text-gray-600 hover:text-blue-700 px-2 py-2 rounded hover:bg-blue-50 transition-colors font-semibold"
-                            onClick={() => { setMenuOpen(false); setMobileServicesOpen(false); }}
-                          >
-                            {group.label}
-                          </Link>
-                        ) : (
-                          <p className="text-sm text-gray-600 px-2 py-2 font-semibold">
-                            {group.label}
-                          </p>
-                        )}
-                        {group.items.map((item) =>
-                          item.highlight ? (
-                            <Link
-                              key={item.href}
-                              href={item.href}
-                              className={`mb-1 ${HIGHLIGHT_ITEM}`}
-                              onClick={() => { setMenuOpen(false); setMobileServicesOpen(false); }}
-                            >
-                              <HighlightLabel label={item.label} description={item.description} />
-                            </Link>
-                          ) : (
-                            <Link
-                              key={item.href}
-                              href={item.href}
-                              className="block text-sm text-gray-600 hover:text-blue-700 px-2 py-2 rounded hover:bg-blue-50 transition-colors font-medium"
-                              onClick={() => { setMenuOpen(false); setMobileServicesOpen(false); }}
-                            >
-                              {item.label}
-                            </Link>
-                          )
-                        )}
-                      </div>
+                  <div className="mt-1 flex flex-col gap-1.5 pl-2">
+                    <p className={`${GROUP_LABEL} px-2 pt-1`}>Leaflet services</p>
+                    {LEAFLET_SERVICES.map((item) => (
+                      <ServiceLink key={item.href} item={item} onClick={closeMobile} />
                     ))}
+                    <p className={`${GROUP_LABEL} px-2 pt-2`}>Also</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {ADDITIONAL_SERVICES.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={closeMobile}
+                          className={`flex min-h-11 items-center justify-center rounded-full border border-blue-200 bg-white px-3 text-center text-sm font-bold text-[#1e3a8a] transition-colors hover:border-blue-400 hover:bg-blue-50 ${FOCUS}`}
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                    <Link
+                      href="/services"
+                      onClick={closeMobile}
+                      className={`flex min-h-11 items-center rounded px-2 text-sm font-bold text-blue-700 hover:text-[#1e3a8a] ${FOCUS}`}
+                    >
+                      View all services &rarr;
+                    </Link>
                   </div>
                 )}
               </div>
