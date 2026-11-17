@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { AREA_PAGES, type AreaSlug } from "@/lib/area-pages";
-import { AREA_REGIONS, START, chooseRegion, matchAreas, postcodeDistrict, searchFor, visibleAreas } from "@/lib/area-search";
+import { AREA_REGIONS, START, chooseRegion, countyGroups, matchAreas, postcodeDistrict, searchFor, visibleAreas } from "@/lib/area-search";
 import { areas } from "@/lib/areas-data";
 import { overviewCards } from "@/lib/areas-overview";
 import { formatPostcodeRanges } from "@/lib/postcode-ranges";
@@ -18,8 +18,8 @@ const slugs = Object.keys(AREA_PAGES) as AreaSlug[];
 const find = (q: string) => matchAreas(cards, q).map((c) => c.slug);
 const shownFor = (query: string, region: (typeof START)["region"] = "all") => visibleAreas(cards, { query, region });
 
-function render(mode: "page" | "empty"): string {
-  const run = spawnSync(process.execPath, ["--import", "tsx", "lib/__tests__/render-areas-page.ts", mode], { encoding: "utf8" });
+function render(mode: "page" | "empty" | "search", query = ""): string {
+  const run = spawnSync(process.execPath, ["--import", "tsx", "lib/__tests__/render-areas-page.ts", mode, query], { encoding: "utf8" });
   assert.equal(run.status, 0, run.stderr);
   return run.stdout;
 }
@@ -162,6 +162,45 @@ test("region chips show their own areas, and the results line says what is showi
   assert.deepEqual(chooseRegion("all"), START);
 });
 
+// The county groups as rendered: each heading, whether it is hidden, and its cards that show.
+function groupsIn(html: string) {
+  return [...html.matchAll(/<div( hidden="")?><h2[^>]*>([^<]*)<\/h2><ul[^>]*>([\s\S]*?)<\/ul><\/div>/g)].map((m) => ({
+    heading: m[2],
+    hidden: !!m[1],
+    showing: [...m[3].matchAll(/<li>[\s\S]*?href="\/areas\/leaflet-distribution-([a-z-]+)"/g)].map((x) => x[1]),
+    all: [...m[3].matchAll(/href="\/areas\/leaflet-distribution-([a-z-]+)"/g)].map((x) => x[1]),
+  }));
+}
+
+test("the cards are grouped by county, Hampshire first, each with its count, in their own order", () => {
+  for (const card of cards) assert.equal(card.county, AREA_PAGES[card.slug].county, card.slug);
+  const all = countyGroups(cards, new Set(cards.map((c) => c.slug)));
+  assert.deepEqual(all.map((g) => g.heading), ["Hampshire, 12 areas", "Dorset, 4 areas"]);
+  // Each county's cards in the order the page already had them.
+  assert.deepEqual(all[0].cards.map((c) => c.slug), cards.filter((c) => c.county === "Hampshire").map((c) => c.slug));
+  assert.deepEqual(all[1].cards.map((c) => c.slug), ["bournemouth", "poole", "christchurch", "dorset"]);
+  // Without JavaScript: every card shows, grouped by county, and the results line is as it was.
+  const html = render("page");
+  const groups = groupsIn(html);
+  assert.deepEqual(groups.map((g) => [g.heading, g.hidden, g.showing.length]), [["Hampshire, 12 areas", false, 12], ["Dorset, 4 areas", false, 4]]);
+  assert.match(html, /role="status"[^>]*>Showing all 16 areas<\/p>/);
+  // Every card keeps its region label.
+  for (const card of cards) assert.match(html, new RegExp(`<p[^>]*>${card.regionLabel.replace(/&/g, "&amp;")}</p><h3[^>]*>${card.name.replace(/'/g, "&#x27;")}</h3>`), card.slug);
+  // A search shows only the counties with results, each counting what it shows.
+  const poole = groupsIn(render("search", "Poole"));
+  assert.deepEqual(poole.map((g) => [g.heading, g.hidden, g.showing]), [["Hampshire, 0 areas", true, []], ["Dorset, 2 areas", false, ["poole", "dorset"]]]);
+  const so41 = groupsIn(render("search", "SO41"));
+  assert.deepEqual(so41.map((g) => [g.heading, g.hidden, g.showing]), [["Hampshire, 2 areas", false, ["lymington", "new-forest"]], ["Dorset, 0 areas", true, []]]);
+  // One area showing reads in the singular; a search across both shows both.
+  const romsey = visibleAreas(cards, { query: "Romsey", region: "all" });
+  assert.equal(countyGroups([...romsey.shown, ...cards.filter((c) => !romsey.shown.includes(c))], new Set(romsey.shown.map((c) => c.slug)))[0].heading, "Hampshire, 1 area");
+  const bh = visibleAreas(cards, { query: "BH", region: "all" });
+  assert.deepEqual(countyGroups(bh.shown, new Set(bh.shown.map((c) => c.slug))).map((g) => g.heading), ["Hampshire, 2 areas", "Dorset, 4 areas"]);
+  // A region chip: only its county shows.
+  const forest = visibleAreas(cards, { query: "", region: "new-forest-waterside" });
+  assert.deepEqual(countyGroups(cards, new Set(forest.shown.map((c) => c.slug))).map((g) => [g.heading, g.shown]), [["Hampshire, 6 areas", 6], ["Dorset, 0 areas", 0]]);
+});
+
 test("a search that finds nothing shows the empty state, with a way to ask", () => {
   const none = shownFor("SO31");
   assert.deepEqual(none.shown, []);
@@ -172,8 +211,9 @@ test("a search that finds nothing shows the empty state, with a way to ask", () 
   assert.match(html, /<h3[^>]*>We don&#x27;t have a page for that one yet<\/h3>/);
   assert.match(textOf(html), /We may still deliver there\. Tell us where you'd like to reach and we'll let you know\./);
   assert.match(html, /<a[^>]*href="\/quote\?service=leaflet"[^>]*>Ask about your area<\/a>/);
-  // The cards are all still there, just hidden.
+  // The cards are all still there, just hidden, and so are both county groups.
   assert.equal((html.match(/<li hidden="">/g) ?? []).length, 16);
+  assert.deepEqual(groupsIn(html).map((g) => [g.heading, g.hidden]), [["Hampshire, 0 areas", true], ["Dorset, 0 areas", true]]);
 });
 
 test("every card and its link is in the server-rendered HTML, all showing, with no outside links", () => {

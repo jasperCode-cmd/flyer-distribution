@@ -22,6 +22,7 @@ export function overviewCards(): OverviewCard[] {
       return {
         slug,
         name: page.name,
+        county: page.county,
         href,
         regionId: region.id,
         regionLabel: region.label,

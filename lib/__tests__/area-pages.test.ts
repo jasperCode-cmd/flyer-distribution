@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { findPostcode } from "@/lib/area-planner/data";
-import { AREA_PAGES, coverageMapAlt, coverageMapSrc, type AreaPageData, type AreaSlug } from "@/lib/area-pages";
+import { AREA_PAGES, COUNTIES, coverageMapAlt, coverageMapSrc, type AreaPageData, type AreaSlug } from "@/lib/area-pages";
 import { formatPostcodeRanges } from "@/lib/postcode-ranges";
 
 // The 16 area pages' shared template data: the confirmed postcode lists and
@@ -28,6 +28,36 @@ test("every area page folder has a data entry, and nothing else does", () => {
   assert.deepEqual([...slugs].sort(), folders);
   assert.equal(pages.length, 16);
   for (const [slug, page] of Object.entries(AREA_PAGES)) assert.equal(page.slug, slug);
+});
+
+test("every area has its county, Hampshire or Dorset: a missing or unknown one fails", () => {
+  assert.deepEqual([...COUNTIES], ["Hampshire", "Dorset"]);
+  const expected: Record<AreaSlug, (typeof COUNTIES)[number]> = {
+    southampton: "Hampshire",
+    eastleigh: "Hampshire",
+    "chandlers-ford": "Hampshire",
+    "hedge-end": "Hampshire",
+    winchester: "Hampshire",
+    romsey: "Hampshire",
+    totton: "Hampshire",
+    hythe: "Hampshire",
+    brockenhurst: "Hampshire",
+    ringwood: "Hampshire",
+    "new-forest": "Hampshire",
+    lymington: "Hampshire",
+    bournemouth: "Dorset",
+    poole: "Dorset",
+    christchurch: "Dorset",
+    dorset: "Dorset",
+  };
+  for (const page of pages) {
+    assert.ok("county" in page && (COUNTIES as readonly string[]).includes(page.county), `${page.slug} has no county`);
+    assert.equal(page.county, expected[page.slug], page.slug);
+  }
+  assert.equal(pages.filter((p) => p.county === "Hampshire").length, 12);
+  assert.equal(pages.filter((p) => p.county === "Dorset").length, 4);
+  // Required by the type, so a new area without one doesn't compile.
+  assert.match(readFileSync("lib/area-pages.ts", "utf8"), /\n  \/\/ Required: every area page belongs to one county\.\n  county: County;\n/);
 });
 
 test("the postcode lists are the confirmed ones, each with its neighbourhood names", () => {

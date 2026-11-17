@@ -32,8 +32,14 @@ export type AreaSlug =
   | "lymington"
 ;
 
+// The two counties the /areas page groups its cards by, in that order.
+export const COUNTIES = ["Hampshire", "Dorset"] as const;
+export type County = (typeof COUNTIES)[number];
+
 export type AreaPageData = {
   slug: AreaSlug;
+  // Required: every area page belongs to one county.
+  county: County;
   // As a label (breadcrumb, cards, pills) and in a sentence ("the New Forest").
   name: string;
   inName: string;
@@ -68,6 +74,7 @@ const range = (prefix: string, from: number, to: number) => Array.from({ length:
 export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
   "southampton": {
     slug: "southampton",
+    county: "Hampshire",
     name: "Southampton",
     inName: "Southampton",
     eyebrow: "Southampton, Hampshire",
@@ -108,6 +115,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
   },
   "bournemouth": {
     slug: "bournemouth",
+    county: "Dorset",
     name: "Bournemouth",
     inName: "Bournemouth",
     eyebrow: "Bournemouth, Dorset",
@@ -154,6 +162,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
   },
   "poole": {
     slug: "poole",
+    county: "Dorset",
     name: "Poole",
     inName: "Poole",
     eyebrow: "Poole, Dorset",
@@ -197,6 +206,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
   },
   "winchester": {
     slug: "winchester",
+    county: "Hampshire",
     name: "Winchester",
     inName: "Winchester",
     eyebrow: "Winchester, Hampshire",
@@ -237,6 +247,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
   },
   "new-forest": {
     slug: "new-forest",
+    county: "Hampshire",
     name: "New Forest",
     inName: "the New Forest",
     eyebrow: "New Forest, Hampshire",
@@ -290,6 +301,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
   },
   "ringwood": {
     slug: "ringwood",
+    county: "Hampshire",
     name: "Ringwood",
     inName: "Ringwood",
     eyebrow: "Ringwood, Hampshire",
@@ -323,6 +335,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
   },
   "christchurch": {
     slug: "christchurch",
+    county: "Dorset",
     name: "Christchurch",
     inName: "Christchurch",
     eyebrow: "Christchurch, Dorset",
@@ -360,6 +373,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
   },
   "dorset": {
     slug: "dorset",
+    county: "Dorset",
     name: "Dorset",
     inName: "Dorset",
     eyebrow: "Dorset",
@@ -422,6 +436,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
   },
   "eastleigh": {
     slug: "eastleigh",
+    county: "Hampshire",
     name: "Eastleigh",
     inName: "Eastleigh",
     eyebrow: "Eastleigh, Hampshire",
@@ -460,6 +475,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
   },
   "romsey": {
     slug: "romsey",
+    county: "Hampshire",
     name: "Romsey",
     inName: "Romsey",
     eyebrow: "Romsey, Hampshire",
@@ -497,6 +513,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
   },
   "hythe": {
     slug: "hythe",
+    county: "Hampshire",
     name: "Hythe",
     inName: "Hythe",
     eyebrow: "Hythe, Hampshire",
@@ -534,6 +551,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
   },
   "totton": {
     slug: "totton",
+    county: "Hampshire",
     name: "Totton",
     inName: "Totton",
     eyebrow: "Totton, Hampshire",
@@ -573,6 +591,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
   },
   "hedge-end": {
     slug: "hedge-end",
+    county: "Hampshire",
     name: "Hedge End",
     inName: "Hedge End",
     eyebrow: "Hedge End, Hampshire",
@@ -610,6 +629,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
   },
   "chandlers-ford": {
     slug: "chandlers-ford",
+    county: "Hampshire",
     name: "Chandler's Ford",
     inName: "Chandler's Ford",
     eyebrow: "Chandler's Ford, Hampshire",
@@ -647,6 +667,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
   },
   "brockenhurst": {
     slug: "brockenhurst",
+    county: "Hampshire",
     name: "Brockenhurst",
     inName: "Brockenhurst",
     eyebrow: "Brockenhurst, Hampshire",
@@ -680,6 +701,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
   },
   "lymington": {
     slug: "lymington",
+    county: "Hampshire",
     name: "Lymington",
     inName: "Lymington",
     eyebrow: "Lymington, Hampshire",

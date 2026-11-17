@@ -1,4 +1,4 @@
-import type { AreaSlug } from "@/lib/area-pages";
+import { COUNTIES, type AreaSlug, type County } from "@/lib/area-pages";
 
 // The /areas overview's regions, search and results line. Pure, and safe in
 // the browser: the cards themselves (built from lib/area-pages.ts by
@@ -17,6 +17,7 @@ export type RegionId = (typeof AREA_REGIONS)[number]["id"];
 export type OverviewCard = {
   slug: AreaSlug;
   name: string;
+  county: County;
   href: string;
   regionId: RegionId;
   regionLabel: string;
@@ -111,6 +112,20 @@ export const searchFor = (state: ExplorerState, query: string): ExplorerState =>
 export const chooseRegion = (region: RegionId | "all"): ExplorerState => ({ query: "", region });
 
 const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
+
+// The cards by county, Hampshire first, each in the order given, with a
+// heading counting the ones showing ("Hampshire, 12 areas"). A county with
+// none showing is hidden, as its cards are.
+export function countyGroups<T extends Pick<OverviewCard, "slug" | "county">>(
+  ordered: readonly T[],
+  showing: ReadonlySet<string>
+): { county: County; cards: T[]; shown: number; heading: string }[] {
+  return COUNTIES.map((county) => {
+    const cards = ordered.filter((c) => c.county === county);
+    const shown = cards.filter((c) => showing.has(c.slug)).length;
+    return { county, cards, shown, heading: `${county}, ${shown} ${plural(shown, "area", "areas")}` };
+  });
+}
 
 export function visibleAreas<T extends SearchableArea & Pick<OverviewCard, "regionId">>(
   cards: readonly T[],

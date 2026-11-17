@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Breadcrumb from "@/components/Breadcrumb";
-import { AREA_REGIONS, START, chooseRegion, queryFromSearch, searchFor, visibleAreas, type ExplorerState, type OverviewCard, type RegionId } from "@/lib/area-search";
+import { AREA_REGIONS, START, chooseRegion, countyGroups, queryFromSearch, searchFor, visibleAreas, type ExplorerState, type OverviewCard, type RegionId } from "@/lib/area-search";
 
 // The /areas overview's hero, search, region chips and cards. Every card is
 // in the server-rendered HTML; searching and the chips only hide cards in the
-// browser, so with JavaScript off all of them show. Arriving with ?q= (from
-// the homepage's "Check if we cover you") runs that search straight away.
+// browser, so with JavaScript off all of them show, grouped by county.
+// Arriving with ?q= (from the homepage's "Check if we cover you") runs that
+// search straight away.
 
 const ASK_HREF = "/quote?service=leaflet";
 const YELLOW_BUTTON =
@@ -136,29 +137,37 @@ export function AreaResults({
         <p role="status" aria-live="polite" className="mt-6 font-semibold text-gray-700">
           {line}
         </p>
-        <ul className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {ordered.map((card) => (
-            <li key={card.slug} hidden={!showing.has(card.slug)}>
-              <Link
-                href={card.href}
-                className="group flex h-full flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:border-blue-400 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50"
-              >
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-blue-700">{card.regionLabel}</p>
-                <h3 className="mt-2 text-xl font-bold text-blue-900">{card.name}</h3>
-                <p className="mt-2 text-gray-600 leading-relaxed">{card.blurb}</p>
-                <div className="mt-auto pt-5 flex items-end justify-between gap-4">
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                    <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-800">{card.range}</span>
-                    <span className="text-sm text-gray-600">{card.homes}</span>
-                  </div>
-                  <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-blue-700 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={2.25} strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 12h14M13 6l6 6-6 6" />
-                  </svg>
-                </div>
-              </Link>
-            </li>
+        {/* Hampshire, then Dorset, each counting the cards it shows; one with none showing is hidden. */}
+        <div className="mt-5 flex flex-col gap-10">
+          {countyGroups(ordered, showing).map((group) => (
+            <div key={group.county} hidden={group.shown === 0}>
+              <h2 className="text-xl sm:text-2xl font-bold text-blue-900">{group.heading}</h2>
+              <ul className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {group.cards.map((card) => (
+                  <li key={card.slug} hidden={!showing.has(card.slug)}>
+                    <Link
+                      href={card.href}
+                      className="group flex h-full flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:border-blue-400 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50"
+                    >
+                      <p className="text-xs font-bold uppercase tracking-[0.14em] text-blue-700">{card.regionLabel}</p>
+                      <h3 className="mt-2 text-xl font-bold text-blue-900">{card.name}</h3>
+                      <p className="mt-2 text-gray-600 leading-relaxed">{card.blurb}</p>
+                      <div className="mt-auto pt-5 flex items-end justify-between gap-4">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                          <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-800">{card.range}</span>
+                          <span className="text-sm text-gray-600">{card.homes}</span>
+                        </div>
+                        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-blue-700 transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" strokeWidth={2.25} strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M5 12h14M13 6l6 6-6 6" />
+                        </svg>
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ))}
-        </ul>
+        </div>
         {empty && (
           <div className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-sm max-w-2xl">
             <h3 className="text-xl font-bold text-blue-900">We don&apos;t have a page for that one yet</h3>
