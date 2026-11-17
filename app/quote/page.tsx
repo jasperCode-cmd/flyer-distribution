@@ -52,11 +52,7 @@ export default function QuotePage() {
             <Link href="/case-studies" className="text-white underline underline-offset-2 hover:text-blue-200">
               case studies
             </Link>{" "}
-            first. Comparing distributors? Here&apos;s{" "}
-            <Link href="/before-you-book" className="text-white underline underline-offset-2 hover:text-blue-200">
-              what to know before you book
-            </Link>
-            .
+            first.
           </p>
         </div>
       </section>

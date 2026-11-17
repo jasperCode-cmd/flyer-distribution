@@ -7,7 +7,9 @@
 // - public/email/fdh-logo-white.png: the white logo the site shows on dark
 //   blue, trimmed to the artwork, at twice the size it is shown (190px).
 // - public/email/brands-we-have-worked-with.png: the brands bar's logos on
-//   white, two rows of five, at twice the size it is shown (520px). Each
+//   white, at twice the size it is shown (520px): the featured one
+//   (Partridge of Hampshire) on its own row at the top, centred and about
+//   1.5 times the size of the others, then the rest in rows of five. Each
 //   logo is scaled to a similar visual weight, never recoloured.
 //
 // The original files are only read. Uses the sharp that Next installs.
@@ -15,7 +17,7 @@
 import { mkdir } from "node:fs/promises";
 import { join } from "node:path";
 import sharp from "sharp";
-import { EMAIL_BRANDS, EMAIL_IMAGES } from "../lib/thank-you-email";
+import { EMAIL_BRANDS, EMAIL_FEATURED_BRAND, EMAIL_IMAGES } from "../lib/thank-you-email";
 
 const PUBLIC = join(__dirname, "..", "public");
 const SCALE = 2;
@@ -29,42 +31,58 @@ async function logo() {
     .toFile(join(PUBLIC, EMAIL_IMAGES.logo.path));
 }
 
+// How large the featured logo is against the size it would have among the others.
+const FEATURED_SCALE = 1.5;
+
 async function brands() {
   const columns = 5;
-  const rows = Math.ceil(EMAIL_BRANDS.length / columns);
+  const featured = EMAIL_BRANDS.find((b) => b.file === EMAIL_FEATURED_BRAND);
+  const rest = EMAIL_BRANDS.filter((b) => b !== featured);
+  const rows = Math.ceil(rest.length / columns);
   const width = EMAIL_IMAGES.brands.width * SCALE;
   const cellWidth = Math.floor(width / columns);
   const cellHeight = 52 * SCALE;
+  const topHeight = featured ? Math.round(cellHeight * FEATURED_SCALE) : 0;
   // Each logo gets about the same area, within its cell's box.
   const boxWidth = cellWidth - 18 * SCALE;
   const boxHeight = cellHeight - 10 * SCALE;
   const area = boxWidth * boxHeight * 0.42;
 
+  // A logo at the size it has among the others, times `scale`.
+  async function sized(file: string, scale = 1) {
+    const source = sharp(join(PUBLIC, file));
+    const meta = await source.metadata();
+    const ratio = (meta.width ?? 1) / (meta.height ?? 1);
+    let h = Math.sqrt(area / ratio);
+    let w = h * ratio;
+    if (w > boxWidth) [w, h] = [boxWidth, boxWidth / ratio];
+    if (h > boxHeight) [w, h] = [boxHeight * ratio, boxHeight];
+    const input = await source.resize({ width: Math.round(w * scale), height: Math.round(h * scale), fit: "inside", kernel: "lanczos3" }).png().toBuffer();
+    const size = await sharp(input).metadata();
+    return { input, width: size.width ?? 0, height: size.height ?? 0 };
+  }
+
   const pieces = await Promise.all(
-    EMAIL_BRANDS.map(async (brand, i) => {
-      const source = sharp(join(PUBLIC, brand.file));
-      const meta = await source.metadata();
-      const ratio = (meta.width ?? 1) / (meta.height ?? 1);
-      let h = Math.sqrt(area / ratio);
-      let w = h * ratio;
-      if (w > boxWidth) [w, h] = [boxWidth, boxWidth / ratio];
-      if (h > boxHeight) [w, h] = [boxHeight * ratio, boxHeight];
-      const input = await source.resize({ width: Math.round(w), height: Math.round(h), fit: "inside", kernel: "lanczos3" }).png().toBuffer();
-      const size = await sharp(input).metadata();
+    rest.map(async (brand, i) => {
+      const logo = await sized(brand.file);
       const col = i % columns;
       const rowIndex = Math.floor(i / columns);
       // The last row, if short, is centred.
-      const inRow = Math.min(columns, EMAIL_BRANDS.length - rowIndex * columns);
+      const inRow = Math.min(columns, rest.length - rowIndex * columns);
       const offset = Math.floor(((columns - inRow) * cellWidth) / 2);
       return {
-        input,
-        left: offset + col * cellWidth + Math.round((cellWidth - (size.width ?? 0)) / 2),
-        top: rowIndex * cellHeight + Math.round((cellHeight - (size.height ?? 0)) / 2),
+        input: logo.input,
+        left: offset + col * cellWidth + Math.round((cellWidth - logo.width) / 2),
+        top: topHeight + rowIndex * cellHeight + Math.round((cellHeight - logo.height) / 2),
       };
     })
   );
+  if (featured) {
+    const logo = await sized(featured.file, FEATURED_SCALE);
+    pieces.unshift({ input: logo.input, left: Math.round((width - logo.width) / 2), top: Math.round((topHeight - logo.height) / 2) });
+  }
 
-  await sharp({ create: { width, height: rows * cellHeight, channels: 4, background: { r: 255, g: 255, b: 255, alpha: 1 } } })
+  await sharp({ create: { width, height: topHeight + rows * cellHeight, channels: 4, background: { r: 255, g: 255, b: 255, alpha: 1 } } })
     .composite(pieces)
     .flatten({ background: "#ffffff" })
     .png({ compressionLevel: 9 })

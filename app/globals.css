@@ -36,7 +36,9 @@ body {
 }
 
 .marquee-track {
-  animation: marquee 80s linear infinite;
+  /* 96s keeps the pace it had (about 64px a second on wide screens) now the
+     larger Partridge of Hampshire lockup makes each loop longer. */
+  animation: marquee 96s linear infinite;
 }
 
 /* Pause on hover */

@@ -35,6 +35,7 @@ export { SITE_URL, displayFirstName, escapeEmailHtml };
 // components/BrandsBar.tsx): one image of them all, and the names for its
 // alt text.
 export const EMAIL_BRANDS: readonly { name: string; file: string }[] = [
+  { name: "Partridge of Hampshire", file: "logo-partridge-of-hampshire.webp" },
   { name: "New Arts", file: "logo-new-arts.webp" },
   { name: "Body by Victoria", file: "logo-body-by-victoria.webp" },
   { name: "Associated Asphalt", file: "logo-associated-asphalt.webp" },
@@ -46,6 +47,10 @@ export const EMAIL_BRANDS: readonly { name: string; file: string }[] = [
   { name: "The Healing Hub", file: "logo-the-healing-hub.webp" },
   { name: "Kola Construction", file: "logo-kola-construction.webp" },
 ];
+
+// The brand the image leads with, as the bar does: on its own row at the
+// top, centred, about 1.5 times the size of the others.
+export const EMAIL_FEATURED_BRAND = "logo-partridge-of-hampshire.webp";
 
 // The email's images, in public/email, and the size each is shown at.
 export const EMAIL_IMAGES = {

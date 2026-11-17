@@ -1,6 +1,11 @@
 import Image from "next/image";
 
-const brands = [
+type Brand = { name: string; file: string; width: number; height: number; alt?: string; featured?: boolean };
+
+// Partridge of Hampshire leads, shown about 1.5 times the others' height
+// (its lockup carries the BMW and Changan marks), in full colour like the rest.
+const brands: Brand[] = [
+  { name: "Partridge of Hampshire", file: "logo-partridge-of-hampshire.webp", width: 1876, height: 433, alt: "Partridge of Hampshire, BMW and Changan retailer", featured: true },
   { name: "New Arts", file: "logo-new-arts.webp", width: 762, height: 348 },
   { name: "Body by Victoria", file: "logo-body-by-victoria.webp", width: 466, height: 252 },
   { name: "Associated Asphalt", file: "logo-associated-asphalt.webp", width: 759, height: 128 },
@@ -15,7 +20,7 @@ const brands = [
 
 /*
   Same seamless-loop approach as the old area-pill carousel: the track
-  renders all 10 logos 6 times over (2 copies x 3 reps each) so one copy is
+  renders all 11 logos 6 times over (2 copies x 3 reps each) so one copy is
   comfortably wider than any realistic viewport, and .marquee-track moves by
   exactly -50% (one copy's width) via translateX, so the seam never becomes
   visible.
@@ -25,6 +30,12 @@ const brands = [
   own aria-hidden wrapper; otherwise a screen reader would announce each
   brand's name six times over.
 */
+
+// Heights are set here (width follows the image's own proportions), so each
+// logo's space is known before it loads: nothing shifts.
+const sizeOf = (b: Brand) => (b.featured ? "h-[54px] sm:h-[72px]" : "h-9 sm:h-12");
+const altOf = (b: Brand) => b.alt ?? `${b.name} logo`;
+
 function Logos({ groupId, hidden }: { groupId: string; hidden: boolean }) {
   return (
     <>
@@ -32,10 +43,10 @@ function Logos({ groupId, hidden }: { groupId: string; hidden: boolean }) {
         <div key={`${groupId}-${b.file}`} className="flex-shrink-0 flex items-center">
           <Image
             src={`/${b.file}`}
-            alt={hidden ? "" : `${b.name} logo`}
+            alt={hidden ? "" : altOf(b)}
             width={b.width}
             height={b.height}
-            className="h-9 sm:h-12 w-auto object-contain"
+            className={`${sizeOf(b)} w-auto object-contain`}
           />
         </div>
       ))}
@@ -89,10 +100,10 @@ export default function BrandsBar() {
           <Image
             key={b.file}
             src={`/${b.file}`}
-            alt={`${b.name} logo`}
+            alt={altOf(b)}
             width={b.width}
             height={b.height}
-            className="h-9 sm:h-12 w-auto object-contain"
+            className={`${sizeOf(b)} w-auto object-contain`}
           />
         ))}
       </div>

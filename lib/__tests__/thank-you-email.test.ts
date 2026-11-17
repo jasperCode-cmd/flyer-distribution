@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import sharp from "sharp";
 import {
-  EMAIL_BRANDS,
+  EMAIL_BRANDS, EMAIL_FEATURED_BRAND,
   EMAIL_IMAGES,
   SITE_URL,
   THANK_YOU_PREHEADER,
@@ -223,10 +223,17 @@ test("the images: PNG copies hosted on the site, the white logo with white alt t
   assert.match(buildThankYouEmail(FULL, SLOTS, "").html, /src="\/email\/fdh-logo-white\.png"/);
 });
 
-test("the email's brands are the brands bar's, in the same order", () => {
+test("the email's brands are the brands bar's, in the same order", async () => {
   const bar = readFileSync("components/BrandsBar.tsx", "utf8");
   const listed = [...bar.matchAll(/\{ name: "([^"]+)", file: "([^"]+)"/g)].map((m) => ({ name: m[1], file: m[2] }));
   assert.deepEqual(EMAIL_BRANDS, listed);
+  // The one the bar features leads the image too: its own row at the top,
+  // 1.5 times a row's height, then the other ten in two rows of five.
+  const featured = /\{ name: "[^"]+", file: "([^"]+)"[^}]*featured: true/.exec(bar)![1];
+  assert.equal(EMAIL_FEATURED_BRAND, featured);
+  assert.equal(EMAIL_BRANDS[0].file, featured);
+  const meta = await sharp(`public${EMAIL_IMAGES.brands.path}`).metadata();
+  assert.equal(meta.height, (52 * 1.5 + 2 * 52) * 2);
 });
 
 test("600px, table-based, inline styles, and it stacks on phones", () => {
