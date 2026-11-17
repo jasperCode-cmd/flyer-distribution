@@ -207,13 +207,10 @@ test("each service shows its own fields after Company, in their old order", () =
     "budget",
     "message",
   ]);
-  // Leaflet Printing: what to print and the quantity first, the rest after.
-  // (print-spec only when the print builder's link carried one.)
-  assert.deepEqual(namesIn(between(PRINTING_FIELDS, "{/* The rest of the section.")), ["print-spec", "print-items", "print-quantity"]);
+  // Leaflet Printing: what to print (the print builder's choice: its summary first, then its parts;
+  // print-sides not for business cards, print-fold only when folded) and the quantity first, the rest after.
+  assert.deepEqual(namesIn(between(PRINTING_FIELDS, "{/* The rest of the section.")), ["print-spec", "print-item", "print-size", "print-sides", "print-fold", "print-paper", "print-quantity"]);
   assert.deepEqual(namesIn(between(PRINTING_AFTER_QUANTITY, WEB_FIELDS)), [
-    "print-size",
-    "print-sides",
-    "print-sides",
     "print-design",
     "print-send-to",
     "also-deliver",
@@ -530,7 +527,7 @@ const noteOf = async (email: string) =>
 
 test("real database: a Leaflet Printing enquiry is saved as a lead, with its answers in the lead's note", { skip }, async () => {
   const email = `printing${DOMAIN}`;
-  // What the form sends for printing, with design and letterbox delivery both Yes.
+  // What the form sends for printing (folded leaflets chosen in its print builder), with design and letterbox delivery both Yes.
   const res = await postQuietly({
     "first-name": "Pia",
     "last-name": "Test",
@@ -538,11 +535,13 @@ test("real database: a Leaflet Printing enquiry is saved as a lead, with its ans
     phone: "07700 900123",
     company: "Pia Ltd",
     service: "Leaflet Printing",
-    "print-spec": "A5 flyers, double-sided, 250gsm silk",
-    "print-items": "Flyers and leaflets, Business cards",
+    "print-spec": "DL Z-fold leaflets, double-sided, 130gsm gloss",
+    "print-item": "Folded leaflets",
+    "print-size": "DL",
+    "print-sides": "Double-sided",
+    "print-fold": "Z-fold",
+    "print-paper": "130gsm gloss",
     "print-quantity": "2,500 to 5,000",
-    "print-size": "A5",
-    "print-sides": "Double sided",
     "print-design": "Yes",
     "print-send-to": "SO15 2AB",
     "also-deliver": "Yes (Print and Deliver)",
@@ -566,10 +565,12 @@ test("real database: a Leaflet Printing enquiry is saved as a lead, with its ans
   const note = await noteOf(email);
   for (const line of [
     "Service type: Leaflet Printing",
-    "Print spec: A5 flyers, double-sided, 250gsm silk",
-    "Print items: Flyers and leaflets, Business cards",
-    "Item size: A5",
-    "Print sides: Double sided",
+    "Print spec: DL Z-fold leaflets, double-sided, 130gsm gloss",
+    "Print item: Folded leaflets",
+    "Item size: DL",
+    "Fold: Z-fold",
+    "Print sides: Double-sided",
+    "Paper: 130gsm gloss",
     "Design wanted: Yes",
     "Send printed leaflets to: SO15 2AB",
     "Also deliver: Yes (Print and Deliver)",
@@ -578,16 +579,68 @@ test("real database: a Leaflet Printing enquiry is saved as a lead, with its ans
     assert.ok(note.split("\n").includes(line), line);
   }
 
-  // With design and delivery left on No, neither is sent, and neither is recorded.
+  // Straight to /quote with no link from the builder: the builder's defaults are sent. Design and delivery
+  // left on No: neither is sent, and neither is recorded; no fold either.
   const plain = `printing-plain${DOMAIN}`;
   assert.equal(
-    (await postQuietly({ "first-name": "Pip", email: plain, phone: "07700 900123", service: "Leaflet Printing", "print-items": "Flyers and leaflets", "print-quantity": "Not sure yet", "print-size": "A6", "print-sides": "Single sided", "print-send-to": "BH24 2NR" })).status,
+    (
+      await postQuietly({
+        "first-name": "Pip",
+        email: plain,
+        phone: "07700 900123",
+        service: "Leaflet Printing",
+        "print-spec": "A5 flyers, double-sided, 250gsm silk",
+        "print-item": "Flyers and leaflets",
+        "print-size": "A5",
+        "print-sides": "Double-sided",
+        "print-paper": "250gsm silk",
+        "print-quantity": "Not sure yet",
+        "print-send-to": "BH24 2NR",
+      })
+    ).status,
     201
   );
   const plainLead = await prisma.lead.findFirst({ where: { email: plain }, select: { printingIncluded: true, designIncluded: true, targetAreas: true, leafletQuantity: true } });
   assert.deepEqual(plainLead, { printingIncluded: true, designIncluded: false, targetAreas: null, leafletQuantity: "Not sure yet" });
   const plainNote = await noteOf(plain);
-  assert.doesNotMatch(plainNote, /Design wanted|Also deliver|Print spec/);
+  for (const line of ["Print spec: A5 flyers, double-sided, 250gsm silk", "Print item: Flyers and leaflets", "Item size: A5", "Print sides: Double-sided", "Paper: 250gsm silk"]) {
+    assert.ok(plainNote.split("\n").includes(line), line);
+  }
+  assert.doesNotMatch(plainNote, /Design wanted|Also deliver|Fold:/);
+
+  // A business card: 85 x 55mm, no sides, folded.
+  const card = `printing-card${DOMAIN}`;
+  assert.equal(
+    (
+      await postQuietly({
+        "first-name": "Cai",
+        email: card,
+        phone: "07700 900123",
+        service: "Leaflet Printing",
+        "print-spec": "Folded business cards, 85 x 55mm, 350gsm uncoated",
+        "print-item": "Business cards",
+        "print-size": "85 x 55mm",
+        "print-fold": "Folded",
+        "print-paper": "350gsm uncoated",
+        "print-quantity": "Under 1,000",
+        "print-send-to": "SO41 9AA",
+      })
+    ).status,
+    201
+  );
+  const cardNote = (await noteOf(card)).split("\n");
+  for (const line of ["Print item: Business cards", "Item size: 85 x 55mm", "Fold: Folded", "Paper: 350gsm uncoated"]) assert.ok(cardNote.includes(line), line);
+  assert.ok(!cardNote.some((l) => l.startsWith("Print sides:")));
+
+  // What the form sent before the print builder (print-items, its own size and sides) is still taken.
+  const before = `printing-before${DOMAIN}`;
+  assert.equal(
+    (await postQuietly({ "first-name": "Pat", email: before, phone: "07700 900123", service: "Leaflet Printing", "print-items": "Flyers and leaflets", "print-quantity": "Not sure yet", "print-size": "A6", "print-sides": "Single sided", "print-send-to": "BH24 2NR" })).status,
+    201
+  );
+  const beforeNote = (await noteOf(before)).split("\n");
+  for (const line of ["Print items: Flyers and leaflets", "Item size: A6", "Print sides: Single sided"]) assert.ok(beforeNote.includes(line), line);
+  assert.ok(!beforeNote.some((l) => /^(Print spec|Print item|Fold|Paper):/.test(l)));
 });
 
 test("real database: a Leaflet Printing enquiry without one of the quantities is refused", { skip }, async () => {

@@ -20,6 +20,7 @@ import {
   quoteHrefFor,
   SIDES,
   sizesFor,
+  specFields,
   specFromParams,
   specParams,
   specSummary,
@@ -188,18 +189,96 @@ test("an invalid URL parameter is ignored", () => {
   for (const q of ["item=folded&fold=cross&size=DL&ptype=gloss&weight=450", "item=cards&card=nope&paper=nope", "item=custom&sides=&paper="]) assert.ok(isValidSpec(from(q)!), q);
 });
 
-test("the quote form reads the spec only for Leaflet Printing, through these same options", () => {
+test("the structured fields the quote form sends beside the summary", () => {
+  assert.deepEqual(specFields(defaultSpec()), { item: "Flyers and leaflets", size: "A5", sides: "Double-sided", paper: "250gsm silk" });
+  assert.deepEqual(specFields({ product: "flyers", size: "A4", sides: "single", ptype: "uncoated", weight: 170 }), {
+    item: "Flyers and leaflets",
+    size: "A4",
+    sides: "Single-sided",
+    paper: "170gsm uncoated",
+  });
+  // Folded leaflets: always double-sided, and their fold.
+  assert.deepEqual(specFields({ product: "folded", fold: "z", size: "DL", ptype: "gloss", weight: 130 }), {
+    item: "Folded leaflets",
+    size: "DL",
+    sides: "Double-sided",
+    fold: "Z-fold",
+    paper: "130gsm gloss",
+  });
+  // Business cards: 85 x 55mm, no sides; folded ones say so.
+  assert.deepEqual(specFields(defaultSpec("cards")), { item: "Business cards", size: "85 x 55mm", paper: "450gsm silk" });
+  assert.deepEqual(specFields({ product: "cards", card: "folded", paper: "350-uncoated" }), { item: "Business cards", size: "85 x 55mm", fold: "Folded", paper: "350gsm uncoated" });
+  // Custom shapes: the size is confirmed on the call.
+  assert.deepEqual(specFields({ product: "custom", sides: "single", paper: "350-silk" }), { item: "Custom-shaped flyers", size: "Custom", sides: "Single-sided", paper: "350gsm silk" });
+  // Every choice the builder can reach has an item, a size and a paper, and the same item as its quote form tick used to.
+  for (const spec of reachable().values()) {
+    const f = specFields(spec);
+    assert.equal(f.item, QUOTE_ITEM[spec.product]);
+    assert.ok(f.size && f.paper, keyOf(spec));
+    assert.equal(f.fold !== undefined, spec.product === "folded" || (spec.product === "cards" && spec.card === "folded"), keyOf(spec));
+    assert.equal(f.sides !== undefined, spec.product !== "cards", keyOf(spec));
+  }
+});
+
+test("the quote form: the same builder, starting on the link's spec or the defaults, its summary at the top, its fields sent", () => {
   const form = readFileSync("components/QuoteForm.tsx", "utf8");
-  assert.match(form, /import \{[^}]*specFromParams[^}]*\} from "@\/lib\/print-options";/);
-  assert.match(form, /const spec = chosen === "Leaflet Printing" \? specFromParams\(params\) : null;\s+if \(spec\) \{\s+setPrintSpec\(spec\);\s+setPrintItems\(\[QUOTE_ITEM\[spec\.product\]\]\);/);
-  // The spec box: a light blue box first in the print questions, the summary, a Change link back to the builder, and print-spec.
-  const box = form.slice(form.indexOf("{printSpec && ("), form.indexOf("{/* What to print"));
-  assert.match(box, /className="rounded-md border border-blue-100 bg-\[#eff6ff\]/);
-  assert.match(box, />Your chosen spec</);
-  assert.match(box, /href="\/leaflet-printing#paper-and-finish"[\s\S]*?>\s*Change\s*<\/a>/);
-  assert.match(box, /<input type="hidden" name="print-spec" value=\{specSummary\(printSpec\)\} \/>/);
-  // The paper note only without a spec.
-  assert.match(form, /\{!printSpec && \(\s*<p [^>]*>\s*Paper: we recommend 250gsm silk\./);
-  // The route records it in the lead's note.
-  assert.match(readFileSync("app/api/quote-lead/route.ts", "utf8"), /if \(isPrinting && data\["print-spec"\]\) noteLines\.push\(`Print spec: \$\{data\["print-spec"\]\}`\);/);
+  // The builder in form mode, holding the form's spec, which starts on the defaults; a valid link replaces them.
+  assert.match(form, /const \[printSpec, setPrintSpec\] = useState<PrintSpec>\(\(\) => defaultSpec\(\)\);/);
+  assert.match(form, /const spec = chosen === "Leaflet Printing" \? specFromParams\(params\) : null;\s+if \(spec\) setPrintSpec\(spec\);/);
+  assert.match(form, /<PrintBuilder mode="form" id=\{printBuilderId\} spec=\{printSpec\} onSpecChange=\{setPrintSpec\} \/>/);
+  // After sending, back to the defaults.
+  assert.match(form, /setPrintSpec\(defaultSpec\(\)\);/);
+  // What it sends, summary first, before the builder.
+  const fields = form.slice(form.indexOf('<input type="hidden" name="print-spec"'), form.indexOf("<PrintBuilder mode="));
+  assert.deepEqual([...fields.matchAll(/name="([^"]+)" value=\{([^}]+)\}/g)].map((m) => [m[1], m[2]]), [
+    ["print-spec", "specSummary(printSpec)"],
+    ["print-item", "printFields.item"],
+    ["print-size", "printFields.size"],
+    ["print-sides", "printFields.sides"],
+    ["print-fold", "printFields.fold"],
+    ["print-paper", "printFields.paper"],
+  ]);
+  assert.match(fields, /\{printFields\.sides && <input type="hidden" name="print-sides"/);
+  assert.match(fields, /\{printFields\.fold && <input type="hidden" name="print-fold"/);
+  // The summary bar: first in the form's card, above the heading and "What do you need?", only for printing, with Change once the builder is there.
+  const card = form.slice(form.indexOf('<div className={`bg-white rounded-lg border border-gray-200 p-8'), form.indexOf("What do you need?"));
+  const bar = card.slice(card.indexOf("{isPrinting && ("), card.indexOf('<h2 className="text-xl font-bold text-blue-900">Get Your Free Quote</h2>'));
+  assert.ok(bar.length > 0 && card.indexOf("{isPrinting && (") < card.indexOf("Get Your Free Quote</h2>"));
+  assert.match(bar, /className="[^"]*rounded-md border border-blue-100 bg-\[#eff6ff\][^"]*"/);
+  assert.match(bar, /Your print: <strong className="font-semibold">\{specSummary\(printSpec\)\}<\/strong>/);
+  assert.match(bar, /\{showQuestions && \(\s+<a\s+href=\{`#\$\{printBuilderId\}`\}\s+onClick=\{goToPrintBuilder\}[\s\S]*?>\s+Change\s+<\/a>/);
+  // Change scrolls the builder into view (at once with reduced motion) and focuses it.
+  const go = form.slice(form.indexOf("function goToPrintBuilder("), form.indexOf("\n  }\n", form.indexOf("function goToPrintBuilder(")));
+  assert.match(go, /e\.preventDefault\(\);/);
+  assert.match(go, /scrollIntoView\(\{ behavior: reduce \? "instant" : "smooth", block: "start" \}\)/);
+  assert.match(go, /builder\.focus\(\{ preventScroll: true \}\)/);
+  // The old printing fields are gone: the item pills, the size and sides, the paper note, the chosen spec box and its link back.
+  for (const gone of ["What would you like printed?", 'name="print-items"', 'id="print-size"', "Double sided (recommended)", "Paper: we recommend 250gsm silk", "Your chosen spec", "/leaflet-printing#paper-and-finish", "PRINT_ITEMS"]) {
+    assert.ok(!form.includes(gone), gone);
+  }
+  // Additional details asks about anything else to print, since the item pills (with Something else) are gone.
+  assert.match(form, /id="print-message"[\s\S]*?placeholder="Paper or finish you have in mind, when you need them, or anything else you'd like printed\.\.\."/);
+  // The route records the summary and each part in the lead's note.
+  const route = readFileSync("app/api/quote-lead/route.ts", "utf8");
+  for (const [field, label] of [["print-spec", "Print spec"], ["print-item", "Print item"], ["print-fold", "Fold"], ["print-sides", "Print sides"], ["print-paper", "Paper"]]) {
+    assert.ok(route.includes(`if (isPrinting && data["${field}"]) noteLines.push(\`${label}: \${data["${field}"]}\`);`), field);
+  }
+  assert.ok(route.includes('if (data["print-size"]) noteLines.push(`Item size: ${data["print-size"]}`);'));
+});
+
+test("the builder's form mode: the same groups on a light panel headed Your print, no link, and it can be focused", () => {
+  const source = readFileSync("components/PrintBuilder.tsx", "utf8");
+  const formMode = source.slice(source.indexOf("if (form) {"), source.indexOf("\n  }\n", source.indexOf("if (form) {")));
+  assert.match(formMode, /id=\{form\.id\}\s+tabIndex=\{-1\}\s+role="group"\s+aria-labelledby=\{`\$\{form\.id\}-heading`\}/);
+  assert.match(formMode, /className="[^"]*rounded-xl border border-\[#e2e8f0\] bg-\[#f8fafc\] p-5[^"]*"/);
+  assert.doesNotMatch(formMode, /shadow/);
+  assert.match(formMode, />\s+Your print\s+<\/h4>/);
+  assert.match(formMode, /\{groups\}/);
+  assert.doesNotMatch(formMode, /Get this printed|<Link/);
+  // The page's card is unchanged: the same groups, its shadow, Build your print and its link.
+  const pageMode = source.slice(source.indexOf("if (form) {") + formMode.length);
+  assert.match(pageMode, /shadow-\[/);
+  assert.match(pageMode, /Build your print/);
+  assert.match(pageMode, /\{groups\}/);
+  assert.match(pageMode, /<Link href=\{quoteHrefFor\(spec\)\}/);
 });

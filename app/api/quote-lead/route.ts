@@ -70,10 +70,16 @@ export async function POST(req: Request) {
 
   const noteLines = [`Service type: ${data.service || "Unspecified"}`];
   if (data["distribution-type"]) noteLines.push(`Distribution type: ${data["distribution-type"]}`);
+  // Printing: the print builder's choice as one line, then its parts (print-items
+  // is what the form sent before the builder, still read in case a page from
+  // before it is submitted).
   if (isPrinting && data["print-spec"]) noteLines.push(`Print spec: ${data["print-spec"]}`);
+  if (isPrinting && data["print-item"]) noteLines.push(`Print item: ${data["print-item"]}`);
   if (data["print-items"]) noteLines.push(`Print items: ${data["print-items"]}`);
   if (data["print-size"]) noteLines.push(`Item size: ${data["print-size"]}`);
+  if (isPrinting && data["print-fold"]) noteLines.push(`Fold: ${data["print-fold"]}`);
   if (isPrinting && data["print-sides"]) noteLines.push(`Print sides: ${data["print-sides"]}`);
+  if (isPrinting && data["print-paper"]) noteLines.push(`Paper: ${data["print-paper"]}`);
   if (data["print-design"]) noteLines.push(`Design wanted: ${data["print-design"]}`);
   if (data["print-send-to"]) noteLines.push(`Send printed leaflets to: ${data["print-send-to"]}`);
   if (data["also-deliver"]) noteLines.push(`Also deliver: ${data["also-deliver"]}`);

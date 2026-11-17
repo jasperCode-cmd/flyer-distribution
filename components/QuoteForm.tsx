@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect, useId } from "react";
 import { revealFirstInvalid, showResult } from "@/components/form-result";
 import { QUANTITY_PLACEHOLDER, QUANTITY_RANGES } from "@/lib/quote-quantity";
-import { CARD_SIZE, QUOTE_ITEM, specFromParams, specSummary, type PrintSpec } from "@/lib/print-options";
+import { defaultSpec, specFields, specFromParams, specSummary, type PrintSpec } from "@/lib/print-options";
+import PrintBuilder from "@/components/PrintBuilder";
 import {
   DEFAULT_DISTRIBUTION_TYPE,
   DISTRIBUTION_TYPES,
@@ -16,10 +17,6 @@ import {
 
 // How many digits the contact number needs before the service's questions show.
 const PHONE_DIGITS_TO_CONTINUE = 10;
-
-// Leaflet Printing's "What would you like printed?", in the order it is sent.
-const PRINT_ITEMS = ["Flyers and leaflets", "Folded leaflets", "Business cards", "Custom-shaped flyers", "Perforated flyers", "Something else"];
-const DEFAULT_PRINT_ITEMS = ["Flyers and leaflets"];
 
 // inPanel: the form is in the floating Get a Quote panel. From 768px up the
 // panel itself is the card there, so the form drops its own border and
@@ -38,11 +35,11 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
   const [includeDesign, setIncludeDesign] = useState(false);
   // Leaflet Distribution: what kind, which names the areas field to suit.
   const [distributionType, setDistributionType] = useState<DistributionType["value"]>(DEFAULT_DISTRIBUTION_TYPE);
-  // Leaflet Printing: what to print, whether to design it, and whether to deliver it door to door too.
-  const [printItems, setPrintItems] = useState<string[]>(DEFAULT_PRINT_ITEMS);
+  // Leaflet Printing: what to print (the print builder's choice: the defaults,
+  // or what the builder on /leaflet-printing sent), whether to design it, and
+  // whether to deliver it door to door too.
+  const [printSpec, setPrintSpec] = useState<PrintSpec>(() => defaultSpec());
   const [printDesign, setPrintDesign] = useState(false);
-  // Leaflet Printing: the spec chosen in the print builder on /leaflet-printing, if the link carried one.
-  const [printSpec, setPrintSpec] = useState<PrintSpec | null>(null);
   const [alsoDeliver, setAlsoDeliver] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -58,6 +55,7 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
   const successRef = useRef<HTMLDivElement>(null);
   const errorRef = useRef<HTMLParagraphElement>(null);
   const resultId = useId();
+  const printBuilderId = useId();
 
   // After sending, the result is brought into view below the header and focused.
   useEffect(() => {
@@ -84,7 +82,8 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
   // screen, or Leaflet Distribution and its kind: public-notice, hand-to-hand or b2b.
   // With printing, the print builder's link also carries its spec (item, size,
   // sides, ptype, weight, fold, card, paper), checked against lib/print-options.ts:
-  // anything it doesn't offer is ignored, and no valid item means no spec.
+  // the form's builder starts on it. Anything it doesn't offer is ignored, and
+  // without a valid item the builder starts on the defaults.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const param = params.get("service");
@@ -93,10 +92,7 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
     const kind = distributionTypeFromParam(param);
     if (kind) setDistributionType(kind);
     const spec = chosen === "Leaflet Printing" ? specFromParams(params) : null;
-    if (spec) {
-      setPrintSpec(spec);
-      setPrintItems([QUOTE_ITEM[spec.product]]);
-    }
+    if (spec) setPrintSpec(spec);
   }, []);
 
   const isLeaflet = serviceType === "Leaflet Distribution";
@@ -104,11 +100,18 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
   const areasField = DISTRIBUTION_TYPES.find((t) => t.value === distributionType) ?? DISTRIBUTION_TYPES[0];
   const isWebDesign = serviceType === "Web Design & SEO";
   const isScreenHire = serviceType === "Screen Hire";
-  // The size and sides the spec sets, where they apply: a business card is always
-  // 85 x 55mm and a custom shape's size is confirmed on the call; folded leaflets
-  // are always double-sided, and business cards have no sides choice.
-  const specSize = !printSpec ? "A5" : "size" in printSpec ? printSpec.size : printSpec.product === "cards" ? CARD_SIZE : "Other or not sure";
-  const specSides = printSpec && "sides" in printSpec && printSpec.sides === "single" ? "Single sided" : "Double sided";
+  const printFields = specFields(printSpec);
+
+  // The top bar's Change link: the form's print builder, brought into view
+  // below the header (smoothly, or at once with reduced motion) and focused.
+  function goToPrintBuilder(e: React.MouseEvent<HTMLAnchorElement>) {
+    e.preventDefault();
+    const builder = document.getElementById(printBuilderId);
+    if (!builder) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    builder.scrollIntoView({ behavior: reduce ? "instant" : "smooth", block: "start" });
+    builder.focus({ preventScroll: true });
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -137,8 +140,7 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
         setIncludeDesign(false);
         setQuantity("");
         setDistributionType(DEFAULT_DISTRIBUTION_TYPE);
-        setPrintItems(DEFAULT_PRINT_ITEMS);
-        setPrintSpec(null);
+        setPrintSpec(defaultSpec());
         setPrintDesign(false);
         setAlsoDeliver(false);
 
@@ -180,6 +182,26 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
 
   return (
     <div className={`bg-white rounded-lg border border-gray-200 p-8${inPanel ? " md:border-0 md:p-0" : ""}`}>
+      {/* Leaflet Printing: what they are getting printed, at the very top,
+          as it stands in the print builder below. Change takes them to the
+          builder, once it is on the page (with the questions). */}
+      {isPrinting && (
+        <div className="mb-6 flex items-center justify-between gap-3 rounded-md border border-blue-100 bg-[#eff6ff] px-4 py-3 text-sm text-blue-900">
+          <p>
+            Your print: <strong className="font-semibold">{specSummary(printSpec)}</strong>
+          </p>
+          {showQuestions && (
+            <a
+              href={`#${printBuilderId}`}
+              onClick={goToPrintBuilder}
+              aria-label="Change your print"
+              className="inline-flex min-h-6 shrink-0 items-center font-semibold text-blue-700 underline underline-offset-2 hover:text-blue-900"
+            >
+              Change
+            </a>
+          )}
+        </div>
+      )}
       <h2 className="text-xl font-bold text-blue-900">Get Your Free Quote</h2>
       <p className="mt-1 text-gray-600">
         Free, with no obligation. We&apos;ll be in touch within 24 hours.
@@ -532,62 +554,20 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
                   {/* ── Leaflet Printing fields ── */}
                   {isPrinting && (
                     <>
-                      {/* The spec chosen in the print builder, sent as print-spec, with a
-                          link back to change it. */}
-                      {printSpec && (
-                        <div className="rounded-md border border-blue-100 bg-[#eff6ff] px-3 py-2.5 text-sm text-blue-900">
-                          <div className="flex items-baseline justify-between gap-3">
-                            <p className="font-semibold">Your chosen spec</p>
-                            <a
-                              href="/leaflet-printing#paper-and-finish"
-                              className="font-semibold text-blue-700 underline underline-offset-2 hover:text-blue-900"
-                              aria-label="Change your chosen spec"
-                            >
-                              Change
-                            </a>
-                          </div>
-                          <p className="mt-0.5">{specSummary(printSpec)}</p>
-                          <input type="hidden" name="print-spec" value={specSummary(printSpec)} />
-                        </div>
-                      )}
-
-                      {/* What to print: pill checkboxes, Flyers and leaflets ticked to
-                          start with (or the spec's item). The boxes have no name; what is
-                          ticked is sent as one line, print-items, in the list's order. */}
-                      <fieldset>
-                        <legend className="block text-sm font-medium text-gray-700 mb-2">
-                          What would you like printed? <span className="font-normal text-gray-500">(tick all that apply)</span>
-                        </legend>
-                        <div className="flex flex-wrap gap-2">
-                          {PRINT_ITEMS.map((item) => {
-                            const ticked = printItems.includes(item);
-                            return (
-                              <label
-                                key={item}
-                                className={`inline-flex min-h-11 items-center gap-1.5 rounded-full border px-4 text-sm font-semibold cursor-pointer transition-colors duration-150 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500 has-[:focus-visible]:ring-offset-2 ${
-                                  ticked ? "border-blue-700 bg-blue-700 text-white" : "border-gray-300 bg-white text-gray-700 hover:border-gray-400"
-                                }`}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={ticked}
-                                  onChange={() =>
-                                    setPrintItems((now) => (now.includes(item) ? now.filter((i) => i !== item) : PRINT_ITEMS.filter((i) => i === item || now.includes(i))))
-                                  }
-                                  className="sr-only"
-                                />
-                                {ticked && (
-                                  <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M5 12.5l4.5 4.5L19 7.5" />
-                                  </svg>
-                                )}
-                                {item}
-                              </label>
-                            );
-                          })}
-                        </div>
-                        <input type="hidden" name="print-items" value={printItems.join(", ")} />
-                      </fieldset>
+                      {/* What to print: the print builder, starting on the defaults or on
+                          the choice the builder on /leaflet-printing sent. It is sent as
+                          its summary, print-spec, first, then print-item, print-size,
+                          print-sides (not for business cards), print-fold (folded only)
+                          and print-paper. */}
+                      <div>
+                        <input type="hidden" name="print-spec" value={specSummary(printSpec)} />
+                        <input type="hidden" name="print-item" value={printFields.item} />
+                        <input type="hidden" name="print-size" value={printFields.size} />
+                        {printFields.sides && <input type="hidden" name="print-sides" value={printFields.sides} />}
+                        {printFields.fold && <input type="hidden" name="print-fold" value={printFields.fold} />}
+                        <input type="hidden" name="print-paper" value={printFields.paper} />
+                        <PrintBuilder mode="form" id={printBuilderId} spec={printSpec} onSpecChange={setPrintSpec} />
+                      </div>
 
                       {/* Quantity: the leaflet ranges. Any choice folds in the rest. */}
                       <div>
@@ -771,66 +751,6 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
                   {/* ── Leaflet Printing, after the quantity ── */}
                   {isPrinting && (
                     <>
-                      {/* Size and sides side by side, with the paper note beside them
-                          (by the form's own width, so the Get a Quote panel matches).
-                          A spec from the print builder sets them where they apply, and
-                          the paper note goes, since its paper is already chosen. */}
-                      <div className="@container">
-                        <div className="grid grid-cols-1 @min-[420px]:grid-cols-2 @min-[600px]:grid-cols-3 gap-4 items-start">
-                          <div>
-                            <label
-                              htmlFor="print-size"
-                              className="block text-sm font-medium text-gray-700 mb-1"
-                            >
-                              Item size
-                            </label>
-                            <select
-                              id="print-size"
-                              name="print-size"
-                              defaultValue={specSize}
-                              className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-                            >
-                              <option value="A5">A5 (most popular)</option>
-                              <option value="A4">A4</option>
-                              <option value="A6">A6</option>
-                              <option value="DL">DL</option>
-                              {printSpec?.product === "cards" && <option value={CARD_SIZE}>{CARD_SIZE} (business cards)</option>}
-                              <option value="Other or not sure">Other or not sure</option>
-                            </select>
-                          </div>
-                          <fieldset>
-                            <legend className="block text-sm font-medium text-gray-700 mb-2">Print sides</legend>
-                            <div className="flex flex-col gap-2">
-                              <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                  type="radio"
-                                  name="print-sides"
-                                  value="Double sided"
-                                  defaultChecked={specSides === "Double sided"}
-                                  className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                                />
-                                <span className="text-sm text-gray-700">Double sided (recommended)</span>
-                              </label>
-                              <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                  type="radio"
-                                  name="print-sides"
-                                  value="Single sided"
-                                  defaultChecked={specSides === "Single sided"}
-                                  className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-                                />
-                                <span className="text-sm text-gray-700">Single sided</span>
-                              </label>
-                            </div>
-                          </fieldset>
-                          {!printSpec && (
-                            <p className="@min-[420px]:col-span-2 @min-[600px]:col-span-1 rounded-md border border-blue-100 bg-[#eff6ff] px-3 py-2.5 text-xs leading-relaxed text-blue-900">
-                              Paper: we recommend 250gsm silk. We&apos;ll go through other options on the call.
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
                       {/* Design: Yes sends print-design "Yes"; No sends nothing. */}
                       <div className="border border-gray-200 rounded-md px-3 py-3 bg-gray-50">
                         <YesNo
@@ -913,7 +833,7 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
                           id="print-message"
                           name="message"
                           rows={4}
-                          placeholder="Paper or finish you have in mind, when you need them, or anything else..."
+                          placeholder="Paper or finish you have in mind, when you need them, or anything else you'd like printed..."
                           className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                         />
                       </div>

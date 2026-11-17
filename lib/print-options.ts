@@ -203,6 +203,32 @@ export const QUOTE_ITEM: Record<Product, string> = {
   custom: "Custom-shaped flyers",
 };
 
+// The quote form's structured fields for a spec, sent beside its summary:
+// print-item, print-size (85 x 55mm for business cards, Custom for custom
+// shapes), print-sides (not for business cards, which have no sides choice;
+// folded leaflets are always double-sided), print-fold (folded leaflets, and
+// folded business cards) and print-paper.
+export type SpecFields = { item: string; size: string; sides?: string; fold?: string; paper: string };
+export function specFields(spec: PrintSpec): SpecFields {
+  const sidesLabel = (sides: Sides) => SIDES.find((s) => s.id === sides)!.label;
+  switch (spec.product) {
+    case "flyers":
+      return { item: QUOTE_ITEM.flyers, size: spec.size, sides: sidesLabel(spec.sides), paper: `${spec.weight}gsm ${spec.ptype}` };
+    case "folded":
+      return {
+        item: QUOTE_ITEM.folded,
+        size: spec.size,
+        sides: sidesLabel("double"),
+        fold: FOLDS.find((f) => f.id === spec.fold)!.label,
+        paper: `${spec.weight}gsm ${spec.ptype}`,
+      };
+    case "cards":
+      return { item: QUOTE_ITEM.cards, size: CARD_SIZE, ...(spec.card === "folded" ? { fold: "Folded" } : {}), paper: PAPER_LABELS[spec.paper] };
+    case "custom":
+      return { item: QUOTE_ITEM.custom, size: "Custom", sides: sidesLabel(spec.sides), paper: PAPER_LABELS[spec.paper] };
+  }
+}
+
 // The short URL parameters for a spec: item, then only the ones that product uses.
 export function specParams(spec: PrintSpec): URLSearchParams {
   const params = new URLSearchParams({ item: spec.product });

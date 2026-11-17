@@ -32,7 +32,7 @@ test("leaflets: Company, the kind, Areas, then the quantity, with its hints, sho
   assert.ok(section.indexOf(REST) > 0);
   // In this order, and nothing else asked before a quantity is chosen (printing's own part follows).
   assert.deepEqual(namesIn(shown.slice(0, shown.indexOf(PRINTING))), ["company", "service", "distribution-type", "areas-required", "quantity"]);
-  assert.deepEqual(namesIn(shown.slice(shown.indexOf(PRINTING))), ["print-spec", "print-items", "print-quantity"]);
+  assert.deepEqual(namesIn(shown.slice(shown.indexOf(PRINTING))), ["print-spec", "print-item", "print-size", "print-sides", "print-fold", "print-paper", "print-quantity"]);
   const at = ['htmlFor="company"', 'name="distribution-type"', 'htmlFor="areas-required"', 'htmlFor="quantity"'].map((p) => shown.indexOf(p));
   assert.ok(at.every((i, n) => i > 0 && (n === 0 || i > at[n - 1])), at.join(" "));
   assert.match(shown, /Company \/ Organisation/);
