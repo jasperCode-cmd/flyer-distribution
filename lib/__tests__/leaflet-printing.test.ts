@@ -132,7 +132,7 @@ test("the hero: yellow label, H1, intro, the two buttons and the printer photo",
   assert.match(hero, /<div class="h-\[280px\] overflow-hidden rounded-\[20px\][^"]*sm:h-\[380px\]"><img[^>]*class="h-full w-full object-cover"/);
 });
 
-test("the four tick points, the products, paper and sizes, as given", () => {
+test("the four tick points, the products, and the paper, as given", () => {
   const ticks = html().slice(html().indexOf("</section>"), html().indexOf(">What we print</h2>"));
   assert.deepEqual([...ticks.matchAll(/<li[^>]*>[\s\S]*?<\/span>([^<]+)<\/li>/g)].map((m) => m[1]), [
     "250gsm silk, double-sided, recommended",
@@ -159,14 +159,50 @@ test("the four tick points, the products, paper and sizes, as given", () => {
   const paper = textOf(sectionOf("Paper and finish"));
   for (const line of [
     "For most leaflet campaigns we recommend 250gsm silk, printed double-sided. It feels sturdy in the hand, the colours stay sharp, and it holds up going through a letterbox.",
-    "Other paper weights and finishes are available. We will talk you through the options on the call and recommend what suits your campaign.",
+    "Pick your options, or leave it to us and we will recommend what suits your campaign on the call.",
     "We recommend 250gsm silk, double-sided",
   ]) {
     assert.ok(paper.includes(line), line);
   }
-  const sizes = [...sectionOf("Paper and finish").matchAll(/<li class="([^"]*)">([^<]*)<\/li>/g)].map((m) => [m[2], m[1].includes("bg-[#1e3a8a]")]);
-  assert.deepEqual(sizes, [["A6", false], ["A5", true], ["A4", false], ["DL", false]]);
-  assert.match(paper, /^Paper and finish .* Popular sizes A6 A5 A4 DL$/);
+  assert.doesNotMatch(paper, /Other paper weights and finishes|Popular sizes/);
+  // Then the print builder, as the server renders it (before its script loads): the default choice.
+  assert.equal(
+    paper.slice(paper.indexOf("Build your print")),
+    "Build your print Product Flyers and leaflets Folded leaflets Business cards Custom-shaped flyers Size A6 A5 A4 DL Sides Double-sided Single-sided " +
+      "Paper type Silk Uncoated Gloss Paper weight 115gsm 150gsm 170gsm 250gsm (recommended) 350gsm 450gsm " +
+      "Lamination, spot UV, foil and perforation are also available. Ask us on the call. Your choice: A5 flyers, double-sided, 250gsm silk Get this printed"
+  );
+});
+
+test("the print builder: a white card of pill buttons, the default chosen, its summary and its link", () => {
+  const paper = sectionOf("Paper and finish");
+  const builder = paper.slice(paper.indexOf('<div class="rounded-[20px]'));
+  // White, a 1px #e2e8f0 border, 20px corners, 26px padding and a soft shadow.
+  assert.match(builder, /^<div class="rounded-\[20px\] border border-\[#e2e8f0\] bg-white p-\[26px\] shadow-\[[^\]]+\]"><h3 class="font-sans font-bold [^"]*">Build your print<\/h3>/);
+  // Each option a fieldset with a small uppercase grey legend; the pills buttons, at least 44px tall with 12px corners.
+  const groups = [...builder.matchAll(/<fieldset><legend class="([^"]*)">([^<]*)<\/legend><div class="flex flex-wrap gap-2">([\s\S]*?)<\/div><\/fieldset>/g)];
+  assert.deepEqual(groups.map((g) => g[2]), ["Product", "Size", "Sides", "Paper type", "Paper weight"]);
+  for (const g of groups) {
+    assert.match(g[1], /\buppercase\b/);
+    assert.match(g[1], /text-\[#4b5563\]/);
+    const pills = [...g[3].matchAll(/<button type="button" aria-pressed="(true|false)" class="([^"]*)">([^<]*)<\/button>/g)];
+    assert.ok(pills.length >= 2, g[2]);
+    for (const [, pressed, cls] of pills) {
+      assert.match(cls, /\bmin-h-11\b/);
+      assert.match(cls, /rounded-\[12px\]/);
+      // Chosen: navy with white text. Not chosen: white with a #cbd5e1 border.
+      assert.match(cls, pressed === "true" ? /border-\[#1e3a8a\] bg-\[#1e3a8a\] text-white/ : /border-\[#cbd5e1\] bg-white/);
+    }
+    // One chosen in each.
+    assert.equal(pills.filter((p) => p[1] === "true").length, 1, g[2]);
+  }
+  const chosen = groups.map((g) => /aria-pressed="true"[^>]*>([^<]*)</.exec(g[3])![1]);
+  assert.deepEqual(chosen, ["Flyers and leaflets", "A5", "Double-sided", "Silk", "250gsm (recommended)"]);
+  // No note for flyers; the extras line always; then the footer, divided off, with the summary and the yellow button.
+  assert.doesNotMatch(builder, /bg-\[#eff6ff\]/);
+  assert.match(builder, /<div class="mt-6 flex flex-col gap-4 border-t border-\[#e2e8f0\] pt-5[^"]*"><p [^>]*aria-live="polite">Your choice: <strong[^>]*>A5 flyers, double-sided, 250gsm silk<\/strong><\/p><a class="[^"]*bg-\[#facc15\][^"]*" href="\/quote\?service=printing&amp;item=flyers&amp;size=A5&amp;sides=double&amp;ptype=silk&amp;weight=250">Get this printed<svg/);
+  // The section can be linked to, for the quote form's Change link.
+  assert.match(html(), /<section id="paper-and-finish" class="bg-\[#f8fafc\] py-16 sm:py-\[88px\]"><div class="mx-auto w-full max-w-\[1200px\] px-6 grid grid-cols-1 items-start gap-12 lg:grid-cols-2">/);
 });
 
 test("three ways to order, the navy one most popular, each with its link", () => {
@@ -262,7 +298,7 @@ test("printing questions: one real review, word for word, and five questions wit
 
 test("the design's measures: the 1200px container, 88px sections alternating white and #f8fafc, 40px headings, its cards and boxes", () => {
   // Every section's content sits in the same centred 1200px container with 24px sides.
-  const sections = [...html().matchAll(/<section class="([^"]*)">\s*<(?:div|ul) class="([^"]*)"/g)].map((m) => ({ section: m[1], inner: m[2] }));
+  const sections = [...html().matchAll(/<section(?: id="[^"]*")? class="([^"]*)">\s*<(?:div|ul) class="([^"]*)"/g)].map((m) => ({ section: m[1], inner: m[2] }));
   assert.equal(sections.length, 8);
   for (const s of sections) assert.match(s.inner, /^mx-auto w-full max-w-\[1200px\] px-6\b/, s.section);
   // Hero navy (28px above, 72px below); the tick strip grey (22px); then white and #f8fafc in turn, each
@@ -301,15 +337,12 @@ test("the design's measures: the 1200px container, 88px sections alternating whi
   assert.match(SOURCE, /<div className="flex h-full items-center justify-center text-\[#1e3a8a\]">\s+<Icon className="h-12 w-12">\{icon\}<\/Icon>/);
   // The two smaller cards: #f8fafc, no border, the 34px blue icon on the left.
   assert.equal((print.match(/<li class="flex items-start gap-\[18px\] rounded-\[18px\] bg-\[#f8fafc\] p-6"><span class="shrink-0 text-\[#1d4ed8\]"><svg[^>]*class="block h-\[34px\] w-\[34px\]"/g) ?? []).length, 2);
-  // Paper and finish: the recommendation box white with a 2px navy border; the paper photo (16px corners, 220px) above the size chips (12px corners, A5 navy).
+  // Paper and finish: the recommendation box white with a 2px navy border; under it the paper photo (16px corners, 180px);
+  // then the print builder (beside the text from lg, after it on phones). No size chips: the builder has the sizes.
   const paper = sectionOf("Paper and finish");
-  assert.match(paper, /<div class="flex items-center gap-4 rounded-\[16px\] border-2 border-\[#1e3a8a\] bg-white px-\[22px\] py-5"><span class="shrink-0 [^"]*bg-\[#facc15\][^"]*">We recommend<\/span><span class="[^"]*font-bold[^"]*">250gsm silk, double-sided<\/span>/);
+  assert.match(paper, /<div class="flex items-center gap-4 rounded-\[16px\] border-2 border-\[#1e3a8a\] bg-white px-\[22px\] py-5"><span class="shrink-0 [^"]*bg-\[#facc15\][^"]*">We recommend<\/span><span class="[^"]*font-bold[^"]*">250gsm silk, double-sided<\/span><\/div><div class="h-\[180px\] overflow-hidden rounded-\[16px\]"><img[^>]*alt="A fan of coloured paper sheets"[^>]*class="h-full w-full object-cover"[^>]*\/><\/div><\/div><div class="rounded-\[20px\]/);
   assert.match(paper, /we recommend <strong>250gsm silk, printed double-sided<\/strong>\./);
-  assert.match(paper, /<div class="h-\[220px\] overflow-hidden rounded-2xl"><img[^>]*alt="A fan of coloured paper sheets"[^>]*class="h-full w-full object-cover"/);
-  assert.ok(paper.indexOf("printing-paper.webp") < paper.indexOf(">Popular sizes</p>"));
-  assert.equal((paper.match(/<li class="rounded-\[12px\] /g) ?? []).length, 4);
-  // No paper weight or finish chips: only the four sizes.
-  assert.equal((paper.match(/<li /g) ?? []).length, 4);
+  assert.equal((paper.match(/<li /g) ?? []).length, 0);
   // Printing questions: the review a grey card with a 1px border; the questions 19px, bold, between 1px dividers.
   const faq = sectionOf("Printing questions");
   assert.match(faq, /<figure class="mt-3 flex flex-col gap-2\.5 rounded-\[18px\] border border-\[#e2e8f0\] bg-\[#f8fafc\] p-6">/);
@@ -328,8 +361,12 @@ test("the closing band, and every quote link choosing Leaflet Printing", () => {
   assert.ok(textOf(closing).includes("Tell us what you need and where, and we will come back to you with a quote."));
   assert.deepEqual(linksIn(closing), [[QUOTE, "Get a Free Quote"]]);
   const quoteLinks = linksIn(html()).filter(([href]) => href.startsWith("/quote"));
-  assert.equal(quoteLinks.length, 4);
-  assert.ok(quoteLinks.every(([href]) => href === QUOTE));
+  assert.equal(quoteLinks.length, 5);
+  // The builder's link carries its choice too.
+  assert.deepEqual(
+    quoteLinks.filter(([href]) => href !== QUOTE),
+    [[`${QUOTE}&item=flyers&size=A5&sides=double&ptype=silk&weight=250`, "Get this printed"]]
+  );
 });
 
 test("the copy rules: no prices, turnaround times, supplier, banned words or dashes, and every link on the site", () => {
@@ -337,7 +374,7 @@ test("the copy rules: no prices, turnaround times, supplier, banned words or das
   assert.doesNotMatch(text, /£|\bprices?\b|\bpricing\b|\bsolus\b|live tracked|see where every flyer goes|street/i);
   assert.doesNotMatch(text, /turnaround|next.day|same.day|\b\d+\s*(working\s+)?(days?|weeks?|hours?)\b/i);
   assert.doesNotMatch(text, /supplier|print partner/i);
-  assert.doesNotMatch(SOURCE, /[\u2013\u2014]/);
+  for (const source of [SOURCE, read("components/PrintBuilder.tsx"), read("lib/print-options.ts")]) assert.doesNotMatch(source, /[\u2013\u2014]/);
   for (const [href] of linksIn(html())) assert.match(href, /^\//, href);
 });
 

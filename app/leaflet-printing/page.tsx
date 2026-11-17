@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import PrintBuilder from "@/components/PrintBuilder";
 
 // Leaflet and flyer printing. It targets printing: delivery is a benefit
 // that links out to /services and /areas, and "distribution" stays out of
@@ -199,13 +200,6 @@ const ICONS = {
   ),
 };
 
-const SIZES = [
-  { size: "A6", popular: false },
-  { size: "A5", popular: true },
-  { size: "A4", popular: false },
-  { size: "DL", popular: false },
-];
-
 // One real review, word for word as it appears in components/Testimonials.tsx.
 const REVIEW = {
   quote:
@@ -394,26 +388,21 @@ export default function LeafletPrintingPage() {
         </div>
       </section>
 
-      {/* 4. Paper and finish: the recommendation, beside the paper photo and the popular sizes */}
-      <section className={`bg-[#f8fafc] ${SECTION}`}>
-        <div className={`${CONTAINER} grid grid-cols-1 items-center gap-12 lg:grid-cols-2`}>
+      {/* 4. Paper and finish: the recommendation and the paper photo, beside the print builder (after the text on phones) */}
+      <section id="paper-and-finish" className={`bg-[#f8fafc] ${SECTION}`}>
+        <div className={`${CONTAINER} grid grid-cols-1 items-start gap-12 lg:grid-cols-2`}>
           <div className="flex flex-col gap-[18px]">
             <h2 className={H2}>Paper and finish</h2>
             <p className={INTRO}>
               For most leaflet campaigns we recommend <strong>250gsm silk, printed double-sided</strong>. It feels sturdy in the hand, the
               colours stay sharp, and it holds up going through a letterbox.
             </p>
-            <p className={INTRO}>
-              Other paper weights and finishes are available. We will talk you through the options on the call and recommend what suits
-              your campaign.
-            </p>
+            <p className={INTRO}>Pick your options, or leave it to us and we will recommend what suits your campaign on the call.</p>
             <div className="flex items-center gap-4 rounded-[16px] border-2 border-[#1e3a8a] bg-white px-[22px] py-5">
               <span className={`shrink-0 ${BADGE}`}>We recommend</span>
               <span className="text-[18px] font-bold text-[#172554]">250gsm silk, double-sided</span>
             </div>
-          </div>
-          <div className="flex flex-col gap-[26px]">
-            <div className="h-[220px] overflow-hidden rounded-2xl">
+            <div className="h-[180px] overflow-hidden rounded-[16px]">
               <Image
                 src="/images/printing-paper.webp"
                 alt="A fan of coloured paper sheets"
@@ -423,22 +412,8 @@ export default function LeafletPrintingPage() {
                 className="h-full w-full object-cover"
               />
             </div>
-            <div className="flex flex-col gap-3">
-              <p className="text-[13px] font-bold uppercase tracking-[0.12em] text-[#4b5563]">Popular sizes</p>
-              <ul className="flex flex-wrap gap-2.5">
-                {SIZES.map((s) => (
-                  <li
-                    key={s.size}
-                    className={`rounded-[12px] px-[22px] py-3 font-bold ${
-                      s.popular ? "border border-[#1e3a8a] bg-[#1e3a8a] text-white" : "border border-[#cbd5e1] bg-white text-[#172554]"
-                    }`}
-                  >
-                    {s.size}
-                  </li>
-                ))}
-              </ul>
-            </div>
           </div>
+          <PrintBuilder />
         </div>
       </section>
 

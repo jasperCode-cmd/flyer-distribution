@@ -70,6 +70,7 @@ export async function POST(req: Request) {
 
   const noteLines = [`Service type: ${data.service || "Unspecified"}`];
   if (data["distribution-type"]) noteLines.push(`Distribution type: ${data["distribution-type"]}`);
+  if (isPrinting && data["print-spec"]) noteLines.push(`Print spec: ${data["print-spec"]}`);
   if (data["print-items"]) noteLines.push(`Print items: ${data["print-items"]}`);
   if (data["print-size"]) noteLines.push(`Item size: ${data["print-size"]}`);
   if (isPrinting && data["print-sides"]) noteLines.push(`Print sides: ${data["print-sides"]}`);

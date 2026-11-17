@@ -82,7 +82,7 @@ test("a link chooses a service with ?service=leaflet, printing, web or screen, o
     assert.equal(distributionTypeFromParam(other), "", String(other));
   }
   // Read from the address when the form loads.
-  assert.match(form, /const param = new URLSearchParams\(window\.location\.search\)\.get\("service"\);\s+const chosen = serviceFromParam\(param\);\s+if \(chosen\) setServiceType\(chosen\);\s+const kind = distributionTypeFromParam\(param\);\s+if \(kind\) setDistributionType\(kind\);/);
+  assert.match(form, /const params = new URLSearchParams\(window\.location\.search\);\s+const param = params\.get\("service"\);\s+const chosen = serviceFromParam\(param\);\s+if \(chosen\) setServiceType\(chosen\);\s+const kind = distributionTypeFromParam\(param\);\s+if \(kind\) setDistributionType\(kind\);/);
 });
 
 test("before a card is chosen: the heading, the four cards and the hint, and no fields", () => {
@@ -208,7 +208,8 @@ test("each service shows its own fields after Company, in their old order", () =
     "message",
   ]);
   // Leaflet Printing: what to print and the quantity first, the rest after.
-  assert.deepEqual(namesIn(between(PRINTING_FIELDS, "{/* The rest of the section.")), ["print-items", "print-quantity"]);
+  // (print-spec only when the print builder's link carried one.)
+  assert.deepEqual(namesIn(between(PRINTING_FIELDS, "{/* The rest of the section.")), ["print-spec", "print-items", "print-quantity"]);
   assert.deepEqual(namesIn(between(PRINTING_AFTER_QUANTITY, WEB_FIELDS)), [
     "print-size",
     "print-sides",
@@ -537,6 +538,7 @@ test("real database: a Leaflet Printing enquiry is saved as a lead, with its ans
     phone: "07700 900123",
     company: "Pia Ltd",
     service: "Leaflet Printing",
+    "print-spec": "A5 flyers, double-sided, 250gsm silk",
     "print-items": "Flyers and leaflets, Business cards",
     "print-quantity": "2,500 to 5,000",
     "print-size": "A5",
@@ -564,6 +566,7 @@ test("real database: a Leaflet Printing enquiry is saved as a lead, with its ans
   const note = await noteOf(email);
   for (const line of [
     "Service type: Leaflet Printing",
+    "Print spec: A5 flyers, double-sided, 250gsm silk",
     "Print items: Flyers and leaflets, Business cards",
     "Item size: A5",
     "Print sides: Double sided",
@@ -584,7 +587,7 @@ test("real database: a Leaflet Printing enquiry is saved as a lead, with its ans
   const plainLead = await prisma.lead.findFirst({ where: { email: plain }, select: { printingIncluded: true, designIncluded: true, targetAreas: true, leafletQuantity: true } });
   assert.deepEqual(plainLead, { printingIncluded: true, designIncluded: false, targetAreas: null, leafletQuantity: "Not sure yet" });
   const plainNote = await noteOf(plain);
-  assert.doesNotMatch(plainNote, /Design wanted|Also deliver/);
+  assert.doesNotMatch(plainNote, /Design wanted|Also deliver|Print spec/);
 });
 
 test("real database: a Leaflet Printing enquiry without one of the quantities is refused", { skip }, async () => {
