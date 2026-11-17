@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import Breadcrumb from "@/components/Breadcrumb";
 
 // Leaflet and flyer printing. It targets printing: delivery is a benefit
 // that links out to /services and /areas, and "distribution" stays out of
@@ -65,13 +64,27 @@ const serviceSchema = {
   ],
 };
 
+// The design's measures: a centred 1200px container with 24px sides on every
+// section, 88px above and below each section (64px on phones), 40px headings
+// in #172554, body text #374151 at a 1.6 line height, third-level headings in
+// the body font.
+const CONTAINER = "mx-auto w-full max-w-[1200px] px-6";
+const SECTION = "py-16 sm:py-[88px]";
+const H2 = "font-heading text-[32px] sm:text-[40px] font-extrabold leading-[1.1] text-[#172554]";
+const INTRO = "text-[18px] text-[#374151]";
+const H3 = "font-sans font-bold";
+// Buttons: 56px tall (the design's 52px plus the outline's 2px border, which the yellow one matches), 12px corners, 17px bold.
 const YELLOW_BUTTON =
-  "inline-block bg-yellow-400 hover:bg-yellow-300 text-blue-900 font-bold px-7 py-3.5 rounded-md transition duration-200 ease-out hover:scale-105 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-blue-900";
-const IN_TEXT_LINK = "font-semibold text-blue-700 underline underline-offset-2 hover:text-blue-900";
+  "inline-flex min-h-[56px] items-center rounded-[12px] bg-[#facc15] px-[26px] text-[17px] font-bold text-[#172554] transition duration-200 ease-out hover:scale-105 hover:bg-yellow-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#1e3a8a]";
+const OUTLINE_BUTTON =
+  "inline-flex min-h-[56px] items-center rounded-[12px] border-2 border-[#dbeafe] px-[22px] text-[17px] font-bold text-white transition duration-200 ease-out hover:scale-105 hover:bg-white hover:text-[#1e3a8a]";
+const CLOSING_BUTTON =
+  "inline-flex min-h-[56px] shrink-0 items-center rounded-[12px] bg-[#facc15] px-[30px] text-[18px] font-bold text-[#172554] transition duration-200 ease-out hover:scale-105 hover:bg-yellow-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#172554]";
+const IN_TEXT_LINK = "text-[#1d4ed8] underline underline-offset-2 hover:text-[#172554]";
 // A card's link on a white card, and on a navy one.
-const CARD_LINK = "inline-flex items-center gap-1.5 font-semibold text-blue-700 hover:text-blue-900 underline-offset-4 hover:underline";
-const CARD_LINK_ON_NAVY = "inline-flex items-center gap-1.5 font-semibold text-[#facc15] hover:text-yellow-200 underline-offset-4 hover:underline";
-const CARD = "rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl";
+const CARD_LINK = "inline-flex items-center gap-1.5 font-bold text-[#1d4ed8] hover:text-[#172554] underline-offset-4 hover:underline";
+const CARD_LINK_ON_NAVY = "inline-flex items-center gap-1.5 font-bold text-[#facc15] hover:text-yellow-200 underline-offset-4 hover:underline";
+const BADGE = "rounded-full bg-[#facc15] px-2.5 py-1 text-[12px] font-bold leading-none text-[#172554]";
 const STAR = "M12 2.5l2.9 6.06 6.6.87-4.83 4.6 1.24 6.6L12 17.5l-5.91 3.13 1.24-6.6-4.83-4.6 6.6-.87L12 2.5z";
 
 const Arrow = () => (
@@ -81,8 +94,8 @@ const Arrow = () => (
 );
 
 // Line icons, drawn on a 24px grid.
-const Icon = ({ children, className = "h-7 w-7" }: { children: React.ReactNode; className?: string }) => (
-  <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round">
+const Icon = ({ children, className = "h-7 w-7", strokeWidth = 1.75 }: { children: React.ReactNode; className?: string; strokeWidth?: number }) => (
+  <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
     {children}
   </svg>
 );
@@ -92,6 +105,7 @@ const TICKS = ["250gsm silk, double-sided, recommended", "Delivered to you or th
 const MAIN_PRODUCTS = [
   {
     title: "Flyers and leaflets",
+    image: { src: "/images/printing-flyers-leaflets.webp", alt: "Colourful printed leaflets laid out on a desk" },
     text: "Our main product. A6, A5, A4 and DL, printed single or double-sided.",
     icon: (
       <>
@@ -102,6 +116,7 @@ const MAIN_PRODUCTS = [
   },
   {
     title: "Folded leaflets",
+    image: { src: "/images/printing-folded-leaflets.webp", alt: "A printed folded leaflet standing on a stack of leaflets" },
     text: "Folded leaflets, available creased or perforated.",
     icon: (
       <>
@@ -112,6 +127,7 @@ const MAIN_PRODUCTS = [
   },
   {
     title: "Business cards",
+    image: { src: "/images/printing-business-cards.webp", alt: "A stack of printed business cards" },
     text: "Standard, folded and uncoated cards to match your leaflets.",
     icon: (
       <>
@@ -128,9 +144,8 @@ const MORE_PRODUCTS = [
     text: "Cut to a shape that suits your brand, so your leaflet stands out on the doormat.",
     icon: (
       <>
-        <circle cx="6" cy="6" r="3" />
-        <circle cx="6" cy="18" r="3" />
-        <path d="M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12" />
+        <path d="M12 3 4 9v12h16V9Z" />
+        <path d="M9 21v-6h6v6" />
       </>
     ),
   },
@@ -140,11 +155,49 @@ const MORE_PRODUCTS = [
     icon: (
       <>
         <rect x="3" y="4" width="18" height="16" rx="2" />
-        <path d="M3 14h2m3 0h2m3 0h2m3 0h2" />
+        <path d="M3 14h18" strokeDasharray="2 2" />
       </>
     ),
   },
 ];
+
+const ICONS = {
+  printer: (
+    <>
+      <path d="M6 9V2h12v7" />
+      <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
+      <rect x="6" y="14" width="12" height="8" />
+    </>
+  ),
+  letterbox: (
+    <>
+      <path d="M3 9.5 12 3l9 6.5V21H3Z" />
+      <path d="M8 14h8" />
+    </>
+  ),
+  pen: (
+    <>
+      <path d="M12 19l7-7 3 3-7 7-3-3z" />
+      <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+      <path d="M2 2l7.6 7.6" />
+      <circle cx="11" cy="11" r="2" />
+    </>
+  ),
+  pin: (
+    <>
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+      <circle cx="12" cy="10" r="3" />
+    </>
+  ),
+  parcel: (
+    <>
+      <path d="M16.5 9.4 7.5 4.2" />
+      <path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7Z" />
+      <path d="M3.3 7 12 12l8.7-5" />
+      <path d="M12 22V12" />
+    </>
+  ),
+};
 
 const SIZES = [
   { size: "A6", popular: false },
@@ -201,64 +254,105 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
   },
 ];
 
+// A main product card: a band across the top, 200px tall, filled edge to
+// edge by its photo, or (with no image) its line icon, large, on light blue;
+// then its title and line.
+function PrintCard({ title, text, icon, image }: { title: string; text: string; icon: React.ReactNode; image?: { src: string; alt: string } }) {
+  return (
+    <li className="flex flex-col overflow-hidden rounded-[18px] border border-[#e2e8f0] bg-white">
+      <div className="h-[200px] bg-[#dbeafe]">
+        {image ? (
+          <Image
+            src={image.src}
+            alt={image.alt}
+            width={1200}
+            height={700}
+            sizes="(min-width: 1200px) 371px, (min-width: 768px) calc((100vw - 88px) / 3), calc(100vw - 48px)"
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-[#1e3a8a]">
+            <Icon className="h-12 w-12">{icon}</Icon>
+          </div>
+        )}
+      </div>
+      <div className="flex flex-col gap-2 p-6">
+        <h3 className={`${H3} text-[22px] text-[#172554]`}>{title}</h3>
+        <p className="text-[#374151]">{text}</p>
+      </div>
+    </li>
+  );
+}
+
 export default function LeafletPrintingPage() {
   return (
-    <>
+    <div className="leading-[1.6] text-[#1f2937]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
 
-      {/* 1. Hero */}
-      <section className="bg-blue-900 text-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14 lg:py-20 grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] gap-10 lg:gap-14 items-center">
-          <div>
-            <Breadcrumb
-              items={[
-                { label: "Home", href: "/" },
-                { label: "Services", href: "/services" },
-                { label: "Leaflet Printing" },
-              ]}
-            />
-            <p className="text-[#facc15] text-sm font-semibold uppercase tracking-widest mb-3">Printing for Hampshire and Dorset businesses</p>
-            <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight mb-5">Leaflet and Flyer Printing</h1>
-            <p className="text-blue-100 text-lg sm:text-xl leading-relaxed mb-8">
-              We print leaflets, flyers and business cards for local businesses across Hampshire and Dorset, then deliver them to you or
-              straight through letterboxes in your chosen areas.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link href={QUOTE_HREF} className={YELLOW_BUTTON}>
-                Get a Free Quote
-              </Link>
-              <Link
-                href="/services"
-                className="inline-block border-2 border-white text-white hover:bg-white hover:text-blue-900 font-bold px-7 py-3 rounded-md transition duration-200 ease-out hover:scale-105"
-              >
-                See our leaflet delivery
-              </Link>
+      {/* 1. Hero: the breadcrumb, then the copy beside the photo box */}
+      <section className="bg-[#1e3a8a] text-white">
+        <div className={`${CONTAINER} pt-7 pb-16 sm:pb-[72px]`}>
+          <nav aria-label="Breadcrumb" className="mb-9 text-[14px] text-[#dbeafe]">
+            <ol className="flex flex-wrap items-center gap-x-1.5">
+              <li>
+                <Link href="/" className="underline underline-offset-2 hover:text-white">
+                  Home
+                </Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li>
+                <Link href="/services" className="underline underline-offset-2 hover:text-white">
+                  Services
+                </Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li>
+                <span className="font-bold text-white" aria-current="page">Leaflet Printing</span>
+              </li>
+            </ol>
+          </nav>
+          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,1.075fr)_minmax(0,1fr)]">
+            <div className="flex flex-col gap-[22px]">
+              <p className="text-[#facc15] text-[13px] font-bold uppercase tracking-[0.14em]">Printing for Hampshire and Dorset businesses</p>
+              <h1 className="font-heading text-[40px] sm:text-[56px] font-extrabold leading-[1.05]">Leaflet and Flyer Printing</h1>
+              <p className="max-w-[560px] text-[18px] sm:text-[20px] text-[#dbeafe]">
+                We print leaflets, flyers and business cards for local businesses across Hampshire and Dorset, then deliver them to you or
+                straight through letterboxes in your chosen areas.
+              </p>
+              <div className="mt-1.5 flex flex-wrap gap-3.5">
+                <Link href={QUOTE_HREF} className={YELLOW_BUTTON}>
+                  Get a Free Quote
+                </Link>
+                <Link href="/services" className={OUTLINE_BUTTON}>
+                  See our leaflet delivery
+                </Link>
+              </div>
             </div>
-          </div>
-          {/* Cropped square from the bottom, so the printed leaflets in hand stay in view. */}
-          <div className="overflow-hidden rounded-2xl shadow-2xl shadow-black/30 ring-1 ring-white/10">
-            <Image
-              src="/Flyer%20Distribution%20Hampshire.webp"
-              alt="Printed leaflets in hand, ready for delivery in a Hampshire village"
-              width={1200}
-              height={1600}
-              priority
-              sizes="(min-width: 1152px) 490px, (min-width: 1024px) 42vw, calc(100vw - 32px)"
-              className="block aspect-square w-full object-cover object-bottom"
-            />
+            {/* The photo box: 380px tall (280px on phones), 20px corners. */}
+            <div className="h-[280px] overflow-hidden rounded-[20px] sm:h-[380px]">
+              <Image
+                src="/images/leaflet-printing-hero.webp"
+                alt="A large printer mid-print"
+                width={1500}
+                height={1000}
+                priority
+                sizes="(min-width: 1200px) 532px, (min-width: 1024px) 45vw, calc(100vw - 48px)"
+                className="h-full w-full object-cover"
+              />
+            </div>
           </div>
         </div>
       </section>
 
       {/* 2. Four quick points */}
-      <section className="bg-slate-50 border-b border-gray-100">
-        <ul className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-3">
+      <section className="border-b border-[#e2e8f0] bg-[#f8fafc]">
+        <ul className={`${CONTAINER} flex flex-wrap justify-between gap-x-8 gap-y-3.5 py-[22px] font-bold text-[#172554]`}>
           {TICKS.map((tick) => (
-            <li key={tick} className="flex items-center gap-3 font-semibold text-blue-900">
-              <span aria-hidden="true" className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#1e3a8a] text-[#facc15]">
-                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12.5l4.5 4.5L19 7.5" />
+            <li key={tick} className="flex items-center gap-2.5">
+              <span aria-hidden="true" className="text-[#1d4ed8]">
+                <svg viewBox="0 0 24 24" className="h-[22px] w-[22px]" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 6 9 17l-5-5" />
                 </svg>
               </span>
               {tick}
@@ -267,34 +361,32 @@ export default function LeafletPrintingPage() {
         </ul>
       </section>
 
-      {/* 3. What we print */}
-      <section className="bg-white py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-3">What we print</h2>
-          <p className="text-gray-600 text-lg leading-relaxed max-w-3xl mb-10">
-            Leaflets and flyers are what most of our customers order, but we print a lot more than that. Tell us what you need on the call
-            and we will recommend the right format.
-          </p>
-          <ul className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* 3. What we print: three photo cards, then two smaller grey ones */}
+      <section className={`bg-white ${SECTION}`}>
+        <div className={`${CONTAINER} flex flex-col gap-10`}>
+          <div className="flex max-w-[720px] flex-col gap-3">
+            <h2 className={H2}>What we print</h2>
+            <p className={INTRO}>
+              Leaflets and flyers are what most of our customers order, but we print a lot more than that. Tell us what you need on the
+              call and we will recommend the right format.
+            </p>
+          </div>
+          <ul className="grid grid-cols-1 gap-5 md:grid-cols-3">
             {MAIN_PRODUCTS.map((p) => (
-              <li key={p.title} className={`${CARD} p-7`}>
-                <span className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
-                  <Icon>{p.icon}</Icon>
-                </span>
-                <h3 className="mt-5 text-xl font-bold text-blue-900">{p.title}</h3>
-                <p className="mt-2 text-gray-600 leading-relaxed">{p.text}</p>
-              </li>
+              <PrintCard key={p.title} {...p} />
             ))}
           </ul>
-          <ul className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <ul className="grid grid-cols-1 gap-5 md:grid-cols-2">
             {MORE_PRODUCTS.map((p) => (
-              <li key={p.title} className={`${CARD} flex items-start gap-4 p-5`}>
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
-                  <Icon className="h-6 w-6">{p.icon}</Icon>
+              <li key={p.title} className="flex items-start gap-[18px] rounded-[18px] bg-[#f8fafc] p-6">
+                <span className="shrink-0 text-[#1d4ed8]">
+                  <Icon className="block h-[34px] w-[34px]" strokeWidth={2}>
+                    {p.icon}
+                  </Icon>
                 </span>
-                <div>
-                  <h3 className="text-lg font-bold text-blue-900">{p.title}</h3>
-                  <p className="mt-1 text-gray-600 leading-relaxed">{p.text}</p>
+                <div className="flex flex-col gap-1">
+                  <h3 className={`${H3} text-[20px] text-[#172554]`}>{p.title}</h3>
+                  <p className="text-[#374151]">{p.text}</p>
                 </div>
               </li>
             ))}
@@ -302,187 +394,212 @@ export default function LeafletPrintingPage() {
         </div>
       </section>
 
-      {/* 4. Paper and finish */}
-      <section className="bg-slate-50 py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] gap-8 lg:gap-12 items-start">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-4">Paper and finish</h2>
-            <p className="text-gray-600 text-lg leading-relaxed">
-              For most leaflet campaigns we recommend 250gsm silk, printed double-sided. It feels sturdy in the hand, the colours stay
-              sharp, and it holds up going through a letterbox.
+      {/* 4. Paper and finish: the recommendation, beside the paper photo and the popular sizes */}
+      <section className={`bg-[#f8fafc] ${SECTION}`}>
+        <div className={`${CONTAINER} grid grid-cols-1 items-center gap-12 lg:grid-cols-2`}>
+          <div className="flex flex-col gap-[18px]">
+            <h2 className={H2}>Paper and finish</h2>
+            <p className={INTRO}>
+              For most leaflet campaigns we recommend <strong>250gsm silk, printed double-sided</strong>. It feels sturdy in the hand, the
+              colours stay sharp, and it holds up going through a letterbox.
             </p>
-            <p className="mt-4 text-gray-600 text-lg leading-relaxed">
+            <p className={INTRO}>
               Other paper weights and finishes are available. We will talk you through the options on the call and recommend what suits
               your campaign.
             </p>
-            <div className="mt-7 inline-flex flex-col items-start gap-3 rounded-xl border-2 border-[#1e3a8a] bg-white px-6 py-5 shadow-sm">
-              <span className="rounded-full bg-[#facc15] px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-900">We recommend</span>
-              <p className="font-heading text-2xl font-bold text-blue-900">250gsm silk, double-sided</p>
+            <div className="flex items-center gap-4 rounded-[16px] border-2 border-[#1e3a8a] bg-white px-[22px] py-5">
+              <span className={`shrink-0 ${BADGE}`}>We recommend</span>
+              <span className="text-[18px] font-bold text-[#172554]">250gsm silk, double-sided</span>
             </div>
           </div>
-          <div className="rounded-2xl border border-gray-200 bg-white p-6 sm:p-7 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-widest text-[#1d4ed8]">Popular sizes</p>
-            <ul className="mt-4 flex flex-wrap gap-3">
-              {SIZES.map((s) => (
-                <li
-                  key={s.size}
-                  className={`rounded-full px-5 py-2.5 font-heading text-lg font-bold ${
-                    s.popular ? "bg-[#1e3a8a] text-white shadow-md" : "border border-blue-200 bg-white text-blue-900"
-                  }`}
-                >
-                  {s.size}
-                </li>
-              ))}
-            </ul>
+          <div className="flex flex-col gap-[26px]">
+            <div className="h-[220px] overflow-hidden rounded-2xl">
+              <Image
+                src="/images/printing-paper.webp"
+                alt="A fan of coloured paper sheets"
+                width={1200}
+                height={700}
+                sizes="(min-width: 1200px) 552px, (min-width: 1024px) 45vw, calc(100vw - 48px)"
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <div className="flex flex-col gap-3">
+              <p className="text-[13px] font-bold uppercase tracking-[0.12em] text-[#4b5563]">Popular sizes</p>
+              <ul className="flex flex-wrap gap-2.5">
+                {SIZES.map((s) => (
+                  <li
+                    key={s.size}
+                    className={`rounded-[12px] px-[22px] py-3 font-bold ${
+                      s.popular ? "border border-[#1e3a8a] bg-[#1e3a8a] text-white" : "border border-[#cbd5e1] bg-white text-[#172554]"
+                    }`}
+                  >
+                    {s.size}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 5. Three ways to order */}
-      <section className="bg-white py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-3">Three ways to order</h2>
-          <p className="text-gray-600 text-lg leading-relaxed max-w-3xl mb-10">
-            Print on its own, or let us handle delivery too. Whichever you choose, you deal with the same local team from start to finish.
-          </p>
-          <ul className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <li className={`${CARD} flex flex-col p-7`}>
-              <h3 className="text-xl font-bold text-blue-900">Print only</h3>
-              <p className="mt-3 text-gray-600 leading-relaxed">
+      {/* 5. Three ways to order: three equal cards, the third navy and most popular */}
+      <section className={`bg-white ${SECTION}`}>
+        <div className={`${CONTAINER} flex flex-col gap-10`}>
+          <div className="flex max-w-[720px] flex-col gap-3">
+            <h2 className={H2}>Three ways to order</h2>
+            <p className={INTRO}>
+              Print on its own, or let us handle delivery too. Whichever you choose, you deal with the same local team from start to finish.
+            </p>
+          </div>
+          <ul className="grid grid-cols-1 gap-5 md:grid-cols-3">
+            <li className="flex flex-col gap-3.5 rounded-[20px] border border-[#e2e8f0] bg-white p-[30px]">
+              <span className="text-[#1d4ed8]">
+                <Icon className="block h-9 w-9" strokeWidth={2}>
+                  {ICONS.printer}
+                </Icon>
+              </span>
+              <h3 className={`${H3} text-[24px] text-[#172554]`}>Print only</h3>
+              <p className="flex-1 text-[#374151]">
                 We print your leaflets and deliver the boxes to you anywhere in Hampshire and Dorset, or send them to you further afield.
               </p>
-              <p className="mt-auto pt-5">
-                <Link href={QUOTE_HREF} className={CARD_LINK}>
-                  Get a printing quote <Arrow />
-                </Link>
-              </p>
+              <Link href={QUOTE_HREF} className={`self-start ${CARD_LINK}`}>
+                Get a printing quote <Arrow />
+              </Link>
             </li>
-            <li className={`${CARD} flex flex-col p-7`}>
-              <h3 className="text-xl font-bold text-blue-900">Print and Deliver</h3>
-              <p className="mt-3 text-gray-600 leading-relaxed">
+            <li className="flex flex-col gap-3.5 rounded-[20px] border border-[#e2e8f0] bg-white p-[30px]">
+              <span className="text-[#1d4ed8]">
+                <Icon className="block h-9 w-9" strokeWidth={2}>
+                  {ICONS.letterbox}
+                </Icon>
+              </span>
+              <h3 className={`${H3} text-[24px] text-[#172554]`}>Print and Deliver</h3>
+              <p className="flex-1 text-[#374151]">
                 Send us your artwork. We print it and our own team delivers it door to door, with every round GPS tracked.
               </p>
-              <p className="mt-auto pt-5">
-                <Link href="/services#print-and-deliver" className={CARD_LINK}>
-                  About Print and Deliver <Arrow />
-                </Link>
-              </p>
+              <Link href="/services#print-and-deliver" className={`self-start ${CARD_LINK}`}>
+                About Print and Deliver <Arrow />
+              </Link>
             </li>
-            <li className="relative flex flex-col rounded-2xl bg-[#1e3a8a] p-7 text-white shadow-lg transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl">
-              <span className="absolute -top-3 left-7 rounded-full bg-[#facc15] px-3 py-1 text-xs font-bold uppercase tracking-wider text-blue-900">
-                Most popular
+            <li className="relative flex flex-col gap-3.5 rounded-[20px] bg-[#1e3a8a] p-[30px] text-white">
+              <span className={`absolute right-5 top-5 ${BADGE}`}>Most popular</span>
+              <span className="text-[#facc15]">
+                <Icon className="block h-9 w-9" strokeWidth={2}>
+                  {ICONS.pen}
+                </Icon>
               </span>
-              <h3 className="text-xl font-bold">Design, Print and Deliver</h3>
-              <p className="mt-3 text-[#dbeafe] leading-relaxed">
+              <h3 className={`${H3} text-[24px]`}>Design, Print and Deliver</h3>
+              <p className="flex-1 text-[#dbeafe]">
                 No artwork yet? We design your leaflet, print it and deliver it. One campaign, one team, start to finish.
               </p>
-              <p className="mt-auto pt-5">
-                <Link href="/services#design-print-deliver" className={CARD_LINK_ON_NAVY}>
-                  About Design, Print and Deliver <Arrow />
-                </Link>
-              </p>
+              <Link href="/services#design-print-deliver" className={`self-start ${CARD_LINK_ON_NAVY}`}>
+                About Design, Print and Deliver <Arrow />
+              </Link>
             </li>
           </ul>
         </div>
       </section>
 
       {/* 6. Where we deliver: the two counties, then anywhere else (no town names or postcodes) */}
-      <section className="bg-slate-50 py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-3">Where we deliver your leaflets</h2>
-          <p className="text-gray-600 text-lg leading-relaxed max-w-3xl mb-10">
-            We print and deliver leaflets for businesses right across Hampshire and Dorset. Outside those counties? We can still print
-            your leaflets and send them to you.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex flex-col rounded-2xl bg-[#1e3a8a] p-7 text-white shadow-lg">
-              <h3 className="text-xl font-bold">Hampshire and Dorset</h3>
-              <p className="mt-3 text-[#dbeafe] leading-relaxed">
+      <section className={`bg-[#f8fafc] ${SECTION}`}>
+        <div className={`${CONTAINER} flex flex-col gap-9`}>
+          <div className="flex max-w-[760px] flex-col gap-3">
+            <h2 className={H2}>Where we deliver your leaflets</h2>
+            <p className={INTRO}>
+              We print and deliver leaflets for businesses right across Hampshire and Dorset. Outside those counties? We can still print
+              your leaflets and send them to you.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="flex flex-col gap-3.5 rounded-[20px] bg-[#1e3a8a] p-8 text-white">
+              <span className="text-[#facc15]">
+                <Icon className="block h-[38px] w-[38px]" strokeWidth={2}>
+                  {ICONS.pin}
+                </Icon>
+              </span>
+              <h3 className={`${H3} text-[26px]`}>Hampshire and Dorset</h3>
+              <p className="flex-1 text-[17px] text-[#dbeafe]">
                 This is home for us. We can drop the boxes off to you, or our own team can deliver your leaflets door to door, with every
                 round GPS tracked.
               </p>
-              <p className="mt-auto pt-5">
-                <Link href="/areas" className={CARD_LINK_ON_NAVY}>
-                  See the areas we cover <Arrow />
-                </Link>
-              </p>
+              <Link href="/areas" className={`self-start ${CARD_LINK_ON_NAVY}`}>
+                See the areas we cover <Arrow />
+              </Link>
             </div>
-            <div className="flex flex-col rounded-2xl border border-gray-200 bg-white p-7 shadow-sm">
-              <h3 className="text-xl font-bold text-blue-900">Other areas</h3>
-              <p className="mt-3 text-gray-600 leading-relaxed">
+            <div className="flex flex-col gap-3.5 rounded-[20px] border border-[#e2e8f0] bg-white p-8">
+              <span className="text-[#1d4ed8]">
+                <Icon className="block h-[38px] w-[38px]" strokeWidth={2}>
+                  {ICONS.parcel}
+                </Icon>
+              </span>
+              <h3 className={`${H3} text-[26px] text-[#172554]`}>Other areas</h3>
+              <p className="flex-1 text-[17px] text-[#374151]">
                 Based further afield? We can still print your leaflets and send them to you. Just tell us where they need to go when you
                 get a quote.
               </p>
-              <p className="mt-auto pt-5">
-                <Link href={QUOTE_HREF} className={CARD_LINK}>
-                  Get a printing quote <Arrow />
-                </Link>
-              </p>
+              <Link href={QUOTE_HREF} className={`self-start ${CARD_LINK}`}>
+                Get a printing quote <Arrow />
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
       {/* 7. Printing questions: the intro and one real review, beside the questions (no FAQ schema) */}
-      <section className="bg-white py-16">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] gap-10 lg:gap-14 items-start">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-blue-900 mb-3">Printing questions</h2>
-            <p className="text-gray-600 text-lg leading-relaxed">
+      <section className={`bg-white ${SECTION}`}>
+        <div className={`${CONTAINER} grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,408fr)_minmax(0,696fr)]`}>
+          <div className="flex flex-col gap-3.5">
+            <h2 className={H2}>Printing questions</h2>
+            <p className={INTRO}>
               The questions we get asked most about printing. For anything about delivery, see our{" "}
               <Link href="/faq" className={IN_TEXT_LINK}>
                 FAQ page
               </Link>
               .
             </p>
-            <figure className="mt-8 rounded-2xl border border-gray-200 bg-slate-50 p-6">
-              <svg role="img" aria-label="5 out of 5 stars" viewBox="0 0 120 24" className="h-5 w-auto fill-amber-400">
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <path key={i} d={STAR} transform={`translate(${i * 24} 0)`} />
-                ))}
-              </svg>
-              <blockquote className="mt-3 text-gray-700 leading-relaxed">&ldquo;{REVIEW.quote}&rdquo;</blockquote>
-              <figcaption className="mt-4">
-                <p className="font-semibold text-blue-900">{REVIEW.name}</p>
-                <p className="text-sm text-gray-500">{REVIEW.label}</p>
-              </figcaption>
+            {/* One real review, with the 5.0 Google rating the site shows elsewhere. */}
+            <figure className="mt-3 flex flex-col gap-2.5 rounded-[18px] border border-[#e2e8f0] bg-[#f8fafc] p-6">
+              <p className="flex items-center gap-2.5">
+                <span className="font-heading text-[36px] font-extrabold text-[#172554]">5.0</span>
+                <svg role="img" aria-label="5 out of 5 stars" viewBox="0 0 120 24" className="h-[22px] w-auto fill-[#b45309]">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <path key={i} d={STAR} transform={`translate(${i * 24} 0)`} />
+                  ))}
+                </svg>
+              </p>
+              <p className="text-[14px] text-[#4b5563]">{REVIEW.label}</p>
+              <blockquote className="mt-1.5 italic text-[#1f2937]">&ldquo;{REVIEW.quote}&rdquo;</blockquote>
+              <figcaption className="font-bold text-[#172554]">{REVIEW.name}</figcaption>
             </figure>
           </div>
-          <div className="space-y-3">
+          <div className="flex flex-col">
             {FAQS.map((f, i) => (
-              <details key={f.q} open={i === 0} className="group rounded-xl border border-gray-200 bg-white open:shadow-sm">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-xl px-5 py-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 [&::-webkit-details-marker]:hidden">
-                  <h3 className="text-base sm:text-lg font-semibold text-blue-900">{f.q}</h3>
-                  <svg
-                    aria-hidden="true"
-                    viewBox="0 0 24 24"
-                    className="h-5 w-5 shrink-0 text-blue-700 transition-transform duration-200 group-open:rotate-180"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2.25}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M6 9l6 6 6-6" />
+              <details key={f.q} open={i === 0} className="group border-b border-[#e2e8f0] py-5">
+                <summary className="flex cursor-pointer list-none items-center gap-3 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 [&::-webkit-details-marker]:hidden">
+                  <svg aria-hidden="true" viewBox="0 0 24 24" className="h-3 w-3 shrink-0 fill-[#172554] transition-transform duration-200 group-open:rotate-90">
+                    <path d="M6 3l15 9-15 9z" />
                   </svg>
+                  <h3 className={`${H3} text-[19px] text-[#172554]`}>{f.q}</h3>
                 </summary>
-                <p className="px-5 pb-5 text-gray-600 leading-relaxed">{f.a}</p>
+                <p className="mt-3 text-[#374151]">{f.a}</p>
               </details>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 8. Closing band */}
-      <section className="bg-blue-900 text-white py-16">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-3">Ready to get your leaflets printed?</h2>
-          <p className="text-blue-100 text-lg mb-8">Tell us what you need and where, and we will come back to you with a quote.</p>
-          <Link href={QUOTE_HREF} className={YELLOW_BUTTON}>
+      {/* 8. Closing band: heading on the left, the button on the right (stacked on phones). A
+          faint line under it keeps it apart from the footer, which is nearly the same navy. */}
+      <section className="bg-[#172554] text-white border-b border-white/10">
+        <div className={`${CONTAINER} flex flex-col items-start gap-7 py-16 sm:py-[72px] md:flex-row md:items-center md:justify-between`}>
+          <div className="flex flex-col gap-2.5">
+            <h2 className="font-heading text-[30px] sm:text-[36px] font-extrabold leading-[1.15]">Ready to get your leaflets printed?</h2>
+            <p className="text-[18px] text-[#dbeafe]">Tell us what you need and where, and we will come back to you with a quote.</p>
+          </div>
+          <Link href={QUOTE_HREF} className={CLOSING_BUTTON}>
             Get a Free Quote
           </Link>
         </div>
       </section>
-    </>
+    </div>
   );
 }

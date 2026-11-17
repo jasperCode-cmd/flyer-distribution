@@ -3,7 +3,7 @@
 // and the links to it from the Services menu, the footer and /services.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 import sitemap from "@/app/sitemap";
@@ -30,7 +30,7 @@ function render(): Rendered {
 const read = (p: string) => readFileSync(p, "utf8");
 const SOURCE = read("app/leaflet-printing/page.tsx");
 const decode = (s: string) => s.replace(/&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, "&");
-const textOf = (html: string) => decode(html.replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
+const textOf = (html: string) => decode(html.replace(/<\/?(strong|em)>/g, "").replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim();
 const html = () => render().html;
 const visible = () => textOf(html().replace(/<script[\s\S]*?<\/script>/g, ""));
 const headings = (level: number) => [...html().matchAll(new RegExp(`<h${level}[^>]*>([\\s\\S]*?)</h${level}>`, "g"))].map((m) => textOf(m[1]));
@@ -99,7 +99,7 @@ test("the schema: BreadcrumbList Home / Services / Leaflet Printing, and a Servi
   assert.match(html(), /<nav aria-label="Breadcrumb"[^>]*>[\s\S]*?>Home<\/a>[\s\S]*?>Services<\/a>[\s\S]*?aria-current="page">Leaflet Printing<\/span>/);
 });
 
-test("the hero: yellow label, H1, intro, the two buttons and the existing leaflets photo", () => {
+test("the hero: yellow label, H1, intro, the two buttons and the printer photo", () => {
   const hero = html().slice(0, html().indexOf("</section>"));
   assert.match(hero, /<p class="text-\[#facc15\][^"]*">Printing for Hampshire and Dorset businesses<\/p>/);
   assert.ok(
@@ -111,11 +111,25 @@ test("the hero: yellow label, H1, intro, the two buttons and the existing leafle
     [QUOTE, "Get a Free Quote"],
     ["/services", "See our leaflet delivery"],
   ]);
-  // The one photo: the existing leaflets-in-hand one, never the doorway leaflet with its printed slogan.
-  const imgs = html().match(/<img[^>]*>/g) ?? [];
-  assert.equal(imgs.length, 1);
-  assert.match(imgs[0], /url=%2FFlyer%2520Distribution%2520Hampshire\.webp/);
+  // The photos, each from public/images with its own alt: the hero first (loaded straight away), then
+  // the three product cards, then the paper. Never the doorway leaflet with its printed slogan.
+  const imgs = [...html().matchAll(/<img[^>]*>/g)].map((m) => ({
+    src: /url=%2Fimages%2F([a-z-]+\.webp)/.exec(m[0])?.[1],
+    alt: decode(/alt="([^"]*)"/.exec(m[0])![1]),
+    lazy: / loading="lazy"/.test(m[0]),
+    size: /width="(\d+)" height="(\d+)"/.exec(m[0])!.slice(1).join("x"),
+  }));
+  assert.deepEqual(imgs, [
+    { src: "leaflet-printing-hero.webp", alt: "A large printer mid-print", lazy: false, size: "1500x1000" },
+    { src: "printing-flyers-leaflets.webp", alt: "Colourful printed leaflets laid out on a desk", lazy: true, size: "1200x700" },
+    { src: "printing-folded-leaflets.webp", alt: "A printed folded leaflet standing on a stack of leaflets", lazy: true, size: "1200x700" },
+    { src: "printing-business-cards.webp", alt: "A stack of printed business cards", lazy: true, size: "1200x700" },
+    { src: "printing-paper.webp", alt: "A fan of coloured paper sheets", lazy: true, size: "1200x700" },
+  ]);
+  for (const img of imgs) assert.ok(existsSync(join("public", "images", img.src!)), img.src);
   assert.doesNotMatch(SOURCE, /Leaflet going through door/);
+  // The photo box: 380px tall (280px on phones), 20px corners, the photo covering it.
+  assert.match(hero, /<div class="h-\[280px\] overflow-hidden rounded-\[20px\][^"]*sm:h-\[380px\]"><img[^>]*class="h-full w-full object-cover"/);
 });
 
 test("the four tick points, the products, paper and sizes, as given", () => {
@@ -170,7 +184,14 @@ test("three ways to order, the navy one most popular, each with its link", () =>
     ["/services#print-and-deliver", "About Print and Deliver"],
     ["/services#design-print-deliver", "About Design, Print and Deliver"],
   ]);
-  assert.match(ways, /<li class="relative flex flex-col rounded-2xl bg-\[#1e3a8a\][^"]*"><span class="[^"]*bg-\[#facc15\][^"]*">Most popular<\/span><h3[^>]*>Design, Print and Deliver<\/h3>/);
+  // Three equal cards (18px corners); the third navy, with the yellow badge at its top right and a yellow link.
+  assert.match(ways, /<ul class="grid grid-cols-1 gap-5 md:grid-cols-3">/);
+  assert.equal((ways.match(/<li class="flex flex-col gap-3\.5 rounded-\[20px\] border border-\[#e2e8f0\] bg-white p-\[30px\]"><span class="text-\[#1d4ed8\]"><svg/g) ?? []).length, 2);
+  assert.match(
+    ways,
+    /<li class="relative flex flex-col gap-3\.5 rounded-\[20px\] bg-\[#1e3a8a\] p-\[30px\] text-white"><span class="absolute right-5 top-5 [^"]*bg-\[#facc15\][^"]*">Most popular<\/span><span class="text-\[#facc15\]"><svg[\s\S]*?<\/svg><\/span><h3[^>]*>Design, Print and Deliver<\/h3>/
+  );
+  assert.match(ways, /<a class="[^"]*text-\[#facc15\][^"]*" href="\/services#design-print-deliver">/);
   // Those anchors are cards on /services.
   const services = read("app/services/page.tsx");
   for (const id of ["print-and-deliver", "design-print-deliver"]) assert.match(services, new RegExp(`id: "${id}"`));
@@ -184,8 +205,9 @@ test("where we deliver: the two counties, then anywhere else, with no town names
       "We print and deliver leaflets for businesses right across Hampshire and Dorset. Outside those counties? We can still print your leaflets and send them to you."
     )
   );
-  assert.match(where, /<div class="flex flex-col rounded-2xl bg-\[#1e3a8a\][^"]*"><h3[^>]*>Hampshire and Dorset<\/h3>/);
-  assert.match(where, /<div class="flex flex-col rounded-2xl border border-gray-200 bg-white[^"]*"><h3[^>]*>Other areas<\/h3>/);
+  assert.match(where, /<div class="grid grid-cols-1 gap-6 md:grid-cols-2">/);
+  assert.match(where, /<div class="flex flex-col gap-3\.5 rounded-\[20px\] bg-\[#1e3a8a\] p-8 text-white"><span class="text-\[#facc15\]"><svg[\s\S]*?<\/svg><\/span><h3[^>]*>Hampshire and Dorset<\/h3>/);
+  assert.match(where, /<div class="flex flex-col gap-3\.5 rounded-\[20px\] border border-\[#e2e8f0\] bg-white p-8"><span class="text-\[#1d4ed8\]"><svg[\s\S]*?<\/svg><\/span><h3[^>]*>Other areas<\/h3>/);
   assert.deepEqual(linksIn(where), [
     ["/areas", "See the areas we cover"],
     [QUOTE, "Get a printing quote"],
@@ -204,11 +226,11 @@ test("printing questions: one real review, word for word, and five questions wit
   assert.match(testimonials, new RegExp(`name: "Kola Construction",\\s+label: "Google Review",\\s+quote:\\s+"${quote.replace(/\./g, "\\.")}"`));
   const figure = faq.slice(faq.indexOf("<figure"), faq.indexOf("</figure>"));
   // The quote marks render as \u201c and \u201d.
-  assert.ok(textOf(figure).includes(`\u201c${quote}\u201d`));
-  assert.ok(textOf(figure).endsWith("Kola Construction Google Review"));
-  // Stars as the homepage shows them, and no rating number.
+  // The quote marks render as \u201c and \u201d.
+  assert.equal(textOf(figure), `5.0 Google Review \u201c${quote}\u201d Kola Construction`);
+  // The rating and stars, as the site already shows them (the rating snapshot).
   assert.match(figure, /aria-label="5 out of 5 stars"/);
-  assert.doesNotMatch(textOf(figure), /\d\.\d/);
+  assert.match(read("components/ReviewBand.tsx"), />5\.0<\/p>/);
   const questions = [...faq.matchAll(/<details([^>]*)>[\s\S]*?<h3[^>]*>([^<]*)<\/h3>[\s\S]*?<p[^>]*>([\s\S]*?)<\/p><\/details>/g)].map((m) => ({
     open: / open=""/.test(m[1]),
     q: decode(m[2]),
@@ -236,6 +258,69 @@ test("printing questions: one real review, word for word, and five questions wit
   assert.deepEqual(questions[2].links, [["/services#design-print-deliver", "Design, Print and Deliver"]]);
   // No FAQ schema.
   assert.ok(schemas().every((s) => s["@type"] !== "FAQPage"));
+});
+
+test("the design's measures: the 1200px container, 88px sections alternating white and #f8fafc, 40px headings, its cards and boxes", () => {
+  // Every section's content sits in the same centred 1200px container with 24px sides.
+  const sections = [...html().matchAll(/<section class="([^"]*)">\s*<(?:div|ul) class="([^"]*)"/g)].map((m) => ({ section: m[1], inner: m[2] }));
+  assert.equal(sections.length, 8);
+  for (const s of sections) assert.match(s.inner, /^mx-auto w-full max-w-\[1200px\] px-6\b/, s.section);
+  // Hero navy (28px above, 72px below); the tick strip grey (22px); then white and #f8fafc in turn, each
+  // 88px top and bottom (64px on phones); the closing band #172554 (72px).
+  const padding = (s: { section: string; inner: string }) => (`${s.section} ${s.inner}`.match(/(?:sm:)?p[tby]-\[?\d+(?:px)?\]?/g) ?? []).join(" ");
+  assert.deepEqual(
+    sections.map((s) => [s.section.match(/bg-\[#[0-9a-f]+\]|bg-white/)![0], padding(s)]),
+    [
+      ["bg-[#1e3a8a]", "pt-7 pb-16 sm:pb-[72px]"],
+      ["bg-[#f8fafc]", "py-[22px]"],
+      ["bg-white", "py-16 sm:py-[88px]"],
+      ["bg-[#f8fafc]", "py-16 sm:py-[88px]"],
+      ["bg-white", "py-16 sm:py-[88px]"],
+      ["bg-[#f8fafc]", "py-16 sm:py-[88px]"],
+      ["bg-white", "py-16 sm:py-[88px]"],
+      ["bg-[#172554]", "py-16 sm:py-[72px]"],
+    ]
+  );
+  // H2s: 40px (36px in the closing band; 32px and 30px on phones), weight 800, the heading font, tight line height, #172554.
+  const h2s = [...html().matchAll(/<h2 class="([^"]*)"/g)].map((m) => m[1]);
+  assert.equal(h2s.length, 6);
+  for (const c of h2s.slice(0, 5)) assert.equal(c, "font-heading text-[32px] sm:text-[40px] font-extrabold leading-[1.1] text-[#172554]");
+  assert.equal(h2s[5], "font-heading text-[30px] sm:text-[36px] font-extrabold leading-[1.15]");
+  // Third-level headings in the body font, bold.
+  for (const m of html().matchAll(/<h3 class="([^"]*)"/g)) assert.match(m[1], /^font-sans font-bold /);
+  // The page wraps everything at a 1.6 line height (after the hero photo's preload link), body text #374151.
+  assert.match(html(), /^(<link rel="preload"[^>]*\/>)?<div class="leading-\[1\.6\] text-\[#1f2937\]"><script type="application\/ld\+json">/);
+  assert.equal((html().match(/<p class="text-\[18px\] text-\[#374151\]">/g) ?? []).length, 6);
+  // The main product cards: 18px corners, 1px #e2e8f0 border, a 200px band filled by the photo, 24px padding below.
+  const print = sectionOf("What we print");
+  assert.equal(
+    (print.match(/<li class="flex flex-col overflow-hidden rounded-\[18px\] border border-\[#e2e8f0\] bg-white"><div class="h-\[200px\] bg-\[#dbeafe\]"><img[^>]*class="h-full w-full object-cover"[^>]*><\/div><div class="flex flex-col gap-2 p-6">/g) ?? []).length,
+    3
+  );
+  // Without a photo, the band shows the card's icon, large, centred on light blue.
+  assert.match(SOURCE, /<div className="flex h-full items-center justify-center text-\[#1e3a8a\]">\s+<Icon className="h-12 w-12">\{icon\}<\/Icon>/);
+  // The two smaller cards: #f8fafc, no border, the 34px blue icon on the left.
+  assert.equal((print.match(/<li class="flex items-start gap-\[18px\] rounded-\[18px\] bg-\[#f8fafc\] p-6"><span class="shrink-0 text-\[#1d4ed8\]"><svg[^>]*class="block h-\[34px\] w-\[34px\]"/g) ?? []).length, 2);
+  // Paper and finish: the recommendation box white with a 2px navy border; the paper photo (16px corners, 220px) above the size chips (12px corners, A5 navy).
+  const paper = sectionOf("Paper and finish");
+  assert.match(paper, /<div class="flex items-center gap-4 rounded-\[16px\] border-2 border-\[#1e3a8a\] bg-white px-\[22px\] py-5"><span class="shrink-0 [^"]*bg-\[#facc15\][^"]*">We recommend<\/span><span class="[^"]*font-bold[^"]*">250gsm silk, double-sided<\/span>/);
+  assert.match(paper, /we recommend <strong>250gsm silk, printed double-sided<\/strong>\./);
+  assert.match(paper, /<div class="h-\[220px\] overflow-hidden rounded-2xl"><img[^>]*alt="A fan of coloured paper sheets"[^>]*class="h-full w-full object-cover"/);
+  assert.ok(paper.indexOf("printing-paper.webp") < paper.indexOf(">Popular sizes</p>"));
+  assert.equal((paper.match(/<li class="rounded-\[12px\] /g) ?? []).length, 4);
+  // No paper weight or finish chips: only the four sizes.
+  assert.equal((paper.match(/<li /g) ?? []).length, 4);
+  // Printing questions: the review a grey card with a 1px border; the questions 19px, bold, between 1px dividers.
+  const faq = sectionOf("Printing questions");
+  assert.match(faq, /<figure class="mt-3 flex flex-col gap-2\.5 rounded-\[18px\] border border-\[#e2e8f0\] bg-\[#f8fafc\] p-6">/);
+  assert.equal((faq.match(/<details[^>]*class="group border-b border-\[#e2e8f0\] py-5"/g) ?? []).length, 5);
+  assert.equal((faq.match(/<h3 class="font-sans font-bold text-\[19px\] text-\[#172554\]">/g) ?? []).length, 5);
+  // Closing band: #172554, the heading on the left and the yellow button on the right, stacked on phones.
+  const closing = html().slice(html().lastIndexOf("<section"));
+  assert.match(
+    closing,
+    /<section class="bg-\[#172554\] text-white border-b border-white\/10"><div class="mx-auto w-full max-w-\[1200px\] px-6 flex flex-col items-start gap-7 py-16 sm:py-\[72px\] md:flex-row md:items-center md:justify-between">/
+  );
 });
 
 test("the closing band, and every quote link choosing Leaflet Printing", () => {
