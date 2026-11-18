@@ -182,26 +182,6 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
 
   return (
     <div className={`bg-white rounded-lg border border-gray-200 p-8${inPanel ? " md:border-0 md:p-0" : ""}`}>
-      {/* Leaflet Printing: what they are getting printed, at the very top,
-          as it stands in the print builder below. Change takes them to the
-          builder, once it is on the page (with the questions). */}
-      {isPrinting && (
-        <div className="mb-6 flex items-center justify-between gap-3 rounded-md border border-blue-100 bg-[#eff6ff] px-4 py-3 text-sm text-blue-900">
-          <p>
-            Your print: <strong className="font-semibold">{specSummary(printSpec)}</strong>
-          </p>
-          {showQuestions && (
-            <a
-              href={`#${printBuilderId}`}
-              onClick={goToPrintBuilder}
-              aria-label="Change your print"
-              className="inline-flex min-h-6 shrink-0 items-center font-semibold text-blue-700 underline underline-offset-2 hover:text-blue-900"
-            >
-              Change
-            </a>
-          )}
-        </div>
-      )}
       <h2 className="text-xl font-bold text-blue-900">Get Your Free Quote</h2>
       <p className="mt-1 text-gray-600">
         Free, with no obligation. We&apos;ll be in touch within 24 hours.
@@ -332,6 +312,27 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
           />
 
           <div ref={detailsRef} className="border-t border-gray-200 pt-6 scroll-mt-20">
+            {/* Leaflet Printing: what they are getting printed, as it stands in
+                the print builder below, just above Your details (so it comes
+                into view with them when the service is chosen). Change takes
+                them to the builder, once it is on the page (with the questions). */}
+            {isPrinting && (
+              <div className="mb-5 flex items-center justify-between gap-3 rounded-md border border-blue-100 bg-[#eff6ff] px-4 py-3 text-sm text-blue-900">
+                <p>
+                  Your print: <strong className="font-semibold">{specSummary(printSpec)}</strong>
+                </p>
+                {showQuestions && (
+                  <a
+                    href={`#${printBuilderId}`}
+                    onClick={goToPrintBuilder}
+                    aria-label="Change your print"
+                    className="inline-flex min-h-6 shrink-0 items-center font-semibold text-blue-700 underline underline-offset-2 hover:text-blue-900"
+                  >
+                    Change
+                  </a>
+                )}
+              </div>
+            )}
             <h3 className="text-lg font-bold text-blue-900">Your details</h3>
           </div>
 
@@ -763,28 +764,85 @@ export default function QuoteForm({ inPanel = false }: { inPanel?: boolean }) {
                         {printDesign && <input type="hidden" name="print-design" value="Yes" />}
                       </div>
 
-                      {/* Where to send the printed leaflets: their own postcode. */}
-                      <div>
-                        <label
-                          htmlFor="print-send-to"
-                          className="block text-sm font-medium text-gray-700 mb-1"
-                        >
-                          Where should we send them? <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          id="print-send-to"
-                          name="print-send-to"
-                          required
-                          autoComplete="postal-code"
-                          placeholder="Your postcode, e.g. SO15 2AB"
-                          aria-describedby="print-send-to-hint"
-                          className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
+                      {/* Where to send the printed leaflets: their full delivery address,
+                          sent as print-address-1, print-address-2, print-town, then the
+                          postcode, which keeps its old name, print-send-to. Town or city
+                          and Postcode side by side from sm, as the name fields are. */}
+                      <fieldset aria-describedby="print-send-to-hint">
+                        <legend className="block text-sm font-semibold text-gray-800 mb-3">Delivery address</legend>
+                        <div className="space-y-4">
+                          <div>
+                            <label
+                              htmlFor="print-address-1"
+                              className="block text-sm font-medium text-gray-700 mb-1"
+                            >
+                              Address <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                              type="text"
+                              id="print-address-1"
+                              name="print-address-1"
+                              required
+                              autoComplete="address-line1"
+                              placeholder="Building name or number and road"
+                              className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="print-address-2"
+                              className="block text-sm font-medium text-gray-700 mb-1"
+                            >
+                              Address line 2
+                            </label>
+                            <input
+                              type="text"
+                              id="print-address-2"
+                              name="print-address-2"
+                              autoComplete="address-line2"
+                              className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                              <label
+                                htmlFor="print-town"
+                                className="block text-sm font-medium text-gray-700 mb-1"
+                              >
+                                Town or city <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                id="print-town"
+                                name="print-town"
+                                required
+                                autoComplete="address-level2"
+                                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </div>
+                            <div>
+                              <label
+                                htmlFor="print-send-to"
+                                className="block text-sm font-medium text-gray-700 mb-1"
+                              >
+                                Postcode <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                id="print-send-to"
+                                name="print-send-to"
+                                required
+                                autoComplete="postal-code"
+                                placeholder="e.g. SO15 2AB"
+                                className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              />
+                            </div>
+                          </div>
+                        </div>
                         <p id="print-send-to-hint" className="mt-1.5 text-xs text-gray-500">
                           We deliver across Hampshire and Dorset, and can send them to other areas too.
                         </p>
-                      </div>
+                      </fieldset>
 
                       {/* Door to door as well: Yes sends also-deliver and shows the
                           areas to deliver to; No sends nothing. */}

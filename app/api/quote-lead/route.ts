@@ -81,6 +81,15 @@ export async function POST(req: Request) {
   if (isPrinting && data["print-sides"]) noteLines.push(`Print sides: ${data["print-sides"]}`);
   if (isPrinting && data["print-paper"]) noteLines.push(`Paper: ${data["print-paper"]}`);
   if (data["print-design"]) noteLines.push(`Design wanted: ${data["print-design"]}`);
+  // Printing: the full delivery address as one line (the form sends it in
+  // parts; the postcode is still print-send-to, on its own line as before).
+  if (isPrinting && (data["print-address-1"] || data["print-town"])) {
+    const address = [data["print-address-1"], data["print-address-2"], data["print-town"], data["print-send-to"]]
+      .map((part) => (typeof part === "string" ? part.trim() : ""))
+      .filter(Boolean)
+      .join(", ");
+    noteLines.push(`Delivery address: ${address}`);
+  }
   if (data["print-send-to"]) noteLines.push(`Send printed leaflets to: ${data["print-send-to"]}`);
   if (data["also-deliver"]) noteLines.push(`Also deliver: ${data["also-deliver"]}`);
   if (data.budget) noteLines.push(`Budget range: ${data.budget}`);

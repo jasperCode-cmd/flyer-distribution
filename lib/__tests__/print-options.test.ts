@@ -240,10 +240,15 @@ test("the quote form: the same builder, starting on the link's spec or the defau
   ]);
   assert.match(fields, /\{printFields\.sides && <input type="hidden" name="print-sides"/);
   assert.match(fields, /\{printFields\.fold && <input type="hidden" name="print-fold"/);
-  // The summary bar: first in the form's card, above the heading and "What do you need?", only for printing, with Change once the builder is there.
+  // The summary bar: only for printing, after the service picker, just above Your details (inside its block, under
+  // its divider, so it comes into view with it), with Change once the builder is there; nothing of it above the picker.
   const card = form.slice(form.indexOf('<div className={`bg-white rounded-lg border border-gray-200 p-8'), form.indexOf("What do you need?"));
-  const bar = card.slice(card.indexOf("{isPrinting && ("), card.indexOf('<h2 className="text-xl font-bold text-blue-900">Get Your Free Quote</h2>'));
-  assert.ok(bar.length > 0 && card.indexOf("{isPrinting && (") < card.indexOf("Get Your Free Quote</h2>"));
+  assert.doesNotMatch(card, /Your print:/);
+  const details = form.slice(form.indexOf('<div ref={detailsRef} className="border-t border-gray-200 pt-6 scroll-mt-20">'), form.indexOf("Your details</h3>"));
+  const bar = details.slice(details.indexOf("{isPrinting && ("));
+  assert.ok(details.indexOf("{isPrinting && (") > 0);
+  assert.match(bar, /\)\}\s+<h3 className="text-lg font-bold text-blue-900">$/);
+  assert.equal(form.split("Your print: <strong").length - 1, 1);
   assert.match(bar, /className="[^"]*rounded-md border border-blue-100 bg-\[#eff6ff\][^"]*"/);
   assert.match(bar, /Your print: <strong className="font-semibold">\{specSummary\(printSpec\)\}<\/strong>/);
   assert.match(bar, /\{showQuestions && \(\s+<a\s+href=\{`#\$\{printBuilderId\}`\}\s+onClick=\{goToPrintBuilder\}[\s\S]*?>\s+Change\s+<\/a>/);

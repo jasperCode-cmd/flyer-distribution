@@ -212,6 +212,9 @@ test("each service shows its own fields after Company, in their old order", () =
   assert.deepEqual(namesIn(between(PRINTING_FIELDS, "{/* The rest of the section.")), ["print-spec", "print-item", "print-size", "print-sides", "print-fold", "print-paper", "print-quantity"]);
   assert.deepEqual(namesIn(between(PRINTING_AFTER_QUANTITY, WEB_FIELDS)), [
     "print-design",
+    "print-address-1",
+    "print-address-2",
+    "print-town",
     "print-send-to",
     "also-deliver",
     "print-delivery-areas",
@@ -311,7 +314,8 @@ test("choosing a card, by click, tap or keyboard, the chosen one included, bring
   assert.match(form, /const \[cardChoices, setCardChoices\] = useState\(0\);/);
   // Once the form is there, its start and first field are checked.
   assert.match(form, /useEffect\(\(\) => \{\s+if \(cardChoices\) showDetails\(detailsRef\.current, firstNameRef\.current\);\s+\}, \[cardChoices\]\);/);
-  assert.match(form, /<div ref=\{detailsRef\} className="border-t border-gray-200 pt-6 scroll-mt-20">\s+<h3 className="text-lg font-bold text-blue-900">Your details<\/h3>/);
+  // (With Leaflet Printing, its Your print bar sits in the same block, above the heading, so it comes into view too.)
+  assert.match(form, /<div ref=\{detailsRef\} className="border-t border-gray-200 pt-6 scroll-mt-20">\s+\{\/\*[^]*?\*\/\}\s+\{isPrinting && \([^]*?Your print: [^]*?\)\}\s+<h3 className="text-lg font-bold text-blue-900">Your details<\/h3>/);
   assert.match(form, /ref=\{firstNameRef\}\s+type="text"\s+id="first-name"/);
   // Only when the first field is not fully on screen, on the page or in the
   // panel's own scrolling area; smoothly, or at once with reduced motion.
@@ -543,6 +547,9 @@ test("real database: a Leaflet Printing enquiry is saved as a lead, with its ans
     "print-paper": "130gsm gloss",
     "print-quantity": "2,500 to 5,000",
     "print-design": "Yes",
+    "print-address-1": "Unit 4, Harbour Road",
+    "print-address-2": "Ocean Village",
+    "print-town": "Southampton",
     "print-send-to": "SO15 2AB",
     "also-deliver": "Yes (Print and Deliver)",
     "print-delivery-areas": "Southampton SO15, SO16",
@@ -572,6 +579,7 @@ test("real database: a Leaflet Printing enquiry is saved as a lead, with its ans
     "Print sides: Double-sided",
     "Paper: 130gsm gloss",
     "Design wanted: Yes",
+    "Delivery address: Unit 4, Harbour Road, Ocean Village, Southampton, SO15 2AB",
     "Send printed leaflets to: SO15 2AB",
     "Also deliver: Yes (Print and Deliver)",
     "Message: Silk please",
@@ -595,6 +603,8 @@ test("real database: a Leaflet Printing enquiry is saved as a lead, with its ans
         "print-sides": "Double-sided",
         "print-paper": "250gsm silk",
         "print-quantity": "Not sure yet",
+        "print-address-1": "12 Market Place",
+        "print-town": "Ringwood",
         "print-send-to": "BH24 2NR",
       })
     ).status,
@@ -603,7 +613,8 @@ test("real database: a Leaflet Printing enquiry is saved as a lead, with its ans
   const plainLead = await prisma.lead.findFirst({ where: { email: plain }, select: { printingIncluded: true, designIncluded: true, targetAreas: true, leafletQuantity: true } });
   assert.deepEqual(plainLead, { printingIncluded: true, designIncluded: false, targetAreas: null, leafletQuantity: "Not sure yet" });
   const plainNote = await noteOf(plain);
-  for (const line of ["Print spec: A5 flyers, double-sided, 250gsm silk", "Print item: Flyers and leaflets", "Item size: A5", "Print sides: Double-sided", "Paper: 250gsm silk"]) {
+  // Address line 2 left empty: the delivery address skips it.
+  for (const line of ["Print spec: A5 flyers, double-sided, 250gsm silk", "Print item: Flyers and leaflets", "Item size: A5", "Print sides: Double-sided", "Paper: 250gsm silk", "Delivery address: 12 Market Place, Ringwood, BH24 2NR", "Send printed leaflets to: BH24 2NR"]) {
     assert.ok(plainNote.split("\n").includes(line), line);
   }
   assert.doesNotMatch(plainNote, /Design wanted|Also deliver|Fold:/);
@@ -639,8 +650,8 @@ test("real database: a Leaflet Printing enquiry is saved as a lead, with its ans
     201
   );
   const beforeNote = (await noteOf(before)).split("\n");
-  for (const line of ["Print items: Flyers and leaflets", "Item size: A6", "Print sides: Single sided"]) assert.ok(beforeNote.includes(line), line);
-  assert.ok(!beforeNote.some((l) => /^(Print spec|Print item|Fold|Paper):/.test(l)));
+  for (const line of ["Print items: Flyers and leaflets", "Item size: A6", "Print sides: Single sided", "Send printed leaflets to: BH24 2NR"]) assert.ok(beforeNote.includes(line), line);
+  assert.ok(!beforeNote.some((l) => /^(Print spec|Print item|Fold|Paper|Delivery address):/.test(l)));
 });
 
 test("real database: a Leaflet Printing enquiry without one of the quantities is refused", { skip }, async () => {

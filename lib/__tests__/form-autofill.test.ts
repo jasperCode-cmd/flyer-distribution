@@ -59,12 +59,32 @@ for (const [file, fields] of [
 
 test("the quote form's own fields: one autofill value each, and none on the questions about the campaign", () => {
   const source = readFileSync("components/QuoteForm.tsx", "utf8");
-  assert.deepEqual([...source.matchAll(/autoComplete="([^"]+)"/g)].map((m) => m[1]), ["given-name", "family-name", "email", "tel", "organization", "postal-code"]);
+  assert.deepEqual([...source.matchAll(/autoComplete="([^"]+)"/g)].map((m) => m[1]), [
+    "given-name",
+    "family-name",
+    "email",
+    "tel",
+    "organization",
+    "address-line1",
+    "address-line2",
+    "address-level2",
+    "postal-code",
+  ]);
   // The areas to leaflet are the target, not the visitor's own postcode.
   assert.equal(attr(tagOf(source, "areas-required"), "autoComplete"), undefined);
   assert.equal(attr(tagOf(source, "print-delivery-areas"), "autoComplete"), undefined);
-  // Where to send printed leaflets is their own postcode, so autofill offers it.
-  assert.equal(attr(tagOf(source, "print-send-to"), "autoComplete"), "postal-code");
+  // Where to send printed leaflets is their own address, so autofill offers each part of it.
+  for (const [id, value, required] of [
+    ["print-address-1", "address-line1", true],
+    ["print-address-2", "address-line2", false],
+    ["print-town", "address-level2", true],
+    ["print-send-to", "postal-code", true],
+  ] as const) {
+    const tag = tagOf(source, id);
+    assert.equal(attr(tag, "autoComplete"), value, id);
+    assert.equal(attr(tag, "name"), id, id);
+    assert.equal(/\srequired\s/.test(tag), required, id);
+  }
 });
 
 test("the application's own fields: one autofill value each, and the hidden bot trap still off", () => {

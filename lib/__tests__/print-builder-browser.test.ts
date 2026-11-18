@@ -186,6 +186,20 @@ async function formState(root: any) {
     };
   });
 }
+// Where the summary bar sits: after "What do you need?", directly above the "Your details" heading, under the divider.
+const barPlace = (root: any) =>
+  root.evaluate((m: Element) => {
+    const bar = [...m.querySelectorAll("p")].find((p) => p.textContent?.startsWith("Your print: "))!.parentElement!;
+    const legend = [...m.querySelectorAll("legend")].find((l) => l.textContent?.trim() === "What do you need?")!;
+    const heading = [...m.querySelectorAll("h3")].find((h) => h.textContent === "Your details")!;
+    const block = heading.parentElement!;
+    return {
+      afterPicker: !!(legend.compareDocumentPosition(bar) & 4),
+      directlyAboveDetails: bar.nextElementSibling === heading,
+      belowDivider: bar.parentElement === block && getComputedStyle(block).borderTopWidth === "1px" && bar.getBoundingClientRect().top > block.getBoundingClientRect().top,
+      gapToHeading: Math.round(heading.getBoundingClientRect().top - bar.getBoundingClientRect().bottom),
+    };
+  });
 // The questions show once the contact number has enough digits.
 async function showQuestions(root: any) {
   await root.locator("#phone").fill("07700 900123");
@@ -229,17 +243,11 @@ test("(a) \"Get this printed\" opens the form on that exact choice: a flyer, a f
       await o.page.waitForLoadState("networkidle");
       assert.equal(o.page.url(), `${BASE}${c.href}`, c.name);
       const main = o.page.locator("main");
-      // The bar is there at once, at the top of the card, above What do you need?; Change waits for the builder.
+      // The bar is there at once, after the service picker and directly above Your details; Change waits for the builder.
       let st = await formState(main);
       assert.equal(st.bar, `Your print: ${c.summary}`, c.name);
       assert.equal(st.change, null, "no Change before the builder is on the page");
-      const order = await main.evaluate((m: Element) => {
-        const bar = [...m.querySelectorAll("p")].find((p) => p.textContent?.startsWith("Your print: "))!.parentElement!;
-        const legend = [...m.querySelectorAll("legend")].find((l) => l.textContent?.trim() === "What do you need?")!;
-        const h2 = [...m.querySelectorAll("h2")].find((h) => h.textContent === "Get Your Free Quote")!;
-        return { first: bar.parentElement!.firstElementChild === bar, beforeHeading: !!(bar.compareDocumentPosition(h2) & 4), beforeLegend: !!(bar.compareDocumentPosition(legend) & 4) };
-      });
-      assert.deepEqual(order, { first: true, beforeHeading: true, beforeLegend: true }, c.name);
+      assert.deepEqual(await barPlace(main), { afterPicker: true, directlyAboveDetails: true, belowDivider: true, gapToHeading: 20 }, c.name);
       await showQuestions(main);
       st = await formState(main);
       assert.deepEqual(st.pressed, c.pressed, c.name);
@@ -300,12 +308,15 @@ test("(c) straight to /quote and choosing Leaflet Printing starts on the default
       assert.equal((await formState(main)).bar, null, "no bar before a service is chosen");
       await main.locator("label", { has: o.page.locator('input[name="quote-service"][value="Leaflet Printing"]') }).click();
       assert.equal((await formState(main)).bar, defaults.bar);
+      assert.deepEqual(await barPlace(main), { afterPicker: true, directlyAboveDetails: true, belowDivider: true, gapToHeading: 20 });
       await showQuestions(main);
       const st = await formState(main);
       assert.deepEqual({ bar: st.bar, pressed: st.pressed, sent: st.sent }, defaults);
       // Choosing another service takes the bar away.
-      await main.locator("label", { has: o.page.locator('input[name="quote-service"][value="Web Design & SEO"]') }).click();
-      assert.equal((await formState(main)).bar, null);
+      for (const other of ["Web Design & SEO", "Screen Hire", "Leaflet Distribution"]) {
+        await main.locator("label", { has: o.page.locator(`input[name="quote-service"][value="${other}"]`) }).click();
+        assert.equal((await formState(main)).bar, null, other);
+      }
     } finally {
       await o.ctx.close();
     }
@@ -400,5 +411,72 @@ test("(d) Change brings the builder into view below the header and focuses it, o
     assert.deepEqual(o.offServer.filter((r) => /web3forms|quote-lead/.test(r)), []);
   } finally {
     await o.ctx.close();
+  }
+});
+
+test("the delivery address: four fields that autofill, three required, town and postcode side by side on a desktop, stacked on a phone", { skip }, async () => {
+  for (const [width, height] of [[1440, 900], [390, 664]]) {
+    const o = await open("/quote?service=printing", width, height);
+    try {
+      const main = o.page.locator("main");
+      await showQuestions(main);
+      await main.locator("#print-quantity").selectOption("Not sure yet");
+      await main.locator("#print-address-1").waitFor({ state: "visible" });
+      const group = await main.evaluate((m: Element) => {
+        const fieldset = [...m.querySelectorAll("fieldset")].find((f) => f.querySelector("legend")?.textContent === "Delivery address")!;
+        const fields = [...fieldset.querySelectorAll("input")].map((i) => ({
+          label: (m.querySelector(`label[for="${i.id}"]`) as HTMLElement).innerText.replace(/\s+/g, " ").trim(),
+          name: i.name,
+          autocomplete: i.autocomplete,
+          required: i.required,
+          placeholder: i.placeholder,
+          missing: i.validity.valueMissing,
+          box: (() => { const r = i.getBoundingClientRect(); return { left: Math.round(r.left), top: Math.round(r.top), width: Math.round(r.width) }; })(),
+        }));
+        const hint = document.getElementById(fieldset.getAttribute("aria-describedby")!)!.textContent;
+        const order = [...m.querySelectorAll("form input, form select, form textarea")].map((e) => (e as HTMLInputElement).name);
+        return { fields, hint, order, text: fieldset.innerText };
+      });
+      const tag = `${width}`;
+      assert.deepEqual(
+        group.fields.map((f: any) => [f.label, f.name, f.autocomplete, f.required, f.placeholder, f.missing]),
+        [
+          ["Address *", "print-address-1", "address-line1", true, "Building name or number and road", true],
+          ["Address line 2", "print-address-2", "address-line2", false, "", false],
+          ["Town or city *", "print-town", "address-level2", true, "", true],
+          ["Postcode *", "print-send-to", "postal-code", true, "e.g. SO15 2AB", true],
+        ],
+        tag
+      );
+      assert.equal(group.hint, "We deliver across Hampshire and Dorset, and can send them to other areas too.");
+      assert.doesNotMatch(group.text + group.fields.map((f: any) => f.placeholder).join(" "), /street/i);
+      // Sent in this order, the letterbox question's target areas after them as before.
+      const at = (name: string) => group.order.indexOf(name);
+      assert.ok(at("print-design") < at("print-address-1") && at("print-address-1") < at("print-address-2") && at("print-address-2") < at("print-town") && at("print-town") < at("print-send-to"), group.order.join(" "));
+      const [, , town, postcode] = group.fields.map((f: any) => f.box);
+      if (width >= 640) assert.ok(town.top === postcode.top && postcode.left > town.left, `${tag}: side by side ${JSON.stringify([town, postcode])}`);
+      else assert.ok(postcode.top > town.top && postcode.left === town.left && town.width === group.fields[0].box.width, `${tag}: stacked ${JSON.stringify([town, postcode])}`);
+      // Filled in, each is satisfied and what the form would send carries them in order.
+      await main.locator("#print-address-1").fill("Unit 4, Harbour Road");
+      await main.locator("#print-town").fill("Southampton");
+      await main.locator("#print-send-to").fill("SO15 2AB");
+      const sent = await main.evaluate((m: Element) =>
+        [...new FormData(m.querySelector("form")!).entries()].filter(([k]) => /^print-(address-1|address-2|town|send-to)$/.test(k)).map(([k, v]) => `${k}=${v}`)
+      );
+      assert.deepEqual(sent, ["print-address-1=Unit 4, Harbour Road", "print-address-2=", "print-town=Southampton", "print-send-to=SO15 2AB"]);
+      // The letterbox question's target areas are as before.
+      await main.locator('[role="group"][aria-labelledby="also-deliver-question"] button', { hasText: "Yes" }).click();
+      const areas = main.locator("#print-delivery-areas");
+      assert.deepEqual([await areas.getAttribute("name"), await areas.getAttribute("placeholder"), await areas.getAttribute("autocomplete"), await areas.evaluate((i: HTMLInputElement) => i.required)], [
+        "print-delivery-areas",
+        "e.g. Southampton SO15, SO16",
+        null,
+        false,
+      ]);
+      assert.equal(await o.page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth), false);
+      assert.deepEqual(o.offServer.filter((r) => /web3forms|quote-lead/.test(r)), [], "nothing sent");
+    } finally {
+      await o.ctx.close();
+    }
   }
 });
