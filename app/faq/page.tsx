@@ -60,12 +60,12 @@ const schemaAnswers = [
   "Once we have your printed leaflets, we take care of getting them delivered. Our door-to-door leaflet distribution service posts them directly through letterboxes across your chosen postcode areas in Hampshire and Dorset. Once your materials are received, our team carries out the rounds and confirms completion. Take a look at examples of our work to see it in action.",
   "Yes. Our Design, Print and Deliver package is a complete end-to-end service where we handle everything from initial artwork through to delivery across Hampshire and Dorset. Just let us know when requesting your quote and we'll talk you through the options. We also handle statutory Public Notice Leafleting for infrastructure projects across Hampshire.",
   "Yes. Postcode-level targeting is central to how we work. You choose the postcode areas you want to reach, and we focus your flyer distribution campaign there. Our Campaign Planning service can help if you're unsure which postcode areas in Hampshire or Dorset are best suited to your business.",
-  "Not necessarily. You can supply your own printed materials, or choose our Print and Deliver service and we'll handle the printing for you. We have established relationships with print partners which means we can offer competitive pricing on A6, A5, A4 and DL formats. Just let us know when requesting your quote and we'll include printing in your package.",
-  "Use our Get a Quote page and tell us your target postcode areas and approximate quantity. We'll come back to you within 24 hours with a tailored price for your leaflet distribution campaign. If you're comparing distributors, it's worth reading what to know before you book.",
-  "That depends on the postcode areas you want to cover across Hampshire and Dorset and how many households are within them. We generally recommend 5,000 or more, as this gives your campaign enough reach to generate a meaningful response, and we offer discounted packages at this volume. Our Campaign Planning service, part of our leaflet distribution services, can advise on the right quantity for your target areas.",
+  "Not necessarily. You can supply your own printed materials, or choose our Print and Deliver service and we'll handle the printing for you, in A6, A5, A4 or DL. Just let us know when requesting your quote and we'll include printing in your package.",
+  "Use our Get a Quote page and tell us your target postcode areas and approximate quantity. We'll come back to you within 24 hours with a tailored quote for your leaflet distribution campaign. If you're comparing distributors, it's worth reading what to know before you book.",
+  "That depends on the postcode areas you want to cover across Hampshire and Dorset and how many households are within them. We generally recommend 5,000 or more, as this gives your campaign enough reach to generate a meaningful response. Our Campaign Planning service, part of our leaflet distribution services, can advise on the right quantity for your target areas.",
   "We deliver most standard leaflet sizes including A6, A5, A4, and DL. If you're unsure whether your format is suitable, just ask when you get a quote.",
   "Vehicle leaflet distribution involves placing your leaflets on parked cars in car parks, retail areas, and high-footfall locations across Hampshire and Dorset. It's an effective way to reach people who are already out and spending locally, and works well alongside a door-to-door leaflet distribution campaign.",
-  "Most flyer distribution campaigns across Hampshire and Dorset are completed within two weeks of us receiving your materials, with smaller campaigns often turning around faster. We'll agree a clear timeline with you before the campaign begins, so you know exactly when to expect completion.",
+  "It depends on the size of your campaign and the areas you want to cover across Hampshire and Dorset. We'll agree a clear timeline with you before the campaign begins, so you know exactly when to expect completion.",
 ];
 
 export default function FaqPage() {
@@ -180,9 +180,7 @@ export default function FaqPage() {
               <p className="text-gray-600 text-base leading-relaxed">
                 Not necessarily. You can supply your own printed materials, or choose our{" "}
                 <Link href="/leaflet-delivery#print-and-deliver" className={a}>Print and Deliver service</Link> and
-                we&apos;ll handle the printing for you. We have established relationships with print
-                partners which means we can offer competitive pricing on A6, A5, A4 and DL formats.
-                Just let us know when{" "}
+                we&apos;ll handle the printing for you, in A6, A5, A4 or DL. Just let us know when{" "}
                 <Link href="/quote" className={a}>requesting your quote</Link> and we&apos;ll
                 include printing in your package.
               </p>
@@ -195,7 +193,7 @@ export default function FaqPage() {
                 Use our{" "}
                 <Link href="/quote" className={a}>Get a Quote page</Link> and tell us your
                 target postcode areas and approximate quantity. We&apos;ll come back to you within
-                24 hours with a tailored price for your leaflet distribution campaign. If you&apos;re
+                24 hours with a tailored quote for your leaflet distribution campaign. If you&apos;re
                 comparing distributors, it&apos;s worth reading{" "}
                 <Link href="/before-you-book" className={a}>what to know before you book</Link>.
               </p>
@@ -207,8 +205,7 @@ export default function FaqPage() {
               <p className="text-gray-600 text-base leading-relaxed">
                 That depends on the postcode areas you want to cover across Hampshire and Dorset and
                 how many households are within them. We generally recommend 5,000 or more, as this
-                gives your campaign enough reach to generate a meaningful response, and we offer
-                discounted packages at this volume. Our{" "}
+                gives your campaign enough reach to generate a meaningful response. Our{" "}
                 <Link href="/leaflet-delivery#how-it-works" className={a}>Campaign Planning service</Link>, part of our{" "}
                 <Link href="/leaflet-delivery" className={a}>leaflet distribution services</Link>, can
                 advise on the right quantity for your target areas.
@@ -241,10 +238,9 @@ export default function FaqPage() {
             <div className="bg-white border border-gray-200 rounded-lg p-6">
               <h2 className="text-base font-semibold text-blue-900 mb-2">{questions[9]}</h2>
               <p className="text-gray-600 text-base leading-relaxed">
-                Most flyer distribution campaigns across Hampshire and Dorset are completed within
-                two weeks of us receiving your materials, with smaller campaigns often turning around
-                faster. We&apos;ll agree a clear timeline with you before the campaign begins, so
-                you know exactly when to expect completion.
+                It depends on the size of your campaign and the areas you want to cover across
+                Hampshire and Dorset. We&apos;ll agree a clear timeline with you before the campaign
+                begins, so you know exactly when to expect completion.
               </p>
             </div>
 

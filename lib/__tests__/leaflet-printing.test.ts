@@ -321,6 +321,10 @@ test("the design's measures: the 1200px container, 88px sections alternating whi
   assert.equal(h2s.length, 6);
   for (const c of h2s.slice(0, 5)) assert.equal(c, "font-heading text-[32px] sm:text-[40px] font-extrabold leading-[1.1] text-[#172554]");
   assert.equal(h2s[5], "font-heading text-[30px] sm:text-[36px] font-extrabold leading-[1.15]");
+  // The H1 56px, and on phones 36px, the same as /leaflet-delivery's.
+  const h1 = /<h1 className="([^"]*)">Leaflet and Flyer Printing<\/h1>/.exec(SOURCE)![1];
+  assert.equal(h1, "font-heading text-[36px] sm:text-[56px] font-extrabold leading-[1.05]");
+  assert.ok(read("app/leaflet-delivery/page.tsx").includes(`<h1 className="${h1}">`));
   // Third-level headings in the body font, bold.
   for (const m of html().matchAll(/<h3 class="([^"]*)"/g)) assert.match(m[1], /^font-sans font-bold /);
   // The page wraps everything at a 1.6 line height (after the hero photo's preload link), body text #374151.

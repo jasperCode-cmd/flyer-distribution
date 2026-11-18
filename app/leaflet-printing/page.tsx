@@ -309,7 +309,7 @@ export default function LeafletPrintingPage() {
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,1.075fr)_minmax(0,1fr)]">
             <div className="flex flex-col gap-[22px]">
               <p className="text-[#facc15] text-[13px] font-bold uppercase tracking-[0.14em]">Printing for Hampshire and Dorset businesses</p>
-              <h1 className="font-heading text-[40px] sm:text-[56px] font-extrabold leading-[1.05]">Leaflet and Flyer Printing</h1>
+              <h1 className="font-heading text-[36px] sm:text-[56px] font-extrabold leading-[1.05]">Leaflet and Flyer Printing</h1>
               <p className="max-w-[560px] text-[18px] sm:text-[20px] text-[#dbeafe]">
                 We print leaflets, flyers and business cards for local businesses across Hampshire and Dorset, then deliver them to you or
                 straight through letterboxes in your chosen areas.
