@@ -286,7 +286,7 @@ export default function AreaPage({ area }: { area: AreaPageData }) {
               <h3 className="mt-4 text-lg font-bold text-blue-900">We plan, print and design</h3>
               <p className="mt-2 text-gray-600 leading-relaxed">
                 We plan the rounds for the postcodes you choose, and if you need them we can take care of the{" "}
-                <Link href="/services" className="text-blue-700 hover:underline font-medium">
+                <Link href="/leaflet-delivery#design-print-deliver" className="text-blue-700 hover:underline font-medium">
                   design and printing
                 </Link>{" "}
                 as well, so your leaflets arrive ready to go.

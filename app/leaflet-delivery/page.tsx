@@ -157,8 +157,8 @@ const DOOR_TO_DOOR_POINTS = [
 ];
 
 // The other ways we deliver: the first three link to their pages; vehicle distribution has no page yet,
-// so its card asks about it on the quote form.
-const OTHER_METHODS: { title: string; text: string; href: string; cta: string; whole: boolean; icon: React.ReactNode }[] = [
+// so its card asks about it on the quote form, and other pages link to the card (its id).
+const OTHER_METHODS: { title: string; text: string; href: string; cta: string; whole: boolean; id?: string; icon: React.ReactNode }[] = [
   {
     title: "Hand-to-Hand Distribution",
     text: "Face to face at shopping centres, town centres and events.",
@@ -208,6 +208,7 @@ const OTHER_METHODS: { title: string; text: string; href: string; cta: string; w
     href: QUOTE_HREF,
     cta: "Ask about it",
     whole: false,
+    id: "vehicle-leaflet-distribution",
     icon: (
       <>
         <path d="M5 17h14l-1.5-6h-11Z" />
@@ -429,7 +430,7 @@ export default function LeafletDeliveryPage() {
               );
               const card = "flex flex-1 flex-col gap-2.5 rounded-[18px] border border-[#e2e8f0] bg-white p-6";
               return (
-                <li key={m.title} className="flex">
+                <li key={m.title} id={m.id} className={m.id ? "flex scroll-mt-24" : "flex"}>
                   {m.whole ? (
                     <Link
                       href={m.href}

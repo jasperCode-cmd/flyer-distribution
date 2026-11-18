@@ -5,7 +5,10 @@
 // narrowed to its 22 real districts (with the sentences that named or
 // implied places beyond them reworded),
 // Southampton's "around 250,000 residents", and Fordingbridge out of the New
-// Forest copy (SP6 is in its postcodes instead). Its postcodes and
+// Forest copy (SP6 is in its postcodes instead). Its leaflet links go to
+// /leaflet-delivery, and those about vehicle campaigns to its vehicle card;
+// two of them read differently for it (Poole's "our door to door leaflet
+// delivery" and Chandler's Ford's "the leaflet delivery we offer"). Its postcodes and
 // neighbourhood names are as confirmed, and its homes figure is the Census
 // 2021 households in those postcode districts, from the Area Planner's data,
 // rounded to the nearest 500. Its hero is its coverage map, and a photo sits
@@ -100,7 +103,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
       ],
       [
         "We work with restaurants, tradespeople, estate agents, gyms, retailers, and many other local businesses to help them grow their customer base through our full range of ",
-        { href: "/services", text: "leaflet distribution services" },
+        { href: "/leaflet-delivery", text: "leaflet distribution services" },
         ". We also run ",
         { href: "/services/hand-to-hand-distribution", text: "hand-to-hand distribution" },
         " at Westquay Shopping Centre, putting leaflets straight into shoppers' hands.",
@@ -139,7 +142,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     copy: [
       [
         "Bournemouth is one of Dorset's largest towns, known for its beaches, vibrant town centre, and large student population. We cover BH1 through BH11 and surrounding postcodes, reaching residential areas across all neighbourhoods, backed by our full range of ",
-        { href: "/services", text: "distribution services" },
+        { href: "/leaflet-delivery", text: "distribution services" },
         ".",
       ],
       [
@@ -181,7 +184,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
     copy: [
       [
         "Poole is one of the most affluent towns in Dorset, with prestigious areas like Sandbanks, Canford Cliffs, and Branksome Park attracting high-income households. Our distributors cover BH12 through BH18 and surrounding postcodes as part of ",
-        { href: "/services", text: "the service we offer" },
+        { href: "/leaflet-delivery", text: "our door to door leaflet delivery" },
         " across the wider area.",
       ],
       [
@@ -232,7 +235,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
       ],
       [
         "Winchester's county town professional base makes it particularly effective for premium services such as home improvements, fine dining, private schools, and specialist professional services, all delivered through ",
-        { href: "/services", text: "our full leaflet distribution service" },
+        { href: "/leaflet-delivery", text: "our full leaflet distribution service" },
         ". For reaching other businesses directly, we also offer ",
         { href: "/services/b2b-distribution", text: "B2B leaflet distribution" },
         " around Winchester's business parks and professional quarters, alongside our standard door-to-door rounds.",
@@ -285,7 +288,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
       ],
       [
         "Vehicle ",
-        { href: "/services", text: "leaflet distribution" },
+        { href: "/leaflet-delivery#vehicle-leaflet-distribution", text: "leaflet distribution" },
         " is also available in car parks and high-footfall locations across New Forest towns for businesses looking to reach visitors and day-trippers as well as residents. We've also delivered statutory notice work here, including a road closure campaign around Lyndhurst that's part of ",
         { href: "/case-studies", text: "our portfolio of work" },
         ".",
@@ -320,7 +323,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
       ],
       [
         "Vehicle ",
-        { href: "/services", text: "leaflet distribution" },
+        { href: "/leaflet-delivery#vehicle-leaflet-distribution", text: "leaflet distribution" },
         " is also available across Ringwood's car parks and retail areas for businesses looking to reach people already out and spending locally. We also handle statutory ",
         { href: "/services/public-notice-leafleting", text: "Public Notice Leafleting" },
         " for infrastructure projects reaching into this part of Hampshire.",
@@ -360,7 +363,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
       ],
       [
         "Christchurch's harbourside and town centre retail areas are also available for ",
-        { href: "/services", text: "vehicle leaflet distribution" },
+        { href: "/leaflet-delivery#vehicle-leaflet-distribution", text: "vehicle leaflet distribution" },
         ", reaching visitors and day-trippers alongside the resident population.",
       ],
     ],
@@ -498,7 +501,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
       ],
       [
         "Vehicle campaigns are also part of ",
-        { href: "/services", text: "our leaflet distribution options" },
+        { href: "/leaflet-delivery#vehicle-leaflet-distribution", text: "our leaflet distribution options" },
         " around Romsey's car parks and retail areas, useful for reaching visitors to the Abbey and Sir Harold Hillier Gardens alongside residents. We've also completed residential rounds out towards West Wellow, where you can ",
         { href: "/case-studies", text: "see the results" },
         ".",
@@ -538,7 +541,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
       ],
       [
         "We can also run vehicle campaigns around Hythe's marina and shopping area, part of ",
-        { href: "/services", text: "our distribution options" },
+        { href: "/leaflet-delivery#vehicle-leaflet-distribution", text: "our distribution options" },
         " putting your materials in front of boat owners and visitors as well as residents.",
       ],
     ],
@@ -576,7 +579,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
       ],
       [
         "We also offer vehicle campaigns around Totton's retail areas and car parks, part of ",
-        { href: "/services", text: "the full range of services" },
+        { href: "/leaflet-delivery#vehicle-leaflet-distribution", text: "the full range of services" },
         " we provide, a good option for reaching shoppers heading to the shops near Eling Tide Mill and the town centre. West Wellow campaigns, among our ",
         { href: "/case-studies", text: "recent projects" },
         ", often route through here too.",
@@ -616,7 +619,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
       ],
       [
         "Vehicle campaigns are available around Hedge End Retail Park and the surrounding car parks too, part of ",
-        { href: "/services", text: "what we offer" },
+        { href: "/leaflet-delivery#vehicle-leaflet-distribution", text: "what we offer" },
         " for reaching shoppers travelling in from outside the immediate area.",
       ],
     ],
@@ -654,7 +657,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
       ],
       [
         "We can also run vehicle campaigns around the shops at Fryern and the wider Chandler's Ford area, part of ",
-        { href: "/services", text: "our service list" },
+        { href: "/leaflet-delivery#vehicle-leaflet-distribution", text: "the leaflet delivery we offer" },
         ", putting your materials in front of people already out and about locally.",
       ],
     ],
@@ -688,7 +691,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
       ],
       [
         "Vehicle campaigns are also available around Brockenhurst's Brookley Road and station car parks, part of ",
-        { href: "/services", text: "the services we provide" },
+        { href: "/leaflet-delivery#vehicle-leaflet-distribution", text: "the services we provide" },
         ", a useful way to reach visitors as well as the village's own residents.",
       ],
     ],
@@ -724,7 +727,7 @@ export const AREA_PAGES: Record<AreaSlug, AreaPageData> = {
       ],
       [
         "Lymington's Saturday market and harbour bring in visitors as well as residents, and vehicle campaigns around the town's car parks are part of ",
-        { href: "/services", text: "our leaflet distribution services" },
+        { href: "/leaflet-delivery#vehicle-leaflet-distribution", text: "our leaflet distribution services" },
         ". For campaigns reaching further along the coast, ",
         { href: "/areas/leaflet-distribution-christchurch", text: "Christchurch" },
         " can be added, and ",

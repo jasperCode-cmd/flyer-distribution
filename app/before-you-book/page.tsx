@@ -102,7 +102,7 @@ const payingFor = [
   {
     title: "Clients who come back",
     body: "We'd rather earn your next campaign than rush this one.",
-    link: { href: "/services", label: "Our services" },
+    link: { href: "/leaflet-delivery", label: "Our leaflet delivery" },
     icon: (
       <>
         <path d="M21 12a9 9 0 01-15.4 6.4L3 16" />
@@ -190,7 +190,7 @@ export default function BeforeYouBookPage() {
           <p className="text-gray-600 text-lg leading-relaxed mb-5">
             If you&apos;re after the cheapest service, we&apos;re not the ones to go with. If you want every one of your
             leaflets{" "}
-            <Link href="/services" className={link}>
+            <Link href="/leaflet-delivery" className={link}>
               delivered properly, to a high standard
             </Link>
             , we&apos;re definitely the ones to pick.

@@ -140,8 +140,8 @@ export default function PublicNoticeLeafletingPage() {
                 project defines. We are not a planning consultancy, and this
                 page is not planning advice. For our wider leaflet
                 distribution work across Hampshire, see our{" "}
-                <Link href="/services" className="text-blue-700 hover:underline font-medium">
-                  standard services
+                <Link href="/leaflet-delivery" className="text-blue-700 hover:underline font-medium">
+                  door to door leaflet delivery
                 </Link>
                 . We&apos;ve completed statutory notice work across the
                 county. Take a look at{" "}

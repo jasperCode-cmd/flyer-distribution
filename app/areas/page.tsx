@@ -77,9 +77,9 @@ export default function AreasPage() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {[
-              { title: "Design, Print and Deliver", href: "/services" },
-              { title: "Print and Deliver", href: "/services" },
-              { title: "Leaflet Distribution", href: "/services" },
+              { title: "Design, Print and Deliver", href: "/leaflet-delivery#design-print-deliver" },
+              { title: "Print and Deliver", href: "/leaflet-delivery#print-and-deliver" },
+              { title: "Leaflet Distribution", href: "/leaflet-delivery" },
               { title: "Public Notice Leafleting", href: "/services/public-notice-leafleting" },
             ].map((svc) => (
               <Link
@@ -93,10 +93,10 @@ export default function AreasPage() {
             ))}
           </div>
           <Link
-            href="/services"
+            href="/leaflet-delivery"
             className="text-blue-600 hover:text-blue-800 font-semibold text-sm underline underline-offset-2"
           >
-            See all services →
+            See all leaflet services →
           </Link>
         </div>
       </section>

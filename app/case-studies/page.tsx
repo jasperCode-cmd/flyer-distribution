@@ -70,7 +70,7 @@ const caseStudies = [
     body: (
       <>
         A residential door-to-door{" "}
-        <Link href="/services" className="text-blue-700 hover:underline font-medium">
+        <Link href="/leaflet-delivery" className="text-blue-700 hover:underline font-medium">
           leaflet drop
         </Link>{" "}
         across West Wellow, delivering printed materials directly to
@@ -140,7 +140,7 @@ const caseStudies = [
     body: (
       <>
         A completed round in Oakley using{" "}
-        <Link href="/services" className="text-blue-700 hover:underline font-medium">
+        <Link href="/leaflet-delivery" className="text-blue-700 hover:underline font-medium">
           our leaflet services
         </Link>
         , delivering door to door across the village.
@@ -166,7 +166,7 @@ const caseStudies = [
     stat: "1,000 Leaflets (Opera Performance)",
     body: (
       <>
-        <Link href="/services" className="text-blue-700 hover:underline font-medium">
+        <Link href="/leaflet-delivery" className="text-blue-700 hover:underline font-medium">
           Leaflet distribution
         </Link>{" "}
         covering Micheldever and the wider Winchester area, reaching
@@ -221,8 +221,8 @@ const caseStudies = [
     body: (
       <>
         A completed round in Petersfield using{" "}
-        <Link href="/services" className="text-blue-700 hover:underline font-medium">
-          our leaflet services
+        <Link href="/leaflet-delivery" className="text-blue-700 hover:underline font-medium">
+          our leaflet delivery service
         </Link>
         , delivering door to door across the town.
       </>

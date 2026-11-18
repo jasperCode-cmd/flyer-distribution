@@ -34,7 +34,7 @@ export default function AreasExplorer({ cards }: { cards: OverviewCard[] }) {
             <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight mb-5">Areas We Cover</h1>
             <p className="text-blue-100 text-lg sm:text-xl leading-relaxed mb-8">
               We distribute flyers and leaflets across Hampshire and Dorset, covering hundreds of postcodes as part of our full{" "}
-              <Link href="/services" className="text-white underline underline-offset-2 hover:text-blue-200">
+              <Link href="/leaflet-delivery" className="text-white underline underline-offset-2 hover:text-blue-200">
                 leaflet distribution service
               </Link>
               . Every round is GPS tracked.

@@ -204,17 +204,17 @@ test("our services: the leaflet block with its own links, the two other services
   const last = lastSection();
   const panel = last.slice(last.indexOf(">Our services</p>") - 200);
   assert.match(last, /<div class="rounded-\[24px\] border border-\[#e2e8f0\] bg-white p-6 shadow-[^"]*sm:p-8"><p class="[^"]*uppercase[^"]*text-slate-500">Our services<\/p>/);
-  // Leaflet services: navy, 16px corners, the yellow paper plane on dark navy, the title a link of its own.
+  // Leaflet services: navy, 16px corners, the yellow paper plane on dark navy, the title a link of its own (to /leaflet-delivery).
   const leaflet = panel.slice(panel.indexOf('<div class="mt-4 rounded-2xl bg-[#1e3a8a]'), panel.indexOf('<ul class="mt-2 divide-y'));
   assert.ok(leaflet.length > 0);
   assert.match(leaflet, /<span class="[^"]*bg-\[#172554\] text-\[#facc15\]"><svg[^>]*><path d="M21\.5 2\.5 2\.5 10l7 3 3 7 9-17\.5ZM9\.5 13 15 8\.5"/);
-  assert.match(leaflet, /<h3 class="font-heading text-\[22px\] font-extrabold[^"]*"><a [^>]*href="\/services">Leaflet services \u2192<\/a><\/h3>/);
+  assert.match(leaflet, /<h3 class="font-heading text-\[22px\] font-extrabold[^"]*"><a [^>]*href="\/leaflet-delivery">Leaflet services \u2192<\/a><\/h3>/);
   assert.ok(text(leaflet).includes("Door to door across Hampshire and Dorset, GPS tracked. Design and print too."));
   // Five white pills, each its own link; no link holds another.
   assert.deepEqual(
     [...leaflet.matchAll(/<li><a class="([^"]*)" href="([^"]+)">([^<]*)<\/a><\/li>/g)].map((m) => [m[3], m[2], /bg-white/.test(m[1]) && /text-\[13px\] font-bold text-\[#1e3a8a\]/.test(m[1])]),
     [
-      ["Distribution", "/services", true],
+      ["Distribution", "/leaflet-delivery", true],
       ["Printing", "/leaflet-printing", true],
       ["Public Notice", "/services/public-notice-leafleting", true],
       ["Hand-to-Hand", "/services/hand-to-hand-distribution", true],
@@ -239,19 +239,19 @@ test("our services: the leaflet block with its own links, the two other services
 
 test("no link from the two old sections is lost, and the new ones are there", () => {
   const hrefs = linksIn(lastSection()).map(([h]) => h);
-  // Our Services: /services, web design, screen hire. Next steps: the quote, case studies, the jobs page.
+  // Our Services: /services (View all services), web design, screen hire. Next steps: the quote, case studies, the jobs page.
   for (const old of ["/services", "/services/web-design-seo", "/services/screen-hire", "/quote?service=leaflet", "/case-studies", "/leaflet-distribution-jobs"]) {
     assert.ok(hrefs.includes(old), old);
   }
-  for (const added of ["/leaflet-printing", "/services/public-notice-leafleting", "/services/hand-to-hand-distribution", "/services/b2b-distribution"]) {
+  for (const added of ["/leaflet-delivery", "/leaflet-printing", "/services/public-notice-leafleting", "/services/hand-to-hand-distribution", "/services/b2b-distribution"]) {
     assert.ok(hrefs.includes(added), added);
   }
   assert.deepEqual(linksIn(lastSection()).map(([h, t]) => `${t} ${h}`), [
     "Get a Free Quote /quote?service=leaflet",
     "Want to see our work? Real campaigns, with the areas we covered /case-studies",
     "Want to join the team? Flexible, local leaflet delivery work /leaflet-distribution-jobs",
-    "Leaflet services \u2192 /services",
-    "Distribution /services",
+    "Leaflet services \u2192 /leaflet-delivery",
+    "Distribution /leaflet-delivery",
     "Printing /leaflet-printing",
     "Public Notice /services/public-notice-leafleting",
     "Hand-to-Hand /services/hand-to-hand-distribution",

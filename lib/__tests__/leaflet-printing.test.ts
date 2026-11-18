@@ -1,6 +1,6 @@
 // The Leaflet Printing page (/leaflet-printing): its metadata and schema, its
 // sections and copy in order, the photo and review it reuses, the copy rules,
-// and the links to it from the Services menu, the footer and /services.
+// and the links to it from the Services menu, the footer and /services, and its own links to /leaflet-delivery.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
@@ -109,7 +109,7 @@ test("the hero: yellow label, H1, intro, the two buttons and the printer photo",
   );
   assert.deepEqual(linksIn(hero).slice(-2), [
     [QUOTE, "Get a Free Quote"],
-    ["/services", "See our leaflet delivery"],
+    ["/leaflet-delivery", "See our leaflet delivery"],
   ]);
   // The photos, each from public/images with its own alt: the hero first (loaded straight away), then
   // the three product cards, then the paper. Never the doorway leaflet with its printed slogan.
@@ -217,8 +217,8 @@ test("three ways to order, the navy one most popular, each with its link", () =>
   ]);
   assert.deepEqual(linksIn(ways), [
     [QUOTE, "Get a printing quote"],
-    ["/services#print-and-deliver", "About Print and Deliver"],
-    ["/services#design-print-deliver", "About Design, Print and Deliver"],
+    ["/leaflet-delivery#print-and-deliver", "About Print and Deliver"],
+    ["/leaflet-delivery#design-print-deliver", "About Design, Print and Deliver"],
   ]);
   // Three equal cards (18px corners); the third navy, with the yellow badge at its top right and a yellow link.
   assert.match(ways, /<ul class="grid grid-cols-1 gap-5 md:grid-cols-3">/);
@@ -227,11 +227,10 @@ test("three ways to order, the navy one most popular, each with its link", () =>
     ways,
     /<li class="relative flex flex-col gap-3\.5 rounded-\[20px\] bg-\[#1e3a8a\] p-\[30px\] text-white"><span class="absolute right-5 top-5 [^"]*bg-\[#facc15\][^"]*">Most popular<\/span><span class="text-\[#facc15\]"><svg[\s\S]*?<\/svg><\/span><h3[^>]*>Design, Print and Deliver<\/h3>/
   );
-  assert.match(ways, /<a class="[^"]*text-\[#facc15\][^"]*" href="\/services#design-print-deliver">/);
-  // Those anchors are cards on /services.
-  const services = read("app/services/page.tsx");
-  for (const id of ["print-and-deliver", "design-print-deliver"]) assert.match(services, new RegExp(`id: "${id}"`));
-  assert.match(services, /id=\{pkg\.id\}/);
+  assert.match(ways, /<a class="[^"]*text-\[#facc15\][^"]*" href="\/leaflet-delivery#design-print-deliver">/);
+  // Those anchors are cards on /leaflet-delivery.
+  const delivery = read("app/leaflet-delivery/page.tsx");
+  for (const id of ["print-and-deliver", "design-print-deliver"]) assert.match(delivery, new RegExp(`<li id="${id}"`));
 });
 
 test("where we deliver: the two counties, then anywhere else, with no town names or postcodes", () => {
@@ -277,7 +276,7 @@ test("printing questions: one real review, word for word, and five questions wit
   assert.deepEqual(questions.map((x) => [x.q, x.a]), [
     [
       "Can you print leaflets without delivering them?",
-      "Yes. We deliver the printed boxes to you anywhere in Hampshire and Dorset, and we can send them to other areas too. If you later want them delivered to homes, see our leaflet delivery .",
+      "Yes. We deliver the printed boxes to you anywhere in Hampshire and Dorset, and we can send them to other areas too. If you later want them delivered to homes, see our door to door leaflet delivery .",
     ],
     ["What paper do you recommend?", "For most campaigns, 250gsm silk printed double-sided. Other weights and finishes are available and we will advise on the call."],
     ["Can you design the leaflet for us?", "Yes. Our Design, Print and Deliver package covers the design too."],
@@ -290,8 +289,8 @@ test("printing questions: one real review, word for word, and five questions wit
       "As well as flyers and leaflets, we print custom-shaped and perforated flyers, folded leaflets and business cards, including folded and uncoated cards.",
     ],
   ]);
-  assert.deepEqual(questions[0].links, [["/services", "leaflet delivery"]]);
-  assert.deepEqual(questions[2].links, [["/services#design-print-deliver", "Design, Print and Deliver"]]);
+  assert.deepEqual(questions[0].links, [["/leaflet-delivery", "door to door leaflet delivery"]]);
+  assert.deepEqual(questions[2].links, [["/leaflet-delivery#design-print-deliver", "Design, Print and Deliver"]]);
   // No FAQ schema.
   assert.ok(schemas().every((s) => s["@type"] !== "FAQPage"));
 });

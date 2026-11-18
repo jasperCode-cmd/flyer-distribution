@@ -4,13 +4,14 @@ import StaggerGroup from "@/components/StaggerGroup";
 // The homepage's "Leaflet Services" section: the two print packages as large
 // cards, three core services as smaller cards, and the rest as one line of
 // links. Every description is the homepage's own, word for word; services
-// with a page of their own link to it, the rest to their card on /services.
+// with a page of their own link to it, the rest to /leaflet-delivery or their
+// part of it (a package's card, How it works, the vehicle card).
 //
 // On phones (below md) the same markup is much shorter: Design, Print and
 // Deliver is one compact navy card, the other four are rows of one white
 // panel (each with a short line instead of its description), the Also line
-// names the same services in smaller text, and View all services moves to the
-// bottom. Nothing is rendered twice: what a phone doesn't show is display:
+// names the same services in smaller text, and View all leaflet services moves
+// to the bottom. Nothing is rendered twice: what a phone doesn't show is display:
 // none there.
 
 type Icon = "pen" | "printer" | "mail" | "target" | "hand";
@@ -19,7 +20,7 @@ export const PACKAGES = [
   {
     title: "Design, Print and Deliver",
     desc: "Our full end-to-end service. We handle everything from design and printing in A6, A5, A4 or DL through to full distribution across your chosen areas.",
-    href: "/services#design-print-deliver",
+    href: "/leaflet-delivery#design-print-deliver",
     icon: "pen" as Icon,
     tags: ["Design", "Print", "Deliver"],
     phoneLine: "We design it, print it and deliver it for you.",
@@ -27,7 +28,7 @@ export const PACKAGES = [
   {
     title: "Print and Deliver",
     desc: "Already have your design ready? We handle the printing in A6, A5, A4 or DL and deliver your leaflets directly through letterboxes across Hampshire and Dorset.",
-    href: "/services#print-and-deliver",
+    href: "/leaflet-delivery#print-and-deliver",
     icon: "printer" as Icon,
     tags: ["Print", "Deliver"],
     phoneLine: "Your artwork, printed and delivered",
@@ -38,14 +39,14 @@ export const CORE_SERVICES = [
   {
     title: "Leaflet Distribution",
     desc: "Door-to-door delivery to households across your chosen areas. Your printed materials posted directly through letterboxes across Hampshire and Dorset.",
-    href: "/services#leaflet-distribution",
+    href: "/leaflet-delivery",
     icon: "mail" as Icon,
     phoneLine: "Through letterboxes in your areas",
   },
   {
     title: "Targeted Postcode Campaigns",
     desc: "We use postcode data to focus your distribution on the areas most likely to respond to your campaign. Rather than blanket coverage, we put your leaflets where your potential customers actually live.",
-    href: "/services#targeted-postcode-campaigns",
+    href: "/leaflet-delivery",
     icon: "target" as Icon,
     phoneLine: "Focus on the areas most likely to respond",
   },
@@ -61,8 +62,8 @@ export const CORE_SERVICES = [
 
 export const MORE_SERVICES = [
   { title: "Leaflet Printing", href: "/leaflet-printing" },
-  { title: "Campaign Planning", href: "/services#campaign-planning" },
-  { title: "Vehicle Leaflet Distribution", href: "/services#vehicle-leaflet-distribution" },
+  { title: "Campaign Planning", href: "/leaflet-delivery#how-it-works" },
+  { title: "Vehicle Leaflet Distribution", href: "/leaflet-delivery#vehicle-leaflet-distribution" },
   { title: "Public Notice Leafleting", href: "/services/public-notice-leafleting" },
   { title: "B2B Leaflet Distribution", href: "/services/b2b-distribution" },
 ];
@@ -235,7 +236,7 @@ export default function LeafletServices() {
           </StaggerGroup>
         </div>
 
-        {/* 4. Everything else, in one line (smaller on phones); View all services here from md, as the button on phones. */}
+        {/* 4. Everything else, in one line (smaller on phones); View all leaflet services here from md, as the button on phones. */}
         <p className="mt-5 text-sm leading-relaxed text-gray-500 md:col-span-2 md:mt-8 md:text-base md:text-gray-600">
           Also:{" "}
           {MORE_SERVICES.map((svc, i) => (
@@ -248,20 +249,20 @@ export default function LeafletServices() {
           ))}
           <span className="hidden md:inline"> </span>
           <Link
-            href="/services"
+            href="/leaflet-delivery"
             className="hidden items-center gap-1 font-semibold text-blue-700 underline underline-offset-2 hover:text-blue-900 md:inline-flex"
           >
-            View all services
+            View all leaflet services
             <Arrow className="w-3.5 h-3.5" />
           </Link>
         </p>
 
-        {/* View all services: at the bottom on phones (full width, 48px), top right from md. One link, placed by the grid. */}
+        {/* View all leaflet services: at the bottom on phones (full width, 48px), top right from md. One link, placed by the grid. */}
         <Link
-          href="/services"
+          href="/leaflet-delivery"
           className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-md border-2 border-blue-700 px-5 py-2.5 font-bold text-blue-700 transition-colors duration-200 hover:bg-blue-700 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50 md:col-start-2 md:row-start-1 md:mt-0 md:inline-flex md:min-h-0 md:w-auto md:shrink-0 md:justify-self-end"
         >
-          View all services
+          View all leaflet services
           <Arrow />
         </Link>
       </div>

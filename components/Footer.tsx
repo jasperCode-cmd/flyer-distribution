@@ -8,6 +8,7 @@ import { hidesSiteChrome } from "@/lib/site-chrome";
 import { FDH_ADDRESS_LINES } from "@/lib/fdh-address";
 
 const serviceLinks = [
+  { href: "/leaflet-delivery", label: "Leaflet Delivery" },
   { href: "/services", label: "Services" },
   { href: "/leaflet-printing", label: "Leaflet Printing" },
   { href: "/services/public-notice-leafleting", label: "Public Notice Leafleting" },

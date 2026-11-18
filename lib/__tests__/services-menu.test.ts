@@ -75,12 +75,12 @@ test("the Services menu: leaflet services led by Leaflet Distribution then Leafl
   assert.equal((phone.match(/min-h-11/g) ?? []).length, 1);
   // Each kind of service link (3), the phone's pills (1) and the All services bar (1) is at least 44px tall.
   assert.equal((header.match(/className=\{`(block|flex) min-h-11 /g) ?? []).length, 5);
-  // Footer: second in its Services list.
+  // Footer: Leaflet Delivery first in its Services list, then Services (all of them), then Leaflet Printing.
   const footer = read("components/Footer.tsx");
   const serviceLinks = footer.slice(footer.indexOf("const serviceLinks"), footer.indexOf("];", footer.indexOf("const serviceLinks")));
   assert.deepEqual(
     [...serviceLinks.matchAll(/label: "([^"]+)"/g)].map((m) => m[1]),
-    ["Services", "Leaflet Printing", "Public Notice Leafleting", "Hand-to-Hand Leaflet Distribution", "B2B Leaflet Distribution", "Web Design & SEO", "Screen Hire"]
+    ["Leaflet Delivery", "Services", "Leaflet Printing", "Public Notice Leafleting", "Hand-to-Hand Leaflet Distribution", "B2B Leaflet Distribution", "Web Design & SEO", "Screen Hire"]
   );
   // /services: one link, in the Print and Deliver card.
   const services = read("app/services/page.tsx");

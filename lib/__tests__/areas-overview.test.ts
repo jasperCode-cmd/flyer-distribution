@@ -230,7 +230,7 @@ test("every card and its link is in the server-rendered HTML, all showing, with 
   assert.match(html, /<nav aria-label="Breadcrumb"[\s\S]*?>Home<\/a>[\s\S]*?aria-current="page">Areas<\/span>/);
   const text = textOf(html);
   assert.match(text, /We distribute flyers and leaflets across Hampshire and Dorset, covering hundreds of postcodes as part of our full leaflet distribution service \. Every round is GPS tracked\./);
-  assert.match(html, /<a[^>]*href="\/services"[^>]*>leaflet distribution service<\/a>/);
+  assert.match(html, /<a[^>]*href="\/leaflet-delivery"[^>]*>leaflet distribution service<\/a>/);
   assert.match(html, /<label for="area-search"[^>]*>Find your area<\/label>/);
   assert.match(html, /<input id="area-search" type="search"[^>]*placeholder="Type a town or postcode, e\.g\. BH14 or Romsey" aria-describedby="area-search-hint"/);
   assert.match(html, /id="area-search-hint"[^>]*>Works with full postcodes too, like SO51 8AB\.<\/p>/);
@@ -248,11 +248,11 @@ test("every card and its link is in the server-rendered HTML, all showing, with 
   assert.ok(cardsAt > 0 && cardsAt < servicesAt && servicesAt < closingAt, `${cardsAt} ${servicesAt} ${closingAt}`);
   const services = [...html.slice(servicesAt, closingAt).matchAll(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/g)].map((m) => [m[1], textOf(m[2]).trim()]);
   assert.deepEqual(services, [
-    ["/services", "Design, Print and Deliver View service \u2192"],
-    ["/services", "Print and Deliver View service \u2192"],
-    ["/services", "Leaflet Distribution View service \u2192"],
+    ["/leaflet-delivery#design-print-deliver", "Design, Print and Deliver View service \u2192"],
+    ["/leaflet-delivery#print-and-deliver", "Print and Deliver View service \u2192"],
+    ["/leaflet-delivery", "Leaflet Distribution View service \u2192"],
     ["/services/public-notice-leafleting", "Public Notice Leafleting View service \u2192"],
-    ["/services", "See all services \u2192"],
+    ["/leaflet-delivery", "See all leaflet services \u2192"],
   ]);
   assert.match(text, /From design and print through to targeted postcode campaigns, we have a service to suit every budget\./);
   assert.doesNotMatch(text, /Ready to Get Started/);

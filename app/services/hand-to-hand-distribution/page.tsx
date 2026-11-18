@@ -201,7 +201,7 @@ export default function HandToHandDistributionPage() {
             </p>
             <p className="text-lg">
               It complements our regular{" "}
-              <Link href="/services" className="text-blue-700 hover:underline font-medium">
+              <Link href="/leaflet-delivery" className="text-blue-700 hover:underline font-medium">
                 door-to-door rounds
               </Link>{" "}
               well for businesses wanting a fuller campaign. Got questions

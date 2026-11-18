@@ -130,7 +130,7 @@ const WHERE_NEXT = [
 ];
 
 const LEAFLET_PILLS = [
-  { label: "Distribution", href: "/services" },
+  { label: "Distribution", href: "/leaflet-delivery" },
   { label: "Printing", href: "/leaflet-printing" },
   { label: "Public Notice", href: "/services/public-notice-leafleting" },
   { label: "Hand-to-Hand", href: "/services/hand-to-hand-distribution" },
@@ -283,7 +283,7 @@ export default function AboutPage() {
                 </span>
                 <div className="min-w-0">
                   <h3 className="font-heading text-[22px] font-extrabold leading-tight">
-                    <Link href="/services" className="inline-flex min-h-10 items-center underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#facc15]">
+                    <Link href="/leaflet-delivery" className="inline-flex min-h-10 items-center underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#facc15]">
                       Leaflet services &rarr;
                     </Link>
                   </h3>

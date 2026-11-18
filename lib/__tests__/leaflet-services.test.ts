@@ -29,26 +29,26 @@ const textOf = (html: string) =>
     .trim();
 
 // The homepage's ten services, word for word, and where each goes: its own
-// page if it has one, otherwise its card on /services.
+// page if it has one, otherwise /leaflet-delivery or its part of it.
 const BEFORE: Record<string, { desc: string; href: string }> = {
   "Design, Print and Deliver": {
     desc: "Our full end-to-end service. We handle everything from design and printing in A6, A5, A4 or DL through to full distribution across your chosen areas.",
-    href: "/services#design-print-deliver",
+    href: "/leaflet-delivery#design-print-deliver",
   },
   "Print and Deliver": {
     desc: "Already have your design ready? We handle the printing in A6, A5, A4 or DL and deliver your leaflets directly through letterboxes across Hampshire and Dorset.",
-    href: "/services#print-and-deliver",
+    href: "/leaflet-delivery#print-and-deliver",
   },
   "Leaflet Distribution": {
     desc: "Door-to-door delivery to households across your chosen areas. Your printed materials posted directly through letterboxes across Hampshire and Dorset.",
-    href: "/services#leaflet-distribution",
+    href: "/leaflet-delivery",
   },
   "Targeted Postcode Campaigns": {
     desc: "We use postcode data to focus your distribution on the areas most likely to respond to your campaign. Rather than blanket coverage, we put your leaflets where your potential customers actually live.",
-    href: "/services#targeted-postcode-campaigns",
+    href: "/leaflet-delivery",
   },
-  "Vehicle Leaflet Distribution": { desc: "", href: "/services#vehicle-leaflet-distribution" },
-  "Campaign Planning": { desc: "", href: "/services#campaign-planning" },
+  "Vehicle Leaflet Distribution": { desc: "", href: "/leaflet-delivery#vehicle-leaflet-distribution" },
+  "Campaign Planning": { desc: "", href: "/leaflet-delivery#how-it-works" },
   "Leaflet Printing": { desc: "", href: "/leaflet-printing" },
   "Public Notice Leafleting": { desc: "", href: "/services/public-notice-leafleting" },
   "Hand-to-Hand Leaflet Distribution": {
@@ -75,7 +75,7 @@ test("the section renders the header, two packages, three cards and the Also lin
   // Header row.
   assert.match(html, /<p class="[^"]*uppercase[^"]*">What we do<\/p><h2[^>]*>Leaflet Services<\/h2>/);
   assert.ok(text.includes("From door-to-door delivery to targeted postcode campaigns, we have a service to suit every budget and campaign goal."));
-  assert.match(html, /<a class="[^"]*border-2 border-blue-700[^"]*" href="\/services">View all services<svg aria-hidden="true"/);
+  assert.match(html, /<a class="[^"]*border-2 border-blue-700[^"]*" href="\/leaflet-delivery">View all leaflet services<svg aria-hidden="true"/);
   // Every card is a single link to its page, with the hover lift and a focus ring.
   const cards = [...html.matchAll(/<a class="(group flex h-full[^"]*)" href="([^"]*)">([\s\S]*?)<\/a>/g)];
   assert.equal(cards.length, 5);
@@ -107,41 +107,40 @@ test("the section renders the header, two packages, three cards and the Also lin
   assert.match(standard[3], /text-\[#1d4ed8\][^"]*">Find out more<svg/);
   assert.deepEqual([...standard[3].matchAll(/<li[^>]*>([^<]*)<\/li>/g)].map((m) => m[1]), ["Print", "Deliver"]);
   assert.equal((html.match(/Most popular/g) ?? []).length, 1);
-  // The Also line (as desktop shows it), each name an in-text link, then View all services.
+  // The Also line (as desktop shows it), each name an in-text link, then View all leaflet services.
   const also = /<p class="[^"]*md:mt-8[^"]*">(Also:[\s\S]*?)<\/p>/.exec(html)![1];
-  assert.equal(textOf(also).replace(/ ,/g, ","), "Also: Leaflet Printing, Campaign Planning, Vehicle Leaflet Distribution, Public Notice Leafleting and B2B Leaflet Distribution . View all services");
+  assert.equal(textOf(also).replace(/ ,/g, ","), "Also: Leaflet Printing, Campaign Planning, Vehicle Leaflet Distribution, Public Notice Leafleting and B2B Leaflet Distribution . View all leaflet services");
   assert.deepEqual(
     [...also.matchAll(/<a[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/g)].map((m) => [m[1], textOf(m[2])]),
-    [...MORE_SERVICES.map((s) => [s.href, s.title]), ["/services", "View all services"]]
+    [...MORE_SERVICES.map((s) => [s.href, s.title]), ["/leaflet-delivery", "View all leaflet services"]]
   );
-  // Every service keeps its page, View all services stays /services, and nothing leaves the site.
+  // Every service keeps its page, the rest and View all leaflet services go to /leaflet-delivery (no link to
+  // /services or its cards is left), and nothing leaves the site.
   const hrefs = new Set([...html.matchAll(/href="([^"]*)"/g)].map((m) => m[1]));
   assert.deepEqual([...hrefs].sort(), [
+    "/leaflet-delivery",
+    "/leaflet-delivery#design-print-deliver",
+    "/leaflet-delivery#how-it-works",
+    "/leaflet-delivery#print-and-deliver",
+    "/leaflet-delivery#vehicle-leaflet-distribution",
     "/leaflet-printing",
-    "/services",
-    "/services#campaign-planning",
-    "/services#design-print-deliver",
-    "/services#leaflet-distribution",
-    "/services#print-and-deliver",
-    "/services#targeted-postcode-campaigns",
-    "/services#vehicle-leaflet-distribution",
     "/services/b2b-distribution",
     "/services/hand-to-hand-distribution",
     "/services/public-notice-leafleting",
   ]);
-  assert.equal([...html.matchAll(/href="\/services">View all services/g)].length, 2);
+  assert.equal([...html.matchAll(/href="\/leaflet-delivery">View all leaflet services/g)].length, 2);
   // House rules.
   assert.doesNotMatch(html, /[\u2013\u2014]/);
   for (const word of [/\bstreet/i, /£/, /\bprices?\b/i]) assert.doesNotMatch(text, word);
 });
 
-test("on phones: one compact navy card, one white panel of four rows, the same names in Also, View all services last", () => {
+test("on phones: one compact navy card, one white panel of four rows, the same names in Also, View all leaflet services last", () => {
   const { html, PACKAGES, CORE_SERVICES, MORE_SERVICES } = render();
   // What a phone hides is display: none below md, so it is neither shown nor read out there.
   const phoneText = (h: string) =>
     textOf(h.replace(/<(\w+) class="[^"]*(?<![:\w-])hidden(?![\w-])[^"]*"[^>]*>[\s\S]*?<\/\1>/g, ""));
   // Design, Print and Deliver: the title and badge on one row, one line, Find out more; no icon, chips or long description.
-  const featured = /<a class="group flex h-full[^"]*" href="\/services#design-print-deliver">([\s\S]*?)<\/a>/.exec(html)![1];
+  const featured = /<a class="group flex h-full[^"]*" href="\/leaflet-delivery#design-print-deliver">([\s\S]*?)<\/a>/.exec(html)![1];
   assert.match(featured, /<div class="flex items-start justify-between gap-3 md:block"><h3 class="font-heading text-\[20px\] font-extrabold[^"]*">Design, Print and Deliver<\/h3><span class="[^"]*bg-\[#facc15\][^"]*">Most popular<\/span><\/div>/);
   assert.match(featured, /<span class="hidden md:flex h-14 w-14/);
   assert.match(featured, /<ul class="mt-5 hidden flex-wrap gap-2 md:flex">/);
@@ -152,9 +151,9 @@ test("on phones: one compact navy card, one white panel of four rows, the same n
   assert.deepEqual(
     rows.map((r) => [r[2], phoneText(r[3])]),
     [
-      ["/services#print-and-deliver", "Print and Deliver Your artwork, printed and delivered"],
-      ["/services#leaflet-distribution", "Leaflet Distribution Through letterboxes in your areas"],
-      ["/services#targeted-postcode-campaigns", "Targeted Postcode Campaigns Focus on the areas most likely to respond"],
+      ["/leaflet-delivery#print-and-deliver", "Print and Deliver Your artwork, printed and delivered"],
+      ["/leaflet-delivery", "Leaflet Distribution Through letterboxes in your areas"],
+      ["/leaflet-delivery", "Targeted Postcode Campaigns Focus on the areas most likely to respond"],
       ["/services/hand-to-hand-distribution", "Hand-to-Hand Distribution Handed out at events and busy spots"],
     ]
   );
@@ -179,24 +178,26 @@ test("on phones: one compact navy card, one white panel of four rows, the same n
   // 12px between the navy card and the panel; no gap between the panel's rows.
   assert.match(html, /<div class="grid grid-cols-1 gap-3 md:grid-cols-2 md:gap-6">/);
   assert.match(html, /<div class="grid grid-cols-1 md:mt-6 md:grid-cols-3 md:gap-6">/);
-  // Also: the same five names as desktop, Leaflet Printing first; only its View all services link waits for md (phones have the button).
+  // Also: the same five names as desktop, Leaflet Printing first; only its View all leaflet services link waits for md (phones have the button).
   const also = /<p class="[^"]*md:mt-8[^"]*">(Also:[\s\S]*?)<\/p>/.exec(html)![1];
   assert.equal(
     phoneText(also).replace(/ ([,.])/g, "$1"),
     "Also: Leaflet Printing, Campaign Planning, Vehicle Leaflet Distribution, Public Notice Leafleting and B2B Leaflet Distribution."
   );
   assert.deepEqual(MORE_SERVICES.map((s) => s.title), ["Leaflet Printing", "Campaign Planning", "Vehicle Leaflet Distribution", "Public Notice Leafleting", "B2B Leaflet Distribution"]);
-  assert.match(also, /<a class="hidden [^"]*md:inline-flex" href="\/services">View all services<svg/);
-  // View all services: one link, last in the section (at the bottom on phones), full width and 48px tall there; top right from md.
-  const viewAll = [...html.matchAll(/<a class="([^"]*border-2 border-blue-700[^"]*)" href="\/services">View all services<svg/g)];
+  assert.match(also, /<a class="hidden [^"]*md:inline-flex" href="\/leaflet-delivery">View all leaflet services<svg/);
+  // View all leaflet services: one link, last in the section (at the bottom on phones), full width and 48px tall there; top right from md.
+  const viewAll = [...html.matchAll(/<a class="([^"]*border-2 border-blue-700[^"]*)" href="\/leaflet-delivery">View all leaflet services<svg/g)];
   assert.equal(viewAll.length, 1);
   assert.match(viewAll[0][1], /\bmt-6 flex min-h-12 w-full\b/);
   assert.match(viewAll[0][1], /md:col-start-2 md:row-start-1 md:mt-0 md:inline-flex md:min-h-0 md:w-auto/);
-  assert.match(html.slice(html.lastIndexOf("<a ")), /^<a class="[^"]*border-2 border-blue-700[^"]*" href="\/services">View all services<svg/);
-  // Every service's link is in the HTML once (View all services twice, as before: the button and the Also line's link).
-  for (const href of ["/services#design-print-deliver", "/services#print-and-deliver", "/services#leaflet-distribution", "/services#targeted-postcode-campaigns", "/services/hand-to-hand-distribution", "/leaflet-printing", "/services#campaign-planning", "/services#vehicle-leaflet-distribution", "/services/public-notice-leafleting", "/services/b2b-distribution"]) {
+  assert.match(html.slice(html.lastIndexOf("<a ")), /^<a class="[^"]*border-2 border-blue-700[^"]*" href="\/leaflet-delivery">View all leaflet services<svg/);
+  // Every service's link is in the HTML once; /leaflet-delivery four times (Leaflet Distribution, Targeted Postcode
+  // Campaigns, and View all leaflet services twice, as before: the button and the Also line's link).
+  for (const href of ["/leaflet-delivery#design-print-deliver", "/leaflet-delivery#print-and-deliver", "/services/hand-to-hand-distribution", "/leaflet-printing", "/leaflet-delivery#how-it-works", "/leaflet-delivery#vehicle-leaflet-distribution", "/services/public-notice-leafleting", "/services/b2b-distribution"]) {
     assert.equal(html.split(`href="${href}"`).length - 1, 1, href);
   }
+  assert.equal(html.split('href="/leaflet-delivery"').length - 1, 4);
 });
 
 test("the homepage shows the section in the same place, and nothing else of it is left behind", () => {
@@ -209,7 +210,7 @@ test("the homepage shows the section in the same place, and nothing else of it i
   assert.doesNotMatch(page, /const services = \[|services\.map/);
 });
 
-test("every /services card has a stable id and a scroll margin, and each homepage anchor lands on one", () => {
+test("every /services card keeps its stable id and scroll margin, and each homepage anchor lands on its part of /leaflet-delivery", () => {
   const source = readFileSync("app/services/page.tsx", "utf8");
   const ids = [...source.matchAll(/^    id: "([a-z0-9-]+)",\n    title: "([^"]+)",$/gm)].map((m) => [m[1], m[2]]);
   assert.deepEqual(ids, [
@@ -227,10 +228,18 @@ test("every /services card has a stable id and a scroll margin, and each homepag
   assert.match(source, /id=\{pkg\.id\}\n\s+className="scroll-mt-24 /);
   assert.match(source, /"scroll-mt-24 group bg-white rounded-lg/);
   assert.equal(source.split("id={svc.id}").length - 1, 2);
-  // Each homepage anchor names a real card, for the service it is about.
+  // Each homepage anchor names a real part of /leaflet-delivery, for the service it is about (Campaign Planning
+  // is How it works), and none points at a /services card any more.
   const { PACKAGES, CORE_SERVICES, MORE_SERVICES } = render();
-  const byId = new Map(ids.map(([id, title]) => [id, title]));
-  const anchored = [...PACKAGES, ...CORE_SERVICES, ...MORE_SERVICES].filter((s) => s.href.startsWith("/services#"));
-  assert.equal(anchored.length, 6);
-  for (const s of anchored) assert.equal(byId.get(s.href.slice("/services#".length)), s.title, s.href);
+  const all = [...PACKAGES, ...CORE_SERVICES, ...MORE_SERVICES];
+  assert.ok(all.every((s) => !s.href.startsWith("/services#")));
+  const anchored = all.filter((s) => s.href.startsWith("/leaflet-delivery#")).map((s) => [s.href.slice("/leaflet-delivery#".length), s.title]);
+  assert.deepEqual(anchored, [
+    ["design-print-deliver", "Design, Print and Deliver"],
+    ["print-and-deliver", "Print and Deliver"],
+    ["how-it-works", "Campaign Planning"],
+    ["vehicle-leaflet-distribution", "Vehicle Leaflet Distribution"],
+  ]);
+  const delivery = readFileSync("app/leaflet-delivery/page.tsx", "utf8");
+  for (const [id] of anchored) assert.match(delivery, new RegExp(`id="${id}"|id: "${id}"`), id);
 });

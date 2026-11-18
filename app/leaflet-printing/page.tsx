@@ -4,7 +4,7 @@ import Link from "next/link";
 import PrintBuilder from "@/components/PrintBuilder";
 
 // Leaflet and flyer printing. It targets printing: delivery is a benefit
-// that links out to /services and /areas, and "distribution" stays out of
+// that links out to /leaflet-delivery and /areas, and "distribution" stays out of
 // its H1 and H2s so it doesn't compete with those pages. Facts only: no
 // prices, no turnaround times, and the print supplier is never named.
 
@@ -215,8 +215,8 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
       <>
         Yes. We deliver the printed boxes to you anywhere in Hampshire and Dorset, and we can send them to other areas too. If you later
         want them delivered to homes, see our{" "}
-        <Link href="/services" className={IN_TEXT_LINK}>
-          leaflet delivery
+        <Link href="/leaflet-delivery" className={IN_TEXT_LINK}>
+          door to door leaflet delivery
         </Link>
         .
       </>
@@ -231,7 +231,7 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
     a: (
       <>
         Yes. Our{" "}
-        <Link href="/services#design-print-deliver" className={IN_TEXT_LINK}>
+        <Link href="/leaflet-delivery#design-print-deliver" className={IN_TEXT_LINK}>
           Design, Print and Deliver
         </Link>{" "}
         package covers the design too.
@@ -318,7 +318,7 @@ export default function LeafletPrintingPage() {
                 <Link href={QUOTE_HREF} className={YELLOW_BUTTON}>
                   Get a Free Quote
                 </Link>
-                <Link href="/services" className={OUTLINE_BUTTON}>
+                <Link href="/leaflet-delivery" className={OUTLINE_BUTTON}>
                   See our leaflet delivery
                 </Link>
               </div>
@@ -455,7 +455,7 @@ export default function LeafletPrintingPage() {
               <p className="flex-1 text-[#374151]">
                 Send us your artwork. We print it and our own team delivers it door to door, with every round GPS tracked.
               </p>
-              <Link href="/services#print-and-deliver" className={`self-start ${CARD_LINK}`}>
+              <Link href="/leaflet-delivery#print-and-deliver" className={`self-start ${CARD_LINK}`}>
                 About Print and Deliver <Arrow />
               </Link>
             </li>
@@ -470,7 +470,7 @@ export default function LeafletPrintingPage() {
               <p className="flex-1 text-[#dbeafe]">
                 No artwork yet? We design your leaflet, print it and deliver it. One campaign, one team, start to finish.
               </p>
-              <Link href="/services#design-print-deliver" className={`self-start ${CARD_LINK_ON_NAVY}`}>
+              <Link href="/leaflet-delivery#design-print-deliver" className={`self-start ${CARD_LINK_ON_NAVY}`}>
                 About Design, Print and Deliver <Arrow />
               </Link>
             </li>

@@ -199,7 +199,12 @@ export default function B2BDistributionPage() {
               It complements your existing marketing well, sitting alongside
               digital campaigns, email marketing and sales outreach rather
               than replacing any of it, and scales from a single business
-              park to a much wider regional campaign. Take a look at{" "}
+              park to a much wider regional campaign. To reach homes as well
+              as businesses, see all our{" "}
+              <Link href="/leaflet-delivery" className="text-blue-700 hover:underline font-medium">
+                leaflet delivery options
+              </Link>
+              . Take a look at{" "}
               <Link href="/case-studies" className="text-blue-700 hover:underline font-medium">
                 our track record
               </Link>{" "}

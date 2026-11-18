@@ -377,7 +377,7 @@ export default function WebDesignSeoPage() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Link
-              href="/services"
+              href="/leaflet-delivery#design-print-deliver"
               className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-md transition-all group"
             >
               <Image
@@ -397,7 +397,7 @@ export default function WebDesignSeoPage() {
               </div>
             </Link>
             <Link
-              href="/services"
+              href="/leaflet-delivery#print-and-deliver"
               className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-md transition-all group"
             >
               <Image
@@ -417,7 +417,7 @@ export default function WebDesignSeoPage() {
               </div>
             </Link>
             <Link
-              href="/services"
+              href="/leaflet-delivery"
               className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:border-blue-300 hover:shadow-md transition-all group"
             >
               <Image

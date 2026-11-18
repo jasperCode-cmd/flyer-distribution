@@ -138,7 +138,7 @@ export default function FaqPage() {
               <h2 className="text-base font-semibold text-blue-900 mb-2">{questions[1]}</h2>
               <p className="text-gray-600 text-base leading-relaxed">
                 Once we have your printed leaflets, we take care of getting them delivered. Our{" "}
-                <Link href="/services" className={a}>door-to-door leaflet distribution service</Link>{" "}
+                <Link href="/leaflet-delivery" className={a}>door-to-door leaflet distribution service</Link>{" "}
                 posts them directly through letterboxes across your chosen postcode areas in Hampshire
                 and Dorset. Once your materials are received, our team carries out the rounds and
                 confirms completion. Take a look at{" "}
@@ -152,7 +152,7 @@ export default function FaqPage() {
               <h2 className="text-base font-semibold text-blue-900 mb-2">{questions[2]}</h2>
               <p className="text-gray-600 text-base leading-relaxed">
                 Yes. Our{" "}
-                <Link href="/services" className={a}>Design, Print and Deliver package</Link>{" "}
+                <Link href="/leaflet-delivery#design-print-deliver" className={a}>Design, Print and Deliver package</Link>{" "}
                 is a complete end-to-end service where we handle everything from initial artwork
                 through to delivery across Hampshire and Dorset. Just let us know when{" "}
                 <Link href="/quote" className={a}>requesting your quote</Link> and we&apos;ll
@@ -168,7 +168,7 @@ export default function FaqPage() {
               <p className="text-gray-600 text-base leading-relaxed">
                 Yes. Postcode-level targeting is central to how we work. You choose the postcode
                 areas you want to reach, and we focus your flyer distribution campaign there. Our{" "}
-                <Link href="/services" className={a}>Campaign Planning service</Link> can help
+                <Link href="/leaflet-delivery#how-it-works" className={a}>Campaign Planning service</Link> can help
                 if you&apos;re unsure which postcode areas in Hampshire or Dorset are best suited
                 to your business.
               </p>
@@ -179,7 +179,7 @@ export default function FaqPage() {
               <h2 className="text-base font-semibold text-blue-900 mb-2">{questions[4]}</h2>
               <p className="text-gray-600 text-base leading-relaxed">
                 Not necessarily. You can supply your own printed materials, or choose our{" "}
-                <Link href="/services" className={a}>Print and Deliver service</Link> and
+                <Link href="/leaflet-delivery#print-and-deliver" className={a}>Print and Deliver service</Link> and
                 we&apos;ll handle the printing for you. We have established relationships with print
                 partners which means we can offer competitive pricing on A6, A5, A4 and DL formats.
                 Just let us know when{" "}
@@ -209,8 +209,8 @@ export default function FaqPage() {
                 how many households are within them. We generally recommend 5,000 or more, as this
                 gives your campaign enough reach to generate a meaningful response, and we offer
                 discounted packages at this volume. Our{" "}
-                <Link href="/services" className={a}>Campaign Planning service</Link>, part of our{" "}
-                <Link href="/services" className={a}>leaflet distribution services</Link>, can
+                <Link href="/leaflet-delivery#how-it-works" className={a}>Campaign Planning service</Link>, part of our{" "}
+                <Link href="/leaflet-delivery" className={a}>leaflet distribution services</Link>, can
                 advise on the right quantity for your target areas.
               </p>
             </div>
@@ -233,7 +233,7 @@ export default function FaqPage() {
                 parks, retail areas, and high-footfall locations across Hampshire and Dorset.
                 It&apos;s an effective way to reach people who are already out and spending locally,
                 and works well alongside a{" "}
-                <Link href="/services" className={a}>door-to-door leaflet distribution campaign</Link>.
+                <Link href="/leaflet-delivery" className={a}>door-to-door leaflet distribution campaign</Link>.
               </p>
             </div>
 
