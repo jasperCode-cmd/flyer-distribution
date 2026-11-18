@@ -416,9 +416,9 @@ test("it is in the sitemap (www, dated 18 November 2026, the same settings as th
   const other = entries.find((e) => e.url === `${SITE}/leaflet-printing`)!;
   assert.equal(entry[0].changeFrequency, other.changeFrequency);
   assert.equal(entry[0].priority, other.priority);
-  // The dates of the other pages are unchanged.
+  // The dates of the other pages are unchanged (but for /services, rebuilt the same day: see services-page.test.ts).
   assert.equal(new Date(other.lastModified!).toISOString(), "2026-11-17T00:00:00.000Z");
-  assert.equal(new Date(entries.find((e) => e.url === `${SITE}/services`)!.lastModified!).toISOString(), "2026-06-24T00:00:00.000Z");
+  assert.equal(new Date(entries.find((e) => e.url === `${SITE}/about`)!.lastModified!).toISOString(), "2026-06-24T00:00:00.000Z");
   const llms = read("public/llms.txt").split("\n");
   assert.ok(llms.includes(`- [Leaflet Delivery](${OWN}): Door to door leaflet delivery across Hampshire and Dorset by our own local team, with every round GPS tracked and a route report at the end.`));
   assert.ok(llms.indexOf("## Services") < llms.findIndex((l) => l.includes(OWN)));

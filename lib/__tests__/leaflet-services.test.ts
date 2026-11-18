@@ -210,24 +210,12 @@ test("the homepage shows the section in the same place, and nothing else of it i
   assert.doesNotMatch(page, /const services = \[|services\.map/);
 });
 
-test("every /services card keeps its stable id and scroll margin, and each homepage anchor lands on its part of /leaflet-delivery", () => {
+test("each homepage anchor lands on its part of /leaflet-delivery (the old /services cards are gone)", () => {
+  // /services is the all services hub now: its rows are the four services, not the old leaflet cards.
   const source = readFileSync("app/services/page.tsx", "utf8");
-  const ids = [...source.matchAll(/^    id: "([a-z0-9-]+)",\n    title: "([^"]+)",$/gm)].map((m) => [m[1], m[2]]);
-  assert.deepEqual(ids, [
-    ["design-print-deliver", "Design, Print and Deliver"],
-    ["print-and-deliver", "Print and Deliver"],
-    ["leaflet-distribution", "Leaflet Distribution"],
-    ["targeted-postcode-campaigns", "Targeted Postcode Campaigns"],
-    ["campaign-planning", "Campaign Planning"],
-    ["vehicle-leaflet-distribution", "Vehicle Leaflet Distribution"],
-    ["public-notice-leafleting", "Public Notice Leafleting"],
-    ["hand-to-hand-leaflet-distribution", "Hand-to-Hand Leaflet Distribution"],
-    ["b2b-leaflet-distribution", "B2B Leaflet Distribution"],
-  ]);
-  // Every card carries its id and clears the 65px sticky header with room to spare.
-  assert.match(source, /id=\{pkg\.id\}\n\s+className="scroll-mt-24 /);
-  assert.match(source, /"scroll-mt-24 group bg-white rounded-lg/);
-  assert.equal(source.split("id={svc.id}").length - 1, 2);
+  for (const old of ["targeted-postcode-campaigns", "campaign-planning", "hand-to-hand-leaflet-distribution", "b2b-leaflet-distribution"]) {
+    assert.ok(!source.includes(`id: "${old}"`) && !source.includes(`id="${old}"`), old);
+  }
   // Each homepage anchor names a real part of /leaflet-delivery, for the service it is about (Campaign Planning
   // is How it works), and none points at a /services card any more.
   const { PACKAGES, CORE_SERVICES, MORE_SERVICES } = render();

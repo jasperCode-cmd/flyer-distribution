@@ -82,8 +82,8 @@ test("the Services menu: leaflet services led by Leaflet Distribution then Leafl
     [...serviceLinks.matchAll(/label: "([^"]+)"/g)].map((m) => m[1]),
     ["Leaflet Delivery", "Services", "Leaflet Printing", "Public Notice Leafleting", "Hand-to-Hand Leaflet Distribution", "B2B Leaflet Distribution", "Web Design & SEO", "Screen Hire"]
   );
-  // /services: one link, in the Print and Deliver card.
+  // /services: its Leaflet Printing row's button, to the print builder.
   const services = read("app/services/page.tsx");
-  assert.equal((services.match(/href="\/leaflet-printing"/g) ?? []).length, 1);
-  assert.match(services, /\{pkg\.id === "print-and-deliver" && \(\s+<Link href="\/leaflet-printing"[^>]*>\s+See our leaflet printing\s+<\/Link>\s+\)\}/);
+  assert.deepEqual([...services.matchAll(/["'](\/leaflet-printing[^"']*)["']/g)].map((m) => m[1]), ["/leaflet-printing", "/leaflet-printing#paper-and-finish"]);
+  assert.match(services, /button=\{\{ label: "Build your print", href: "\/leaflet-printing#paper-and-finish" \}\}/);
 });

@@ -44,9 +44,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // The area pages moved to /areas/leaflet-distribution-[area] on 27 October 2026,
     // and the /areas overview's links changed with them. Lymington's page and
     // the Leaflet Printing page were added on 17 November 2026, and the
-    // Leaflet Delivery page on 18 November 2026.
+    // Leaflet Delivery page on 18 November 2026, when /services was rebuilt as
+    // the all services hub.
     lastModified: new Date(
-      route === "/leaflet-delivery"
+      route === "/leaflet-delivery" || route === "/services"
         ? "2026-11-18"
         : route === "/areas/leaflet-distribution-lymington" || route === "/leaflet-printing"
           ? "2026-11-17"

@@ -371,7 +371,6 @@ test("the services pages' quote links choose their service; every other quote li
     [join("app", "about", "page.tsx")]: ["/quote?service=leaflet"],
     // The areas overview's closing band asks about leaflets too.
     [join("app", "areas", "page.tsx")]: ["/quote?service=leaflet"],
-    [join("app", "services", "page.tsx")]: ["/quote?service=leaflet", "/quote?service=leaflet"],
     // The kinds of leaflet distribution choose Leaflet Distribution and their kind.
     [join("app", "services", "b2b-distribution", "page.tsx")]: ["/quote?service=b2b"],
     [join("app", "services", "hand-to-hand-distribution", "page.tsx")]: ["/quote?service=hand-to-hand"],
@@ -386,6 +385,8 @@ test("the services pages' quote links choose their service; every other quote li
   assert.match(printing, /const QUOTE_HREF = "\/quote\?service=printing";/);
   assert.equal(serviceFromParam("printing"), "Leaflet Printing");
   assert.doesNotMatch(printing, /href="\/quote/);
+  // The all services hub's closing button asks without choosing (it covers every service).
+  assert.match(readFileSync("app/services/page.tsx", "utf8"), /<Link href="\/quote" className=\{CLOSING_BUTTON\}>\s+Get a Free Quote/);
   // Including both "Book a Free Call" buttons.
   const web = readFileSync("app/services/web-design-seo/page.tsx", "utf8");
   assert.equal((web.match(/href="\/quote\?service=web"[^>]*>\s*Book a Free Call/g) ?? []).length, 2);
