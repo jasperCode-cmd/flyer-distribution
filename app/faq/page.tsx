@@ -60,7 +60,7 @@ const schemaAnswers = [
   "Once we have your printed leaflets, we take care of getting them delivered. Our door-to-door leaflet distribution service posts them directly through letterboxes across your chosen postcode areas in Hampshire and Dorset. Once your materials are received, our team carries out the rounds and confirms completion. Take a look at examples of our work to see it in action.",
   "Yes. Our Design, Print and Deliver package is a complete end-to-end service where we handle everything from initial artwork through to delivery across Hampshire and Dorset. Just let us know when requesting your quote and we'll talk you through the options. We also handle statutory Public Notice Leafleting for infrastructure projects across Hampshire.",
   "Yes. Postcode-level targeting is central to how we work. You choose the postcode areas you want to reach, and we focus your flyer distribution campaign there. Our Campaign Planning service can help if you're unsure which postcode areas in Hampshire or Dorset are best suited to your business.",
-  "Not necessarily. You can supply your own printed materials, or choose our Print and Deliver service and we'll handle the printing for you, in A6, A5, A4 or DL. Just let us know when requesting your quote and we'll include printing in your package.",
+  "Not necessarily. You can supply your own printed materials, or choose our Print and Deliver service and we'll handle the printing for you, in A6, A5, A4 or DL. Just let us know when requesting your quote and we'll include printing in your package. See our leaflet printing.",
   "Use our Get a Quote page and tell us your target postcode areas and approximate quantity. We'll come back to you within 24 hours with a tailored quote for your leaflet distribution campaign. If you're comparing distributors, it's worth reading what to know before you book.",
   "That depends on the postcode areas you want to cover across Hampshire and Dorset and how many households are within them. We generally recommend 5,000 or more, as this gives your campaign enough reach to generate a meaningful response. Our Campaign Planning service, part of our leaflet distribution services, can advise on the right quantity for your target areas.",
   "We deliver most standard leaflet sizes including A6, A5, A4, and DL. If you're unsure whether your format is suitable, just ask when you get a quote.",
@@ -182,7 +182,8 @@ export default function FaqPage() {
                 <Link href="/leaflet-delivery#print-and-deliver" className={a}>Print and Deliver service</Link> and
                 we&apos;ll handle the printing for you, in A6, A5, A4 or DL. Just let us know when{" "}
                 <Link href="/quote" className={a}>requesting your quote</Link> and we&apos;ll
-                include printing in your package.
+                include printing in your package.{" "}
+                <Link href="/leaflet-printing" className={a}>See our leaflet printing</Link>.
               </p>
             </div>
 

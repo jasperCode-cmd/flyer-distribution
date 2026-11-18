@@ -94,6 +94,23 @@ const Arrow = () => (
   </svg>
 );
 
+// A card link whose words wrap like text, its arrow kept on the line of the last word (never alone at the side).
+const WRAPPING_LINK = "self-start font-bold underline-offset-4 hover:underline";
+function ArrowText({ children }: { children: string }) {
+  const at = children.lastIndexOf(" ");
+  return (
+    <>
+      {children.slice(0, at + 1)}
+      <span className="whitespace-nowrap">
+        {children.slice(at + 1)}
+        <svg aria-hidden="true" viewBox="0 0 24 24" className="ml-1.5 inline-block h-4 w-4 align-[-3px]" fill="none" stroke="currentColor" strokeWidth={2.25} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+      </span>
+    </>
+  );
+}
+
 // Line icons, drawn on a 24px grid.
 const Icon = ({ children, className = "h-7 w-7", strokeWidth = 1.75 }: { children: React.ReactNode; className?: string; strokeWidth?: number }) => (
   <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
@@ -261,7 +278,8 @@ function PrintCard({ title, text, icon, image }: { title: string; text: string; 
             alt={image.alt}
             width={1200}
             height={700}
-            sizes="(min-width: 1200px) 371px, (min-width: 768px) calc((100vw - 88px) / 3), calc(100vw - 48px)"
+            // Covering a 200px band, the photo is drawn at least 343px wide (200px times its 12:7 shape).
+            sizes="(min-width: 1200px) 371px, (min-width: 1117px) calc((100vw - 88px) / 3), (min-width: 768px) 343px, (min-width: 391px) calc(100vw - 48px), 343px"
             className="h-full w-full object-cover"
           />
         ) : (
@@ -331,7 +349,8 @@ export default function LeafletPrintingPage() {
                 width={1500}
                 height={1000}
                 priority
-                sizes="(min-width: 1200px) 532px, (min-width: 1024px) 45vw, calc(100vw - 48px)"
+                // Covering a box 280px tall (380px from sm), the photo is drawn at least 420px (570px) wide.
+                sizes="(min-width: 1024px) 570px, (min-width: 468px) calc(100vw - 48px), 420px"
                 className="h-full w-full object-cover"
               />
             </div>
@@ -430,7 +449,8 @@ export default function LeafletPrintingPage() {
               Print on its own, or let us handle delivery too. Whichever you choose, you deal with the same local team from start to finish.
             </p>
           </div>
-          <ul className="grid grid-cols-1 gap-5 md:grid-cols-3">
+          {/* One card a row until lg, then the three side by side. */}
+          <ul className="grid grid-cols-1 gap-5 lg:grid-cols-3">
             <li className="flex flex-col gap-3.5 rounded-[20px] border border-[#e2e8f0] bg-white p-[30px]">
               <span className="text-[#1d4ed8]">
                 <Icon className="block h-9 w-9" strokeWidth={2}>
@@ -441,8 +461,8 @@ export default function LeafletPrintingPage() {
               <p className="flex-1 text-[#374151]">
                 We print your leaflets and deliver the boxes to you anywhere in Hampshire and Dorset, or send them to you further afield.
               </p>
-              <Link href={QUOTE_HREF} className={`self-start ${CARD_LINK}`}>
-                Get a printing quote <Arrow />
+              <Link href={QUOTE_HREF} className={`${WRAPPING_LINK} text-[#1d4ed8] hover:text-[#172554]`}>
+                <ArrowText>Get a printing quote</ArrowText>
               </Link>
             </li>
             <li className="flex flex-col gap-3.5 rounded-[20px] border border-[#e2e8f0] bg-white p-[30px]">
@@ -455,8 +475,8 @@ export default function LeafletPrintingPage() {
               <p className="flex-1 text-[#374151]">
                 Send us your artwork. We print it and our own team delivers it door to door, with every round GPS tracked.
               </p>
-              <Link href="/leaflet-delivery#print-and-deliver" className={`self-start ${CARD_LINK}`}>
-                About Print and Deliver <Arrow />
+              <Link href="/leaflet-delivery#print-and-deliver" className={`${WRAPPING_LINK} text-[#1d4ed8] hover:text-[#172554]`}>
+                <ArrowText>About Print and Deliver</ArrowText>
               </Link>
             </li>
             <li className="relative flex flex-col gap-3.5 rounded-[20px] bg-[#1e3a8a] p-[30px] text-white">
@@ -470,8 +490,8 @@ export default function LeafletPrintingPage() {
               <p className="flex-1 text-[#dbeafe]">
                 No artwork yet? We design your leaflet, print it and deliver it. One campaign, one team, start to finish.
               </p>
-              <Link href="/leaflet-delivery#design-print-deliver" className={`self-start ${CARD_LINK_ON_NAVY}`}>
-                About Design, Print and Deliver <Arrow />
+              <Link href="/leaflet-delivery#design-print-deliver" className={`${WRAPPING_LINK} text-[#facc15] hover:text-yellow-200`}>
+                <ArrowText>About Design, Print and Deliver</ArrowText>
               </Link>
             </li>
           </ul>

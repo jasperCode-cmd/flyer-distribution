@@ -8,7 +8,9 @@ import Link from "next/link";
 // design: its 1200px container, spacing, type sizes, colours, corners and
 // cards (the design's flex and grid rules, so it wraps where the design does).
 // On phones (below 640px) the headings and the larger section padding are
-// smaller, as on /leaflet-delivery. Each row has an id the hero's buttons jump
+// smaller, as on /leaflet-delivery. The hero's four buttons and the four
+// reasons sit 1 across on small phones, 2 from sm and 4 from lg, so no row is
+// left with one. Each row has an id the hero's buttons jump
 // to. Facts only: no prices, no turnaround times, no supplier named.
 
 const SITE = "https://www.flyerdistributionhampshire.co.uk";
@@ -90,6 +92,12 @@ const IN_TEXT_LINK_ON_NAVY = "text-white underline hover:text-[#facc15]";
 const STAR = "M12 2.5l2.9 6.06 6.6.87-4.83 4.6 1.24 6.6L12 17.5l-5.91 3.13 1.24-6.6-4.83-4.6 6.6-.87L12 2.5z";
 // Each row's photo: as wide as its column (548px beside the copy at full width, the full width once they stack).
 const ROW_IMAGE_SIZES = "(min-width: 1200px) 548px, (min-width: 984px) calc(50vw - 52px), calc(100vw - 48px)";
+// A row photo covers its box, so in a box taller than the photo's own shape it is drawn wider than the box: its
+// height times the photo's width-to-height ratio (coverWidth). sizes asks for the wider of the two, so the file
+// the browser picks fills the photo as drawn: beside the copy from 984px (548px at most), the full width once they
+// stack, and never less than coverWidth.
+const rowImageSizes = (coverWidth: number) =>
+  `(min-width: 984px) ${Math.max(548, coverWidth)}px, (min-width: ${coverWidth + 48}px) calc(100vw - 48px), ${coverWidth}px`;
 
 const Arrow = ({ className = "h-4 w-4" }: { className?: string }) => (
   <svg aria-hidden="true" viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={2.25} strokeLinecap="round" strokeLinejoin="round">
@@ -193,7 +201,7 @@ export default function ServicesPage() {
             Leaflet delivery, printing, web design and mobile screen hire. Pick one, or put them together and deal with one local team
             from start to finish.
           </p>
-          <ul className="mt-[18px] grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-3">
+          <ul className="mt-[18px] grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {JUMPS.map((j) => (
               <li key={j.id}>
                 <a
@@ -217,7 +225,7 @@ export default function ServicesPage() {
             alt="Leaflets posted through a letterbox"
             width={1600}
             height={1200}
-            sizes={ROW_IMAGE_SIZES}
+            sizes={rowImageSizes(534)}
             className="h-[400px] min-w-0 flex-[1_1_440px] rounded-[20px] object-cover"
           />
           <RowCopy
@@ -244,7 +252,7 @@ export default function ServicesPage() {
             alt="Colourful printed leaflets laid out on a desk"
             width={1200}
             height={700}
-            sizes={ROW_IMAGE_SIZES}
+            sizes={rowImageSizes(618)}
             className="h-[360px] min-w-0 flex-[1_1_440px] rounded-[20px] object-cover"
           />
         </div>
@@ -294,11 +302,11 @@ export default function ServicesPage() {
       <section id="web-design-seo" className="scroll-mt-16">
         <div className={`${CONTAINER} flex flex-wrap items-center gap-14 pt-16 pb-14 sm:pt-[88px]`}>
           <Image
-            src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1200&q=80"
+            src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=1800&q=80"
             alt="A laptop showing website code on a desk"
-            width={1200}
-            height={801}
-            sizes={ROW_IMAGE_SIZES}
+            width={1800}
+            height={1202}
+            sizes={rowImageSizes(540)}
             className="h-[360px] min-w-0 flex-[1_1_440px] rounded-[20px] object-cover"
           />
           <RowCopy
@@ -332,7 +340,7 @@ export default function ServicesPage() {
 
       {/* 7. Reasons: the 5.0 Google rating (linking to the reviews, as on the homepage) and three short lines */}
       <section className="border-t border-[#e2e8f0] bg-[#f8fafc]">
-        <div className={`${CONTAINER} grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-5 py-10`}>
+        <div className={`${CONTAINER} grid grid-cols-1 gap-5 py-10 sm:grid-cols-2 lg:grid-cols-4`}>
           <a
             href={GOOGLE_PROFILE}
             target="_blank"

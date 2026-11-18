@@ -44,7 +44,17 @@ test("the three answers reworded: printing, quantities and how long a campaign t
   const answers = Object.fromEntries(shown());
   assert.equal(
     answers["Do I need to have my leaflets printed already?"],
-    "Not necessarily. You can supply your own printed materials, or choose our Print and Deliver service and we'll handle the printing for you, in A6, A5, A4 or DL. Just let us know when requesting your quote and we'll include printing in your package."
+    "Not necessarily. You can supply your own printed materials, or choose our Print and Deliver service and we'll handle the printing for you, in A6, A5, A4 or DL. Just let us know when requesting your quote and we'll include printing in your package. See our leaflet printing."
+  );
+  // Its links: the Print and Deliver package, the quote form, and the printing page.
+  const printing = /Do I need to have my leaflets printed already\?<\/h2><p[^>]*>([\s\S]*?)<\/p>/.exec(html())![1];
+  assert.deepEqual(
+    [...printing.matchAll(/<a[^>]*href="([^"]+)"[^>]*>([^<]*)<\/a>/g)].map((m) => [m[1], m[2]]),
+    [
+      ["/leaflet-delivery#print-and-deliver", "Print and Deliver service"],
+      ["/quote", "requesting your quote"],
+      ["/leaflet-printing", "See our leaflet printing"],
+    ]
   );
   assert.equal(
     answers["How many leaflets do I need?"],

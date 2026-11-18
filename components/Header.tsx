@@ -161,6 +161,14 @@ export default function Header() {
     setMobileServicesOpen(false);
   };
 
+  // While the phone menu is open the page is marked, so the floating Get a
+  // Quote button steps aside (app/globals.css) and never covers a menu item;
+  // it comes back as the menu closes.
+  useEffect(() => {
+    document.documentElement.toggleAttribute("data-phone-menu-open", menuOpen);
+    return () => document.documentElement.removeAttribute("data-phone-menu-open");
+  }, [menuOpen]);
+
   const pathname = usePathname();
   if (hidesSiteChrome(pathname)) return null;
 

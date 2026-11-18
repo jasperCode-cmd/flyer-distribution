@@ -181,7 +181,12 @@ export default function B2BDistributionPage() {
               broad advertising that may never reach the right person. We
               deliver to offices, industrial estates, business parks and
               other commercial areas, focusing on the specific industries
-              and sectors most relevant to what you offer.
+              and sectors most relevant to what you offer. If your leaflets
+              aren&apos;t printed yet, our{" "}
+              <Link href="/leaflet-printing" className="text-blue-700 hover:underline font-medium">
+                leaflet printing
+              </Link>{" "}
+              covers that as well.
             </p>
             <p className="text-lg">
               It&apos;s well suited to trades, professional services,

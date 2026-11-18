@@ -393,17 +393,22 @@ test("the design's measures: the 1200px container, 88px sections, 40px headings,
   const how = sectionOf("How we deliver your leaflets");
   assert.match(how, /<div class="flex flex-wrap items-center gap-10 rounded-\[24px\] bg-\[#1e3a8a\] p-10 text-white">/);
   assert.equal((how.match(/<li class="flex items-start gap-3\.5 rounded-\[14px\] bg-\[#172554\] px-\[18px\] py-4">/g) ?? []).length, 3);
-  // The four method cards: as many columns as fit at 260px, 18px corners, a 1px #e2e8f0 border, 24px padding, the
-  // 48px light blue icon box.
-  assert.match(how, /<ul class="grid grid-cols-\[repeat\(auto-fit,minmax\(260px,1fr\)\)\] gap-4">/);
+  // The four method cards (and the four steps and the four area groups): 1 across on phones, 2 from md, 4 from xl,
+  // so no row is left with one; 18px corners, a 1px #e2e8f0 border, 24px padding, the 48px light blue icon box.
+  assert.match(how, /<ul class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">/);
+  assert.match(sectionOf("How it works"), /<ol class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">/);
+  assert.doesNotMatch(SOURCE, /auto-fit,minmax\((260|230|250)px/);
   assert.equal((how.match(/class="[^"]*flex flex-1 flex-col gap-2\.5 rounded-\[18px\] border border-\[#e2e8f0\] bg-white p-6[^"]*"[^>]*><span class="flex h-12 w-12 items-center justify-center rounded-\[12px\] bg-\[#eff6ff\] text-\[#1d4ed8\]">/g) ?? []).length, 4);
   // The packages: 300px columns, 20px corners, 30px padding.
-  assert.match(sectionOf("Need them printed too?"), /<ul class="grid grid-cols-\[repeat\(auto-fit,minmax\(300px,1fr\)\)\] gap-5">/);
+  // The three printing cards: one a row until lg, then three across.
+  assert.match(sectionOf("Need them printed too?"), /<ul class="grid grid-cols-1 gap-5 lg:grid-cols-3">/);
   assert.equal((sectionOf("Need them printed too?").match(/rounded-\[20px\][^"]*p-\[30px\]/g) ?? []).length, 3);
   // The round: 462px tall (the design's 460px and its 1px border), 20px corners.
   assert.match(html(), /<img alt="GPS tracked leaflet delivery route in Bitterne Park, Southampton"[^>]*class="h-\[462px\] w-full rounded-\[20px\] border border-\[#e2e8f0\] object-cover"/);
   // The area groups: 250px columns, 16px corners; the questions 19px bold between 1px dividers; the closing card navy, 24px corners, 48px padding.
-  assert.match(sectionOf("Where we deliver"), /<ul class="grid grid-cols-\[repeat\(auto-fit,minmax\(250px,1fr\)\)\] gap-4"><li class="flex flex-col gap-2\.5 rounded-\[16px\] border border-\[#e2e8f0\] p-5">/);
+  assert.match(sectionOf("Where we deliver"), /<ul class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4"><li class="flex flex-col gap-2\.5 rounded-\[16px\] border border-\[#e2e8f0\] p-5">/);
+  // The hero photo covers a box 400px tall, so it is drawn at least 534px wide: sizes asks for that.
+  assert.match(html(), /<img alt="Leaflets posted through a letterbox"[^>]*sizes="\(min-width: 996px\) 534px, \(min-width: 582px\) calc\(100vw - 48px\), 534px"/);
   assert.equal((sectionOf("Leaflet delivery questions").match(/<details[^>]*class="border-b border-\[#e2e8f0\] py-5"><summary class="[^"]*text-\[19px\] font-bold text-\[#172554\][^"]*">/g) ?? []).length, 5);
   assert.match(html(), /<div class="flex flex-wrap items-center justify-between gap-6 rounded-\[24px\] bg-\[#1e3a8a\] p-12 text-white">/);
 });

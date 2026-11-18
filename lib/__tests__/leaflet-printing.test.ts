@@ -221,7 +221,11 @@ test("three ways to order, the navy one most popular, each with its link", () =>
     ["/leaflet-delivery#design-print-deliver", "About Design, Print and Deliver"],
   ]);
   // Three equal cards (18px corners); the third navy, with the yellow badge at its top right and a yellow link.
-  assert.match(ways, /<ul class="grid grid-cols-1 gap-5 md:grid-cols-3">/);
+  // One card a row until lg, then three across; each link's arrow stays with its last word.
+  assert.match(ways, /<ul class="grid grid-cols-1 gap-5 lg:grid-cols-3">/);
+  for (const [text, last] of [["Get a printing", "quote"], ["About Print and", "Deliver"], ["About Design, Print and", "Deliver"]]) {
+    assert.ok(ways.includes(`>${text} <span class="whitespace-nowrap">${last}<svg aria-hidden="true"`), text);
+  }
   assert.equal((ways.match(/<li class="flex flex-col gap-3\.5 rounded-\[20px\] border border-\[#e2e8f0\] bg-white p-\[30px\]"><span class="text-\[#1d4ed8\]"><svg/g) ?? []).length, 2);
   assert.match(
     ways,

@@ -180,7 +180,12 @@ export default function HandToHandDistributionPage() {
               centre entrance, a town centre pedestrian area, or an event,
               and hands your material straight to passers-by. It&apos;s a
               direct, personal way to reach people at the exact moment
-              they&apos;re out and about.
+              they&apos;re out and about. If you need the leaflets printed
+              first, we handle the{" "}
+              <Link href="/leaflet-printing" className="text-blue-700 hover:underline font-medium">
+                leaflet printing
+              </Link>{" "}
+              too.
             </p>
             <p className="text-lg">
               We&apos;ve run hand-to-hand campaigns at Westquay Shopping

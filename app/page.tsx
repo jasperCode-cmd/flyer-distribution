@@ -286,6 +286,14 @@ export default function HomePage() {
               imagePosition="center 30%"
             />
           </StaggerGroup>
+          <p className="mt-8">
+            <Link
+              href="/services"
+              className="text-blue-700 hover:text-blue-900 font-semibold text-sm underline underline-offset-2"
+            >
+              See all our services →
+            </Link>
+          </p>
         </div>
       </section>
 

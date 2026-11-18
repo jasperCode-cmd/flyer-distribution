@@ -74,6 +74,9 @@ const serviceSchema = {
 // The design's measures: a centred 1200px container with 24px sides, 88px
 // above and below each section (64px on phones), 40px headings in #172554
 // (32px on phones), body text at a 1.6 line height, card titles in the body font.
+// The three sets of four (delivery methods, steps, area groups) sit 1 across on
+// phones, 2 from md and 4 from xl, and the three printing cards 1 across until
+// lg and 3 from lg, so no row is ever left with one.
 const CONTAINER = "mx-auto w-full max-w-[1200px] px-6";
 const SECTION = "py-16 sm:py-[88px]";
 const H2 = "font-heading text-[32px] sm:text-[40px] font-extrabold leading-[1.1] text-[#172554]";
@@ -360,14 +363,15 @@ export default function LeafletDeliveryPage() {
                 <span className="sr-only"> (opens in a new tab)</span>
               </a>
             </div>
-            {/* 400px tall, 20px corners and a deep shadow; 522px wide beside the copy at full width. */}
+            {/* 400px tall, 20px corners and a deep shadow; 522px wide beside the copy at full width. Covering a box
+                400px tall, the photo is drawn at least 534px wide, which sizes asks for. */}
             <Image
               src="/images/leaflet-delivery-hero.webp"
               alt="Leaflets posted through a letterbox"
               width={1600}
               height={1200}
               priority
-              sizes="(min-width: 1200px) 522px, (min-width: 996px) calc(50vw - 78px), calc(100vw - 48px)"
+              sizes="(min-width: 996px) 534px, (min-width: 582px) calc(100vw - 48px), 534px"
               className="h-[400px] min-w-0 flex-[1_1_420px] rounded-[20px] object-cover shadow-[0_24px_48px_rgba(15,23,42,0.35)]"
             />
           </div>
@@ -417,7 +421,7 @@ export default function LeafletDeliveryPage() {
               ))}
             </ul>
           </div>
-          <ul className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4">
+          <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             {OTHER_METHODS.map((m) => {
               const inside = (
                 <>
@@ -463,7 +467,8 @@ export default function LeafletDeliveryPage() {
             <h2 className={H2}>Need them printed too?</h2>
             <p className={INTRO}>Bring your own leaflets, or let us print them and deliver them in one go.</p>
           </div>
-          <ul className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-5">
+          {/* One card a row until lg, then the three side by side (none left on its own). */}
+          <ul className="grid grid-cols-1 gap-5 lg:grid-cols-3">
             <li id="design-print-deliver" className="relative flex scroll-mt-24 flex-col gap-3 rounded-[20px] bg-[#1e3a8a] p-[30px] text-white">
               <span className={`absolute right-5 top-5 ${BADGE}`}>Most popular</span>
               {/* Kept clear of the badge, so the title wraps rather than run under it. */}
@@ -499,7 +504,7 @@ export default function LeafletDeliveryPage() {
       <section id="how-it-works" className={`scroll-mt-16 bg-white ${SECTION}`}>
         <div className={`${CONTAINER} flex flex-col gap-9`}>
           <h2 className={H2}>How it works</h2>
-          <ol className="grid grid-cols-[repeat(auto-fit,minmax(230px,1fr))] gap-5">
+          <ol className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
             {STEPS.map((s, i) => (
               <li key={s.title} className="flex flex-col gap-2 border-t-[3px] border-[#facc15] pt-[18px]">
                 <span className="text-[13px] font-bold text-[#b45309]">{String(i + 1).padStart(2, "0")}</span>
@@ -556,7 +561,7 @@ export default function LeafletDeliveryPage() {
               See all areas <Arrow />
             </Link>
           </div>
-          <ul className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
+          <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
             {AREA_GROUPS.map((g) => (
               <li key={g.label} className="flex flex-col gap-2.5 rounded-[16px] border border-[#e2e8f0] p-5">
                 <h3 className={`${H3} text-[12px] uppercase tracking-[0.12em] text-[#1d4ed8]`}>{g.label}</h3>

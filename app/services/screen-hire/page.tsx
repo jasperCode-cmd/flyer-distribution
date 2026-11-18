@@ -150,6 +150,11 @@ export default function ScreenHirePage() {
           >
             Web Design &amp; SEO
           </Link>
+          <p className="mt-5 text-sm">
+            <Link href="/services" className="text-blue-700 hover:text-blue-900 font-semibold underline underline-offset-2">
+              See all our services &rarr;
+            </Link>
+          </p>
         </div>
       </section>
     </>

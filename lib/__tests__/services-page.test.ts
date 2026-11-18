@@ -250,7 +250,16 @@ test("the design's measures, and smaller headings and padding on phones as on /l
   assert.match(html(), /<h1 class="max-w-\[820px\] font-heading text-\[36px\] sm:text-\[56px\] font-extrabold leading-\[1\.05\]">/);
   assert.match(read("app/leaflet-delivery/page.tsx"), /const SECTION = "py-16 sm:py-\[88px\]";/);
   // The jump buttons, the row buttons and the pills.
-  assert.match(html(), /<ul class="mt-\[18px\] grid grid-cols-\[repeat\(auto-fit,minmax\(220px,1fr\)\)\] gap-3">/);
+  // The four jump buttons and the four reasons: 1 across on small phones, 2 from sm, 4 from lg (no row left with one).
+  assert.match(html(), /<ul class="mt-\[18px\] grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">/);
+  assert.match(html(), /<section class="border-t border-\[#e2e8f0\] bg-\[#f8fafc\]"><div class="mx-auto w-full max-w-\[1200px\] px-6 grid grid-cols-1 gap-5 py-10 sm:grid-cols-2 lg:grid-cols-4">/);
+  // Each row photo's sizes asks for the width it is drawn at when it covers its box (its height times its shape).
+  const sizesOf = (alt: string) => decode(new RegExp(`<img alt="${alt}"[^>]*sizes="([^"]*)"`).exec(html())![1]);
+  assert.equal(sizesOf("Leaflets posted through a letterbox"), "(min-width: 984px) 548px, (min-width: 582px) calc(100vw - 48px), 534px");
+  assert.equal(sizesOf("Colourful printed leaflets laid out on a desk"), "(min-width: 984px) 618px, (min-width: 666px) calc(100vw - 48px), 618px");
+  assert.equal(sizesOf("A laptop showing website code on a desk"), "(min-width: 984px) 548px, (min-width: 588px) calc(100vw - 48px), 540px");
+  assert.equal(sizesOf("Our mobile LED screen trailer set up outdoors"), "(min-width: 1200px) 548px, (min-width: 984px) calc(50vw - 52px), calc(100vw - 48px)");
+  assert.match(SOURCE, /src="https:\/\/images\.unsplash\.com\/photo-1498050108023-c5249f4df085\?w=1800&q=80"\s+alt="A laptop showing website code on a desk"\s+width=\{1800\}\s+height=\{1202\}/);
   assert.equal((html().match(/class="flex items-center justify-between gap-2\.5 rounded-\[14px\] border border-\[#3b5bb5\] bg-\[#172554\] px-\[18px\] py-4 font-bold text-white/g) ?? []).length, 4);
   assert.equal((html().match(/class="mt-1\.5 inline-flex min-h-\[52px\] items-center gap-1\.5 self-start rounded-\[12px\] bg-\[#1e3a8a\] px-6 font-bold text-white/g) ?? []).length, 4);
   assert.equal((html().match(/rounded-full bg-\[#eff6ff\] px-\[13px\] py-\[7px\] text-\[14px\] font-bold text-\[#1e3a8a\]/g) ?? []).length, 15);

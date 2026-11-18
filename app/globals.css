@@ -165,3 +165,12 @@ body {
     animation: none;
   }
 }
+
+/* ── Floating quote button and the phone menu ──
+   The header marks the page while its phone menu is open (below lg, 1024px),
+   and the floating Get a Quote button steps aside so it covers no menu item. */
+@media (max-width: 1023.98px) {
+  html[data-phone-menu-open] .floating-quote-button {
+    display: none;
+  }
+}

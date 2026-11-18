@@ -210,7 +210,7 @@ export default function FloatingQuoteButton() {
   const wiggling = visible && !open && !hasOpenedOnce && !footerInView;
 
   return (
-    <div ref={containerRef} className="fixed bottom-6 right-6 z-50">
+    <div ref={containerRef} className="floating-quote-button fixed bottom-6 right-6 z-50">
       {pillStage !== "gone" && (
         <button
           type="button"
