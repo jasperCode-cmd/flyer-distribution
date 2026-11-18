@@ -126,6 +126,7 @@ test("each service's row: its copy, its pills (links for leaflet delivery only),
   assert.deepEqual(button(printing), ["/leaflet-printing#paper-and-finish", "Build your print"]);
   assert.equal(img(printing).alt, "Colourful printed leaflets laid out on a desk");
   assert.match(img(printing).src, /url=%2Fimages%2Fprinting-flyers-leaflets\.webp/);
+  assert.equal(img(printing).size, "2312x1349");
   assert.match(img(printing).cls, /h-\[360px\]/);
   assert.match(read("app/leaflet-printing/page.tsx"), /<section id="paper-and-finish"/);
 

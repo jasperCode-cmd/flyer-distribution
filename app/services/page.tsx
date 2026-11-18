@@ -250,8 +250,8 @@ export default function ServicesPage() {
           <Image
             src="/images/printing-flyers-leaflets.webp"
             alt="Colourful printed leaflets laid out on a desk"
-            width={1200}
-            height={700}
+            width={2312}
+            height={1349}
             sizes={rowImageSizes(618)}
             className="h-[360px] min-w-0 flex-[1_1_440px] rounded-[20px] object-cover"
           />

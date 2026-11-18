@@ -174,11 +174,11 @@ test("photos covering boxes taller than their own shape get a file big enough fo
   // The largest file each photo has (what the optimiser serves for any bigger request).
   const PHOTOS: [string, string, number][] = [
     ["/services", "Leaflets posted through a letterbox", 1600],
-    ["/services", "Colourful printed leaflets laid out on a desk", 1200],
+    ["/services", "Colourful printed leaflets laid out on a desk", 2312],
     ["/services", "A laptop showing website code on a desk", 1800],
     ["/leaflet-delivery", "Leaflets posted through a letterbox", 1600],
     ["/leaflet-printing", "A large printer mid-print", 1500],
-    ["/leaflet-printing", "Colourful printed leaflets laid out on a desk", 1200],
+    ["/leaflet-printing", "Colourful printed leaflets laid out on a desk", 2312],
     ["/leaflet-printing", "A printed folded leaflet standing on a stack of leaflets", 1200],
     ["/leaflet-printing", "A stack of printed business cards", 1200],
   ];

@@ -123,7 +123,7 @@ const TICKS = ["250gsm silk, double-sided, recommended", "Delivered to you or th
 const MAIN_PRODUCTS = [
   {
     title: "Flyers and leaflets",
-    image: { src: "/images/printing-flyers-leaflets.webp", alt: "Colourful printed leaflets laid out on a desk" },
+    image: { src: "/images/printing-flyers-leaflets.webp", alt: "Colourful printed leaflets laid out on a desk", width: 2312, height: 1349 },
     text: "Our main product. A6, A5, A4 and DL, printed single or double-sided.",
     icon: (
       <>
@@ -134,7 +134,7 @@ const MAIN_PRODUCTS = [
   },
   {
     title: "Folded leaflets",
-    image: { src: "/images/printing-folded-leaflets.webp", alt: "A printed folded leaflet standing on a stack of leaflets" },
+    image: { src: "/images/printing-folded-leaflets.webp", alt: "A printed folded leaflet standing on a stack of leaflets", width: 1200, height: 700 },
     text: "Folded leaflets, available creased or perforated.",
     icon: (
       <>
@@ -145,7 +145,7 @@ const MAIN_PRODUCTS = [
   },
   {
     title: "Business cards",
-    image: { src: "/images/printing-business-cards.webp", alt: "A stack of printed business cards" },
+    image: { src: "/images/printing-business-cards.webp", alt: "A stack of printed business cards", width: 1200, height: 700 },
     text: "Standard, folded and uncoated cards to match your leaflets.",
     icon: (
       <>
@@ -268,7 +268,7 @@ const FAQS: { q: string; a: React.ReactNode }[] = [
 // A main product card: a band across the top, 200px tall, filled edge to
 // edge by its photo, or (with no image) its line icon, large, on light blue;
 // then its title and line.
-function PrintCard({ title, text, icon, image }: { title: string; text: string; icon: React.ReactNode; image?: { src: string; alt: string } }) {
+function PrintCard({ title, text, icon, image }: { title: string; text: string; icon: React.ReactNode; image?: { src: string; alt: string; width: number; height: number } }) {
   return (
     <li className="flex flex-col overflow-hidden rounded-[18px] border border-[#e2e8f0] bg-white">
       <div className="h-[200px] bg-[#dbeafe]">
@@ -276,8 +276,8 @@ function PrintCard({ title, text, icon, image }: { title: string; text: string; 
           <Image
             src={image.src}
             alt={image.alt}
-            width={1200}
-            height={700}
+            width={image.width}
+            height={image.height}
             // Covering a 200px band, the photo is drawn at least 343px wide (200px times its 12:7 shape).
             sizes="(min-width: 1200px) 371px, (min-width: 1117px) calc((100vw - 88px) / 3), (min-width: 768px) 343px, (min-width: 391px) calc(100vw - 48px), 343px"
             className="h-full w-full object-cover"
