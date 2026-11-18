@@ -10,11 +10,12 @@ type ServiceItem = { href: string; label: string; description: string; look?: "f
 
 // The Services menu, shared by the desktop dropdown (two columns) and the
 // phone menu (one). The leaflet services lead with Leaflet Distribution, the
-// most prominent (navy, its badge on a line of its own above the title), then
-// Leaflet Printing, lighter (light blue, with a printer icon); the rest are
-// plain. Each says in a line what it is.
+// most prominent (navy, its badge on a line of its own above the title, and
+// opening /leaflet-delivery), then Leaflet Printing, lighter (light blue, with
+// a printer icon); the rest are plain. Each says in a line what it is. Both
+// end with the All services bar.
 const LEAFLET_SERVICES: ServiceItem[] = [
-  { href: "/services", label: "Leaflet Distribution", description: "Door to door, GPS tracked. We can design and print it too.", look: "featured" },
+  { href: "/leaflet-delivery", label: "Leaflet Distribution", description: "Door to door, GPS tracked. We can design and print it too.", look: "featured" },
   { href: "/leaflet-printing", label: "Leaflet Printing", description: "Flyers, leaflets and business cards", look: "highlight" },
   { href: "/services/public-notice-leafleting", label: "Public Notice Leafleting", description: "Road closures, works and consultations" },
   { href: "/services/hand-to-hand-distribution", label: "Hand-to-Hand Leaflet Distribution", description: "Leaflets handed out at events and busy spots" },
@@ -67,6 +68,26 @@ function ServiceLink({ item, onClick }: { item: ServiceItem; onClick: () => void
     <Link href={item.href} onClick={onClick} className={`block min-h-11 rounded-lg px-4 py-2.5 transition-colors hover:bg-slate-100 ${FOCUS}`}>
       <span className="block text-sm font-bold leading-snug text-[#1e3a8a]">{item.label}</span>
       <span className="mt-0.5 block text-balance text-[13px] leading-snug text-slate-500">{item.description}</span>
+    </Link>
+  );
+}
+
+// The last row of the Services menu, the full width of the desktop panel and
+// at the bottom of the phone menu's Services: one link to /services, light grey
+// with a 1px border and 12px corners, its title and line on the left and
+// View all on the right.
+function AllServicesBar({ onClick, className }: { onClick: () => void; className: string }) {
+  return (
+    <Link
+      href="/services"
+      onClick={onClick}
+      className={`flex min-h-11 items-center justify-between gap-4 rounded-[12px] border border-[#e2e8f0] bg-[#f8fafc] px-4 py-3 transition-colors hover:border-[#cbd5e1] hover:bg-slate-100 ${FOCUS} ${className}`}
+    >
+      <span className="min-w-0">
+        <span className="block text-sm font-bold leading-snug text-[#1e3a8a]">All services</span>
+        <span className="mt-0.5 block text-balance text-[13px] leading-snug text-slate-600">Leaflet delivery, printing, web design and screen hire in one place</span>
+      </span>
+      <span className="shrink-0 text-sm font-bold text-blue-700">View all &rarr;</span>
     </Link>
   );
 }
@@ -168,7 +189,7 @@ export default function Header() {
             </Link>
 
             {/* Services dropdown: two columns, leaflet services on the left and
-                the additional services on the right, then View all services. */}
+                the additional services on the right, then the All services bar. */}
             <div
               ref={dropdownRef}
               className="relative"
@@ -243,15 +264,7 @@ export default function Header() {
                         </div>
                       </div>
                     </div>
-                    <div className="mt-4 border-t border-[#e2e8f0] pt-3">
-                      <Link
-                        href="/services"
-                        onClick={closePanel}
-                        className={`inline-flex min-h-8 items-center rounded px-1 text-sm font-bold text-blue-700 underline-offset-4 hover:text-[#1e3a8a] hover:underline ${FOCUS}`}
-                      >
-                        View all services &rarr;
-                      </Link>
-                    </div>
+                    <AllServicesBar onClick={closePanel} className="mt-4" />
                   </div>
                 </div>
               )}
@@ -343,13 +356,7 @@ export default function Header() {
                         </Link>
                       ))}
                     </div>
-                    <Link
-                      href="/services"
-                      onClick={closeMobile}
-                      className={`flex min-h-11 items-center rounded px-2 text-sm font-bold text-blue-700 hover:text-[#1e3a8a] ${FOCUS}`}
-                    >
-                      View all services &rarr;
-                    </Link>
+                    <AllServicesBar onClick={closeMobile} className="mt-1.5" />
                   </div>
                 )}
               </div>

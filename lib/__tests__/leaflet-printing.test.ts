@@ -381,7 +381,7 @@ test("the copy rules: no prices, turnaround times, supplier, banned words or das
   for (const [href] of linksIn(html())) assert.match(href, /^\//, href);
 });
 
-test("it is in the sitemap, dated 17 November 2026, with the same settings as the other pages", () => {
+test("it is in the sitemap, dated 17 November 2026, with the same settings as the other pages, and in llms.txt", () => {
   const entries = sitemap();
   const entry = entries.filter((e) => e.url === OWN);
   assert.equal(entry.length, 1);
@@ -389,4 +389,9 @@ test("it is in the sitemap, dated 17 November 2026, with the same settings as th
   const other = entries.find((e) => e.url === `${SITE}/services`)!;
   assert.equal(entry[0].changeFrequency, other.changeFrequency);
   assert.equal(entry[0].priority, other.priority);
+  const llms = readFileSync("public/llms.txt", "utf8").split("\n");
+  assert.ok(
+    llms.includes(`- [Leaflet Printing](${OWN}): Leaflet, flyer and business card printing for Hampshire and Dorset businesses, delivered to you or door to door.`)
+  );
+  assert.ok(llms.indexOf("## Services") < llms.findIndex((l) => l.includes(OWN)));
 });
