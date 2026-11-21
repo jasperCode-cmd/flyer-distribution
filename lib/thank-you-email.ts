@@ -46,6 +46,8 @@ export const EMAIL_BRANDS: readonly { name: string; file: string }[] = [
   { name: "Elisha's Pampered Paws", file: "logo-elishas-pampered-paws.webp" },
   { name: "The Healing Hub", file: "logo-the-healing-hub.webp" },
   { name: "Kola Construction", file: "logo-kola-construction.webp" },
+  { name: "Angler Digital", file: "images/logo-angler-digital.webp" },
+  { name: "My Invoice", file: "images/logo-my-invoice.webp" },
 ];
 
 // The brand the image leads with, as the bar does: on its own row at the

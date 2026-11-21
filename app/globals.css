@@ -36,9 +36,9 @@ body {
 }
 
 .marquee-track {
-  /* 96s keeps the pace it had (about 64px a second on wide screens) now the
-     larger Partridge of Hampshire lockup makes each loop longer. */
-  animation: marquee 96s linear infinite;
+  /* 110s keeps the pace it had (about 64px a second on wide screens, 51px on
+     phones) now Angler Digital and My Invoice make each loop longer. */
+  animation: marquee 110s linear infinite;
 }
 
 /* Pause on hover */

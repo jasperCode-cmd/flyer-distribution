@@ -1,9 +1,15 @@
 import Image from "next/image";
 
-type Brand = { name: string; file: string; width: number; height: number; alt?: string; featured?: boolean };
+type Brand = { name: string; file: string; width: number; height: number; alt?: string; featured?: boolean; size?: string };
 
 // Partridge of Hampshire leads, shown about 1.5 times the others' height
 // (its lockup carries the BMW and Changan marks), in full colour like the rest.
+// Angler Digital and My Invoice are sized by how large they look, not by their
+// box: both files are cropped tight to the artwork, Angler Digital's lettering
+// is under half its height (the hook runs the full height), and My Invoice is
+// a solid colour badge. At 40px (30px on phones) the Angler Digital lettering
+// matches the other wordmarks' and Partridge's, and the badge sits no taller
+// than Kola Construction and Elisha's Pampered Paws.
 const brands: Brand[] = [
   { name: "Partridge of Hampshire", file: "logo-partridge-of-hampshire.webp", width: 1876, height: 433, alt: "Partridge of Hampshire, BMW and Changan retailer", featured: true },
   { name: "New Arts", file: "logo-new-arts.webp", width: 762, height: 348 },
@@ -16,11 +22,13 @@ const brands: Brand[] = [
   { name: "Elisha's Pampered Paws", file: "logo-elishas-pampered-paws.webp", width: 331, height: 364 },
   { name: "The Healing Hub", file: "logo-the-healing-hub.webp", width: 764, height: 163 },
   { name: "Kola Construction", file: "logo-kola-construction.webp", width: 566, height: 462 },
+  { name: "Angler Digital", file: "images/logo-angler-digital.webp", width: 1346, height: 316, size: "h-[30px] sm:h-10" },
+  { name: "My Invoice", file: "images/logo-my-invoice.webp", width: 390, height: 357, size: "h-[30px] sm:h-10" },
 ];
 
 /*
   Same seamless-loop approach as the old area-pill carousel: the track
-  renders all 11 logos 6 times over (2 copies x 3 reps each) so one copy is
+  renders all 13 logos 6 times over (2 copies x 3 reps each) so one copy is
   comfortably wider than any realistic viewport, and .marquee-track moves by
   exactly -50% (one copy's width) via translateX, so the seam never becomes
   visible.
@@ -33,7 +41,7 @@ const brands: Brand[] = [
 
 // Heights are set here (width follows the image's own proportions), so each
 // logo's space is known before it loads: nothing shifts.
-const sizeOf = (b: Brand) => (b.featured ? "h-[54px] sm:h-[72px]" : "h-9 sm:h-12");
+const sizeOf = (b: Brand) => b.size ?? (b.featured ? "h-[54px] sm:h-[72px]" : "h-9 sm:h-12");
 const altOf = (b: Brand) => b.alt ?? `${b.name} logo`;
 
 function Logos({ groupId, hidden }: { groupId: string; hidden: boolean }) {
