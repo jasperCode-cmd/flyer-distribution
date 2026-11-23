@@ -127,7 +127,9 @@ test("the hero: yellow label, H1, intro, the two buttons and the printer photo",
     { src: "printing-paper.webp", alt: "A fan of coloured paper sheets", lazy: true, size: "2400x1350" },
   ]);
   for (const img of imgs) assert.ok(existsSync(join("public", "images", img.src!)), img.src);
+  // The old branded letterbox photo, with wording the site no longer uses, is gone.
   assert.doesNotMatch(SOURCE, /Leaflet going through door/);
+  for (const gone of ["Leaflet going through door with our branding.webp", "Leaflet going through door with our branding cropped.webp"]) assert.ok(!existsSync(join("public", gone)), gone);
   // The photo box: 380px tall (280px on phones), 20px corners, the photo covering it.
   assert.match(hero, /<div class="h-\[280px\] overflow-hidden rounded-\[20px\][^"]*sm:h-\[380px\]"><img[^>]*class="h-full w-full object-cover"/);
 });
