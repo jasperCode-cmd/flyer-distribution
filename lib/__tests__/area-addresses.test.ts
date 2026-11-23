@@ -60,8 +60,9 @@ test("the sitemap lists only the new addresses, with them and /areas dated 27 Oc
     assert.equal(new Date(e.lastModified!).toISOString(), added, e.url);
   }
   // Everything else keeps its date (Leaflet Printing and Leaflet Delivery, added later, and /services, rebuilt,
-  // have their own: see leaflet-printing.test.ts, leaflet-delivery.test.ts and services-page.test.ts).
-  const ownDates = [`${SITE}/leaflet-printing`, `${SITE}/leaflet-delivery`, `${SITE}/services`];
+  // and /case-studies, with a new campaign, have their own: see leaflet-printing.test.ts,
+  // leaflet-delivery.test.ts, services-page.test.ts and case-studies.test.ts).
+  const ownDates = [`${SITE}/leaflet-printing`, `${SITE}/leaflet-delivery`, `${SITE}/services`, `${SITE}/case-studies`];
   for (const e of entries.filter((e) => e.url !== `${SITE}/areas` && !e.url.startsWith(`${SITE}/areas/`) && !ownDates.includes(e.url))) {
     assert.equal(new Date(e.lastModified!).toISOString(), "2026-06-24T00:00:00.000Z", e.url);
   }

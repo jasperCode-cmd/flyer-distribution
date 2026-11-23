@@ -56,14 +56,63 @@ const breadcrumbSchema = {
   ],
 };
 
-// All six entries below are real completed jobs. Leaflet counts and
+// All seven entries below are real completed jobs. Leaflet counts and
 // client type are now real figures where available (West End has none, so
-// its stat line names the service instead of inventing a number). We still
-// don't have specific client names, dates, or measured outcomes to publish,
-// so copy stays at the level of "what kind of work this was" rather than
-// more specific detail, and nothing here should be treated as final beyond
-// the stat tags.
+// its stat line names the service instead of inventing a number). The car
+// dealership campaign, first, also gives its months and its outcome, as the
+// business supplied them, but never the client: not in the copy, the image
+// file names or the alt text. For the others we still don't have client
+// names, dates, or measured outcomes to publish, so their copy stays at the
+// level of "what kind of work this was" rather than more specific detail.
 const caseStudies = [
+  {
+    place: "Southampton, Eastleigh and the New Forest",
+    subtitle: "Print and Deliver",
+    stat: "10,000 Leaflets (Car Dealership Launch)",
+    body: (
+      <>
+        Printed and delivered across October and November for a Hampshire
+        car dealership launching its new showroom. We covered eleven areas,
+        from{" "}
+        <Link href="/areas/leaflet-distribution-lymington" className="text-blue-700 hover:underline font-medium">
+          Lymington
+        </Link>
+        ,{" "}
+        <Link href="/areas/leaflet-distribution-brockenhurst" className="text-blue-700 hover:underline font-medium">
+          Brockenhurst
+        </Link>{" "}
+        and Ringwood through to Chandler&apos;s Ford, Eastleigh, Bitterne,
+        Midanbury, Harefield, Hedge End, Bursledon and Whiteley, and the
+        dealership had showroom visits booked off the back of the campaign.
+      </>
+    ),
+    linkHref: "/leaflet-delivery",
+    linkLabel: "Learn about Leaflet Distribution",
+    // Cropped copies of the route screenshots in public/images (left as they
+    // are), each the shape of its slot in the collage at lg (0.797 wide per
+    // tall for the big one, 1.61 for the three stacked), without the map
+    // app's buttons.
+    collage: {
+      hero: {
+        src: "/images/car-dealership-route-bursledon.webp",
+        alt: "Tracked leaflet distribution route in Bursledon",
+      },
+      stacked: [
+        {
+          src: "/images/car-dealership-route-bitterne-park.webp",
+          alt: "Tracked leaflet distribution route in Bitterne Park",
+        },
+        {
+          src: "/images/car-dealership-route-brockenhurst.webp",
+          alt: "Tracked leaflet distribution route in Brockenhurst",
+        },
+        {
+          src: "/images/car-dealership-route-lymington.webp",
+          alt: "Tracked leaflet distribution route in Lymington",
+        },
+      ],
+    },
+  },
   {
     place: "West Wellow",
     stat: "2,500 Leaflets (Financial Services)",

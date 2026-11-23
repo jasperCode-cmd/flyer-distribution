@@ -45,15 +45,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // and the /areas overview's links changed with them. Lymington's page and
     // the Leaflet Printing page were added on 17 November 2026, and the
     // Leaflet Delivery page on 18 November 2026, when /services was rebuilt as
-    // the all services hub.
+    // the all services hub. /case-studies gained its car dealership campaign
+    // on 23 November 2026.
     lastModified: new Date(
-      route === "/leaflet-delivery" || route === "/services"
-        ? "2026-11-18"
-        : route === "/areas/leaflet-distribution-lymington" || route === "/leaflet-printing"
-          ? "2026-11-17"
-          : route === "/areas" || route.startsWith("/areas/")
-            ? "2026-10-27"
-            : "2026-06-24"
+      route === "/case-studies"
+        ? "2026-11-23"
+        : route === "/leaflet-delivery" || route === "/services"
+          ? "2026-11-18"
+          : route === "/areas/leaflet-distribution-lymington" || route === "/leaflet-printing"
+            ? "2026-11-17"
+            : route === "/areas" || route.startsWith("/areas/")
+              ? "2026-10-27"
+              : "2026-06-24"
     ),
     changeFrequency: "monthly",
     priority: route === "" ? 1 : 0.8,
