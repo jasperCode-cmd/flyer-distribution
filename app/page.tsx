@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import Image, { getImageProps } from "next/image";
 import Link from "next/link";
 import Testimonials from "@/components/Testimonials";
 import StatsBar from "@/components/StatsBar";
@@ -56,6 +56,20 @@ const GOOGLE_PROFILE = "https://share.google/RVxyPi4TzXAzkt1Am";
 const sellingPoints = ["Local Hampshire and Dorset team", "Postcode targeting", "GPS tracked delivery", "Quote within 24 hours"];
 const HERO_STAR = "M12 2.5l2.9 6.06 6.6.87-4.83 4.6 1.24 6.6L12 17.5l-5.91 3.13 1.24-6.6-4.83-4.6 6.6-.87L12 2.5z";
 
+// The van photo in the hero's right-hand panel, shown from 1024px (lg) up
+// only. It sits in a <picture> whose one source is for 1024px and wider, so
+// below that the browser never fetches it: the fallback is an empty 1x1 GIF,
+// inside a panel that isn't shown. The panel is square, 48% of the width and
+// at most the hero's height (794px), hence the sizes.
+const HERO_VAN = getImageProps({
+  src: "/images/hero-van.webp",
+  alt: "Flyer Distribution Hampshire branded van parked outside an office building",
+  fill: true,
+  sizes: "min(48vw, 800px)",
+  loading: "eager",
+}).props;
+const EMPTY_GIF = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+
 export default function HomePage() {
   return (
     <>
@@ -73,8 +87,14 @@ export default function HomePage() {
           style={{ objectPosition: "center" }}
           priority
         />
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-blue-950/80" />
+        {/* Dark overlay. From 1024px up, an even 80%. Below that, where the
+            hero is one column, the photo's white sky sits behind the eyebrow
+            and the heading and its roofs behind the lower half, so the overlay
+            stays dark over the sky (82%) and eases to 70% over the roofs (from
+            15% to 40% of the way down): the roofs show more clearly, and every
+            line of text keeps AA contrast against the brightest part of the
+            photo behind it. */}
+        <div className="absolute inset-0 bg-linear-to-b from-blue-950/82 from-15% to-blue-950/70 to-40% lg:bg-none lg:bg-blue-950/80" />
 
         {/* Desktop-only full-bleed image panel: spans the right 48% of the
             section edge to edge, independent of the centered text container
@@ -85,11 +105,14 @@ export default function HomePage() {
             clipped on a diagonal (narrower at the top, full width at the
             bottom) at a fixed angle, 12.22 degrees from upright: its run is a
             share of the panel's height (100cqh), so the angle holds however
-            tall the hero is. The photo is shown at the hero's full height and
-            its natural width, against the panel's right edge, so the leaflet
-            is never zoomed and the photo's own left side fills the panel up
-            to the diagonal. A yellow strip just behind it, 6px to the left,
-            edges the diagonal, and a soft shadow falls to its left. */}
+            tall the hero is. The van photo (portrait) covers the panel: it is
+            shown at the panel's full width, and its top and bottom are
+            trimmed, holding the photo 60% of the way down, which centres the
+            van (39% to 67% down the photo) in the square with room above and
+            below, clear of the diagonal, at every desktop width. A yellow
+            strip just behind it, 6px to the left, edges the diagonal, and a
+            soft shadow falls to its left. Not rendered below 1024px, and not
+            downloaded there either (see HERO_VAN). */}
         <div
           className="hidden lg:block absolute inset-y-0 right-0 aspect-square max-w-[48%] [container-type:size]"
           style={{ filter: "drop-shadow(-18px 0 30px rgba(0,0,0,0.35))" }}
@@ -103,79 +126,68 @@ export default function HomePage() {
             className="absolute inset-0 overflow-hidden"
             style={{ clipPath: "polygon(calc(100cqh * 0.2166) 0%, 100% 0%, 100% 100%, 0% 100%)" }}
           >
-            <Image
-              src="/Leaflet going through door with our branding.webp"
-              alt="Branded leaflet being delivered through a letterbox"
-              width={1054}
-              height={1054}
-              sizes="(min-width: 1024px) 1054px, 1px"
-              quality={90}
-              className="absolute top-0 right-0 h-full w-auto max-w-none"
-              loading="eager"
-            />
+            <picture>
+              <source media="(min-width: 1024px)" srcSet={HERO_VAN.srcSet} sizes={HERO_VAN.sizes} />
+              {/* eslint-disable-next-line @next/next/no-img-element -- next/image's own props, via getImageProps */}
+              <img
+                {...HERO_VAN}
+                srcSet={undefined}
+                sizes={undefined}
+                src={EMPTY_GIF}
+                className="object-cover"
+                style={{ ...HERO_VAN.style, objectPosition: "50% 60%" }}
+              />
+            </picture>
           </div>
         </div>
 
         {/* Content */}
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-8">
-          <div className="flex flex-col gap-10">
-            {/* Text, constrained to keep clear of the full-bleed image at desktop */}
-            <div className="lg:max-w-[49%]">
-              <p className="text-blue-300 text-sm font-semibold uppercase tracking-widest mb-4">
-                Hampshire &amp; Dorset
-              </p>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
-                <span className="text-yellow-400">#1</span> Tracked Flyer Distribution in Hampshire and Dorset
-              </h1>
-              <p className="text-blue-100 text-xl sm:text-2xl leading-relaxed mb-8">
-                We deliver and track your leaflets and flyers by GPS, directly
-                through letterboxes across Hampshire and Dorset, helping local
-                businesses reach real customers in the right postcodes.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Link
-                  href="/quote"
-                  className="inline-block bg-white text-blue-900 hover:bg-blue-50 font-bold px-8 py-4 rounded-md text-base transition duration-200 ease-out hover:scale-105 shadow-lg"
-                >
-                  Get a Free Quote
-                </Link>
-                <Link
-                  href="/case-studies"
-                  className="cta-shimmer relative overflow-hidden inline-block border-2 border-white text-white hover:bg-white hover:text-blue-900 font-bold px-8 py-4 rounded-md text-base transition duration-200 ease-out hover:scale-105"
-                >
-                  <span className="relative z-10">See Our Case Studies</span>
-                </Link>
-              </div>
-              {/* Our Google rating as a plain line under the buttons, linking
-                  to the reviews, with a tap area at least 44px tall. */}
-              <a
-                href={GOOGLE_PROFILE}
-                target="_blank"
-                rel="noopener"
-                className="mt-2 flex w-fit max-w-full min-h-11 items-center gap-2 rounded-sm text-sm text-[#dbeafe] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#facc15]"
+          {/* Text, constrained to keep clear of the full-bleed image at desktop.
+              Below 1024px the hero is this text alone, with no photo under it. */}
+          <div className="lg:max-w-[49%]">
+            <p className="text-blue-300 text-sm font-semibold uppercase tracking-widest mb-4">
+              Hampshire &amp; Dorset
+            </p>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
+              <span className="text-yellow-400">#1</span> Tracked Flyer Distribution in Hampshire and Dorset
+            </h1>
+            <p className="text-blue-100 text-xl sm:text-2xl leading-relaxed mb-8">
+              We deliver and track your leaflets and flyers by GPS, directly
+              through letterboxes across Hampshire and Dorset, helping local
+              businesses reach real customers in the right postcodes.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="/quote"
+                className="inline-block bg-white text-blue-900 hover:bg-blue-50 font-bold px-8 py-4 rounded-md text-base transition duration-200 ease-out hover:scale-105 shadow-lg"
               >
-                <svg role="img" aria-label="5 out of 5 stars" viewBox="0 0 120 24" className="h-3.5 w-auto fill-[#facc15] shrink-0">
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <path key={i} d={HERO_STAR} transform={`translate(${i * 24} 0)`} />
-                  ))}
-                </svg>
-                <span>Rated 5.0 on Google by local businesses</span>
-                <span className="sr-only"> (opens in a new tab)</span>
-              </a>
-              <HeroCaseStudyTeaser />
+                Get a Free Quote
+              </Link>
+              <Link
+                href="/case-studies"
+                className="cta-shimmer relative overflow-hidden inline-block border-2 border-white text-white hover:bg-white hover:text-blue-900 font-bold px-8 py-4 rounded-md text-base transition duration-200 ease-out hover:scale-105"
+              >
+                <span className="relative z-10">See Our Case Studies</span>
+              </Link>
             </div>
-            {/* Mobile-only square image, unchanged from before */}
-            <div className="flex justify-center lg:hidden">
-              <Image
-                src="/Leaflet going through door with our branding.webp"
-                alt="Branded leaflet being delivered through a letterbox"
-                width={1054}
-                height={1054}
-                quality={90}
-                sizes="min(100vw, 384px)"
-                className="w-full max-w-xs sm:max-w-sm rounded-xl shadow-2xl"
-              />
-            </div>
+            {/* Our Google rating as a plain line under the buttons, linking
+                to the reviews, with a tap area at least 44px tall. */}
+            <a
+              href={GOOGLE_PROFILE}
+              target="_blank"
+              rel="noopener"
+              className="mt-2 flex w-fit max-w-full min-h-11 items-center gap-2 rounded-sm text-sm text-[#dbeafe] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#facc15]"
+            >
+              <svg role="img" aria-label="5 out of 5 stars" viewBox="0 0 120 24" className="h-3.5 w-auto fill-[#facc15] shrink-0">
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <path key={i} d={HERO_STAR} transform={`translate(${i * 24} 0)`} />
+                ))}
+              </svg>
+              <span>Rated 5.0 on Google by local businesses</span>
+              <span className="sr-only"> (opens in a new tab)</span>
+            </a>
+            <HeroCaseStudyTeaser />
           </div>
         </div>
       </section>

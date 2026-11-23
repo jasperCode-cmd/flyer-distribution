@@ -16,7 +16,7 @@ const LINE_CLASSES = [
 ];
 
 const HEROES = [
-  { file: "app/page.tsx", start: '<section id="hero"', star: "HERO_STAR", after: "See Our Case Studies</span>\n                </Link>\n              </div>", before: "<HeroCaseStudyTeaser />" },
+  { file: "app/page.tsx", start: '<section id="hero"', star: "HERO_STAR", after: "See Our Case Studies</span>\n              </Link>\n            </div>", before: "<HeroCaseStudyTeaser />" },
   { file: "components/AreaPage.tsx", start: "{/* 1. Hero */}", star: "STAR", after: "See Our Case Studies\n              </Link>\n            </div>", before: "{/* The page's coverage map" },
 ];
 
