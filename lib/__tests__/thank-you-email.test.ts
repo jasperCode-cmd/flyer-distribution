@@ -28,7 +28,7 @@ const FULL: QuoteEnquiry = {
   printingIncluded: "yes",
   designIncluded: null,
 };
-const SLOTS = { slotsRemaining: 5, monthLabel: "November" };
+const SLOTS = { slotsRemaining: 5, deadline: "Christmas" };
 
 // The HTML as a reader sees it: tags gone, entities read, spaces collapsed.
 function visible(html: string): string {
@@ -102,7 +102,7 @@ test("no em or en dashes, no Sales Director, no prices and none of the barred ph
     { firstName: "Ann", service: "Screen Hire" },
   ];
   for (const enquiry of variants) {
-    for (const slots of [SLOTS, { slotsRemaining: 1, monthLabel: "December" }, { slotsRemaining: 0, monthLabel: "January" }]) {
+    for (const slots of [SLOTS, { slotsRemaining: 1, deadline: "Christmas" }, { slotsRemaining: 0, deadline: "Christmas" }]) {
       const email = buildThankYouEmail(enquiry, slots);
       for (const [part, content] of Object.entries({ subject: email.subject, preheader: email.preheader, html: email.html, text: email.text })) {
         // A dash typed into the form is theirs; the email adds none of its own.
@@ -156,15 +156,15 @@ test("the target areas sentence with and without areas", () => {
 
 test("the slots box: plural, singular at 1, and gone at 0", () => {
   const five = buildThankYouEmail(FULL, SLOTS);
-  assert.match(five.html, /We have <strong>5<\/strong> campaign slots available for <strong>November<\/strong>, so it's well worth having that chat\./);
+  assert.match(five.html, /We have <strong>5<\/strong> campaign slots remaining before <strong>Christmas<\/strong>, so it's well worth having that chat\./);
   assert.match(five.html, /background:#fff3c7;border-left:4px solid #fdc700;[^"]*"[\s\S]{0,120}color:#1c398e;/, "soft yellow, dark blue text");
-  assert.ok(five.text.includes("We have 5 campaign slots available for November, so it's well worth having that chat."));
+  assert.ok(five.text.includes("We have 5 campaign slots remaining before Christmas, so it's well worth having that chat."));
 
-  const one = buildThankYouEmail(FULL, { slotsRemaining: 1, monthLabel: "December" });
-  assert.match(one.html, /We have <strong>1<\/strong> campaign slot available for <strong>December<\/strong>/);
-  assert.ok(one.text.includes("We have 1 campaign slot available for December,"));
+  const one = buildThankYouEmail(FULL, { slotsRemaining: 1, deadline: "Christmas" });
+  assert.match(one.html, /We have <strong>1<\/strong> campaign slot remaining before <strong>Christmas<\/strong>/);
+  assert.ok(one.text.includes("We have 1 campaign slot remaining before Christmas,"));
 
-  const none = buildThankYouEmail(FULL, { slotsRemaining: 0, monthLabel: "January" });
+  const none = buildThankYouEmail(FULL, { slotsRemaining: 0, deadline: "Christmas" });
   assert.doesNotMatch(none.html, /campaign slot|#fff3c7/);
   assert.doesNotMatch(none.text, /campaign slot/);
 

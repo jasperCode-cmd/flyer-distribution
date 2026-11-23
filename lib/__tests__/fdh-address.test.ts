@@ -46,7 +46,7 @@ test("the privacy policy and llms.txt give it on one line", () => {
 
 test("the automatic emails' footer gives it a line at a time, in the HTML and the plain text", () => {
   const emails = [
-    buildThankYouEmail({ firstName: "Sam", service: "Leaflet Distribution", targetAreas: "Ferndown", quantity: null, printingIncluded: null, designIncluded: null }, { slotsRemaining: 3, monthLabel: "November" }),
+    buildThankYouEmail({ firstName: "Sam", service: "Leaflet Distribution", targetAreas: "Ferndown", quantity: null, printingIncluded: null, designIncluded: null }, { slotsRemaining: 3, deadline: "Christmas" }),
     buildApplicantThankYouEmail({ fullName: "Sam Test" }),
   ];
   for (const email of emails) {

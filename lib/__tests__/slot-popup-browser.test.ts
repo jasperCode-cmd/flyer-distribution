@@ -36,7 +36,7 @@ const local = (() => {
 })();
 const skip = !BASE || !local ? "set QUOTE_FORM_TEST_URL to a local production build to run" : !playwright ? "Playwright is not available" : false;
 
-const POPUP_TEXT = "Get in touch before this month";
+const POPUP_TEXT = "Get in touch before they";
 const SECOND = 1000;
 
 let browser: Browser;

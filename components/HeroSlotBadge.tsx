@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { campaignSlots, slotNoun } from "@/lib/campaign-constants";
+import { slotHeadline, SLOT_CALL_TO_ACTION } from "@/lib/campaign-constants";
 import SlotCountdown, { prefersReducedMotion } from "./SlotCountdown";
 
 // Three phases: "counting" (large, catches the eye while the number ticks
@@ -58,7 +58,7 @@ export default function HeroSlotBadge() {
         className={`${NUMBER_TRANSITION[phase]} ${NUMBER_SIZE[phase]}`}
         label={(count) => (
           <span>
-            {`Campaign ${slotNoun(count)} Available for ${campaignSlots.monthLabel}, secure your slot today`}
+            {`${slotHeadline(count)}${SLOT_CALL_TO_ACTION}`}
           </span>
         )}
       />

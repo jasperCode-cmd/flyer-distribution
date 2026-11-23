@@ -65,8 +65,9 @@ test("a quote request sent anywhere in the visit stops it, recognised by the quo
 test("its content and look are as before", () => {
   assert.match(popup, /className="fixed inset-0 z-\[100\] flex items-end sm:items-center justify-center p-4 bg-black\/60 popup-backdrop"/);
   assert.match(popup, /className="relative bg-white rounded-lg shadow-2xl max-w-sm w-full p-6 popup-panel"/);
-  assert.match(popup, /Get in touch before this month&apos;s slots are gone\./);
-  assert.match(popup, /` Distribution Campaign \$\{slotNoun\(count\)\} Available for \$\{campaignSlots\.monthLabel\}`/);
+  assert.match(popup, /Get in touch before they&apos;re gone\./);
+  // The announcement bar's line (lib/__tests__/slot-line.test.ts).
+  assert.match(popup, /<span className="font-heading font-bold">\s*<SlotCountdown triggered=\{visible\} label=\{\(count\) => ` \$\{slotHeadline\(count\)\}`\} \/>\s*<\/span>\s*\{SLOT_CALL_TO_ACTION\}/);
   assert.match(popup, /<Link\s+href="\/quote"\s+onClick=\{dismiss\}/);
   assert.doesNotMatch(popup, /[\u2013\u2014]/);
 });

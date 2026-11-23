@@ -191,7 +191,7 @@ test("the button is a real link to the services page, with no image in it", () =
 
 test("the same layout as the quote email: header logo, footer, 600px tables with inline styles", () => {
   const applicant = buildApplicantThankYouEmail(FULL).html;
-  const quote = buildThankYouEmail({ firstName: "Sarah", service: "Leaflet Distribution" }, { slotsRemaining: 2, monthLabel: "November" }).html;
+  const quote = buildThankYouEmail({ firstName: "Sarah", service: "Leaflet Distribution" }, { slotsRemaining: 2, deadline: "Christmas" }).html;
   const header = (html: string) => html.slice(html.indexOf('<table role="presentation" class="card"'), html.indexOf("</td></tr>", html.indexOf("fdh-logo-white.png")));
   const footer = (html: string) => html.slice(html.indexOf('<tr><td class="px" bgcolor="#f6f7f9"'), html.lastIndexOf("You&#39;re receiving this"));
   assert.equal(header(applicant), header(quote), "the same header");

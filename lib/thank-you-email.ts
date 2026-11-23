@@ -1,6 +1,6 @@
 // The automatic thank-you email to a website quote enquiry (FDH only): its
 // subject, preview text, HTML and plain-text versions, from the details the
-// form sent and this month's campaign slots. No server imports, so the CRM
+// form sent and the campaign slots left. No server imports, so the CRM
 // preview and the tests build it the same way as the send does.
 //
 // It uses the layout the automatic emails share (lib/email-layout.ts). Every
@@ -84,7 +84,8 @@ export function enquiryFromQuoteForm(data: Record<string, unknown>): QuoteEnquir
   };
 }
 
-export type CampaignSlots = { slotsRemaining: number; monthLabel: string };
+// The slots left and what they're before (lib/campaign-constants.ts).
+export type CampaignSlots = { slotsRemaining: number; deadline: string };
 
 export type ThankYouEmail = { subject: string; preheader: string; html: string; text: string };
 
@@ -113,10 +114,10 @@ export function enquirySummary(enquiry: QuoteEnquiry): { label: string; value: s
   return rows;
 }
 
-// "We have 5 campaign slots available for November", or null when there are none.
-export function slotsSentence(slots: CampaignSlots): { count: string; noun: string; month: string } | null {
+// "We have 5 campaign slots remaining before Christmas", or null when there are none.
+export function slotsSentence(slots: CampaignSlots): { count: string; noun: string; deadline: string } | null {
   if (!(slots.slotsRemaining > 0)) return null;
-  return { count: String(slots.slotsRemaining), noun: slotNoun(slots.slotsRemaining).toLowerCase(), month: slots.monthLabel };
+  return { count: String(slots.slotsRemaining), noun: slotNoun(slots.slotsRemaining).toLowerCase(), deadline: slots.deadline };
 }
 
 export function thankYouSubject(enquiry: QuoteEnquiry): string {
@@ -167,7 +168,7 @@ export function buildThankYouEmail(
   const slotsHtml = slot
     ? row(
         noticeBox(
-          `We have <strong>${e(slot.count)}</strong> campaign ${e(slot.noun)} available for <strong>${e(slot.month)}</strong>, so it's well worth having that chat.`
+          `We have <strong>${e(slot.count)}</strong> campaign ${e(slot.noun)} remaining before <strong>${e(slot.deadline)}</strong>, so it's well worth having that chat.`
         ),
         "8px 40px 24px 40px"
       )
@@ -221,7 +222,7 @@ ${row(p(e(LOOKING_FORWARD)) + p(`Speak soon,<br><strong style="color:#101828;">D
     "Brands we've worked with",
     brandNames.join(", "),
     "",
-    ...(slot ? [`We have ${slot.count} campaign ${slot.noun} available for ${slot.month}, so it's well worth having that chat.`, ""] : []),
+    ...(slot ? [`We have ${slot.count} campaign ${slot.noun} remaining before ${slot.deadline}, so it's well worth having that chat.`, ""] : []),
     LOOKING_FORWARD,
     "",
     "Speak soon,",

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { hidesSiteChrome } from "@/lib/site-chrome";
-import { campaignSlots, slotNoun } from "@/lib/campaign-constants";
+import { slotHeadline, SLOT_CALL_TO_ACTION } from "@/lib/campaign-constants";
 import SlotCountdown from "./SlotCountdown";
 
 // Shown at most once per visit: recorded in sessionStorage the moment it
@@ -145,16 +145,16 @@ export default function SlotPopup() {
             <path d="M18 6L6 18M6 6l12 12" />
           </svg>
         </button>
-        <p className="font-heading text-blue-900 font-bold text-lg mb-2 pr-6">
-          <SlotCountdown
-            triggered={visible}
-            label={(count) =>
-              ` Distribution Campaign ${slotNoun(count)} Available for ${campaignSlots.monthLabel}`
-            }
-          />
+        {/* The announcement bar's line, from the same words: the number
+            and what follows it in bold, the call to action in normal weight. */}
+        <p className="text-blue-900 text-lg mb-2 pr-6">
+          <span className="font-heading font-bold">
+            <SlotCountdown triggered={visible} label={(count) => ` ${slotHeadline(count)}`} />
+          </span>
+          {SLOT_CALL_TO_ACTION}
         </p>
         <p className="text-gray-600 text-base mb-5">
-          Get in touch before this month&apos;s slots are gone.
+          Get in touch before they&apos;re gone.
         </p>
         <Link
           href="/quote"
